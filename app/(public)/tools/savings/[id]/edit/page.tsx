@@ -4,7 +4,7 @@
 
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getGoal } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
@@ -55,17 +55,12 @@ export default async function EditSavingsGoalPage({ params }: PageProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <header className="space-y-2">
-        <Link
-          href={`/tools/savings/${id}`}
-          className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
-        >
-          ← {data.goal.name}
-        </Link>
-        <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-          Edit goal
-        </h1>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: `/tools/savings/${id}`, label: data.goal.name }}
+        eyebrow={LABELS.tools.savings.hubEyebrow}
+        title="Edit goal"
+      />
 
       <GoalForm mode="edit" initial={initial} kids={kids} />
 

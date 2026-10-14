@@ -20,7 +20,8 @@ import LeaveGoalButton from '../_components/LeaveGoalButton'
 import MyDestinationPanel from '../_components/MyDestinationPanel'
 import NotesFeed from '@/components/goals/NotesFeed'
 import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
+import PageHeader from '@/components/PageHeader'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -116,75 +117,60 @@ export default async function SavingsGoalPage({ params }: PageProps) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
 
-      <header className="space-y-2">
-        <Link
-          href="/tools/savings"
-          className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
-        >
-          {LABELS.tools.savings.upLink}
-        </Link>
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div className="min-w-0">
-            <Eyebrow className="mb-1">
-              {goal.kid_profile_id && kidName ? (
-                <Link
-                  href={`/tools/family/${goal.kid_profile_id}`}
-                  className="hover:text-accent transition-colors"
-                >
-                  For {kidName} →
-                </Link>
-              ) : (
-                <>Personal savings</>
-              )}
-            </Eyebrow>
-            <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
-              {goal.name}
-            </h1>
-            {goal.description && (
-              <p className="text-prose-faint text-sm sm:text-base mt-1 leading-snug max-w-xl">
-                {goal.description}
-              </p>
-            )}
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools/savings', label: LABELS.tools.savings.short }}
+        eyebrow={goal.kid_profile_id && kidName ? `For ${kidName}` : 'Personal savings'}
+        title={goal.name}
+        deck={goal.description ?? undefined}
+        actions={isOwner ? (
+          <div className="flex items-center gap-2">
+            <GoalStatusButton goalId={goal.id} status={goal.status} />
+            <Link
+              href={`/tools/savings/${goal.id}/edit`}
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Edit
+            </Link>
           </div>
-          {isOwner && (
-            <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href={`/tools/savings/${goal.id}/invite`}
-                className="text-sm font-medium text-accent hover:text-accent-hover transition-colors px-3 py-1.5 border border-accent/40 hover:border-accent rounded-lg min-h-[44px] flex items-center"
-              >
-                Invite
-              </Link>
-              <GoalStatusButton goalId={goal.id} status={goal.status} />
-              <Link
-                href={`/tools/savings/${goal.id}/edit`}
-                className="text-sm text-prose-faint hover:text-prose-muted transition-colors px-3 py-1.5 border border-soft rounded-lg min-h-[44px] flex items-center"
-              >
-                Edit
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <MembersPanel
-        goalId={goal.id}
-        members={participantDisplay}
-        isOwner={isOwner}
-        seatsRemaining={Math.max(0, 5 - participants.length)}
+        ) : undefined}
       />
 
-      <ProgressBlock goal={goal} stats={stats} />
-
-      {stats.catchUpSuggestion && goal.cadence && (
-        <CatchUpPanel cadence={goal.cadence} suggestion={stats.catchUpSuggestion} />
+      {goal.kid_profile_id && kidName && (
+        <Link
+          href={`/tools/family/${goal.kid_profile_id}`}
+          className="inline-flex items-center min-h-[44px] -mt-3 text-sm font-semibold text-accent-text hover:underline underline-offset-2"
+        >
+          For {kidName} →
+        </Link>
       )}
 
-      <ContributionButton
-        goal={goal}
-        effectiveDestinationType={effectiveDestinationType}
-        effectiveDestinationUrl={effectiveDestinationUrl}
-        effectiveDestinationLabel={effectiveDestinationLabel}
-      />
+      {/* On a phone the Yes panel leads and Members follows; from sm up the
+          roster reads first. One flex column, order flipped per breakpoint. */}
+      <div className="flex flex-col gap-6">
+        <div className="order-1 sm:order-2 space-y-6">
+          <ProgressBlock goal={goal} stats={stats} />
+
+          {stats.catchUpSuggestion && goal.cadence && (
+            <CatchUpPanel cadence={goal.cadence} suggestion={stats.catchUpSuggestion} />
+          )}
+
+          <ContributionButton
+            goal={goal}
+            effectiveDestinationType={effectiveDestinationType}
+            effectiveDestinationUrl={effectiveDestinationUrl}
+            effectiveDestinationLabel={effectiveDestinationLabel}
+          />
+        </div>
+
+        <MembersPanel
+          className="order-2 sm:order-1"
+          goalId={goal.id}
+          members={participantDisplay}
+          isOwner={isOwner}
+          seatsRemaining={Math.max(0, 5 - participants.length)}
+        />
+      </div>
 
       {/* Per-participant destination editor — visible only when (a) viewer
           is a non-owner participant AND (b) goal is in per_participant

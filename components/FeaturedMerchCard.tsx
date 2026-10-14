@@ -1,5 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { BagIcon } from '@/components/icons'
+import { Badge } from '@/components/ui/Badge'
 import { getMerchDisplayImage, formatPrice, type Merch } from '@/lib/merch'
 
 interface Props {
@@ -15,7 +17,7 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
 
   const inner = (
     <>
-      <div className="relative w-full aspect-square bg-surface-raised/40 overflow-hidden">
+      <div className="relative w-full aspect-square bg-surface-sunken border-b-[3px] border-chrome overflow-hidden">
         {displayImage ? (
           <Image
             src={displayImage}
@@ -26,27 +28,25 @@ export function FeaturedMerchCard({ item, compact = false }: Props) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl opacity-30">👕</span>
+            <BagIcon className="w-10 h-10 text-prose-faint" strokeWidth={1} aria-hidden />
           </div>
         )}
         {item.status === 'coming_soon' && (
-          <div className="absolute top-2 left-2 bg-accent-tint/90 backdrop-blur-sm px-2 py-0.5 rounded-full">
-            <p className="text-[10px] font-bold text-accent-text-soft uppercase tracking-widest">Coming Soon</p>
-          </div>
+          <Badge tone="neutral" size="sm" className="absolute top-2 left-2">Coming soon</Badge>
         )}
       </div>
       <div className={`flex-1 flex flex-col ${compact ? 'p-3' : 'p-4'}`}>
         <p className={`font-semibold text-prose leading-snug group-hover:text-accent-text-soft transition-colors line-clamp-2 ${compact ? 'text-xs' : 'text-sm'}`}>
           {item.name}
         </p>
-        <p className={`text-accent-text font-bold mt-auto pt-1 ${compact ? 'text-xs' : 'text-sm'}`}>
-          {item.price_cents != null ? formatPrice(item.price_cents) : 'Shop Now'}
+        <p className={`text-prose font-bold tabular-nums mt-auto pt-1 ${compact ? 'text-xs' : 'text-sm'}`}>
+          {item.price_cents != null ? formatPrice(item.price_cents) : '—'}
         </p>
       </div>
     </>
   )
 
-  const className = 'group flex h-full flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-accent hover:-translate-y-1 transition-all duration-200'
+  const className = 'group flex h-full flex-col bg-surface rounded-xl overflow-hidden border border-soft hover:border-strong transition-colors'
 
   if (isExternal) {
     return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>

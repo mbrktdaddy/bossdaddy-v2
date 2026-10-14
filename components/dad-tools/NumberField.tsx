@@ -13,13 +13,25 @@
 // re-synced (during render, not in an effect) whenever the parent's value
 // changes to something the draft doesn't already say — e.g. a kid switch or
 // a handoff prefill.
+//
+// Thousands separators are display-only and arrive on BLUR ("35,000"): while
+// the field has focus the raw draft shows, so the caret never jumps mid-type
+// and nothing but digits ever reaches `parse`. The look is `fieldClass` (the
+// P5 recipe: 16px on a phone, 44px tall) with the label recipe <Field> uses.
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
+import { fieldClass } from '@/components/ui/Field'
 
 function parse(s: string): number {
   if (s === '' || s === '.') return 0
   const n = Number(s)
   return Number.isFinite(n) ? n : 0
+}
+
+function group(s: string): string {
+  const [int, frac] = s.split('.')
+  const g = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return frac === undefined ? g : `${g}.${frac}`
 }
 
 // Hide 0 behind the placeholder so the field reads as empty waiting for input.
@@ -41,6 +53,9 @@ export default function NumberField({
 }) {
   const [draft, setDraft] = useState(show(value))
   const [synced, setSynced] = useState(value)
+  const [focused, setFocused] = useState(false)
+  const id = useId()
+  const helpId = help ? `${id}-help` : undefined
   if (value !== synced) {
     setSynced(value)
     if (parse(draft) !== value) setDraft(show(value))
@@ -60,31 +75,35 @@ export default function NumberField({
 
   return (
     <div>
-      <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
+      <label htmlFor={id} className="block mb-1.5 text-sm font-semibold text-prose">
         {label}
       </label>
       <div className="relative">
         {prefix && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm pointer-events-none">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-prose-faint text-base sm:text-sm pointer-events-none">
             {prefix}
           </span>
         )}
         <input
+          id={id}
           type="text"
           inputMode={decimal ? 'decimal' : 'numeric'}
-          value={draft}
+          value={focused ? draft : group(draft)}
           placeholder={placeholder}
           onChange={handle}
-          className={`w-full ${prefix ? 'pl-7' : 'pl-3'} ${suffix ? 'pr-12' : 'pr-3'} py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors`}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          aria-describedby={helpId}
+          className={fieldClass({ className: `${prefix ? 'pl-8' : ''} ${suffix ? 'pr-12' : ''}`.trim() })}
           autoComplete="off"
         />
         {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm pointer-events-none">
+          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-prose-faint text-base sm:text-sm pointer-events-none">
             {suffix}
           </span>
         )}
       </div>
-      {help && <p className="text-xs text-prose-faint mt-1.5">{help}</p>}
+      {help && <p id={helpId} className="text-xs text-prose-muted mt-1.5 leading-snug">{help}</p>}
     </div>
   )
 }

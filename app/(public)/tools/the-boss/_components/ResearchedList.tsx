@@ -37,7 +37,7 @@ export function ResearchedList({ items, query }: { items: ProductBlock[]; query?
           return (
             <li key={`${c.kind}:${c.slug}`} className="py-2.5 first:pt-0 last:pb-0">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="font-semibold text-prose leading-snug">{c.title}</span>
+                <span className="font-extrabold text-prose leading-snug">{c.title}</span>
                 {price && <span className="text-[11px] text-prose-faint shrink-0">{price}</span>}
               </div>
               {c.fit && <p className="mt-0.5 text-[13px] text-prose-muted leading-snug">{c.fit}</p>}
@@ -58,7 +58,7 @@ export function ResearchedList({ items, query }: { items: ProductBlock[]; query?
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] text-prose-faint hover:text-accent hover:underline truncate max-w-[9rem] py-1"
+                    className="text-[11px] text-prose-faint hover:text-accent-text hover:underline truncate max-w-[9rem] py-1"
                   >
                     {s.title}
                   </a>

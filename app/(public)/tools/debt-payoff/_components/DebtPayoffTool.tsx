@@ -20,6 +20,7 @@ import {
 import { toQuery } from '@/lib/dad-tools/url-params'
 import type { DebtRow } from '@/lib/dad-tools/debt-params'
 import { Card } from '@/components/ui/Card'
+import { Field } from '@/components/ui/Field'
 import { XIcon } from '@/components/icons'
 
 const EXTRA_MAX = 2_000
@@ -79,21 +80,22 @@ export default function DebtPayoffTool({ today, initial }: Props) {
         {rows.map((r, i) => (
           <Card key={r.id} className="p-4 space-y-3">
             <div className="flex items-center gap-3">
-              <input
+              <Field
+                label={`Name for debt ${i + 1}`}
+                hideLabel
                 type="text"
                 value={r.name}
                 maxLength={40}
                 placeholder={`Debt ${i + 1} — e.g. Visa, car, student loan`}
                 onChange={(e) => update(r.id, { name: e.target.value })}
-                aria-label={`Name for debt ${i + 1}`}
-                className="flex-1 min-w-0 px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
+                className="flex-1 min-w-0"
               />
               {rows.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeRow(r.id)}
                   aria-label={`Remove ${label(r, i)}`}
-                  className="shrink-0 h-11 w-11 flex items-center justify-center rounded-xl text-prose-faint hover:text-prose hover:bg-surface-raised transition-colors"
+                  className="shrink-0 h-11 w-11 flex items-center justify-center rounded-md text-prose-faint hover:text-prose hover:bg-surface-hover transition-colors"
                 >
                   <XIcon className="w-4 h-4" strokeWidth={2} />
                 </button>
@@ -113,7 +115,7 @@ export default function DebtPayoffTool({ today, initial }: Props) {
           type="button"
           onClick={addRow}
           disabled={rows.length >= 12}
-          className="w-full py-3 rounded-2xl border border-dashed border-strong text-sm font-semibold text-prose-muted hover:text-prose hover:border-accent disabled:opacity-40 transition-colors"
+          className="w-full min-h-[44px] py-3 rounded-md border-2 border-dashed border-strong text-sm font-semibold text-prose-muted hover:text-prose hover:border-accent disabled:opacity-40 transition-colors"
         >
           + Add a debt
         </button>
@@ -160,6 +162,14 @@ export default function DebtPayoffTool({ today, initial }: Props) {
       </section>
 
       {/* ── Result ──────────────────────────────────────────────────────── */}
+      {/* Always mounted (one empty-result rule): before there's a debt, the panel
+          holds its slot and says what it needs. */}
+      {!plan && (
+        <ResultCard
+          label="Debt-free"
+          voice="Add a debt with a balance and a minimum, and your payoff date shows up here."
+        />
+      )}
       {plan && (
         <ResultCard
           label="Debt-free"
@@ -275,7 +285,7 @@ function Compare({
         {cols.map(({ key, r }) => (
           <div
             key={key}
-            className={`rounded-xl p-3 border ${key === strategy ? 'border-accent/40 bg-surface-raised' : 'border-soft'}`}
+            className={`rounded-xl p-3 border ${key === strategy ? 'border-accent bg-surface-raised' : 'border-soft'}`}
           >
             <p className="text-[10px] uppercase tracking-widest font-semibold text-prose-faint">
               {key === 'avalanche' ? 'Avalanche' : 'Snowball'}

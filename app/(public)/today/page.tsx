@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 import type { TodayOccurrence, TodayGoal, TodayGoalGroup } from '@/lib/goals/today'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import PageHeader from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/Button'
 
 type OccurrenceRow = TodayOccurrence
@@ -91,19 +92,15 @@ export default async function TodayPage() {
 
   return (
     <Wrap>
-      <header className="space-y-2">
-        <Eyebrow>
-          {LABELS.goals.todayEyebrow}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-          {dueNow.length > 0 ? LABELS.goals.todayHeading : LABELS.goals.todayClearHeading}
-        </h1>
-        <p className="text-base text-prose-muted leading-snug">
-          {dueNow.length > 0
-            ? `${dueNow.length} thing${dueNow.length === 1 ? '' : 's'} waiting on you.`
-            : LABELS.goals.todayClearBody}
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools', label: LABELS.tools.short }}
+        eyebrow={LABELS.goals.todayEyebrow}
+        title={dueNow.length > 0 ? LABELS.goals.todayHeading : LABELS.goals.todayClearHeading}
+        deck={dueNow.length > 0
+          ? `${dueNow.length} thing${dueNow.length === 1 ? '' : 's'} waiting on you.`
+          : LABELS.goals.todayClearBody}
+      />
 
       {/* The week, before the work. Approximate by construction — see the note on
           stripZone — and silent when there are no schedules to draw one from. */}

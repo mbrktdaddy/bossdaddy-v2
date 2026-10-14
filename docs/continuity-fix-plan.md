@@ -361,7 +361,17 @@ masthead, the "Unsubscribe" link appears in Gmail's header.
      card is now notify-intent ("Notify me", tag `notify:gifts:season`); shop launch tag is
      `notify:shop:launch` (admin stat counts both); `Switch` has no `aria-describedby` and
      `PageHeader` `deck` is string-only (helper text lives in the body).
-  3. Phases 6–7 — commerce, tools.
+  3. Phases 6–7 — commerce, tools. **Built 2026-10-14** (baseline 118 → 81; gates green, 724 tests).
+     Phase 6 complete incl. `MerchImageGallery` (IconButton chevrons, BagIcon, Badge); shipping
+     "Free" is one constant (`shop/_lib/shipping.ts`, true — checkout adds no shipping); order
+     lookup failure → `RouteError` via `OrderLookupError` (Sentry event on junk ids). Phase 7:
+     hub, Dad Math, Milestones, NumberField, ToolTiles, family, savings, the Boss, goals index/detail,
+     /today. **Not done:** goals sub-routes (new/edit/share/invite/shared), savings
+     `CatchUpPanel` (1px warn box), `MyDestinationPanel`, `NotificationsPanel`,
+     `ContributionButton/Log`, family `SectionHeader` cards, `/tools/email-unsubscribe` GET bug.
+     **Walkthrough flags:** back-link parent for /goals + /today = Tools; hub 6-col calculator grid at
+     tablet; Dad Math verdict Badge dropped; savings delete-goal still uses a typed `prompt`; family
+     avatar only from sm up; cart qty "−" stops at 1 (Remove is the only delete).
   4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs.
 - Rough size: ~180 files across all phases (Phase 7 is the largest, ~45).
 

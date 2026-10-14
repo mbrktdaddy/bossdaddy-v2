@@ -8,6 +8,7 @@ import Link from 'next/link'
 import RemoveParticipantButton from '../[id]/invite/_RemoveParticipantButton'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Avatar } from '@/components/ui/Avatar'
 import { buttonVariants } from '@/components/ui/Button'
 
 export interface MemberDisplay {
@@ -23,9 +24,10 @@ interface Props {
   members:        MemberDisplay[]
   isOwner:        boolean
   seatsRemaining: number
+  className?:     string
 }
 
-export default function MembersPanel({ goalId, members, isOwner, seatsRemaining }: Props) {
+export default function MembersPanel({ goalId, members, isOwner, seatsRemaining, className = '' }: Props) {
   const solo = members.length < 2
 
   // Non-owner on a solo goal has nothing to manage here — the strip would just
@@ -33,7 +35,7 @@ export default function MembersPanel({ goalId, members, isOwner, seatsRemaining 
   if (solo && !isOwner) return null
 
   return (
-    <Card as="section" className="p-5 space-y-4">
+    <Card as="section" tone="chrome" className={`p-5 space-y-4 ${className}`}>
       <div className="flex items-center justify-between gap-3">
         <Eyebrow>
           Members — {members.length} / 5
@@ -56,20 +58,12 @@ export default function MembersPanel({ goalId, members, isOwner, seatsRemaining 
       ) : (
         <div className="space-y-2">
           {members.map((m) => {
-            const initial = (m.displayName.trim()?.[0] ?? '?').toUpperCase()
             return (
               <div
                 key={m.userId}
                 className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft rounded-lg min-h-[44px]"
               >
-                {m.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover bg-surface-sunken shrink-0" />
-                ) : (
-                  <div className="h-9 w-9 rounded-full bg-accent/15 text-accent flex items-center justify-center text-sm font-black shrink-0" aria-hidden="true">
-                    {initial}
-                  </div>
-                )}
+                <Avatar src={m.avatarUrl} name={m.displayName} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-prose truncate">
                     {m.isCurrent ? 'You' : m.displayName}

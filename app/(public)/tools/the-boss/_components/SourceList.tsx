@@ -1,4 +1,5 @@
 import type { SourceBlock } from '@/lib/boss/types'
+import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 
 // Live-search sources under a Boss answer — third-party pages and X posts, built
@@ -7,7 +8,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 // explicit "unverified" tag from the DATA, so it shows even if the prose forgets.
 export default function SourceList({ items }: { items: SourceBlock[] }) {
   return (
-    <div className="border border-soft rounded-xl bg-surface overflow-hidden">
+    <Card className="overflow-hidden">
       <Eyebrow className="px-3 pt-2.5 pb-1">Sources</Eyebrow>
       <ul className="divide-y divide-soft">
         {items.map((s) => (
@@ -26,6 +27,6 @@ export default function SourceList({ items }: { items: SourceBlock[] }) {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   )
 }

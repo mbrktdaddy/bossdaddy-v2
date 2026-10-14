@@ -1,11 +1,10 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { formatPrice, getMerchDisplayImage } from '@/lib/merch'
 import MerchProductView from './_components/MerchProductView'
 import { buildSocialMetadata, toAbsoluteUrl } from '@/lib/og'
 import type { Metadata } from 'next'
-import { ChevronLeftIcon } from '@/components/icons'
+import { BackLink } from '@/components/ui/BackLink'
 import { LABELS } from '@/lib/labels'
 
 interface Props {
@@ -106,13 +105,7 @@ export default async function MerchDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
-      <Link
-        href="/shop"
-        className="inline-flex items-center gap-1.5 text-sm text-prose-faint hover:text-accent-text-soft transition-colors mb-8"
-      >
-        <ChevronLeftIcon className="w-3.5 h-3.5" strokeWidth={2} />
-        {LABELS.shop.short}
-      </Link>
+      <BackLink href="/shop" label={LABELS.shop.short} className="mb-6" />
 
       <MerchProductView
         galleryImages={galleryImages}

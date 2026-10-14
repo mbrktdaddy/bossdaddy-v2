@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { XIcon } from '@/components/icons'
+import { BagIcon, XIcon } from '@/components/icons'
+import { IconButton } from '@/components/ui/IconButton'
+import { Badge } from '@/components/ui/Badge'
 
 interface Props {
   images: string[]
@@ -66,22 +68,22 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
             </button>
             {many && (
               <>
-                <button
-                  type="button"
+                <IconButton
+                  tone="overlay"
+                  label="Previous image"
                   onClick={(e) => { e.stopPropagation(); go(-1) }}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
-                  aria-label="Previous image"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10"
                 >
                   <Chevron dir="left" />
-                </button>
-                <button
-                  type="button"
+                </IconButton>
+                <IconButton
+                  tone="overlay"
+                  label="Next image"
                   onClick={(e) => { e.stopPropagation(); go(1) }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
-                  aria-label="Next image"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
                 >
                   <Chevron dir="right" />
-                </button>
+                </IconButton>
                 <span className="absolute bottom-3 left-3 z-10 bg-black/50 text-white text-xs rounded-full px-2.5 py-1">
                   {selected + 1} / {images.length}
                 </span>
@@ -89,12 +91,10 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
             )}
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-7xl opacity-20">👕</div>
+          <div className="w-full h-full flex items-center justify-center"><BagIcon className="w-16 h-16 text-prose-faint" strokeWidth={1} aria-hidden /></div>
         )}
         {comingSoon && (
-          <div className="absolute top-4 left-4 z-10 bg-accent-tint/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
-            <p className="text-xs font-bold text-accent-text-soft uppercase tracking-widest">Coming soon</p>
-          </div>
+          <Badge tone="neutral" className="absolute top-4 left-4 z-10">Coming soon</Badge>
         )}
       </div>
 
@@ -129,36 +129,36 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
 
           {many && (
             <>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); go(-1) }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3"
-                aria-label="Previous image"
-              >
-                <Chevron dir="left" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); go(1) }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 text-white rounded-full p-3"
-                aria-label="Next image"
-              >
-                <Chevron dir="right" />
-              </button>
+              <IconButton
+                  tone="overlay"
+                  label="Previous image"
+                  onClick={(e) => { e.stopPropagation(); go(-1) }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10"
+                >
+                  <Chevron dir="left" />
+                </IconButton>
+              <IconButton
+                  tone="overlay"
+                  label="Next image"
+                  onClick={(e) => { e.stopPropagation(); go(1) }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10"
+                >
+                  <Chevron dir="right" />
+                </IconButton>
               <span className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-sm rounded-full px-3 py-1">
                 {selected + 1} / {images.length}
               </span>
             </>
           )}
 
-          <button
-            type="button"
+          <IconButton
+            tone="overlay"
+            label="Close"
             onClick={(e) => { e.stopPropagation(); setZoomed(false) }}
-            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
-            aria-label="Close"
+            className="absolute top-4 right-4 z-10"
           >
             <XIcon className="w-5 h-5" strokeWidth={2} />
-          </button>
+          </IconButton>
         </div>
       )}
     </div>

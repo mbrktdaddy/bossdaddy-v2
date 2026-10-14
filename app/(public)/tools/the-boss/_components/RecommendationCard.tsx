@@ -12,9 +12,9 @@ import { Badge } from '@/components/ui/Badge'
 export default function RecommendationCard({ c }: { c: ReviewBlock }) {
   const s = c.scores
   return (
-    <Card className="p-3">
+    <Card className="relative p-3 hover:border-accent transition-colors">
       <div className="flex items-baseline justify-between gap-2">
-        <Link href={c.url} className="font-semibold text-accent hover:underline leading-snug">
+        <Link href={c.url} className="font-extrabold text-prose hover:text-accent-text leading-snug after:absolute after:inset-0 after:content-['']">
           {c.title}
         </Link>
         {typeof c.rating === 'number' && (
@@ -38,7 +38,7 @@ export default function RecommendationCard({ c }: { c: ReviewBlock }) {
             href={c.buyUrl}
             rel="sponsored nofollow noopener"
             target="_blank"
-            className={buttonVariants()}
+            className={buttonVariants({ className: 'relative z-10' })}
           >
             See it <span aria-hidden>→</span>
           </Link>

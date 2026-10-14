@@ -110,22 +110,21 @@ export default function ToolTiles({ className = '' }: { className?: string }) {
       <ul className="grid grid-cols-4 gap-2 sm:gap-3">
         {TILES.map(({ href, label, Icon }) => (
           <li key={href}>
+            {/* The ToolCard compact panel, shrunk to a launcher cell (continuity plan
+                P12 / Phase 7): a black `data-theme="dark"` zone, the 4px orange top
+                rule, the label in Montserrat. Orange icon on black, white label. */}
             <Link
               href={href}
+              data-theme="dark"
               className={[
                 'group flex min-h-[76px] flex-col items-center justify-center gap-1.5',
-                'rounded-xl border border-soft bg-surface px-1.5 py-3 text-center',
-                'transition-colors hover:border-accent',
+                'rounded-xl bg-chrome text-prose border-t-4 border-accent px-1.5 py-3 text-center',
               ].join(' ')}
             >
-              {/* ORANGE ICON, PROSE LABEL. The icon carries the brand and the eye lands
-                  on it first; the label stays ink so four accent words in a row don't
-                  read as four links shouting. accent clears 3:1 against this surface —
-                  measured with the palette validator, not eyeballed. */}
-              <span className="text-accent transition-colors group-hover:text-accent-hover">
+              <span className="text-accent-text">
                 <Icon />
               </span>
-              <span className="text-[11px] font-semibold leading-tight text-prose-muted transition-colors group-hover:text-prose">
+              <span className="font-display text-[11px] font-extrabold leading-tight text-prose transition-colors group-hover:text-accent-text">
                 {label}
               </span>
             </Link>

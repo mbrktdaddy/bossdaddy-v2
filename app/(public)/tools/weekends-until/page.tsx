@@ -3,7 +3,7 @@ import { OG_SITE, OG_CARD_PATH, TWITTER_HANDLE, OG_TEMPLATE_VERSION } from '@/li
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
-import { BackLink } from '@/components/ui/BackLink'
+import { CalculatorPage } from '@/components/dad-tools/CalculatorParts'
 import {
   milestoneDate,
   unitsRemaining,
@@ -12,7 +12,6 @@ import {
 } from '@/lib/dad-tools/calc'
 import WeekendsTool from './_components/WeekendsTool'
 import InstallPWA from '@/components/InstallPWA'
-import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const MILESTONE_KEYS: Milestone[] = [
   'until_18', 'next_birthday', 'starts_school', 'gets_license', 'summer', 'custom',
@@ -126,22 +125,10 @@ export default async function WeekendsUntilPage({ searchParams }: PageProps) {
   const { user } = await getUserSafe(supabase)
   const kids = await getKids()
 
+  const W = LABELS.tools.weekendsUntil
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
-
-      <header className="space-y-3">
-        <Eyebrow>
-          {LABELS.tools.weekendsUntil.short}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-          How many weekends do you have left?
-        </h1>
-        <p className="text-prose-faint text-base sm:text-lg leading-snug">
-          Pick a milestone. Get a number. Then make them count.
-        </p>
-      </header>
-
+    <CalculatorPage role={W.spokeRole} short={W.short} h1={W.h1} tagline={W.tagline} disclosure={W.disclosure}>
       <InstallPWA body="Install Boss Daddy — keep this number one tap away on your home screen." />
 
       <WeekendsTool
@@ -161,7 +148,6 @@ export default async function WeekendsUntilPage({ searchParams }: PageProps) {
             : undefined
         }
       />
-
-    </div>
+    </CalculatorPage>
   )
 }

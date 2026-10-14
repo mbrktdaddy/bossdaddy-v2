@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { MerchImageGallery } from '@/components/MerchImageGallery'
 import AddToCartForm from './AddToCartForm'
 import { LabelBlock } from '@/components/ui/LabelBlock'
+import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import { FREE_SHIPPING_NOTE } from '../../_lib/shipping'
 
 interface Variant {
   id: string
@@ -57,21 +60,24 @@ export default function MerchProductView({
 
       <div className="flex flex-col">
         <LabelBlock className="self-start mb-3">Boss Daddy Merch</LabelBlock>
-        <h1 className="text-3xl font-black text-prose mb-3">{name}</h1>
-        <p className="text-2xl font-bold text-accent-text-soft mb-1">{priceDisplay}</p>
-        <p className="text-sm text-prose-faint mb-6">Free US shipping included</p>
-
+        <h1 className="text-3xl font-black text-prose mb-4">{name}</h1>
         {description && (
-          <p className="text-prose-muted leading-relaxed mb-8">{description}</p>
+          <p className="text-prose-muted leading-relaxed mb-6">{description}</p>
         )}
 
-        {isAvailable && variants.length > 0 ? (
-          <AddToCartForm variants={variants} onVariantChange={handleVariantChange} />
-        ) : (
-          <div className="mt-auto pt-6 border-t border-soft">
-            <p className="text-prose-faint text-sm">This item is coming soon — check back for the drop.</p>
-          </div>
-        )}
+        <Card tone="chrome" className="p-5 sm:p-6 mt-auto">
+          <p className="text-2xl font-black text-prose tabular-nums">{priceDisplay}</p>
+          <p className="text-sm text-prose-faint mt-1 mb-5">{FREE_SHIPPING_NOTE}</p>
+
+          {isAvailable && variants.length > 0 ? (
+            <AddToCartForm variants={variants} onVariantChange={handleVariantChange} />
+          ) : (
+            <div className="flex flex-col items-start gap-2">
+              <Badge tone="neutral">Coming soon</Badge>
+              <p className="text-prose-muted text-sm">This item is coming soon — check back for the drop.</p>
+            </div>
+          )}
+        </Card>
       </div>
     </div>
   )

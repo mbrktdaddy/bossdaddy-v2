@@ -120,7 +120,7 @@ export default function ShareMenu({
         <button
           type="button"
           onClick={handleNativeShare}
-          className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          className={buttonVariants({ variant: 'outline' })}
         >
           Share…
         </button>
@@ -129,14 +129,14 @@ export default function ShareMenu({
       <button
         type="button"
         onClick={handleCopy}
-        className={buttonVariants({ variant: 'outline', size: 'sm' })}
+        className={buttonVariants({ variant: 'outline' })}
       >
         {copied ? 'Copied!' : 'Copy link'}
       </button>
 
       <a
         href={mailtoHref}
-        className={buttonVariants({ variant: 'outline', size: 'sm' })}
+        className={buttonVariants({ variant: 'outline' })}
       >
         Send to spouse
       </a>

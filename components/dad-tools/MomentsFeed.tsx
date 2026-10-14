@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { deleteMoment, type KidMoment } from '@/lib/dad-tools/moment-actions'
 import { LABELS } from '@/lib/labels'
+import { useConfirm } from '@/components/ui/useConfirm'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   moments: KidMoment[]
@@ -30,14 +32,18 @@ export default function MomentsFeed({ moments }: Props) {
 function MomentItem({ moment }: { moment: KidMoment }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
-  const [confirming, setConfirming] = useState(false)
+  const { confirm: ask, dialog } = useConfirm()
 
-  function handleDelete() {
-    if (!confirming) { setConfirming(true); return }
+  async function handleDelete() {
+    const ok = await ask({
+      title: 'Remove this moment?',
+      confirmLabel: 'Remove',
+      danger: true,
+    })
+    if (!ok) return
     startTransition(async () => {
       const result = await deleteMoment(moment.id)
       if (result.ok) router.refresh()
-      setConfirming(false)
     })
   }
 
@@ -45,7 +51,7 @@ function MomentItem({ moment }: { moment: KidMoment }) {
   const formatted = formatMomentDate(date)
 
   return (
-    <li className="group relative bg-surface-sunken border border-faint rounded-xl px-3 py-2.5">
+    <li className="relative bg-surface-sunken border border-soft rounded-xl px-3 py-2.5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-xs text-prose-faint mb-1">{formatted}</p>
@@ -55,16 +61,13 @@ function MomentItem({ moment }: { moment: KidMoment }) {
           type="button"
           onClick={handleDelete}
           disabled={pending}
-          className={`shrink-0 text-xs px-2 py-1 rounded-md transition-colors ${
-            confirming
-              ? 'bg-danger-bg text-danger-ink hover:bg-danger-line'
-              : 'text-prose-faint hover:text-danger-ink opacity-0 group-hover:opacity-100 focus:opacity-100'
-          }`}
-          aria-label={confirming ? 'Confirm remove' : 'Remove moment'}
+          className={buttonVariants({ variant: 'ghost', size: 'md', className: 'shrink-0 -my-1 -mr-1' })}
+          aria-label="Remove moment"
         >
-          {pending ? '…' : confirming ? 'Confirm' : 'Remove'}
+          {pending ? '…' : 'Remove'}
         </button>
       </div>
+      {dialog}
     </li>
   )
 }

@@ -26,9 +26,9 @@ import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
 import ToolTiles from '@/components/dad-tools/ToolTiles'
 import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import PageHeader from '@/components/PageHeader'
+import { ToolCard } from '@/components/dad-tools/ToolCard'
 import { buttonVariants } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
 import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
@@ -45,11 +45,16 @@ export function generateMetadata(): Metadata {
 }
 
 type SpokeCard = {
-  role:   string
+  kicker: string
   title:  string
   blurb:  string
-  href:   string | null  // null = coming soon
-  badge?: string
+  href:   string
+}
+
+// The role names the step; the tool's short name rides along only when it says
+// something the title doesn't (eyebrow doctrine: never repeat the title).
+function kickerOf(role: string, short: string, full: string): string {
+  return short === full ? role : `${role} · ${short}`
 }
 
 // Main spokes — the three concepts the tools area is built around. Order
@@ -57,20 +62,20 @@ type SpokeCard = {
 // closes the loop with the moment counter.
 const MAIN_SPOKES: SpokeCard[] = [
   {
-    role:  LABELS.tools.theBoss.spokeRole,
-    title: LABELS.tools.theBoss.full,
+    kicker: kickerOf(LABELS.tools.theBoss.spokeRole, LABELS.tools.theBoss.short, LABELS.tools.theBoss.full),
+    title:  LABELS.tools.theBoss.full,
     blurb: LABELS.tools.theBoss.spokeBlurb,
     href:  '/tools/the-boss',
   },
   {
-    role:  LABELS.tools.weekendsUntil.spokeRole,
-    title: LABELS.tools.weekendsUntil.full,
+    kicker: kickerOf(LABELS.tools.weekendsUntil.spokeRole, LABELS.tools.weekendsUntil.short, LABELS.tools.weekendsUntil.full),
+    title:  LABELS.tools.weekendsUntil.full,
     blurb: LABELS.tools.weekendsUntil.spokeBlurb,
     href:  '/tools/weekends-until',
   },
   {
-    role:  LABELS.tools.savings.spokeRole,
-    title: LABELS.tools.savings.full,
+    kicker: kickerOf(LABELS.tools.savings.spokeRole, LABELS.tools.savings.short, LABELS.tools.savings.full),
+    title:  LABELS.tools.savings.full,
     blurb: LABELS.tools.savings.spokeBlurb,
     href:  '/tools/savings',
   },
@@ -78,8 +83,8 @@ const MAIN_SPOKES: SpokeCard[] = [
   // calculator you visit, it's a daily loop that pings you. The card belongs here
   // because this hub is where a dad looks for his own stuff.
   {
-    role:  LABELS.goals.spokeRole,
-    title: LABELS.goals.full,
+    kicker: kickerOf(LABELS.goals.spokeRole, LABELS.goals.short, LABELS.goals.full),
+    title:  LABELS.goals.full,
     blurb: LABELS.goals.spokeBlurb,
     href:  '/goals',
   },
@@ -94,32 +99,32 @@ const MAIN_SPOKES: SpokeCard[] = [
 // result links to the next one. All stateless — no account needed.
 const REFERENCE_TOOLS: SpokeCard[] = [
   {
-    role:  LABELS.tools.runway.spokeRole,
-    title: LABELS.tools.runway.full,
+    kicker: kickerOf(LABELS.tools.runway.spokeRole, LABELS.tools.runway.short, LABELS.tools.runway.full),
+    title:  LABELS.tools.runway.full,
     blurb: LABELS.tools.runway.spokeBlurb,
     href:  '/tools/emergency-runway',
   },
   {
-    role:  LABELS.tools.lifeInsurance.spokeRole,
-    title: LABELS.tools.lifeInsurance.full,
+    kicker: kickerOf(LABELS.tools.lifeInsurance.spokeRole, LABELS.tools.lifeInsurance.short, LABELS.tools.lifeInsurance.full),
+    title:  LABELS.tools.lifeInsurance.full,
     blurb: LABELS.tools.lifeInsurance.spokeBlurb,
     href:  '/tools/life-insurance',
   },
   {
-    role:  LABELS.tools.debtPayoff.spokeRole,
-    title: LABELS.tools.debtPayoff.full,
+    kicker: kickerOf(LABELS.tools.debtPayoff.spokeRole, LABELS.tools.debtPayoff.short, LABELS.tools.debtPayoff.full),
+    title:  LABELS.tools.debtPayoff.full,
     blurb: LABELS.tools.debtPayoff.spokeBlurb,
     href:  '/tools/debt-payoff',
   },
   {
-    role:  LABELS.tools.loanMath.spokeRole,
-    title: LABELS.tools.loanMath.full,
+    kicker: kickerOf(LABELS.tools.loanMath.spokeRole, LABELS.tools.loanMath.short, LABELS.tools.loanMath.full),
+    title:  LABELS.tools.loanMath.full,
     blurb: LABELS.tools.loanMath.spokeBlurb,
     href:  '/tools/loan-math',
   },
   {
-    role:  LABELS.tools.dadMath.spokeRole,
-    title: LABELS.tools.dadMath.full,
+    kicker: kickerOf(LABELS.tools.dadMath.spokeRole, LABELS.tools.dadMath.short, LABELS.tools.dadMath.full),
+    title:  LABELS.tools.dadMath.full,
     blurb: LABELS.tools.dadMath.spokeBlurb,
     href:  '/tools/dad-math',
   },
@@ -189,36 +194,19 @@ export default async function ToolsHubPage() {
   )
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+    <>
+      {/* Full PageHeader — this is a listing (continuity plan Phase 7). The old hero's
+          second line was an h2 (a heading with nothing under it); it's the deck's
+          opening sentence now. */}
+      <PageHeader
+        eyebrow={isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
+        title={isSignedIn ? LABELS.tools.hub.loggedInBody : LABELS.tools.hub.heroTitle}
+        deck={isSignedIn
+          ? LABELS.tools.hub.loggedInDek
+          : `${LABELS.tools.hub.heroTitleSecond} ${LABELS.tools.hub.heroBody}`}
+      />
 
-      {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section className="mb-10 sm:mb-14">
-        <Eyebrow className="mb-3">
-          {isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
-        </Eyebrow>
-        {isSignedIn ? (
-          <>
-            <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-3">
-              {LABELS.tools.hub.loggedInBody}
-            </h1>
-            <p className="text-base sm:text-lg text-prose-muted leading-[1.7] max-w-2xl">
-              {LABELS.tools.hub.loggedInDek}
-            </p>
-          </>
-        ) : (
-          <>
-            <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
-              {LABELS.tools.hub.heroTitle}
-            </h1>
-            <h2 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight mb-5">
-              {LABELS.tools.hub.heroTitleSecond}
-            </h2>
-            <p className="text-base sm:text-lg text-prose-muted leading-[1.7] max-w-2xl">
-              {LABELS.tools.hub.heroBody}
-            </p>
-          </>
-        )}
-      </section>
+    <div className="max-w-6xl mx-auto px-6 py-10 sm:py-14">
 
       {/* ── THE DAY, FIRST ───────────────────────────────────────────────────
           THIS IS THE SIGNED-IN HOME (docs/nav-ia-plan.md Phase D), so the first thing
@@ -329,24 +317,14 @@ export default async function ToolsHubPage() {
 
       {/* ── NO KIDS YET — short prompt to add one ───────────────────────── */}
       {user && kids.length === 0 && (
-        <section data-theme="dark" className="mb-10 sm:mb-14 p-6 sm:p-8 bg-chrome text-prose border-t-4 border-accent rounded-xl">
-          <p className="text-xs text-accent-text uppercase tracking-widest mb-3">
-            Get started
-          </p>
-          <p className="text-lg sm:text-xl font-black text-prose leading-snug mb-2">
-            Add a family member to unlock personalized numbers.
-          </p>
-          <p className="text-sm text-prose-muted mb-5 max-w-xl">
-            Tools work without an account — but adding your family lets you save
-            moments, get yearly check-ins, and watch the number compound.
-          </p>
-          <Link
-            href={manageKidsHref}
-            className={buttonVariants()}
-          >
-            {LABELS.tools.hub.addFirstKidCta}
-          </Link>
-        </section>
+        <ToolCard
+          href={manageKidsHref}
+          kicker="Get started"
+          title="Add a family member to unlock personalized numbers."
+          blurb="Tools work without an account — but adding your family lets you save moments, get yearly check-ins, and watch the number compound."
+          cta={LABELS.tools.hub.addFirstKidCta}
+          className="mb-10 sm:mb-14"
+        />
       )}
 
       {/* ── WHAT YOU'RE CARRYING ─────────────────────────────────────────────
@@ -388,8 +366,11 @@ export default async function ToolsHubPage() {
       {isSignedIn ? null : (
         <section className="mb-10 sm:mb-14">
           <SectionHeader label="The tools" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {MAIN_SPOKES.map((spoke) => renderSpoke(spoke, 'main'))}
+          {/* Four spokes: two across, then four — never three-and-an-orphan. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {MAIN_SPOKES.map((spoke) => (
+              <ToolCard key={spoke.href} href={spoke.href} kicker={spoke.kicker} title={spoke.title} blurb={spoke.blurb} cta="Open" />
+            ))}
           </div>
         </section>
       )}
@@ -403,62 +384,24 @@ export default async function ToolsHubPage() {
           path filled the section (2026-09-24). */}
       <section>
         <SectionHeader label="Calculators" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {REFERENCE_TOOLS.map((spoke) => renderSpoke(spoke, 'reference'))}
+        {/* Five compact boxes on a 6-column track: 3 + 2 wide ones on desktop (no
+            empty slot), 2 + 2 + a full-width one on tablet. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+          {REFERENCE_TOOLS.map((spoke, i) => (
+            <ToolCard
+              key={spoke.href}
+              href={spoke.href}
+              kicker={spoke.kicker}
+              title={spoke.title}
+              blurb={spoke.blurb}
+              size="compact"
+              tone="box"
+              className={`${i === REFERENCE_TOOLS.length - 1 ? 'sm:col-span-2' : ''} ${i < 3 ? 'lg:col-span-2' : 'lg:col-span-3'}`}
+            />
+          ))}
         </div>
       </section>
     </div>
-  )
-}
-
-// Renders a spoke card in two visual weights:
-//   main      — full-sized headline title, same accent treatment as before
-//   reference — slightly smaller title + muted background so the section
-//               reads as secondary to the main spokes above
-function renderSpoke(spoke: SpokeCard, weight: 'main' | 'reference') {
-  const isReference = weight === 'reference'
-  const titleSize = isReference
-    ? 'text-lg sm:text-xl'
-    : 'text-xl sm:text-2xl'
-
-  const body = (
-    <>
-      <div className="flex items-baseline justify-between gap-2 mb-2">
-        <Eyebrow>
-          {spoke.role}
-        </Eyebrow>
-        {spoke.badge && (
-          <Badge tone="neutral" size="sm">{spoke.badge}</Badge>
-        )}
-      </div>
-      <p className={`${titleSize} font-black text-prose group-hover:text-accent transition-colors leading-tight mb-2`}>
-        {spoke.title}
-      </p>
-      <p className="text-sm text-prose-muted leading-relaxed">
-        {spoke.blurb}
-      </p>
-      {/* No "Open →". The whole card is the link, so that was a second call to action
-          for the same tap, printed five times down the page — and it cost every card a
-          row of height to say nothing the cursor didn't already say. The title turns
-          accent on hover, which is the affordance doing the work. */}
     </>
-  )
-
-  if (spoke.href) {
-    return (
-      <Link key={spoke.title} href={spoke.href} className="block group">
-        <Card tone="chrome" className="h-full p-6">{body}</Card>
-      </Link>
-    )
-  }
-  const dimmed = !!spoke.badge
-  return (
-    <Card
-      key={spoke.title}
-      tone="chrome"
-      className={`p-6 ${dimmed ? 'opacity-60 cursor-not-allowed' : ''}`}
-    >
-      {body}
-    </Card>
   )
 }

@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { getMerchDisplayImage, type Merch } from '@/lib/merch'
 import { BRAND } from '@/lib/brand'
+import { BagIcon } from '@/components/icons'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import { buttonVariants } from '@/components/ui/Button'
 
 /**
@@ -35,7 +37,7 @@ export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: stri
     <section data-theme="dark" className="my-12 bg-chrome text-prose border-t-4 border-accent rounded-xl px-6 py-8">
       <div className="flex items-end justify-between gap-3 mb-5">
         <div className="min-w-0">
-          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">Made by Boss Daddy</p>
+          <LabelBlock tone="accent" className="mb-2">Made by Boss Daddy</LabelBlock>
           <h2 className="text-xl font-black text-prose leading-tight">{BRAND.merchVoice}</h2>
         </div>
         <Link href={exploreHref} className={buttonVariants({ variant: 'primary', size: 'sm', className: 'shrink-0' })}>
@@ -60,14 +62,12 @@ export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: stri
             const isExternal = p.printful_sync_product_id == null && Boolean(p.external_url)
             const inner = (
               <>
-                <div className="relative w-36 h-36 overflow-hidden rounded-xl bg-surface-raised">
+                <div className="relative w-36 h-36 overflow-hidden rounded-xl bg-surface-sunken border-b-[3px] border-chrome">
                   {img ? (
                     <Image src={img} alt="" /* decorative: the link's text already names it — an alt here gets read twice */ fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="144px" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <svg className="w-9 h-9 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1} aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                      </svg>
+                      <BagIcon className="w-9 h-9 text-prose-faint" strokeWidth={1} aria-hidden />
                     </div>
                   )}
                   {p.status !== 'available' && (

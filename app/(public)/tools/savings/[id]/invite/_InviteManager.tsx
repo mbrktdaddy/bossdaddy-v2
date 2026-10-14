@@ -10,6 +10,8 @@ import { createInvite, revokeInvite } from '@/lib/dad-tools/savings-actions'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import { useConfirm } from '@/components/ui/useConfirm'
 
 interface MemberHit { id: string; username: string; displayName: string | null }
 
@@ -51,6 +53,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   const [memberHits, setMemberHits] = useState<MemberHit[]>([])
   const [invitingId, setInvitingId] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirm()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   function onMemberSearch(value: string) {
@@ -94,8 +97,14 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
     })
   }
 
-  function onRevoke(id: string) {
-    if (!window.confirm('Revoke this invite? Anyone who has the link will no longer be able to join.')) return
+  async function onRevoke(id: string) {
+    const ok = await confirm({
+      title: 'Revoke this invite?',
+      body: 'Anyone who has the link will no longer be able to join.',
+      confirmLabel: 'Revoke',
+      danger: true,
+    })
+    if (!ok) return
     setError(null)
     startTransition(async () => {
       const result = await revokeInvite(id)
@@ -117,7 +126,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   const isFull = seatsRemaining <= 0
 
   return (
-    <Card as="section" className="p-6 space-y-5">
+    <Card as="section" tone="chrome" className="p-6 space-y-5">
       <div className="flex items-baseline justify-between">
         <Eyebrow>
           Generate a link
@@ -133,19 +142,16 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
         <>
           {/* Invite an existing member — relays straight to their notifications. */}
           <div className="relative">
-            <label htmlFor="member-search" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
-              Invite a member <span className="normal-case text-prose-faint">(they accept in their notifications)</span>
-            </label>
-            <input
+            <Field
               id="member-search"
+              label={<>Invite a member <span className="font-normal text-prose-faint">(they accept in their notifications)</span></>}
               type="text"
               value={memberQ}
               onChange={(e) => onMemberSearch(e.target.value)}
               placeholder="Search by username or name…"
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             {memberHits.length > 0 && (
-              <div className="mt-2 border border-soft rounded-lg overflow-hidden divide-y divide-soft">
+              <div className="mt-2 border-2 border-chrome rounded-lg overflow-hidden divide-y divide-soft">
                 {memberHits.map((m) => (
                   <div key={m.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-surface-sunken">
                     <span className="min-w-0 text-sm text-prose truncate">
@@ -155,7 +161,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
                       type="button"
                       onClick={() => inviteMember(m)}
                       disabled={pending || invitingId === m.id}
-                      className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
+                      className={buttonVariants({ size: 'md', className: 'shrink-0' })}
                     >
                       {invitingId === m.id ? 'Inviting…' : 'Invite'}
                     </button>
@@ -175,24 +181,17 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
                 was telling the owner the opposite of what the button does, which
                 on a page whose whole job is deciding who to let in is the wrong
                 thing to be wrong about. */}
-            <label htmlFor="invite-email" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
-              Recipient email <span className="normal-case text-prose-faint">(optional — we&apos;ll send it)</span>
-            </label>
-            <input
-              autoComplete="off"
+            <Field
               id="invite-email"
+              label={<>Recipient email <span className="font-normal text-prose-faint">(optional — we&apos;ll send it)</span></>}
+              autoComplete="off"
               type="email"
               maxLength={200}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="sarah@example.com"
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+              hint="Fill this in and we'll email them the invite. Leave it blank and you just get a link to share by text or DM. Inviting the same address again replaces the earlier link rather than adding a second one."
             />
-            <p className="text-xs text-prose-faint mt-1.5">
-              Fill this in and we&apos;ll email them the invite. Leave it blank and
-              you just get a link to share by text or DM. Inviting the same address
-              again replaces the earlier link rather than adding a second one.
-            </p>
           </div>
           <button
             type="button"
@@ -214,14 +213,15 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
             <input
               type="text"
               readOnly
+              aria-label="Invite link"
               value={freshLink}
-              className="flex-1 min-w-0 px-3 py-2 bg-background border border-soft rounded-lg text-prose text-sm font-mono"
+              className="flex-1 min-w-0 px-3 py-2.5 min-h-[44px] bg-surface border border-strong rounded-md text-prose text-base sm:text-sm font-mono"
               onFocus={(e) => e.currentTarget.select()}
             />
             <button
               type="button"
               onClick={() => copyToClipboard(freshLink, 'fresh')}
-              className={buttonVariants({ className: 'shrink-0' })}
+              className={buttonVariants({ variant: 'outline', className: 'shrink-0' })}
             >
               {copied === 'fresh' ? 'Copied!' : 'Copy'}
             </button>
@@ -269,7 +269,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
                 <button
                   type="button"
                   onClick={() => copyToClipboard(url, inv.id)}
-                  className="shrink-0 px-3 py-1.5 bg-background border border-soft hover:border-strong text-prose-muted font-medium rounded-lg text-xs transition-colors"
+                  className={buttonVariants({ variant: 'outline', size: 'md', className: 'shrink-0' })}
                   aria-label={`Copy the invite link for ${inv.label ?? 'the shared link'}`}
                 >
                   {copied === inv.id ? 'Copied' : 'Copy'}
@@ -278,7 +278,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
                   type="button"
                   onClick={() => onRevoke(inv.id)}
                   disabled={pending}
-                  className="shrink-0 px-3 py-1.5 bg-background border border-soft hover:border-danger-line text-danger-ink font-medium rounded-lg text-xs transition-colors"
+                  className={buttonVariants({ variant: 'danger', size: 'md', className: 'shrink-0' })}
                   aria-label={`Revoke invite for ${inv.label ?? 'the shared link'}`}
                 >
                   Revoke
@@ -288,6 +288,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
           })}
         </div>
       )}
+      {dialog}
     </Card>
   )
 }

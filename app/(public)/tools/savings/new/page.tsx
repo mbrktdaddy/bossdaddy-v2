@@ -4,7 +4,7 @@
 
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
@@ -58,20 +58,13 @@ export default async function NewSavingsGoalPage({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <header className="space-y-2">
-        <Link
-          href="/tools/savings"
-          className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
-        >
-          {LABELS.tools.savings.upLink}
-        </Link>
-        <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-          {LABELS.tools.savings.newCta}
-        </h1>
-        <p className="text-prose-faint text-sm sm:text-base leading-snug">
-          Tiny commitment. Real ritual. The math takes care of itself.
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools/savings', label: LABELS.tools.savings.short }}
+        eyebrow={LABELS.tools.savings.hubEyebrow}
+        title={LABELS.tools.savings.newCta}
+        deck="Tiny commitment. Real ritual. The math takes care of itself."
+      />
 
       <GoalForm mode="create" initial={initial} kids={kids} />
     </div>

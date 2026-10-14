@@ -7,7 +7,8 @@ import type { Metadata } from 'next'
 import { OG_SITE } from '@/lib/og'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
-import { BackLink } from '@/components/ui/BackLink'
+import PageHeader from '@/components/PageHeader'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { getKids } from '@/lib/dad-tools/kid-actions'
 import { unreadNoteCounts } from '@/lib/goals/notes'
@@ -39,19 +40,15 @@ export default async function SavingsIndexPage() {
   if (!user) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
-        <header className="space-y-3">
-          <Eyebrow>
-            {LABELS.tools.savings.spokeRole} · {LABELS.tools.savings.short}
-          </Eyebrow>
-          <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
-            {LABELS.tools.savings.h1}
-          </h1>
-          <p className="text-base sm:text-lg text-prose-muted leading-snug max-w-xl">
-            {LABELS.tools.savings.tagline}
-          </p>
-        </header>
+<PageHeader
+          size="compact"
+          back={{ href: '/tools', label: LABELS.tools.short }}
+          eyebrow={`${LABELS.tools.savings.spokeRole} · ${LABELS.tools.savings.short}`}
+          title={LABELS.tools.savings.h1}
+          deck={LABELS.tools.savings.tagline}
+        />
 
-        <Card as="section" className="p-6 sm:p-8 space-y-4">
+        <Card as="section" tone="chrome" className="p-6 sm:p-8 space-y-4">
           <Eyebrow>
             How it works
           </Eyebrow>
@@ -90,47 +87,32 @@ export default async function SavingsIndexPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
-
-      <header className="space-y-3">
-        <Eyebrow>
-          {LABELS.tools.savings.hubEyebrow}
-        </Eyebrow>
-        <div className="flex items-end justify-between gap-3">
-          <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-            {LABELS.tools.savings.full}
-          </h1>
-          {goalsWithStats.length > 0 && (
-            <Link
-              href="/tools/savings/new"
-              className={buttonVariants({ className: 'shrink-0' })}
-            >
-              + New
-            </Link>
-          )}
-        </div>
-        <p className="text-prose-faint text-sm sm:text-base leading-snug">
-          {LABELS.tools.savings.tagline}
-        </p>
-      </header>
+<PageHeader
+        size="compact"
+        back={{ href: '/tools', label: LABELS.tools.short }}
+        eyebrow={LABELS.tools.savings.hubEyebrow}
+        title={LABELS.tools.savings.full}
+        deck={LABELS.tools.savings.tagline}
+        actions={goalsWithStats.length > 0 ? (
+          <Link href="/tools/savings/new" className={buttonVariants()}>
+            + New
+          </Link>
+        ) : undefined}
+      />
 
       <InstallPWA body="Add the Savings tool to your home screen. One-tap return from your bank app." />
 
       {goalsWithStats.length === 0 ? (
-        <section className="bg-surface border border-soft rounded-xl p-6 sm:p-8 text-center space-y-4">
-          <p className="text-lg sm:text-xl font-black text-prose">
-            {LABELS.tools.savings.indexEmptyTitle}
-          </p>
-          <p className="text-sm text-prose-muted max-w-md mx-auto">
-            {LABELS.tools.savings.indexEmptyBody}
-          </p>
-          <Link
-            href="/tools/savings/new"
-            className={buttonVariants()}
-          >
-            {LABELS.tools.savings.newCtaArrow}
-          </Link>
-        </section>
+        <EmptyState
+          variant="dashed"
+          title={LABELS.tools.savings.indexEmptyTitle}
+          body={LABELS.tools.savings.indexEmptyBody}
+          action={
+            <Link href="/tools/savings/new" className={buttonVariants()}>
+              {LABELS.tools.savings.newCtaArrow}
+            </Link>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {goalsWithStats.map((g) => (

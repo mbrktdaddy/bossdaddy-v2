@@ -15,8 +15,7 @@ import { getKids } from '@/lib/dad-tools/kid-actions'
 import { LABELS } from '@/lib/labels'
 import { pickAmounts, LIFE_INSURANCE_KEYS } from '@/lib/dad-tools/url-params'
 import DadMathTool from './_components/DadMathTool'
-import { Eyebrow } from '@/components/ui/Eyebrow'
-import { BackLink } from '@/components/ui/BackLink'
+import { CalculatorPage } from '@/components/dad-tools/CalculatorParts'
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -72,22 +71,10 @@ export default async function DadMathPage({ searchParams }: PageProps) {
   // inputs ride along so the education number can go back without them.
   const lifeInsurance = pickAmounts(single(params.li), LIFE_INSURANCE_KEYS)
 
+  const D = LABELS.tools.dadMath
+
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
-
-      <header className="space-y-3">
-        <Eyebrow>
-          {LABELS.tools.dadMath.spokeRole} · {LABELS.tools.dadMath.short}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-          {LABELS.tools.dadMath.h1}
-        </h1>
-        <p className="text-prose-faint text-base sm:text-lg leading-snug">
-          {LABELS.tools.dadMath.tagline}
-        </p>
-      </header>
-
+    <CalculatorPage role={D.spokeRole} short={D.short} h1={D.h1} tagline={D.tagline} disclosure={D.disclosure}>
       <DadMathTool
         isAuthenticated={!!user}
         initialKids={kids}
@@ -95,12 +82,6 @@ export default async function DadMathPage({ searchParams }: PageProps) {
         initialFromUrl={initialFromUrl.birthdate ? initialFromUrl : undefined}
         lifeInsurance={lifeInsurance}
       />
-
-      <footer className="pt-6 mt-2 border-t border-soft">
-        <p className="text-xs text-prose-faint leading-relaxed">
-          {LABELS.tools.dadMath.disclosure}
-        </p>
-      </footer>
-    </div>
+    </CalculatorPage>
   )
 }

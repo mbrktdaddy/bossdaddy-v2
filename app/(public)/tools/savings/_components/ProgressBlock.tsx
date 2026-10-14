@@ -4,8 +4,7 @@
 import { LABELS } from '@/lib/labels'
 import type { SavingsGoal, GoalStats } from '@/lib/dad-tools/savings'
 import { fmtUsdWhole, fmtUsd, cadenceUnitLabel } from '@/lib/dad-tools/savings'
-import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ProgressBar } from '@/components/ui/ProgressBar'
 
 interface Props {
   goal:  SavingsGoal
@@ -14,20 +13,16 @@ interface Props {
 
 export default function ProgressBlock({ goal, stats }: Props) {
   const labels = LABELS.tools.savings.result
-  const targetPct = goal.target_amount != null
-    ? Math.min(100, Math.max(0, (stats.runningTotal / Number(goal.target_amount)) * 100))
-    : null
 
   return (
-    <Card as="section" className="p-6 space-y-5">
+    // The ONE black panel on the detail screen (Hard Goods) — tokens invert inside the zone.
+    <section aria-label="Progress" data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
 
       {/* Top — saved + target */}
       <div>
-        <Eyebrow className="mb-2">
-          {labels.savedLabel}
-        </Eyebrow>
+        <p className="mb-2 text-[10px] uppercase tracking-widest font-semibold text-accent-text">{labels.savedLabel}</p>
         <div className="flex items-baseline gap-3 flex-wrap">
-          <p className="text-5xl font-black text-prose">{fmtUsdWhole(stats.runningTotal)}</p>
+          <p className="text-5xl font-black text-accent tabular-nums leading-none">{fmtUsdWhole(stats.runningTotal)}</p>
           {goal.target_amount != null && (
             <p className="text-sm text-prose-faint">
               of {fmtUsdWhole(goal.target_amount)} {labels.targetLabel.toLowerCase()}
@@ -35,13 +30,14 @@ export default function ProgressBlock({ goal, stats }: Props) {
           )}
         </div>
 
-        {targetPct != null && (
-          <div className="mt-4 h-2 bg-surface-sunken rounded-full overflow-hidden">
-            <div
-              className="h-full bg-accent transition-all"
-              style={{ width: `${targetPct}%` }}
-            />
-          </div>
+        {goal.target_amount != null && (
+          <ProgressBar
+            className="mt-4"
+            label="Savings progress"
+            value={stats.runningTotal}
+            max={Number(goal.target_amount)}
+            valueText={`${fmtUsdWhole(stats.runningTotal)} of ${fmtUsdWhole(goal.target_amount)}`}
+          />
         )}
 
         {stats.totalWithdrawn > 0 && (
@@ -95,7 +91,7 @@ export default function ProgressBlock({ goal, stats }: Props) {
           })}
         </p>
       )}
-    </Card>
+    </section>
   )
 }
 
@@ -111,7 +107,7 @@ function Stat({ label, value, tone }: {
   return (
     <div className="min-w-0">
       <p className="text-xs text-prose-faint uppercase tracking-widest mb-1 truncate">{label}</p>
-      <p className={`text-lg sm:text-xl font-black truncate ${valueClass}`}>{value}</p>
+      <p className={`text-lg sm:text-xl font-black tabular-nums truncate ${valueClass}`}>{value}</p>
     </div>
   )
 }

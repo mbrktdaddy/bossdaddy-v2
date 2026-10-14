@@ -7,6 +7,7 @@ import { familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { LABELS } from '@/lib/labels'
 import KidPhotoUploader from './KidPhotoUploader'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 const MEMBER_TYPES: MemberType[] = ['child', 'partner', 'other']
@@ -98,14 +99,14 @@ export default function KidProfileForm(props: Props) {
       )}
 
       <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-          Who is this?
-        </label>
-        <div className="grid grid-cols-3 gap-2">
+        <p id="kid-who" className="block mb-1.5 text-sm font-semibold text-prose">Who is this?</p>
+        <div role="radiogroup" aria-labelledby="kid-who" className="grid grid-cols-3 gap-2">
           {MEMBER_TYPES.map((t) => (
             <button
               key={t}
               type="button"
+              role="radio"
+              aria-checked={memberType === t}
               onClick={() => { setMemberType(t); setError(null) }}
               className={`${PILL_BASE} justify-center ${memberType === t ? PILL_ACTIVE : PILL_INACTIVE}`}
             >
@@ -115,42 +116,25 @@ export default function KidProfileForm(props: Props) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-          Name <span className="lowercase text-prose-faint normal-case font-normal tracking-normal">(optional)</span>
-        </label>
-        <input
-          type="text"
-          value={name}
-          maxLength={80}
-          onChange={(e) => { setName(e.target.value); setError(null) }}
-          placeholder={NAME_PLACEHOLDER[memberType]}
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-          autoComplete="off"
-        />
-      </div>
+      <Field
+        label={<>Name <span className="font-normal text-prose-faint">(optional)</span></>}
+        type="text"
+        value={name}
+        maxLength={80}
+        onChange={(e) => { setName(e.target.value); setError(null) }}
+        placeholder={NAME_PLACEHOLDER[memberType]}
+        autoComplete="off"
+      />
 
-      <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-          Birthdate
-          {memberType !== 'child' && (
-            <span className="lowercase text-prose-faint normal-case font-normal tracking-normal"> (optional)</span>
-          )}
-        </label>
-        <input
-          type="date"
-          value={birthdate}
-          required={memberType === 'child'}
-          onChange={(e) => { setBirthdate(e.target.value); setError(null) }}
-          max={new Date().toISOString().slice(0, 10)}
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-        />
-        {memberType !== 'child' && (
-          <p className="mt-1.5 text-[11px] text-prose-faint leading-snug">
-            Optional for a {LABELS.tools.kids.memberType[memberType].toLowerCase()} — add one only if you want birthday reminders.
-          </p>
-        )}
-      </div>
+      <Field
+        label={<>Birthdate{memberType !== 'child' && <span className="font-normal text-prose-faint"> (optional)</span>}</>}
+        type="date"
+        value={birthdate}
+        required={memberType === 'child'}
+        onChange={(e) => { setBirthdate(e.target.value); setError(null) }}
+        max={new Date().toISOString().slice(0, 10)}
+        hint={memberType !== 'child' ? `Optional for a ${LABELS.tools.kids.memberType[memberType].toLowerCase()} — add one only if you want birthday reminders.` : undefined}
+      />
 
       {error && <p className="text-sm text-danger-ink">{error}</p>}
 
@@ -166,7 +150,7 @@ export default function KidProfileForm(props: Props) {
           <button
             type="button"
             onClick={props.onCancel}
-            className="px-4 py-2.5 text-prose-faint hover:text-prose text-sm font-medium rounded-xl transition-colors"
+            className={buttonVariants({ variant: 'ghost' })}
           >
             Cancel
           </button>

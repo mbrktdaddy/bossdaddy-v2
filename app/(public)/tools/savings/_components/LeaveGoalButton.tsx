@@ -7,6 +7,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
+import { useConfirm } from '@/components/ui/useConfirm'
 import { removeParticipant } from '@/lib/dad-tools/savings-actions'
 
 interface Props {
@@ -19,11 +21,15 @@ export default function LeaveGoalButton({ goalId, userId, goalName }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirm()
 
-  function onLeave() {
-    const ok = window.confirm(
-      `Leave "${goalName}"?\n\nYour past contributions stay in the goal's history. You'll lose access to view it. If you change your mind, the owner can re-invite you.`,
-    )
+  async function onLeave() {
+    const ok = await confirm({
+      title: `Leave "${goalName}"?`,
+      body: "Your past contributions stay in the goal's history. You'll lose access to view it. If you change your mind, the owner can re-invite you.",
+      confirmLabel: 'Leave goal',
+      danger: true,
+    })
     if (!ok) return
     setError(null)
     startTransition(async () => {
@@ -39,13 +45,14 @@ export default function LeaveGoalButton({ goalId, userId, goalName }: Props) {
         type="button"
         onClick={onLeave}
         disabled={pending}
-        className="px-4 py-2.5 bg-surface-sunken border border-soft hover:border-danger-line disabled:opacity-50 text-danger-ink font-semibold rounded-lg text-sm transition-colors min-h-[44px]"
+        className={buttonVariants({ variant: 'danger' })}
       >
         Leave this goal
       </button>
       {error && (
         <p className="text-xs text-danger-ink">{error}</p>
       )}
+      {dialog}
     </div>
   )
 }

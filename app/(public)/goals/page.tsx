@@ -27,6 +27,9 @@ import {
 import TodayCard from '@/components/goals/TodayCard'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Badge } from '@/components/ui/Badge'
+import { ProgressBar } from '@/components/ui/ProgressBar'
+import PageHeader from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
@@ -171,22 +174,17 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <header className="flex items-end justify-between gap-4">
-        <div className="space-y-3">
-          <Eyebrow>
-            {LABELS.goals.spokeRole} · {LABELS.goals.short}
-          </Eyebrow>
-          <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-            {LABELS.goals.short}
-          </h1>
-        </div>
-        <Link
-          href="/goals/new"
-          className={buttonVariants({ className: 'shrink-0' })}
-        >
-          {LABELS.goals.newCta}
-        </Link>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools', label: LABELS.tools.short }}
+        eyebrow={`${LABELS.goals.spokeRole} · ${LABELS.goals.short}`}
+        title={LABELS.goals.short}
+        actions={
+          <Link href="/goals/new" className={buttonVariants()}>
+            {LABELS.goals.newCta}
+          </Link>
+        }
+      />
 
       {msg ? (
         <p className="rounded-lg border border-soft bg-surface px-4 py-3 text-sm text-prose-muted">
@@ -348,30 +346,25 @@ export default async function GoalsIndexPage({ searchParams }: Props) {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     {openCount > 0 && goal.status === 'active' ? (
-                      <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-white">
+                      <Badge tone="accent">
                         {openCount > 1 ? `${openCount} open` : 'Due'}
-                      </span>
+                      </Badge>
                     ) : null}
                     {/* Unread notes. Shown on PAUSED and ARCHIVED goals too, unlike
                         the Due badge: a paused goal isn't asking anything of you,
                         but a person who wrote in it is, and that's the one thing
                         worth surfacing on a goal you've set down. */}
                     {(unreadNotes.get(goal.id) ?? 0) > 0 ? (
-                      <span className="rounded-full border border-strong bg-surface-raised px-3 py-1 text-xs font-bold text-accent-text">
+                      <Badge tone="neutral">
                         {unreadNotes.get(goal.id)} new
-                      </span>
+                      </Badge>
                     ) : null}
                   </div>
                 </div>
 
                 {progress != null ? (
                   <div className="mt-4">
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-raised">
-                      <div
-                        className="h-full rounded-full bg-accent"
-                        style={{ width: `${Math.round(progress * 100)}%` }}
-                      />
-                    </div>
+                    <ProgressBar size="sm" label={`${goal.title} progress`} value={Math.round(progress * 100)} />
                     <p className="mt-2 text-xs text-prose-faint">
                       {goal.baseline_value}{unitOf(goal)} → {goal.target_value}{unitOf(goal)}
                       {stat?.latest_value != null ? (
@@ -664,17 +657,12 @@ function safeToday(now: Date, zone: string): string {
 function SignedOut() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
-      <header className="space-y-3">
-        <Eyebrow>
-          {LABELS.goals.spokeRole} · {LABELS.goals.short}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-5xl font-black text-prose leading-[1.05] tracking-tight">
-          {LABELS.goals.h1}
-        </h1>
-        <p className="text-base sm:text-lg text-prose-muted leading-snug max-w-xl">
-          {LABELS.goals.tagline}
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        eyebrow={`${LABELS.goals.spokeRole} · ${LABELS.goals.short}`}
+        title={LABELS.goals.h1}
+        deck={LABELS.goals.tagline}
+      />
 
       <Card as="section" className="p-6 sm:p-8 space-y-4">
         <Eyebrow>
@@ -709,19 +697,14 @@ function Empty({
           Gone. Log and all.
         </p>
       ) : null}
-      <header className="space-y-3">
-        <Eyebrow>
-          {LABELS.goals.spokeRole} · {LABELS.goals.short}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black text-prose leading-tight tracking-tight">
-          {showArchived ? 'Nothing archived.' : LABELS.goals.emptyHeading}
-        </h1>
-        <p className="text-base text-prose-muted leading-snug max-w-xl">
-          {showArchived
-            ? 'Goals you archive show up here so nothing gets lost.'
-            : LABELS.goals.emptyBody}
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        eyebrow={`${LABELS.goals.spokeRole} · ${LABELS.goals.short}`}
+        title={showArchived ? 'Nothing archived.' : LABELS.goals.emptyHeading}
+        deck={showArchived
+          ? 'Goals you archive show up here so nothing gets lost.'
+          : LABELS.goals.emptyBody}
+      />
       {showArchived ? (
         <Link
           href="/goals"

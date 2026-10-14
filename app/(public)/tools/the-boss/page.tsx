@@ -8,7 +8,7 @@ import type { Block } from '@/lib/boss/types'
 import BossChat, { type BossMsg } from './_components/BossChat'
 import PastChats, { type PastChat } from './_components/PastChats'
 import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import PageHeader from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/Button'
 
 export function generateMetadata(): Metadata {
@@ -39,13 +39,14 @@ export default async function TheBossPage({
   const seedContext = params.context
 
   const header = (
-    <header className="mb-5">
-      <Eyebrow className="mb-2">Ask the Boss</Eyebrow>
-      <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">{LABELS.tools.theBoss.full}</h1>
-      <p className="mt-2 text-sm sm:text-base text-prose-muted leading-relaxed max-w-2xl">
-        Straight answers on fixes, gear, plans, and dad life — ask it anything.
-      </p>
-    </header>
+    <PageHeader
+      size="compact"
+      back={{ href: '/tools', label: LABELS.tools.short }}
+      eyebrow="Ask the Boss"
+      title={LABELS.tools.theBoss.full}
+      deck="Straight answers on fixes, gear, plans, and dad life — ask it anything."
+      className="mb-5"
+    />
   )
 
   if (!user) {

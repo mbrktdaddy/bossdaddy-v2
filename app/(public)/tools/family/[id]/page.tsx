@@ -37,7 +37,8 @@ import InlineCapture from '@/components/dad-tools/InlineCapture'
 import MomentsFeed from '@/components/dad-tools/MomentsFeed'
 import WeeklyCheckinOptIn from '@/components/dad-tools/WeeklyCheckinOptIn'
 import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Avatar } from '@/components/ui/Avatar'
+import PageHeader from '@/components/PageHeader'
 import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
@@ -174,41 +175,20 @@ export default async function KidProfilePage({ params }: PageProps) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-7">
 
-      {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="text-xs text-prose-faint">
-        <Link href="/tools" className="hover:text-prose transition-colors">
-          ← All tools
-        </Link>
-      </nav>
-
-      {/* Kid header */}
-      <header className="flex items-start gap-4 sm:gap-5">
-        {familyPhotoSrc(kidRow) ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={familyPhotoSrc(kidRow) as string}
-            alt=""
-            className="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover bg-surface-sunken shrink-0"
-          />
-        ) : (
-          <div
-            className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-accent/15 text-accent flex items-center justify-center text-2xl sm:text-3xl font-black shrink-0"
-            aria-hidden="true"
-          >
-            {(kidRow.name?.trim()?.[0] ?? '?').toUpperCase()}
+      {/* Kid header — the app-page lockup (continuity plan P6) */}
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools', label: LABELS.tools.short }}
+        eyebrow={LABELS.tools.kids.section}
+        title={displayName}
+        deck={subLabel}
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block"><Avatar src={familyPhotoSrc(kidRow)} name={kidRow.name} size={44} /></div>
+            <KidHeaderActions kid={kidRow} />
           </div>
-        )}
-        <div className="min-w-0 flex-1 pt-1">
-          <Eyebrow>
-            {LABELS.tools.kids.section}
-          </Eyebrow>
-          <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight mt-1">
-            {displayName}
-          </h1>
-          <p className="text-sm text-prose-faint mt-0.5">{subLabel}</p>
-        </div>
-        <KidHeaderActions kid={kidRow} />
-      </header>
+        }
+      />
 
       {/* Time card — child-only (the Milestones tool, counting to 18) */}
       {isChild && (

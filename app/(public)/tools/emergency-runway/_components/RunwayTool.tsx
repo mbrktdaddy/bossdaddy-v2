@@ -71,7 +71,6 @@ export default function RunwayTool({ initial }: { initial: { cash?: number; expe
 
   const r = runRunway(cash, expenses)
   const months = fmtMonths(r.months)
-  const hasResult = cash > 0 || expenses > 0
 
   // Band bar: scale to at least 9 months so the 3–6 band always sits in view.
   const scaleMax = Math.max(9, Number.isFinite(r.months) ? Math.ceil(r.months) : 9)
@@ -135,7 +134,8 @@ export default function RunwayTool({ initial }: { initial: { cash?: number; expe
         )}
       </section>
 
-      {hasResult && (
+      {/* Always mounted — the empty state is the no_expenses voice line. */}
+      {(
         <ResultCard
           label="Runway"
           headline={r.band === 'no_expenses' ? '—' : `${months} ${months === '1' ? 'month' : 'months'}`}

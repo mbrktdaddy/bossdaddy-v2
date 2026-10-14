@@ -13,7 +13,8 @@
 // writes back to that kid's row.
 
 import { useState, useTransition, useMemo } from 'react'
-import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+import { Segmented } from '@/components/dad-tools/CalculatorParts'
+import { Field } from '@/components/ui/Field'
 import { LABELS } from '@/lib/labels'
 import { type Kid, updateKidMoneyState } from '@/lib/dad-tools/kid-actions'
 import {
@@ -59,6 +60,9 @@ function resolveInitialKid(
   }
   return kids[0]?.id ?? null
 }
+
+// Segmented values are strings; this stands in for "no saved kid selected".
+const ADHOC = '__adhoc__'
 
 export default function DadMathTool({ isAuthenticated, initialKids, initialKidId, initialFromUrl, lifeInsurance }: Props) {
   // Ad-hoc only when the URL has a birthdate AND it doesn't match a saved
@@ -168,25 +172,15 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
 
       {/* Kid selector — same pattern as WeekendsTool */}
       {isAuthenticated && initialKids.length > 0 && (
-        <section className="flex items-center gap-2 flex-wrap">
-          {initialKids.map((k) => (
-            <button
-              key={k.id}
-              type="button"
-              onClick={() => selectKid(k.id)}
-              className={`${PILL_BASE} ${selectedKidId === k.id ? PILL_ACTIVE : PILL_INACTIVE}`}
-            >
-              {k.name?.trim() || 'Kid'}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => selectKid(null)}
-            className={`${PILL_BASE} ${selectedKidId === null ? PILL_ACTIVE : PILL_INACTIVE}`}
-          >
-            Try another date
-          </button>
-        </section>
+        <Segmented
+          label="Whose math"
+          value={selectedKidId ?? ADHOC}
+          onChange={(v) => selectKid(v === ADHOC ? null : v)}
+          options={[
+            ...initialKids.map((k) => ({ value: k.id, label: k.name?.trim() || 'Kid' })),
+            { value: ADHOC, label: 'Try another date' },
+          ]}
+        />
       )}
 
       {/* Ad-hoc birthdate input */}
@@ -197,18 +191,13 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
               No account needed. Plug in a birthdate to see the math.
             </p>
           )}
-          <div>
-            <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-              Birthdate
-            </label>
-            <input
-              type="date"
-              value={adhocBirthdate}
-              max={today}
-              onChange={(e) => setAdhocBirthdate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
-            />
-          </div>
+          <Field
+            label="Birthdate"
+            type="date"
+            value={adhocBirthdate}
+            max={today}
+            onChange={(e) => setAdhocBirthdate(e.target.value)}
+          />
         </section>
       )}
 
@@ -275,16 +264,16 @@ export default function DadMathTool({ isAuthenticated, initialKids, initialKidId
       )}
 
       {/* Result */}
-      {result && hasInput && (
-        <Result
-          result={result}
-          name={name}
-          targetBy18={targetBy18}
-          kidId={selectedKidId}
-          monthlyContrib={monthlyContrib}
-          lifeInsurance={lifeInsurance}
-        />
-      )}
+      {/* Present before the first number (one empty-result rule): Result renders the
+          quiet "pick a birthdate" panel while `result` is null. */}
+      <Result
+        result={hasInput ? result : null}
+        name={name}
+        targetBy18={targetBy18}
+        kidId={selectedKidId}
+        monthlyContrib={monthlyContrib}
+        lifeInsurance={lifeInsurance}
+      />
 
     </div>
   )

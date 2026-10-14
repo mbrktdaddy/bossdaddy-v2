@@ -27,6 +27,16 @@ import {
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field, fieldClass } from '@/components/ui/Field'
+import { Switch } from '@/components/ui/Switch'
+import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+
+// Select / label recipes shared with <Field> (16px on a phone, 44px tall).
+const LABEL = 'block mb-1.5 text-sm font-semibold text-prose'
+// The 2px-in-both-states choice card: state swaps the colour, never the edge.
+const CARD_BASE = 'text-left px-3 py-3 rounded-lg border-2 transition-colors min-h-[44px]'
+const CARD_ON  = 'border-prose bg-surface-hover text-prose'
+const CARD_OFF = 'border-strong bg-surface text-prose-muted hover:border-prose'
 
 type RhythmMode = 'regular' | 'freeform'
 type TargetMode = 'none' | 'amount' | 'date' | 'both'
@@ -256,13 +266,13 @@ export default function GoalForm({ mode, initial, kids }: Props) {
     <form onSubmit={onSubmit} className="space-y-6">
 
       {/* ── Name + description + kid ────────────────────────────────────── */}
-      <Card as="section" className="p-6 space-y-5">
+      <Card as="section" tone="chrome" className="p-6 space-y-5">
         <Eyebrow>
           About this goal
         </Eyebrow>
 
         <div>
-          <label htmlFor="goal-name" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          <label htmlFor="goal-name" className={LABEL}>
             Name
           </label>
           <input
@@ -274,12 +284,12 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Camping trip 2026"
-            className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className={fieldClass()}
           />
         </div>
 
         <div>
-          <label htmlFor="goal-desc" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          <label htmlFor="goal-desc" className={LABEL}>
             What this is for <span className="text-prose-faint normal-case">(optional)</span>
           </label>
           <textarea
@@ -289,13 +299,13 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Saving up so the kids and I can do Yellowstone next summer."
-            className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className={fieldClass()}
           />
         </div>
 
         {kids.length > 0 && (
           <div>
-            <label htmlFor="goal-kid" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+            <label htmlFor="goal-kid" className={LABEL}>
               Tie to a {LABELS.tools.kids.singular}{' '}
               <span className="text-prose-faint normal-case">(optional)</span>
             </label>
@@ -303,7 +313,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
               id="goal-kid"
               value={kidId}
               onChange={(e) => setKidId(e.target.value)}
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+              className={fieldClass()}
             >
               <option value="">None</option>
               {kids.map((k) => (
@@ -315,11 +325,9 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       </Card>
 
       {/* ── Rhythm ──────────────────────────────────────────────────────── */}
-      <Card as="section" className="p-6 space-y-5">
+      <Card as="section" tone="chrome" className="p-6 space-y-5">
         <div>
-          <Eyebrow className="mb-3">
-            Rhythm
-          </Eyebrow>
+          <Eyebrow className="mb-3">Rhythm</Eyebrow>
           <div className="grid grid-cols-2 gap-2">
             {[
               { v: 'regular',  label: 'Regular amount',  body: 'Set a daily, weekly, or monthly target.' },
@@ -329,11 +337,8 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                 key={opt.v}
                 type="button"
                 onClick={() => setRhythm(opt.v as RhythmMode)}
-                className={`text-left p-3 rounded-lg border transition-colors ${
-                  rhythm === opt.v
-                    ? 'bg-accent-tint border-accent-border text-prose'
-                    : 'bg-surface-sunken border-soft hover:border-accent-border/50 text-prose-muted'
-                }`}
+                className={`${CARD_BASE} ${rhythm === opt.v ? CARD_ON : CARD_OFF}`}
+                aria-pressed={rhythm === opt.v}
               >
                 <p className="text-sm font-semibold">{opt.label}</p>
                 <p className="text-xs text-prose-faint mt-1">{opt.body}</p>
@@ -345,14 +350,14 @@ export default function GoalForm({ mode, initial, kids }: Props) {
         {rhythm === 'regular' && (
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div>
-              <label htmlFor="goal-cadence" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+              <label htmlFor="goal-cadence" className={LABEL}>
                 Cadence
               </label>
               <select
                 id="goal-cadence"
                 value={cadence}
                 onChange={(e) => setCadence(e.target.value as SavingsCadence)}
-                className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className={fieldClass()}
               >
                 <option value="daily">{LABELS.tools.savings.cadences.daily}</option>
                 <option value="weekly">{LABELS.tools.savings.cadences.weekly}</option>
@@ -360,7 +365,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
               </select>
             </div>
             <div>
-              <label htmlFor="goal-amt" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+              <label htmlFor="goal-amt" className={LABEL}>
                 Amount
               </label>
               <div className="relative">
@@ -373,7 +378,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                   step="0.25"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className={fieldClass({ className: 'pl-8' })}
                 />
               </div>
             </div>
@@ -382,12 +387,12 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       </Card>
 
       {/* ── Target ──────────────────────────────────────────────────────── */}
-      <Card as="section" className="p-6 space-y-5">
+      <Card as="section" tone="chrome" className="p-6 space-y-5">
         <div>
           <Eyebrow className="mb-3">
             Target
           </Eyebrow>
-          <div className="grid grid-cols-4 gap-2 text-center text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
               { v: 'none',   label: 'No target' },
               { v: 'amount', label: 'Amount' },
@@ -398,11 +403,8 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                 key={opt.v}
                 type="button"
                 onClick={() => setTarget(opt.v as TargetMode)}
-                className={`px-2 py-3 rounded-lg border transition-colors min-h-[44px] ${
-                  target === opt.v
-                    ? 'bg-accent-tint border-accent-border text-prose font-semibold'
-                    : 'bg-surface-sunken border-soft hover:border-accent-border/50 text-prose-muted'
-                }`}
+                className={`${PILL_BASE} justify-center ${target === opt.v ? PILL_ACTIVE : PILL_INACTIVE}`}
+                aria-pressed={target === opt.v}
               >
                 {opt.label}
               </button>
@@ -412,7 +414,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
         {(target === 'amount' || target === 'both') && (
           <div>
-            <label htmlFor="goal-target-amt" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+            <label htmlFor="goal-target-amt" className={LABEL}>
               Target amount
             </label>
             <div className="relative">
@@ -426,7 +428,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                 value={targetAmount}
                 onChange={(e) => setTargetAmount(e.target.value)}
                 placeholder="500"
-                className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className={fieldClass({ className: 'pl-8' })}
               />
             </div>
           </div>
@@ -434,7 +436,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
         {(target === 'date' || target === 'both') && (
           <div>
-            <label htmlFor="goal-target-date" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+            <label htmlFor="goal-target-date" className={LABEL}>
               Target date
             </label>
             <input
@@ -442,14 +444,14 @@ export default function GoalForm({ mode, initial, kids }: Props) {
               type="date"
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+              className={fieldClass()}
             />
           </div>
         )}
       </Card>
 
       {/* ── Destination ─────────────────────────────────────────────────── */}
-      <Card as="section" className="p-6 space-y-5">
+      <Card as="section" tone="chrome" className="p-6 space-y-5">
         <div>
           <Eyebrow className="mb-1">
             Where the money goes
@@ -462,7 +464,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
         {/* Step 1 — category */}
         <div>
-          <p className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          <p className={LABEL}>
             Category
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -474,11 +476,8 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                   setPickerCategory(cat.id)
                   setPickedPresetId(null)
                 }}
-                className={`text-left px-3 py-3 rounded-lg border transition-colors min-h-[44px] ${
-                  pickerCategory === cat.id
-                    ? 'bg-accent-tint border-accent-border text-prose'
-                    : 'bg-surface-sunken border-soft hover:border-accent-border/50 text-prose-muted'
-                }`}
+                className={`${CARD_BASE} ${pickerCategory === cat.id ? CARD_ON : CARD_OFF}`}
+                aria-pressed={pickerCategory === cat.id}
               >
                 <p className="text-sm font-semibold leading-tight">{cat.label}</p>
                 <p className="text-[10px] text-prose-faint mt-0.5 leading-snug">{cat.description}</p>
@@ -490,7 +489,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
         {/* Step 2 — preset chips for selected category */}
         {pickerCategory && pickerCategory !== 'other' && (
           <div>
-            <p className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+            <p className={LABEL}>
               Pick one
             </p>
             <div className="flex flex-wrap gap-2">
@@ -499,11 +498,8 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                   key={p.id}
                   type="button"
                   onClick={() => applyPreset(p)}
-                  className={`text-sm px-3 py-2 rounded-lg border transition-colors min-h-[44px] ${
-                    pickedPresetId === p.id
-                      ? 'bg-accent-tint border-accent-border text-prose font-semibold'
-                      : 'bg-surface-sunken border-soft hover:border-accent-border/50 text-prose-muted'
-                  }`}
+                  className={`${PILL_BASE} ${pickedPresetId === p.id ? PILL_ACTIVE : PILL_INACTIVE}`}
+                  aria-pressed={pickedPresetId === p.id}
                 >
                   {p.label}
                 </button>
@@ -522,7 +518,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
 
         {/* Label + URL — auto-filled from preset, editable */}
         <div>
-          <label htmlFor="goal-dest-label" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          <label htmlFor="goal-dest-label" className={LABEL}>
             Label
           </label>
           <input
@@ -532,7 +528,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             value={destLabel}
             onChange={(e) => setDestLabel(e.target.value)}
             placeholder="Auto-fills when you pick above — or type your own"
-            className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className={fieldClass()}
           />
           {pickedPreset && (
             <p className="text-xs text-prose-faint mt-1.5">
@@ -542,7 +538,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
         </div>
 
         <div>
-          <label htmlFor="goal-dest-url" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+          <label htmlFor="goal-dest-url" className={LABEL}>
             URL or handle <span className="text-prose-faint normal-case">(optional)</span>
           </label>
           <input
@@ -555,7 +551,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
                 ? pickedPreset.handleHint
                 : 'Login URL, payment handle, or leave blank for cash / manual destinations'
             }
-            className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className={fieldClass()}
           />
           <div className={`mt-2 px-3 py-2 rounded-lg border text-xs leading-snug ${
             destBehavior.willPrefill
@@ -570,7 +566,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
       </Card>
 
       {/* ── Reminders ────────────────────────────────────────────────────── */}
-      <Card as="section" className="p-6 space-y-5">
+      <Card as="section" tone="chrome" className="p-6 space-y-5">
         <div>
           <Eyebrow className="mb-1">
             Reminders
@@ -583,27 +579,22 @@ export default function GoalForm({ mode, initial, kids }: Props) {
           </p>
         </div>
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={reminderEnabled}
-            onChange={(e) => setReminderEnabled(e.target.checked)}
-            className="h-4 w-4 accent-accent"
-          />
-          <span className="text-sm text-prose">Send me reminders</span>
-        </label>
+        <div className="flex items-center gap-1">
+          <Switch id="reminder-enabled" checked={reminderEnabled} onChange={setReminderEnabled} />
+          <label htmlFor="reminder-enabled" className="text-sm text-prose cursor-pointer">Send me reminders</label>
+        </div>
 
         {reminderEnabled && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="reminder-cadence" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+              <label htmlFor="reminder-cadence" className={LABEL}>
                 Cadence
               </label>
               <select
                 id="reminder-cadence"
                 value={reminderCadence}
                 onChange={(e) => setReminderCadence(e.target.value as 'daily' | 'weekly' | 'monthly' | 'off')}
-                className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className={fieldClass()}
               >
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
@@ -611,14 +602,14 @@ export default function GoalForm({ mode, initial, kids }: Props) {
               </select>
             </div>
             <div>
-              <label htmlFor="reminder-hour" className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+              <label htmlFor="reminder-hour" className={LABEL}>
                 Time
               </label>
               <select
                 id="reminder-hour"
                 value={reminderHourUtc}
                 onChange={(e) => setReminderHourUtc(Number(e.target.value))}
-                className="w-full px-3 py-2.5 bg-surface-sunken border border-soft focus:border-accent rounded-lg text-prose focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className={fieldClass()}
               >
                 {REMINDER_HOURS.map((hour) => (
                   <option key={hour} value={hour}>
@@ -662,7 +653,7 @@ export default function GoalForm({ mode, initial, kids }: Props) {
             if (window.history.length > 1) router.back()
             else router.push('/tools/savings')
           }}
-          className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
+          className={buttonVariants({ variant: 'ghost' })}
         >
           Cancel
         </button>

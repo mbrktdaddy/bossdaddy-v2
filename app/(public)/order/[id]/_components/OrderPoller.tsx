@@ -12,9 +12,10 @@ const STORAGE_KEY = 'bd_order_poll_attempts'
 // Gives up after MAX_ATTEMPTS refreshes to avoid an infinite loop when
 // the webhook is delayed or fails.
 //
-// Owns the "refreshes automatically" line too: it is only true while we are
-// still polling, so once timed out it gives way to the "taking longer" message
-// instead of stacking under it (the page can't know the poller's state).
+// Owns BOTH status lines (B10): "finalizing… refreshes automatically" is only
+// true while we are still polling, so once timed out the whole block gives way
+// to the "taking longer" message instead of stacking under it (the page can't
+// know the poller's state).
 export default function OrderPoller() {
   const router = useRouter()
   const [timedOut, setTimedOut] = useState(false)
@@ -33,7 +34,7 @@ export default function OrderPoller() {
 
   if (timedOut) {
     return (
-      <p className="mt-4 text-sm text-prose-faint">
+      <p className="text-sm text-prose-muted">
         Taking longer than expected.{' '}
         <a
           href="mailto:support@bossdaddylife.com?subject=Order%20confirmation%20question"
@@ -46,5 +47,10 @@ export default function OrderPoller() {
     )
   }
 
-  return <p className="text-prose-faint text-sm">This page will refresh automatically.</p>
+  return (
+    <div className="space-y-2">
+      <p className="text-prose-muted">Finalizing your order — usually just a few seconds.</p>
+      <p className="text-prose-faint text-sm">This page will refresh automatically.</p>
+    </div>
+  )
 }

@@ -9,7 +9,10 @@ import type { Milestone, Unit } from '@/lib/dad-tools/calc'
 import { LABELS } from '@/lib/labels'
 import YearlyCheckinOptIn from './YearlyCheckinOptIn'
 import ShareMenu from './ShareMenu'
+import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import { ResultCard, ResultLinks } from '@/components/dad-tools/CalculatorParts'
 
 interface Props {
   result: {
@@ -106,26 +109,30 @@ export default function Result({
   const showLoggedInSaveCta  = isAuthenticated && !savedKidId && hasAdhocReady
   const canCapture = isAuthenticated && savedKidId !== null
 
+  const links = [
+    {
+      eyebrow: `Next step · ${LABELS.tools.savings.spokeRole}`,
+      href:  '/tools/savings',
+      label: LABELS.tools.savings.full,
+      note:  'Turn the number into a habit — a few dollars a day toward something they’ll remember.',
+    },
+    {
+      eyebrow: `Next step · ${LABELS.tools.dadMath.spokeRole}`,
+      href:  '/tools/dad-math',
+      label: LABELS.tools.dadMath.full,
+      note:  'Weekends are one clock. The college number is the other.',
+    },
+  ]
+
   return (
-    <section className="bg-surface border border-faint rounded-3xl p-6 sm:p-10 space-y-6">
-
-      {result.passedHeadline && (
-        <p className="text-sm text-prose-faint italic">
-          {result.passedHeadline}
-        </p>
-      )}
-
-      <div>
-        <p className="text-7xl sm:text-8xl font-black text-accent leading-none tracking-tight">
-          {result.N.toLocaleString()}
-        </p>
-        <p className="text-lg sm:text-xl text-prose mt-4 leading-snug max-w-prose">
-          {result.headline}
-        </p>
-      </div>
-
+    <ResultCard
+      label={`${LABELS.tools.units[unit]} left`}
+      headline={result.N.toLocaleString()}
+      subhead={result.passedHeadline ?? ''}
+      voice={result.headline}
+    >
       {/* Primary action */}
-      <div className="space-y-3 pt-2">
+      <div className="space-y-3">
 
         {showAnonymousSaveCta && (
           <button
@@ -152,12 +159,12 @@ export default function Result({
         {saveMessage && !isAuthenticated && (
           <p className="text-sm text-prose">
             {saveMessage}{' '}
-            <a
+            <Link
               href="/register?next=/account"
-              className="text-accent hover:underline font-semibold"
+              className="text-accent-text hover:underline font-semibold"
             >
               Create an account
-            </a>{' '}
+            </Link>{' '}
             to see it in your dashboard.
           </p>
         )}
@@ -179,7 +186,10 @@ export default function Result({
 
         {canCapture && showCapture && (
           <form onSubmit={handleCapture} className="space-y-2.5">
-            <textarea
+            <Field
+              as="textarea"
+              label="What happened this weekend"
+              hideLabel
               value={captureText}
               rows={3}
               maxLength={2000}
@@ -190,7 +200,7 @@ export default function Result({
                   ? `What happened this weekend with ${kidName}?`
                   : 'What happened this weekend?'
               }
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors resize-none"
+              controlClassName="resize-none"
             />
             <div className="flex items-center gap-2">
               <button
@@ -203,7 +213,7 @@ export default function Result({
               <button
                 type="button"
                 onClick={() => { setShowCapture(false); setCaptureText('') }}
-                className="px-4 py-2.5 text-prose-faint hover:text-prose text-sm rounded-xl transition-colors"
+                className={buttonVariants({ variant: 'outline' })}
               >
                 Cancel
               </button>
@@ -220,7 +230,7 @@ export default function Result({
       {/* Yearly check-in opt-in — only when we have a saved kid to anchor it.
           Anonymous-with-no-saved-kid path: save the kid first, then this shows. */}
       {savedKidId && (
-        <div className="pt-4 border-t border-faint">
+        <div className="pt-4 border-t border-soft">
           <YearlyCheckinOptIn
             kidProfileId={savedKidId}
             fallbackBirthdate={adhocBirthdate || selectedKid?.birthdate || ''}
@@ -229,7 +239,7 @@ export default function Result({
       )}
 
       {/* Share menu — copy link / send to spouse / native share */}
-      <div className="pt-4 border-t border-faint">
+      <div className="pt-4 border-t border-soft">
         <ShareMenu
           N={result.N}
           unit={unit}
@@ -241,6 +251,7 @@ export default function Result({
         />
       </div>
 
-    </section>
+      <ResultLinks links={links} />
+    </ResultCard>
   )
 }

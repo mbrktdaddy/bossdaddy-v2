@@ -18,6 +18,7 @@ import { LABELS } from '@/lib/labels'
 import AcceptInviteButton from './_AcceptInviteButton'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import PageHeader from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/Button'
 
 interface PageProps {
@@ -154,12 +155,12 @@ export default async function AcceptInvitePage({ params }: PageProps) {
     const next = encodeURIComponent(`/tools/savings/invite/${token}`)
     return (
       <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
-        <Card tone="sunken" className="p-5 space-y-3">
+        <div className="border-l-4 border-accent pl-4 space-y-1">
           <Eyebrow>
             Goal
           </Eyebrow>
           <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
-        </Card>
+        </div>
         <p className="text-prose-muted text-sm leading-relaxed">
           Sign in or create a free Boss Daddy account to join this goal. You&apos;ll be able
           to log contributions, see shared progress, and skip days — all while
@@ -174,7 +175,7 @@ export default async function AcceptInvitePage({ params }: PageProps) {
           </Link>
           <Link
             href={`/register?next=${next}`}
-            className="inline-block px-5 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 text-prose font-semibold rounded-lg text-sm transition-colors"
+            className={buttonVariants({ variant: 'outline' })}
           >
             Create an account
           </Link>
@@ -195,12 +196,12 @@ export default async function AcceptInvitePage({ params }: PageProps) {
   // Logged-in non-owner — show goal context + Join button
   return (
     <Layout title={`${ctx.inviterName} invited you to a savings goal`}>
-      <Card tone="sunken" className="p-5 space-y-3">
+      <div className="border-l-4 border-accent pl-4 space-y-1">
         <Eyebrow>
           Goal
         </Eyebrow>
         <p className="text-2xl font-black text-prose leading-tight">{ctx.goalName}</p>
-      </Card>
+      </div>
       <p className="text-prose-muted text-sm leading-relaxed">
         Join {ctx.inviterName.replace(/^@/, '')}{' '}on this goal. You&apos;ll be able to log
         contributions toward the same streak — the goal succeeds when either of you
@@ -216,15 +217,10 @@ export default async function AcceptInvitePage({ params }: PageProps) {
 function Layout({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="max-w-xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-6">
-      <header>
-        <Eyebrow>
-          {LABELS.tools.savings.short}
-        </Eyebrow>
-        <h1 className="text-2xl sm:text-3xl font-black text-prose tracking-tight mt-1">
-          {title}
-        </h1>
-      </header>
-      {children}
+      <PageHeader size="compact" eyebrow={LABELS.tools.savings.short} title={title} />
+      <Card as="section" tone="chrome" className="p-6 space-y-4">
+        {children}
+      </Card>
     </div>
   )
 }
@@ -233,9 +229,9 @@ function BackHome() {
   return (
     <Link
       href="/tools/savings"
-      className="inline-block mt-4 text-sm font-semibold text-accent hover:underline"
+      className={buttonVariants({ variant: 'outline', className: 'mt-2' })}
     >
-      ← Go to Savings
+      Go to Savings
     </Link>
   )
 }

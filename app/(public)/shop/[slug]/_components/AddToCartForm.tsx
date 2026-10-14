@@ -1,10 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatPrice } from '@/lib/merch'
 import { dispatchCartUpdated } from '@/lib/cart-events'
-import { Card } from '@/components/ui/Card'
+import { QtyStepper } from '@/components/ui/QtyStepper'
 import { buttonVariants } from '@/components/ui/Button'
 import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
@@ -45,6 +46,9 @@ export default function AddToCartForm({
   const [qty, setQty] = useState(1)
   const [loading, setLoading] = useState(false)
   const [added, setAdded] = useState(false)
+  // Once anything has been added, "View cart" stays put (the 3s `added` window
+  // used to take the only way to the cart with it).
+  const [everAdded, setEverAdded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const selected = variants.find(
@@ -94,6 +98,7 @@ export default function AddToCartForm({
         return
       }
       setAdded(true)
+      setEverAdded(true)
       dispatchCartUpdated()
       router.refresh()
       setTimeout(() => setAdded(false), 3000)
@@ -105,7 +110,7 @@ export default function AddToCartForm({
   }
 
   return (
-    <div className="flex flex-col gap-5 mt-auto">
+    <div className="flex flex-col gap-5">
       {/* Color selector — only when the product has more than one color */}
       {hasColors && (
         <div>
@@ -118,6 +123,7 @@ export default function AddToCartForm({
               return (
                 <button
                   key={c}
+                  type="button"
                   onClick={() => selectColor(c)}
                   disabled={!avail}
                   className={`${PILL_BASE} ${
@@ -146,6 +152,7 @@ export default function AddToCartForm({
               return (
                 <button
                   key={s}
+                  type="button"
                   onClick={() => setSize(s)}
                   disabled={!avail}
                   className={`${PILL_BASE} min-w-[52px] justify-center ${
@@ -175,21 +182,7 @@ export default function AddToCartForm({
       {/* Qty stepper */}
       <div className="flex items-center gap-3">
         <p className="text-xs text-prose-faint uppercase tracking-widest">Qty</p>
-        <Card className="flex items-center gap-1 px-2 py-1">
-          <button
-            onClick={() => setQty(q => Math.max(1, q - 1))}
-            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-prose transition-colors text-lg leading-none"
-          >
-            −
-          </button>
-          <span className="w-7 text-center text-sm font-bold text-prose tabular-nums">{qty}</span>
-          <button
-            onClick={() => setQty(q => Math.min(10, q + 1))}
-            className="w-8 h-8 flex items-center justify-center text-prose-muted hover:text-prose transition-colors text-lg leading-none"
-          >
-            +
-          </button>
-        </Card>
+        <QtyStepper value={qty} onChange={setQty} min={1} max={10} itemLabel="this item" />
       </div>
 
       {/* Add to cart */}
@@ -210,12 +203,14 @@ export default function AddToCartForm({
           : `Add to Cart · ${formatPrice(selected.retail_price_cents)}`}
       </button>
 
-      {error && <p className="text-sm text-red-700">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm font-medium text-danger-ink">{error}</p>
+      )}
 
-      {added && (
-        <a href="/cart" className="text-center text-sm text-prose-muted hover:text-accent transition-colors font-medium">
-          View Cart →
-        </a>
+      {everAdded && (
+        <Link href="/cart" className={buttonVariants({ variant: 'outline', size: 'lg', className: 'w-full' })}>
+          View cart
+        </Link>
       )}
     </div>
   )

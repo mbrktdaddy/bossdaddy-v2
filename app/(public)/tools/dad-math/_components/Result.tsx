@@ -1,8 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { Badge, type BadgeTone } from '@/components/ui/Badge'
-import { buttonVariants } from '@/components/ui/Button'
+import { ResultCard, ResultLinks } from '@/components/dad-tools/CalculatorParts'
 import { LABELS } from '@/lib/labels'
 import {
   fmtUsd,
@@ -17,7 +15,8 @@ import {
 import { toQuery } from '@/lib/dad-tools/url-params'
 
 interface Props {
-  result:     DadMathResult
+  /** null until there's a birthdate — the panel still renders (one empty-result rule). */
+  result:     DadMathResult | null
   name:       string | null
   targetBy18: number
   // Optional kid context — when present, the "Make this a habit" CTA
@@ -31,25 +30,15 @@ interface Props {
   lifeInsurance?: Record<string, number>
 }
 
-// Verdict → Badge tone. Keeps the visual signal aligned with the copy:
-// good = brand accent, behind = warn, real gap = danger, quiet states = muted.
-function verdictTone(verdict: DadMathResult['verdict']): BadgeTone {
-  switch (verdict) {
-    case 'locked_in':
-    case 'surplus':
-    case 'on_track':
-      return 'accent'
-    case 'behind':
-      return 'warn'
-    case 'real_gap':
-      return 'danger'
-    case 'just_starting':
-    case 'past_18':
-      return 'muted'
-  }
-}
-
 export default function Result({ result, name, targetBy18, kidId, monthlyContrib, lifeInsurance }: Props) {
+  if (!result) {
+    return (
+      <ResultCard
+        label={LABELS.tools.dadMath.result.projectedLabel}
+        voice="Pick a birthdate and the college math shows up here."
+      />
+    )
+  }
   // Build the Savings handoff URL — pre-fills /tools/savings/new with the
   // pace the user just dialed in here. If they're behind, suggest the
   // catch-up monthly; if on track, just keep their current monthly. The
@@ -78,17 +67,13 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
   const headline  = dadMathHeadline(ctx)
   const reasoning = dadMathReasoning(ctx)
   const tagline   = dadMathTagline(ctx)
-  const tone      = verdictTone(result.verdict)
+  const hasMath   = result.verdict !== 'just_starting' && result.verdict !== 'past_18'
 
   const surplus = result.shortfall < 0
-  const stats: { label: string; value: string; emphasis?: boolean }[] = []
+  // The projected number is the ONE headline; everything else supports it.
+  const stats: { label: string; value: string }[] = []
 
-  if (result.verdict !== 'just_starting' && result.verdict !== 'past_18') {
-    stats.push({
-      label: LABELS.tools.dadMath.result.projectedLabel,
-      value: fmtUsdCompact(result.projectedValue),
-      emphasis: true,
-    })
+  if (hasMath) {
     stats.push({
       label: LABELS.tools.dadMath.result.targetLabel,
       value: fmtUsdCompact(targetBy18),
@@ -114,78 +99,41 @@ export default function Result({ result, name, targetBy18, kidId, monthlyContrib
     })
   }
 
+  const links = [
+    // Savings handoff — suppressed on past_18 (no future-tense math to start).
+    ...(result.verdict !== 'past_18'
+      ? [{
+          href:  habitHref,
+          label: 'Make this a habit',
+          note:  `Set up a ${habitAmount > 0 ? `${fmtUsd(habitAmount)}/month` : 'monthly'} savings goal${name ? ` for ${name}` : ''} and tap Yes when you contribute.`,
+        }]
+      : []),
+    // Life Insurance handoff — the college target is the E in DIME. Carries any
+    // Life Insurance inputs that came in, so the round-trip keeps them.
+    ...(result.verdict !== 'past_18' && targetBy18 > 0
+      ? [{
+          href:  `/tools/life-insurance${toQuery({ ...lifeInsurance, edu: targetBy18 })}`,
+          label: `Use this in ${LABELS.tools.lifeInsurance.full}`,
+          note:  `Your ${fmtUsd(targetBy18)} target becomes the education line, so college is still paid for if you aren’t here to pay it.`,
+        }]
+      : []),
+  ]
+
   return (
-    <section
-      data-theme="dark"
-      className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5"
+    <ResultCard
+      label={LABELS.tools.dadMath.result.projectedLabel}
+      headline={hasMath ? fmtUsdCompact(result.projectedValue) : undefined}
+      subhead={tagline}
+      voice={headline}
+      stats={stats}
     >
-      {/* Tagline pill — short, share-friendly verdict */}
-      <div>
-        <Badge tone={tone}>{tagline}</Badge>
-      </div>
-
-      {/* Boss Daddy headline */}
-      <p className="text-xl sm:text-2xl font-black text-prose leading-snug">
-        {headline}
-      </p>
-
-      {/* Stats grid */}
-      {stats.length > 0 && (
-        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-soft">
-          {stats.map((s) => (
-            <div key={s.label}>
-              <dt className="text-[10px] uppercase tracking-widest font-semibold text-prose-faint">
-                {s.label}
-              </dt>
-              <dd className={`mt-1 font-black tabular-nums ${
-                s.emphasis ? 'text-2xl text-accent' : 'text-lg text-prose'
-              }`}>
-                {s.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
-
-      {/* Reasoning — only shown when there's math to explain */}
+      {/* Reasoning — only when there's math to explain */}
       {reasoning && (
         <p className="text-sm text-prose-muted leading-relaxed border-t border-soft pt-4">
           {reasoning}
         </p>
       )}
-
-      {/* Savings handoff — subtle secondary action. Suppress on past_18
-          (no future-tense math) since there's nothing to start. */}
-      {result.verdict !== 'past_18' && (
-        <div className="border-t border-soft pt-4">
-          <Link
-            href={habitHref}
-            className={buttonVariants({ variant: 'outline', size: 'sm' })}
-          >
-            Make this a habit
-          </Link>
-          <p className="text-xs text-prose-faint mt-1 leading-snug">
-            Set up a {habitAmount > 0 ? `${fmtUsd(habitAmount)}/month` : 'monthly'}{' '}
-            savings goal{name ? ` for ${name}` : ''} and tap Yes when you contribute.
-          </p>
-        </div>
-      )}
-
-      {/* Life Insurance handoff — the college target is the E in DIME. Carries
-          any Life Insurance inputs that came in, so the round-trip keeps them. */}
-      {result.verdict !== 'past_18' && targetBy18 > 0 && (
-        <div className="border-t border-soft pt-4">
-          <Link
-            href={`/tools/life-insurance${toQuery({ ...lifeInsurance, edu: targetBy18 })}`}
-            className={buttonVariants({ variant: 'outline', size: 'sm' })}
-          >
-            Use this in {LABELS.tools.lifeInsurance.full}
-          </Link>
-          <p className="text-xs text-prose-faint mt-1 leading-snug">
-            Your {fmtUsd(targetBy18)} target becomes the education line, so college is still paid for if you aren’t here to pay it.
-          </p>
-        </div>
-      )}
-    </section>
+      <ResultLinks links={links} />
+    </ResultCard>
   )
 }

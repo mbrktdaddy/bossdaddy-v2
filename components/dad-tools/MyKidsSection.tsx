@@ -9,6 +9,7 @@ import { ageInYearsMonths } from '@/lib/dad-tools/calc'
 import { LABELS } from '@/lib/labels'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
+import { Avatar } from '@/components/ui/Avatar'
 import AddKidAffordance from './AddKidAffordance'
 
 function ageBadge(birthdate: string | null): string {
@@ -47,7 +48,6 @@ export default async function MyKidsSection() {
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide sm:flex-wrap sm:overflow-visible">
           {kids.map((kid) => {
             const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
-            const initial = (kid.name?.trim()?.[0] ?? '?').toUpperCase()
             const photoSrc = familyPhotoSrc(kid)
             // Children show age; partner/other show their relationship label.
             const meta = kid.member_type === 'child'
@@ -59,23 +59,9 @@ export default async function MyKidsSection() {
                 href={`/tools/family/${kid.id}`}
                 className="group shrink-0 flex flex-col items-center gap-1.5 w-20 sm:w-24 p-2 rounded-xl hover:bg-surface-raised transition-colors"
               >
-                {photoSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={photoSrc}
-                    alt=""
-                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover bg-surface-sunken ring-2 ring-transparent group-hover:ring-accent transition-all"
-                  />
-                ) : (
-                  <div
-                    className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-accent/15 text-accent flex items-center justify-center text-2xl font-black ring-2 ring-transparent group-hover:ring-accent transition-all"
-                    aria-hidden="true"
-                  >
-                    {initial}
-                  </div>
-                )}
+                <Avatar src={photoSrc} name={kid.name} size={44} className="ring-2 ring-transparent group-hover:ring-accent transition-all" />
                 <div className="min-w-0 text-center">
-                  <p className="text-xs font-semibold text-prose truncate w-full group-hover:text-accent-text-soft transition-colors">
+                  <p className="text-xs font-semibold text-prose truncate w-full group-hover:text-accent-text transition-colors">
                     {name}
                   </p>
                   <p className="text-[10px] text-prose-faint">{meta}</p>

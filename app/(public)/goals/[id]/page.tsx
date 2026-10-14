@@ -32,6 +32,9 @@ import MetricTrend from '@/components/goals/MetricTrend'
 import { logOccurrence, logUnprompted, toggleScheduleMute, setGoalStatus } from '../actions'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { ProgressBar } from '@/components/ui/ProgressBar'
+import { Badge } from '@/components/ui/Badge'
+import PageHeader from '@/components/PageHeader'
 import { buttonVariants } from '@/components/ui/Button'
 
 export const metadata: Metadata = {
@@ -281,27 +284,17 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <div>
-        <Link href="/goals" className="inline-flex items-center py-3 text-xs text-prose-muted hover:text-prose">
-          ← {LABELS.goals.short}
-        </Link>
-      </div>
 
       <header className="space-y-3">
         {/* The eyebrow carries the state AND the start date now. "Since" was a stat
             tile competing with three numbers that change; a start date never does. */}
-        <Eyebrow>
-          {LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}
-          {goal.status === 'paused' ? ' · Paused' : ''}
-          {finished ? ' · Finished' : ''}
-          <span className="text-prose-faint"> · since {goal.started_on}</span>
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black text-prose leading-[1.05] tracking-tight">
-          {goal.title}
-        </h1>
-        {goal.description ? (
-          <p className="text-base text-prose-muted leading-snug">{goal.description}</p>
-        ) : null}
+        <PageHeader
+          size="compact"
+          back={{ href: '/goals', label: LABELS.goals.short }}
+          eyebrow={`${LABELS.goals.kinds[goal.kind] ?? LABELS.goals.kinds.custom}${goal.status === 'paused' ? ' · Paused' : ''}${finished ? ' · Finished' : ''} · since ${goal.started_on}`}
+          title={goal.title}
+          deck={goal.description ?? undefined}
+        />
 
         {/* ── who this is making him ────────────────────────────────────────
             Stated, never scored. There is no number beside it and nothing here
@@ -582,9 +575,7 @@ export default async function GoalDetailPage({ params, searchParams }: Props) {
 
         {progress != null ? (
           <Card className="p-5">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-surface-raised">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${Math.round(progress * 100)}%` }} />
-            </div>
+            <ProgressBar label={`${goal.title} progress`} value={Math.round(progress * 100)} />
             <p className="mt-3 text-sm text-prose-muted">
               Started at <span className="text-prose">{goal.baseline_value}{unit}</span>,
               headed for <span className="text-prose">{goal.target_value}{unit}</span>
@@ -960,9 +951,9 @@ function entryKindCopy(kind: string): string {
  */
 function Chip({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full border border-soft bg-surface-raised px-2.5 py-1 text-xs text-prose-muted">
+    <Badge tone="muted" size="sm">
       {children}
-    </span>
+    </Badge>
   )
 }
 

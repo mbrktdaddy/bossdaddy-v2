@@ -6,7 +6,8 @@
 
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import PageHeader from '@/components/PageHeader'
+import { Avatar } from '@/components/ui/Avatar'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
 import InviteManager from './_InviteManager'
@@ -94,25 +95,16 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <header className="space-y-2">
-        <Link
-          href={`/tools/savings/${id}`}
-          className="text-sm text-prose-faint hover:text-prose-muted transition-colors"
-        >
-          ← {goal.name}
-        </Link>
-        <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
-          Invite participants
-        </h1>
-        <p className="text-prose-faint text-sm sm:text-base leading-snug max-w-xl">
-          Up to 5 people can share this goal. When either of you logs a
-          contribution that day, the streak counts — the goal succeeds when
-          anyone shows up.
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: `/tools/savings/${id}`, label: goal.name }}
+        eyebrow={LABELS.tools.savings.hubEyebrow}
+        title="Invite participants"
+        deck="Up to 5 people can share this goal. When either of you logs a contribution that day, the streak counts — the goal succeeds when anyone shows up."
+      />
 
       {/* Current participants */}
-      <Card as="section" className="p-6 space-y-4">
+      <Card as="section" tone="chrome" className="p-6 space-y-4">
         <div className="flex items-baseline justify-between">
           <Eyebrow>
             On this goal — {participants.length} / 5
@@ -128,7 +120,7 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
                 key={p.id}
                 className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft rounded-lg min-h-[44px]"
               >
-                <AvatarCircle profile={profile} />
+                <Avatar src={profile?.avatar_url} name={profile?.display_name || profile?.username} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-prose truncate">{name}</p>
                   {isOwner && (
@@ -166,19 +158,6 @@ export default async function InviteGoalParticipantsPage({ params }: PageProps) 
         })}
         seatsRemaining={Math.max(0, 5 - totalSeats)}
       />
-    </div>
-  )
-}
-
-function AvatarCircle({ profile }: { profile: { avatar_url: string | null; username: string | null; display_name: string | null } | undefined }) {
-  const initial = (profile?.display_name?.trim()?.[0] ?? profile?.username?.[0] ?? '?').toUpperCase()
-  if (profile?.avatar_url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={profile.avatar_url} alt="" className="h-9 w-9 rounded-full object-cover bg-surface-sunken shrink-0" />
-  }
-  return (
-    <div className="h-9 w-9 rounded-full bg-accent/15 text-accent flex items-center justify-center text-sm font-black shrink-0" aria-hidden="true">
-      {initial}
     </div>
   )
 }

@@ -7,6 +7,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
 import { pauseGoal, resumeGoal } from '@/lib/dad-tools/savings-actions'
 
 interface Props {
@@ -39,7 +40,7 @@ export default function GoalStatusButton({ goalId, status }: Props) {
         type="button"
         disabled={pending}
         onClick={onToggle}
-        className="text-sm text-prose-faint hover:text-prose-muted transition-colors px-3 py-1.5 border border-soft rounded-lg disabled:opacity-50 min-h-[44px]"
+        className={buttonVariants({ variant: 'outline' })}
       >
         {isPaused ? 'Resume' : 'Pause'}
       </button>

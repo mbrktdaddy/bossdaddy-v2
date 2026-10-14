@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { addMoment } from '@/lib/dad-tools/moment-actions'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 
 interface Props {
   kidProfileId: string
@@ -62,26 +63,28 @@ export default function CaptureMomentForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2.5">
-      <div>
-        <textarea
-          value={response}
-          rows={3}
-          maxLength={2000}
-          autoFocus={autoFocus}
-          onChange={(e) => { setResponse(e.target.value); setError(null) }}
-          placeholder={placeholder}
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors resize-none"
-        />
-      </div>
+      <Field
+        as="textarea"
+        label={placeholder}
+        hideLabel
+        value={response}
+        rows={3}
+        maxLength={2000}
+        autoFocus={autoFocus}
+        onChange={(e) => { setResponse(e.target.value); setError(null) }}
+        placeholder={placeholder}
+        controlClassName="resize-none"
+      />
 
       <div className="flex items-center gap-2 flex-wrap">
-        <input
+        <Field
           type="date"
+          label="When did this happen?"
+          hideLabel
           value={occurredOn}
           max={today}
           onChange={(e) => setOccurredOn(e.target.value)}
-          className="px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-xs focus:outline-none transition-colors"
-          aria-label="When did this happen?"
+          className="w-auto"
         />
 
         <div className="flex-1" />
@@ -90,7 +93,7 @@ export default function CaptureMomentForm({
           <button
             type="button"
             onClick={onCancel}
-            className="px-3 py-2.5 text-prose-faint hover:text-prose text-sm font-medium rounded-xl transition-colors"
+            className={buttonVariants({ variant: "ghost" })}
           >
             Cancel
           </button>

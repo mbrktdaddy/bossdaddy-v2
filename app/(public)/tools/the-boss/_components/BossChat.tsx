@@ -7,7 +7,8 @@ import { normalizeBossText } from '@/lib/boss/normalizeText'
 import BossBlocks from './BossBlocks'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
-import { PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+import { fieldClass } from '@/components/ui/Field'
+import { PILL_WRAP, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 // `failed` = a hard failure with no streamed text (the whole bubble is the error).
 // `errorNote` = a mid-stream cutoff AFTER text arrived — keep what streamed and
@@ -219,7 +220,7 @@ function BossChatSession({
 
   return (
     <Card tone="chrome" className="flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[42vh] max-h-[60vh]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[42dvh] max-h-[60dvh]">
         {msgs.length === 0 && (
           <div className="py-6">
             <p className="text-sm text-prose-muted mb-3">Ask about gear, how-to, planning, writing — or just dad life.</p>
@@ -229,7 +230,7 @@ function BossChatSession({
                   key={ex}
                   type="button"
                   onClick={() => send(ex)}
-                  className={`${PILL_BASE} ${PILL_INACTIVE}`}
+                  className={`${PILL_WRAP} ${PILL_INACTIVE}`}
                 >
                   {ex}
                 </button>
@@ -307,7 +308,7 @@ function BossChatSession({
             }}
             rows={1}
             placeholder="Ask the Boss…"
-            className="flex-1 resize-none bg-surface-raised border border-soft rounded-xl px-3 py-2.5 text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:border-accent max-h-32"
+            className={fieldClass({ className: 'flex-1 resize-none max-h-32' })}
           />
           <button
             type="submit"
@@ -349,7 +350,7 @@ function FeedbackButton({
       aria-pressed={active}
       title={label}
       className={`inline-flex h-11 w-11 items-center justify-center rounded-lg transition-colors ${
-        active ? 'text-accent' : 'text-prose-faint hover:text-prose'
+        active ? 'text-accent-text' : 'text-prose-faint hover:text-prose'
       }`}
     >
       <svg

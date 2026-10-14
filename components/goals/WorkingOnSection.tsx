@@ -24,6 +24,7 @@ import { planWindow } from '@/lib/goals/progress'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import { ChevronRightIcon } from '@/components/icons'
+import { Badge } from '@/components/ui/Badge'
 
 const ROW_CAP = 8
 
@@ -171,9 +172,9 @@ function Row({
         <p className="text-[11px] text-prose-faint truncate">{sub}</p>
       </div>
       {badge && (
-        <span className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold text-white">
+        <Badge tone="accent" size="sm">
           {badge}
-        </span>
+        </Badge>
       )}
       {value && (
         <p className="shrink-0 text-sm font-black text-prose tabular-nums">{value}</p>

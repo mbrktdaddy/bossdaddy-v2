@@ -12,6 +12,8 @@ import {
   resumeGoal,
   deleteGoal,
 } from '@/lib/dad-tools/savings-actions'
+import { buttonVariants } from '@/components/ui/Button'
+import { useConfirm } from '@/components/ui/useConfirm'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 
@@ -25,6 +27,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const { prompt, dialog } = useConfirm()
 
   function onArchive() {
     setError(null)
@@ -44,13 +47,17 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
     })
   }
 
-  function onDelete() {
+  async function onDelete() {
     // Two-step confirmation: the prompt forces the user to type the goal name
     // to confirm. Stronger than a generic Yes/No since the action is
     // permanent + cascades all entries.
-    const typed = window.prompt(
-      `Delete "${goalName}" forever?\n\nThis removes the goal and EVERY contribution, withdrawal, and adjustment tied to it. This cannot be undone.\n\nType the goal name to confirm:`,
-    )
+    const typed = await prompt({
+      title: `Delete "${goalName}" forever?`,
+      body: 'This removes the goal and EVERY contribution, withdrawal, and adjustment tied to it. This cannot be undone.',
+      label: 'Type the goal name to confirm',
+      confirmLabel: 'Delete permanently',
+      danger: true,
+    })
     if (typed === null) return
     if (typed.trim() !== goalName.trim()) {
       setError('Goal name didn\'t match — delete cancelled.')
@@ -67,7 +74,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
   const isArchived = status === 'archived'
 
   return (
-    <Card as="section" className="p-6 space-y-4">
+    <Card as="section" tone="chrome" className="p-6 space-y-4">
       <div>
         <Eyebrow>
           Danger zone
@@ -84,7 +91,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
             type="button"
             disabled={pending}
             onClick={onUnarchive}
-            className="px-4 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 disabled:opacity-50 text-prose-muted hover:text-prose font-semibold rounded-lg text-sm transition-colors min-h-[44px]"
+            className={buttonVariants({ variant: 'outline' })}
           >
             Restore from archive
           </button>
@@ -93,7 +100,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
             type="button"
             disabled={pending}
             onClick={onArchive}
-            className="px-4 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 disabled:opacity-50 text-prose-muted hover:text-prose font-semibold rounded-lg text-sm transition-colors min-h-[44px]"
+            className={buttonVariants({ variant: 'outline' })}
           >
             Archive goal
           </button>
@@ -103,7 +110,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
           type="button"
           disabled={pending}
           onClick={onDelete}
-          className="px-4 py-2.5 bg-danger-bg border border-danger-line hover:border-danger-ink disabled:opacity-50 text-danger-ink font-semibold rounded-lg text-sm transition-colors min-h-[44px]"
+          className={buttonVariants({ variant: 'danger' })}
         >
           Delete permanently
         </button>
@@ -114,6 +121,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
           {error}
         </div>
       )}
+      {dialog}
     </Card>
   )
 }

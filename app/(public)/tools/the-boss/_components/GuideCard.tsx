@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCategoryBySlug } from '@/lib/categories'
+import { Card } from '@/components/ui/Card'
 import CategoryIcon from '@/components/CategoryIcon'
 import type { GuideBlock } from '@/lib/boss/types'
 
@@ -10,10 +11,8 @@ import type { GuideBlock } from '@/lib/boss/types'
 export default function GuideCard({ c }: { c: GuideBlock }) {
   const cat = c.category ? getCategoryBySlug(c.category) : null
   return (
-    <Link
-      href={c.url}
-      className="group block border border-soft rounded-xl p-3 bg-surface hover:border-accent transition-colors"
-    >
+    <Link href={c.url} className="group block">
+      <Card className="p-3 group-hover:border-accent transition-colors">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-eyebrow mb-1">
         {cat ? (
           <>
@@ -24,12 +23,13 @@ export default function GuideCard({ c }: { c: GuideBlock }) {
           'Guide'
         )}
       </div>
-      <p className="font-semibold text-prose group-hover:text-accent leading-snug transition-colors">{c.title}</p>
+      <p className="font-extrabold text-prose group-hover:text-accent leading-snug transition-colors">{c.title}</p>
       {c.excerpt && <p className="mt-1 text-[13px] text-prose-muted leading-snug line-clamp-2">{c.excerpt}</p>}
       <div className="mt-2 flex items-center gap-3 text-[11px] text-prose-faint">
         {typeof c.readingMinutes === 'number' && c.readingMinutes > 0 && <span>{c.readingMinutes} min read</span>}
-        <span className="text-accent font-semibold">Read guide →</span>
+        <span className="text-accent-text font-semibold">Read guide →</span>
       </div>
+      </Card>
     </Link>
   )
 }

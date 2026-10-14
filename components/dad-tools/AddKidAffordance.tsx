@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { LABELS } from '@/lib/labels'
 import KidProfileForm from './KidProfileForm'
 import { buttonVariants } from '@/components/ui/Button'
@@ -47,12 +48,12 @@ export default function AddKidAffordance({
             {ctaLabel}
           </button>
           <span className="text-xs text-prose-faint">or</span>
-          <a
+          <Link
             href="/tools/weekends-until"
             className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             Try {LABELS.tools.weekendsUntil.short}
-          </a>
+          </Link>
         </div>
       </Card>
     )
@@ -62,7 +63,7 @@ export default function AddKidAffordance({
     <button
       type="button"
       onClick={() => setAdding(true)}
-      className="w-full sm:w-auto px-4 py-2.5 bg-surface border border-faint border-dashed hover:border-accent hover:bg-accent/5 rounded-xl text-sm text-prose-faint hover:text-prose transition-colors"
+      className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 bg-surface border-2 border-dashed border-strong hover:border-prose rounded-xl text-sm font-semibold text-prose-muted hover:text-prose transition-colors"
     >
       + {ctaLabel}
     </button>

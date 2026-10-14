@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { type Merch } from '@/lib/merch'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import { FeaturedMerchCard } from './FeaturedMerchCard'
 
 export async function MerchCallout() {
@@ -25,7 +26,7 @@ export async function MerchCallout() {
     <div className="mt-12 pt-10 border-t border-soft">
       <div className="flex items-end justify-between mb-6">
         <div>
-          <p className="text-[11px] text-accent-text uppercase tracking-[0.2em] font-bold mb-1">— Made by Boss Daddy</p>
+          <LabelBlock className="mb-2">Made by Boss Daddy</LabelBlock>
           <h3 className="text-lg font-black text-prose">Rep the brand while you&apos;re at it.</h3>
         </div>
         <Link

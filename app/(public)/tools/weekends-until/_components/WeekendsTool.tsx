@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
+import { Segmented, ResultCard } from '@/components/dad-tools/CalculatorParts'
+import { Field } from '@/components/ui/Field'
 import { LABELS } from '@/lib/labels'
 import { type Kid } from '@/lib/dad-tools/kid-actions'
 import { recordWeekendsRun } from '@/lib/dad-tools/moment-actions'
@@ -70,6 +71,9 @@ function resolveInitialKid(
   }
   return kids[0]?.id ?? null
 }
+
+// Segmented values are strings; this stands in for "no saved kid selected".
+const ADHOC = '__adhoc__'
 
 export default function WeekendsTool({ isAuthenticated, initialKids, initialKidId, initialFromUrl }: Props) {
   // Resolve the starting kid up front. If the URL carries a birthdate that
@@ -153,25 +157,15 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
 
       {/* Kid selector (logged-in with at least one kid) */}
       {isAuthenticated && initialKids.length > 0 && (
-        <section className="flex items-center gap-2 flex-wrap">
-          {initialKids.map((k) => (
-            <button
-              key={k.id}
-              type="button"
-              onClick={() => setSelectedKidId(k.id)}
-              className={`${PILL_BASE} ${selectedKidId === k.id ? PILL_ACTIVE : PILL_INACTIVE}`}
-            >
-              {k.name?.trim() || 'Kid'}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={() => setSelectedKidId(null)}
-            className={`${PILL_BASE} ${selectedKidId === null ? PILL_ACTIVE : PILL_INACTIVE}`}
-          >
-            Try another date
-          </button>
-        </section>
+        <Segmented
+          label="Whose number"
+          value={selectedKidId ?? ADHOC}
+          onChange={(v) => setSelectedKidId(v === ADHOC ? null : v)}
+          options={[
+            ...initialKids.map((k) => ({ value: k.id, label: k.name?.trim() || 'Kid' })),
+            { value: ADHOC, label: 'Try another date' },
+          ]}
+        />
       )}
 
       {/* Ad-hoc input (anonymous OR logged-in without a kid selected).
@@ -181,81 +175,53 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
       {showAdhoc && (
         <section className={`grid grid-cols-1 ${isTryAnotherDateMode ? '' : 'sm:grid-cols-2'} gap-3`}>
           {!isTryAnotherDateMode && (
-            <div>
-              <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-                Kid&apos;s name <span className="lowercase tracking-normal text-prose-faint">(optional)</span>
-              </label>
-              <input
-                type="text"
-                value={adhocName}
-                maxLength={80}
-                onChange={(e) => setAdhocName(e.target.value)}
-                placeholder="Mason"
-                className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-                autoComplete="off"
-              />
-            </div>
-          )}
-          <div>
-            <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-              Birthdate
-            </label>
-            <input
-              type="date"
-              value={adhocBirthdate}
-              max={today}
-              onChange={(e) => setAdhocBirthdate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
+            <Field
+              label="Kid’s name (optional)"
+              type="text"
+              value={adhocName}
+              maxLength={80}
+              onChange={(e) => setAdhocName(e.target.value)}
+              placeholder="Mason"
+              autoComplete="off"
             />
-          </div>
+          )}
+          <Field
+            label="Birthdate"
+            type="date"
+            value={adhocBirthdate}
+            max={today}
+            onChange={(e) => setAdhocBirthdate(e.target.value)}
+          />
         </section>
       )}
 
-      {/* Milestone tabs */}
+      {/* Milestone picker */}
       {hasInput && (
-        <section>
-          <div className="overflow-x-auto scrollbar-hide -mx-4 sm:mx-0">
-            <div className="flex items-center gap-2 px-4 sm:px-0 min-w-max">
-              {MILESTONES.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMilestone(m.id)}
-                  className={`${PILL_BASE} ${milestone === m.id ? PILL_ACTIVE : PILL_INACTIVE}`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        <section className="space-y-4">
+          <Segmented
+            label="Milestone"
+            value={milestone}
+            onChange={setMilestone}
+            options={MILESTONES.map((m) => ({ value: m.id, label: m.label }))}
+          />
 
           {milestone === 'custom' && (
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  value={customDate}
-                  min={today}
-                  onChange={(e) => setCustomDate(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-prose-faint uppercase tracking-widest mb-1.5">
-                  Label
-                </label>
-                <input
-                  type="text"
-                  value={customLabel}
-                  maxLength={60}
-                  onChange={(e) => setCustomLabel(e.target.value)}
-                  placeholder="our beach trip"
-                  className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field
+                label="Date"
+                type="date"
+                value={customDate}
+                min={today}
+                onChange={(e) => setCustomDate(e.target.value)}
+              />
+              <Field
+                label="Label"
+                type="text"
+                value={customLabel}
+                maxLength={60}
+                onChange={(e) => setCustomLabel(e.target.value)}
+                placeholder="our beach trip"
+              />
             </div>
           )}
         </section>
@@ -263,25 +229,20 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
 
       {/* Unit toggle */}
       {hasInput && (
-        <section className="flex items-center gap-3">
+        <section className="flex items-center gap-3 flex-wrap">
           <span className="text-xs text-prose-faint uppercase tracking-widest font-medium">Show as</span>
-          <div className="flex items-center gap-2">
-            {UNITS.map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => setUnit(u.id)}
-                className={`${PILL_BASE} ${unit === u.id ? PILL_ACTIVE : PILL_INACTIVE}`}
-              >
-                {u.label}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="Show as"
+            value={unit}
+            onChange={setUnit}
+            options={UNITS.map((u) => ({ value: u.id, label: u.label }))}
+          />
         </section>
       )}
 
       {/* Result */}
-      {result && hasInput && (
+      {/* Present before the first number (one empty-result rule). */}
+      {result && hasInput ? (
         <Result
           result={result}
           isAuthenticated={isAuthenticated}
@@ -292,6 +253,11 @@ export default function WeekendsTool({ isAuthenticated, initialKids, initialKidI
           unit={unit}
           customDate={milestone === 'custom' ? customDate : undefined}
           customLabel={milestone === 'custom' ? customLabel : undefined}
+        />
+      ) : (
+        <ResultCard
+          label={`${LABELS.tools.units[unit]} left`}
+          voice="Pick a birthdate and your number shows up here."
         />
       )}
 

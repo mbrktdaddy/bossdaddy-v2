@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { buttonVariants } from '@/components/ui/Button'
+import { useConfirm } from '@/components/ui/useConfirm'
 import { removeParticipant } from '@/lib/dad-tools/savings-actions'
 
 interface Props {
@@ -14,9 +16,16 @@ export default function RemoveParticipantButton({ goalId, userId, name }: Props)
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirm()
 
-  function onRemove() {
-    if (!window.confirm(`Remove ${name} from this goal?\n\nTheir contribution history stays in the log. They can be re-invited later.`)) return
+  async function onRemove() {
+    const ok = await confirm({
+      title: `Remove ${name} from this goal?`,
+      body: 'Their contribution history stays in the log. They can be re-invited later.',
+      confirmLabel: 'Remove',
+      danger: true,
+    })
+    if (!ok) return
     setError(null)
     startTransition(async () => {
       const result = await removeParticipant({ goalId, userId })
@@ -31,7 +40,7 @@ export default function RemoveParticipantButton({ goalId, userId, name }: Props)
         type="button"
         onClick={onRemove}
         disabled={pending}
-        className="px-3 py-1.5 bg-background border border-soft hover:border-danger-line disabled:opacity-50 text-danger-ink font-medium rounded-lg text-xs transition-colors"
+        className={buttonVariants({ variant: 'danger', size: 'md' })}
         aria-label={`Remove ${name}`}
       >
         Remove
@@ -39,6 +48,7 @@ export default function RemoveParticipantButton({ goalId, userId, name }: Props)
       {error && (
         <p className="text-[10px] text-danger-ink max-w-[160px]">{error}</p>
       )}
+      {dialog}
     </div>
   )
 }

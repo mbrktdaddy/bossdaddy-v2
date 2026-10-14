@@ -12,6 +12,9 @@ import { deleteKid, type Kid } from '@/lib/dad-tools/kid-actions'
 import KidProfileForm from './KidProfileForm'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Modal } from '@/components/ui/Modal'
+import { buttonVariants } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { useConfirm } from '@/components/ui/useConfirm'
 
 interface Props {
   kid: Kid
@@ -20,20 +23,24 @@ interface Props {
 export default function KidHeaderActions({ kid }: Props) {
   const router = useRouter()
   const [editing, setEditing] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const { confirm: ask, dialog } = useConfirm()
   const [pending, startTransition] = useTransition()
 
-  function handleDelete() {
-    if (!confirmingDelete) { setConfirmingDelete(true); return }
+  async function handleDelete() {
+    const ok = await ask({
+      title: `Remove ${kid.name?.trim() || 'this person'}?`,
+      body: 'Their profile and every moment you captured will be deleted.',
+      confirmLabel: 'Remove',
+      danger: true,
+    })
+    if (!ok) return
     startTransition(async () => {
       const result = await deleteKid(kid.id)
       if (result.ok) {
         // Kid no longer exists — bounce back to the hub.
         router.push('/tools')
         router.refresh()
-        return
       }
-      setConfirmingDelete(false)
     })
   }
 
@@ -43,7 +50,7 @@ export default function KidHeaderActions({ kid }: Props) {
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-sm text-prose-faint hover:text-prose px-3 py-1.5 rounded-lg border border-soft hover:border-strong transition-colors"
+          className={buttonVariants({ variant: 'outline', size: 'md' })}
         >
           Edit
         </button>
@@ -51,13 +58,9 @@ export default function KidHeaderActions({ kid }: Props) {
           type="button"
           onClick={handleDelete}
           disabled={pending}
-          className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-            confirmingDelete
-              ? 'bg-danger-bg text-danger-ink border-danger-line hover:bg-danger-line'
-              : 'text-prose-faint border-soft hover:text-danger-ink hover:border-danger-line'
-          }`}
+          className={buttonVariants({ variant: 'danger', size: 'md' })}
         >
-          {pending ? '…' : confirmingDelete ? 'Confirm remove' : 'Remove'}
+          {pending ? '…' : 'Remove'}
         </button>
       </div>
 
@@ -69,14 +72,9 @@ export default function KidHeaderActions({ kid }: Props) {
               <Eyebrow>
                 Edit kid
               </Eyebrow>
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                aria-label="Close"
-                className="text-prose-faint hover:text-prose text-lg leading-none p-1"
-              >
-                ×
-              </button>
+              <IconButton label="Close" onClick={() => setEditing(false)} className="-mr-2">
+                <span aria-hidden className="text-xl leading-none">×</span>
+              </IconButton>
             </div>
             <KidProfileForm
               mode="edit"
@@ -87,6 +85,7 @@ export default function KidHeaderActions({ kid }: Props) {
             />
         </Modal>
       )}
+      {dialog}
     </>
   )
 }

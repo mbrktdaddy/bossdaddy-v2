@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { deleteBossConversations } from '../actions'
 import { Card } from '@/components/ui/Card'
+import { useConfirm } from '@/components/ui/useConfirm'
 
 export type PastChat = { id: string; title: string | null; updated_at: string }
 
@@ -18,6 +19,7 @@ export type PastChat = { id: string; title: string | null; updated_at: string }
 // checkboxes + "Delete (n)" — for several at once.
 export default function PastChats({ chats, activeId }: { chats: PastChat[]; activeId: string | null }) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirm()
   const [open, setOpen] = useState(false)
   const [selecting, setSelecting] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -42,16 +44,20 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
     })
   }
 
-  function remove(ids: string[]) {
+  async function remove(ids: string[]) {
     if (ids.length === 0) return
-    const prompt =
-      ids.length === 1 ? 'Delete this chat? This can’t be undone.' : `Delete ${ids.length} chats? This can’t be undone.`
-    if (!window.confirm(prompt)) return
+    const ok = await confirm({
+      title: ids.length === 1 ? 'Delete this chat?' : `Delete ${ids.length} chats?`,
+      body: 'This can’t be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     setFailed(false)
     setRemoved((prev) => new Set([...prev, ...ids]))
     startTransition(async () => {
-      const { ok } = await deleteBossConversations(ids)
-      if (!ok) {
+      const { ok: deleted } = await deleteBossConversations(ids)
+      if (!deleted) {
         // Put them back and say so — never let a failed delete look done.
         setRemoved((prev) => new Set([...prev].filter((id) => !ids.includes(id))))
         setFailed(true)
@@ -65,6 +71,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
 
   return (
     <div className="mb-3">
+      {dialog}
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
@@ -94,7 +101,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
         {activeId && (
           <Link
             href="/tools/the-boss"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline px-1 py-3 min-h-[44px]"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-text hover:underline px-1 py-3 min-h-[44px]"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
@@ -179,7 +186,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
                     onClick={() => setOpen(false)}
                     aria-current={active ? 'page' : undefined}
                     className={`flex-1 min-w-0 flex items-center justify-between gap-3 pl-4 pr-2 py-3 min-h-[44px] text-sm transition-colors ${
-                      active ? 'text-accent' : 'text-prose hover:text-accent'
+                      active ? 'text-accent-text' : 'text-prose hover:text-accent-text'
                     }`}
                   >
                     <span className="truncate">{title}</span>

@@ -7,10 +7,11 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import Link from 'next/link'
 import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { buttonVariants } from '@/components/ui/Button'
+import { Avatar } from '@/components/ui/Avatar'
 
 interface Props {
   kidId: string
@@ -96,14 +97,9 @@ export default function KidPhotoUploader({
   if (!canUpload) {
     return (
       <div className="flex flex-col items-center sm:items-start sm:flex-row gap-3">
-        <div
-          className="w-20 h-20 rounded-full bg-chrome flex items-center justify-center text-3xl font-black text-white shrink-0"
-          aria-hidden="true"
-        >
-          {initial}
-        </div>
+        <Avatar name={initial} size={96} />
         <p className="text-xs text-prose-faint max-w-xs text-center sm:text-left">
-          <a href="/register" className="text-accent hover:underline font-semibold">Sign up</a> to add a photo for your kid.
+          <Link href="/register" className="text-accent-text hover:underline font-semibold">Sign up</Link> to add a photo for your kid.
         </p>
       </div>
     )
@@ -118,15 +114,11 @@ export default function KidPhotoUploader({
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) pickForCrop(f) }}
         title="Click or drop a JPG, PNG, or WebP"
-        className="group relative w-20 h-20 rounded-full overflow-hidden bg-chrome flex items-center justify-center text-3xl font-black text-white shrink-0 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="group relative w-24 h-24 rounded-full overflow-hidden shrink-0 transition-opacity disabled:opacity-50 disabled:cursor-wait"
         aria-label={photoUrl ? 'Change kid photo' : 'Upload kid photo'}
       >
-        {photoUrl ? (
-          <Image src={photoUrl} alt="" fill sizes="80px" className="object-cover" unoptimized />
-        ) : (
-          <span>{initial}</span>
-        )}
-        <span className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
+        <Avatar src={photoUrl} name={initial} size={96} />
+        <span className="absolute inset-0 bg-chrome/60 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
           {busy ? '…' : 'Change'}
         </span>
       </button>
@@ -136,7 +128,7 @@ export default function KidPhotoUploader({
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+          className={buttonVariants({ variant: 'outline', size: 'md' })}
         >
           {busy ? 'Uploading…' : photoUrl ? 'Replace' : 'Upload'}
         </button>
@@ -145,7 +137,7 @@ export default function KidPhotoUploader({
             type="button"
             onClick={handleRemove}
             disabled={busy}
-            className="px-3 py-1.5 bg-transparent hover:bg-danger-bg border border-soft hover:border-danger-line disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-danger-ink rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'danger', size: 'md' })}
           >
             Remove
           </button>
@@ -153,7 +145,7 @@ export default function KidPhotoUploader({
       </div>
       {error && <p className="text-xs text-danger-ink w-full text-center sm:text-left">{error}</p>}
       {saved && !error && (
-        <p className="text-xs text-green-600 font-semibold w-full text-center sm:text-left">Photo updated ✓</p>
+        <p className="text-xs text-success-ink font-semibold w-full text-center sm:text-left">Photo updated ✓</p>
       )}
 
       <input
