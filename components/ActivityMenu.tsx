@@ -41,7 +41,20 @@ interface ConversationSummary {
   muted:       boolean
 }
 
-export default function ActivityMenu({ userId }: { userId: string }) {
+interface ActivityMenuProps {
+  userId: string
+  /**
+   * Which edge of the bell the sm+ dropdown anchors to. `end` (default) hangs the
+   * panel off the bell's right edge — right for the header, where the bell sits at
+   * the far right. `start` anchors the left edge instead — for the dashboard
+   * sidebar, where the bell is at the left of a 240px rail and a right-anchored
+   * 320px panel would open ~100px off the left of the screen. Phones ignore this
+   * (the panel is pinned to the viewport there).
+   */
+  align?: 'start' | 'end'
+}
+
+export default function ActivityMenu({ userId, align = 'end' }: ActivityMenuProps) {
   const [open, setOpen]   = useState(false)
   const [tab, setTab]     = useState<'notifications' | 'messages'>('notifications')
   const [notifs, setNotifs]         = useState<NotificationRow[]>([])
@@ -226,7 +239,7 @@ export default function ActivityMenu({ userId }: { userId: string }) {
             screen). sm+: the anchored dropdown. The sticky header is at top:0, so
             `top-[4.25rem]` lands just under it whether `fixed` resolves against
             the viewport or against the blurred header box. */
-        <div className="fixed inset-x-3 top-[4.25rem] w-auto sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80 sm:max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden">
+        <div className={`fixed inset-x-3 top-[4.25rem] w-auto sm:absolute sm:inset-x-auto sm:top-auto ${align === 'start' ? 'sm:left-0' : 'sm:right-0'} sm:mt-2 sm:w-80 sm:max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden`}>
           {/* Tabs */}
           <div className="flex">
             {tabBtn('notifications', 'Notifications', notifUnread)}

@@ -137,7 +137,6 @@ export default function LoanMathTool({ today, initial }: Props) {
         subhead={hasLoan ? `for ${fmtDuration(term)} at ${aprPct}% APR` : undefined}
         voice={voice}
         stats={stats}
-        tone={hasLoan && interest > 0 ? 'warn' : 'good'}
       >
         <ResultLinks links={links} />
       </ResultCard>

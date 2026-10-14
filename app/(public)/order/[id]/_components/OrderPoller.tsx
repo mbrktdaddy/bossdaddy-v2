@@ -11,6 +11,10 @@ const STORAGE_KEY = 'bd_order_poll_attempts'
 // appears once the Stripe webhook has written it to the DB.
 // Gives up after MAX_ATTEMPTS refreshes to avoid an infinite loop when
 // the webhook is delayed or fails.
+//
+// Owns the "refreshes automatically" line too: it is only true while we are
+// still polling, so once timed out it gives way to the "taking longer" message
+// instead of stacking under it (the page can't know the poller's state).
 export default function OrderPoller() {
   const router = useRouter()
   const [timedOut, setTimedOut] = useState(false)
@@ -42,5 +46,5 @@ export default function OrderPoller() {
     )
   }
 
-  return null
+  return <p className="text-prose-faint text-sm">This page will refresh automatically.</p>
 }

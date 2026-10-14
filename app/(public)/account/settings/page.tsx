@@ -17,7 +17,7 @@ import { BackLink } from '@/components/ui/BackLink'
 import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
-  title: 'Account Settings',
+  title: LABELS.settings.full,
   robots: { index: false, follow: false },
 }
 
@@ -66,13 +66,8 @@ export default async function AccountSettingsPage() {
         {/* Settings is now ONLY settings. Your family, goals, activity, likes and
             followed gear moved to /account — a settings URL was the wrong home for
             things you have rather than things you configure. */}
-        <h1 className="text-2xl font-black">Account Settings</h1>
-        <p className="text-prose-faint text-sm mt-1">
-          Your profile, sign-in, and who can reach you.{' '}
-          <Link href="/account" className="text-accent-text hover:text-prose">
-            Your stuff lives here →
-          </Link>
-        </p>
+        <h1 className="text-2xl font-black">{LABELS.settings.full}</h1>
+        <p className="text-prose-faint text-sm mt-1">{LABELS.settings.tagline}</p>
       </div>
 
       {/* Pending-deletion banner */}

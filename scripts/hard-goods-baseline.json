@@ -1,0 +1,238 @@
+{
+  "app/(auth)/forgot-password/page.tsx": {
+    "R6": 3
+  },
+  "app/(auth)/login/page.tsx": {
+    "R6": 3
+  },
+  "app/(auth)/register/page.tsx": {
+    "R6": 4
+  },
+  "app/(auth)/reset-password/page.tsx": {
+    "R6": 3
+  },
+  "app/(public)/account/connections/page.tsx": {
+    "R8": 1
+  },
+  "app/(public)/account/messages/[conversationId]/_components/Thread.tsx": {
+    "R2": 4,
+    "R3": 1
+  },
+  "app/(public)/account/messages/_components/ConversationList.tsx": {
+    "R2": 1
+  },
+  "app/(public)/account/page.tsx": {
+    "R2": 3
+  },
+  "app/(public)/account/settings/page.tsx": {
+    "R2": 1
+  },
+  "app/(public)/author/[username]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/bench/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/cart/_components/CartItems.tsx": {
+    "R5": 1,
+    "R6": 3
+  },
+  "app/(public)/comparisons/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/comparisons/[slug]/page.tsx": {
+    "R6": 6
+  },
+  "app/(public)/gifts/[occasion]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/goals/[id]/page.tsx": {
+    "R2": 1
+  },
+  "app/(public)/goals/page.tsx": {
+    "R2": 2
+  },
+  "app/(public)/guides/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/order/[id]/page.tsx": {
+    "R6": 2
+  },
+  "app/(public)/picks/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/reviews/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/shop/[slug]/_components/AddToCartForm.tsx": {
+    "R6": 1
+  },
+  "app/(public)/shop/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/stacks/[slug]/error.tsx": {
+    "R6": 1
+  },
+  "app/(public)/tools/dad-math/_components/DadMathTool.tsx": {
+    "R7": 1
+  },
+  "app/(public)/tools/debt-payoff/_components/DebtPayoffTool.tsx": {
+    "R7": 1
+  },
+  "app/(public)/tools/family/[id]/page.tsx": {
+    "R3": 1
+  },
+  "app/(public)/tools/savings/[id]/invite/_InviteManager.tsx": {
+    "R5": 1,
+    "R7": 1
+  },
+  "app/(public)/tools/savings/[id]/invite/_RemoveParticipantButton.tsx": {
+    "R5": 1
+  },
+  "app/(public)/tools/savings/[id]/invite/page.tsx": {
+    "R3": 1
+  },
+  "app/(public)/tools/savings/_components/GoalCardMenu.tsx": {
+    "R5": 1
+  },
+  "app/(public)/tools/savings/_components/GoalDangerZone.tsx": {
+    "R5": 1
+  },
+  "app/(public)/tools/savings/_components/LeaveGoalButton.tsx": {
+    "R5": 1
+  },
+  "app/(public)/tools/savings/_components/MembersPanel.tsx": {
+    "R3": 1
+  },
+  "app/(public)/tools/the-boss/_components/BossChat.tsx": {
+    "R7": 1
+  },
+  "app/(public)/tools/the-boss/_components/PastChats.tsx": {
+    "R5": 1
+  },
+  "app/(public)/tools/the-boss/_components/ResearchedList.tsx": {
+    "R7": 1
+  },
+  "app/(public)/tools/weekends-until/_components/Result.tsx": {
+    "R4": 3,
+    "R7": 1
+  },
+  "app/(public)/tools/weekends-until/_components/WeekendsTool.tsx": {
+    "R7": 4
+  },
+  "components/ActivityMenu.tsx": {
+    "R2": 3
+  },
+  "components/AskBossFab.tsx": {
+    "R8": 1
+  },
+  "components/CartIcon.tsx": {
+    "R2": 1
+  },
+  "components/CommentDeleteButton.tsx": {
+    "R5": 2
+  },
+  "components/CommentForm.tsx": {
+    "R6": 2
+  },
+  "components/EmailSignup.tsx": {
+    "R6": 3,
+    "R7": 1,
+    "R8": 1
+  },
+  "components/FeaturedMerchCard.tsx": {
+    "R2": 1
+  },
+  "components/GalleryViewer.tsx": {
+    "R2": 1
+  },
+  "components/GlobalSearch.tsx": {
+    "R7": 1
+  },
+  "components/Header.tsx": {
+    "R1": 1,
+    "R7": 1
+  },
+  "components/LikeButton.tsx": {
+    "R2": 1,
+    "R6": 4
+  },
+  "components/MerchImageGallery.tsx": {
+    "R2": 3
+  },
+  "components/OffTheBench.tsx": {
+    "R2": 1
+  },
+  "components/RatingScore.tsx": {
+    "R6": 2
+  },
+  "components/account/AccountDeletion.tsx": {
+    "R6": 18,
+    "R7": 2
+  },
+  "components/account/AvatarUploader.tsx": {
+    "R6": 4
+  },
+  "components/account/BioForm.tsx": {
+    "R7": 3
+  },
+  "components/account/ConnectionBadge.tsx": {
+    "R2": 1
+  },
+  "components/account/ContactsCard.tsx": {
+    "R1": 1,
+    "R2": 1
+  },
+  "components/account/EditEmailForm.tsx": {
+    "R6": 4,
+    "R7": 2
+  },
+  "components/account/EditUsernameForm.tsx": {
+    "R6": 1,
+    "R7": 1
+  },
+  "components/account/MessagesCard.tsx": {
+    "R1": 1,
+    "R2": 1
+  },
+  "components/account/PushNotificationSetting.tsx": {
+    "R8": 1
+  },
+  "components/dad-tools/AddKidAffordance.tsx": {
+    "R3": 1,
+    "R4": 1
+  },
+  "components/dad-tools/CaptureMomentForm.tsx": {
+    "R7": 2
+  },
+  "components/dad-tools/KidPhotoUploader.tsx": {
+    "R6": 1
+  },
+  "components/dad-tools/KidProfileForm.tsx": {
+    "R7": 2
+  },
+  "components/dad-tools/MomentsFeed.tsx": {
+    "R4": 1
+  },
+  "components/dad-tools/MyKidsSection.tsx": {
+    "R3": 1
+  },
+  "components/dad-tools/NumberField.tsx": {
+    "R7": 1
+  },
+  "components/goals/NotesFeedClient.tsx": {
+    "R7": 2
+  },
+  "components/goals/WorkingOnSection.tsx": {
+    "R2": 1
+  },
+  "components/members/MemberSearch.tsx": {
+    "R3": 1,
+    "R7": 1
+  },
+  "components/ui/ImageCropper.tsx": {
+    "R1": 1,
+    "R6": 3,
+    "R8": 1
+  }
+}

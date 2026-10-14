@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { WeeklyDigestEmail } from '@/emails/WeeklyDigestEmail'
+import { unsubscribeHeaders } from '@/lib/newsletter/unsubscribe-token'
 import * as React from 'react'
 
 export const maxDuration = 60
@@ -134,6 +135,11 @@ export async function GET(request: NextRequest) {
       to: email,
       subject: `${weekLabel} — ${items.length === 1 ? 'one' : items.length} new from Boss Daddy`,
       react: React.createElement(WeeklyDigestEmail, { email, items, weekLabel, siteUrl }),
+      // RFC 8058 one-click unsubscribe — Gmail/Yahoo's bulk-sender rules, and the
+      // native "Unsubscribe" button that keeps people off the spam-report path.
+      // Per recipient (the link carries a signed token for THAT address); omitted
+      // when NEWSLETTER_UNSUBSCRIBE_SECRET is unset.
+      headers: unsubscribeHeaders(email, siteUrl),
     }))
 
     try {

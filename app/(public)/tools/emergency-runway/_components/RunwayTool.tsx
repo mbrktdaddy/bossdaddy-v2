@@ -142,7 +142,6 @@ export default function RunwayTool({ initial }: { initial: { cash?: number; expe
           subhead={`Target: ${RUNWAY_TARGET_MIN}–${RUNWAY_TARGET_MAX} months of essentials`}
           voice={voiceFor(r, months)}
           stats={stats}
-          tone={r.band === 'target' || r.band === 'strong' ? 'good' : 'warn'}
         >
           {r.band !== 'no_expenses' && (
             <div aria-hidden className="space-y-1.5">

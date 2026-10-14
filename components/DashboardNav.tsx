@@ -190,7 +190,7 @@ export default function DashboardNav({ username, isAdmin, role, avatarUrl, userI
             </div>
           </Link>
           <div className="flex items-center shrink-0">
-            <ActivityMenu userId={userId} />
+            <ActivityMenu userId={userId} align="start" />
           </div>
         </div>
         {isAdmin && <GlobalSearch />}

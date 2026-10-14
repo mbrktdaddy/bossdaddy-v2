@@ -13,7 +13,7 @@ import { mergeByRecency, type LatestItem } from '@/lib/latest'
 import BossToolsSection from '@/components/home/BossToolsSection'
 import TopPicksBoard, { type TopPick } from '@/components/home/TopPicksBoard'
 import AboutBand from '@/components/home/AboutBand'
-import EmailCaptureSection from '@/components/EmailCaptureSection'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import HomeHero from '@/components/home/HomeHero'
 import BenchStrip from '@/components/BenchStrip'
 import { MerchStrip } from '@/components/MerchStrip'
@@ -433,15 +433,13 @@ export default async function HomePage() {
       {/* ── TOOLS — three tiles, the image-free breath mid-page ─────────────── */}
       <BossToolsSection />
 
-      {/* ── NEWSLETTER — inline, mid-page, where major fronts put it ────────── */}
-      <EmailCaptureSection />
+      {/* ── NEWSLETTER — inline, mid-page, where major fronts put it. The
+          `newsletter` id is a link target (/gifts → /#newsletter). ────────── */}
+      <NewsletterSignup variant="block" id="newsletter" />
 
-      {/* ── ON THE BENCH — what's being tested now; self-suppresses at zero ── */}
-      <section className="border-b border-soft">
-        <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-          <BenchStrip heading="On the bench" ctaText="See the bench" />
-        </div>
-      </section>
+      {/* ── ON THE BENCH — what's being tested now; self-suppresses at zero,
+          section and all (it owns its own band) ───────────────────────────── */}
+      <BenchStrip heading="On the bench" ctaText="See the bench" asSection />
 
       {/* ── ABOUT — the closing dark band: portrait + the Creed + two links ── */}
       <AboutBand />

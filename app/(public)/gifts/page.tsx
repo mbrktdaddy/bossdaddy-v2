@@ -7,8 +7,7 @@ import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
 import OccasionIcon from '@/components/OccasionIcon'
 import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
 import EditorialHeader from '@/components/EditorialHeader'
-import { Card } from '@/components/ui/Card'
-import { buttonVariants } from '@/components/ui/Button'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 
 export const revalidate = 60
 
@@ -118,19 +117,16 @@ export default async function GiftsIndexPage() {
         </section>
       ))}
 
-      {/* Newsletter pitch */}
-      <Card tone="chrome" className="mt-16 p-8 text-center max-w-2xl mx-auto">
-        <h3 className="text-xl font-black text-prose mb-2">New gift guides drop with the seasons</h3>
-        <p className="text-sm text-prose-muted mb-4">
-          Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday.
-        </p>
-        <Link
-          href="/#newsletter"
-          className={buttonVariants()}
-        >
-          Get on the list →
-        </Link>
-      </Card>
+      {/* Newsletter pitch — the form itself, in place. This used to link to
+          `/#newsletter`, an id nothing on the homepage carried (B3), so "Get on
+          the list" dropped people at the top of the homepage. */}
+      <NewsletterSignup
+        variant="card"
+        headingAs="h3"
+        heading="New gift guides drop with the seasons"
+        body="Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday."
+        className="mt-16 max-w-2xl mx-auto"
+      />
       </div>
     </>
   )

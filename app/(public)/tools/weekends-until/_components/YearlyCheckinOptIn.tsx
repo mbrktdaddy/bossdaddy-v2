@@ -14,13 +14,14 @@ export default function YearlyCheckinOptIn({ kidProfileId, fallbackBirthdate }: 
   const [showing, setShowing] = useState(false)
   const [email, setEmail]     = useState('')
   const [pending, startTransition] = useTransition()
-  const [confirmed, setConfirmed]  = useState(false)
+  const [outcome, setOutcome]    = useState<'confirmed' | 'already' | null>(null)
   const [error, setError]          = useState<string | null>(null)
 
-  if (confirmed) {
+  if (outcome) {
+    // Same <p> for both outcomes so "already subscribed" doesn't shift the layout.
     return (
       <p className="text-sm text-prose">
-        {LABELS.tools.emails.yearlyCheckin.confirmed}
+        {outcome === 'already' ? LABELS.tools.emails.already : LABELS.tools.emails.yearlyCheckin.confirmed}
       </p>
     )
   }
@@ -48,7 +49,7 @@ export default function YearlyCheckinOptIn({ kidProfileId, fallbackBirthdate }: 
         anchor_date: fallbackBirthdate || undefined,
       })
       if (!r.ok) { setError(r.error); return }
-      setConfirmed(true)
+      setOutcome(r.already ? 'already' : 'confirmed')
     })
   }
 
@@ -65,7 +66,7 @@ export default function YearlyCheckinOptIn({ kidProfileId, fallbackBirthdate }: 
           value={email}
           onChange={(e) => { setEmail(e.target.value); setError(null) }}
           placeholder="you@yourdomain.com"
-          className="flex-1 min-w-0 px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
+          className="flex-1 min-w-0 px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-base min-h-[44px] placeholder:text-prose-faint focus:outline-none transition-colors"
         />
         <button
           type="submit"

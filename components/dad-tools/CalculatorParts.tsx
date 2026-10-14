@@ -6,11 +6,9 @@
 // from a page and on the client from a tool alike.
 
 import Link from 'next/link'
-import { Eyebrow } from '@/components/ui/Eyebrow'
-import { BackLink } from '@/components/ui/BackLink'
+import PageHeader from '@/components/PageHeader'
 import { LABELS } from '@/lib/labels'
 import { buttonVariants } from '@/components/ui/Button'
-import { PILL_BASE, PILL_ACTIVE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 export function CalculatorPage({
   role, short, h1, tagline, disclosure, children,
@@ -24,14 +22,14 @@ export function CalculatorPage({
 }) {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
-      <BackLink href="/tools" label={LABELS.tools.short} className="mb-4" />
-      <header className="space-y-3">
-        <Eyebrow>
-          {role} · {short}
-        </Eyebrow>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight">{h1}</h1>
-        <p className="text-prose-faint text-base sm:text-lg leading-snug">{tagline}</p>
-      </header>
+      {/* The app-page lockup (continuity plan D3/P6) — the tool column governs its width. */}
+      <PageHeader
+        size="compact"
+        back={{ href: '/tools', label: LABELS.tools.short }}
+        eyebrow={`${role} · ${short}`}
+        title={h1}
+        deck={tagline}
+      />
 
       {children}
 
@@ -44,31 +42,39 @@ export function CalculatorPage({
 
 // ONE NUMBER PER PAGE: `headline` is the big number, `label` names it, and
 // everything in `stats` is supporting.
+//
+// RENDER IT FROM FIRST PAINT (continuity plan P12). Before the first input,
+// pass no headline (an em dash holds the slot) and no voice — the voice line
+// is always mounted with two lines reserved, so the panel never jumps when
+// the first number lands, and never jumps again when the verdict wraps.
+// `subhead`: omit it entirely for a tool that never has one; pass '' to hold
+// its line while empty. The headline + voice are a polite live region — a
+// screen reader hears the new answer without the stats being re-read.
 export function ResultCard({
   label, headline, subhead, voice, stats, children,
 }: {
   label:     string
-  headline:  string
+  headline?: string
   subhead?:  string
   voice?:    string
   stats?:    { label: string; value: string }[]
-  tone?:     'good' | 'neutral' | 'warn'
+  /** Share / save / opt-in / ResultLinks — under the stats. */
   children?: React.ReactNode
 }) {
   // The ONE black panel per screen (Hard Goods): tokens invert inside the zone.
   return (
-    <section data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
-      <div>
-        <p className="text-[10px] uppercase tracking-widest font-semibold text-accent-text">{label}</p>
-        <p className="mt-1 text-4xl sm:text-5xl font-black text-accent tabular-nums leading-none">
-          {headline}
-        </p>
-        {subhead && <p className="mt-2 text-sm text-prose-muted">{subhead}</p>}
-      </div>
+    <section aria-label={label} data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
+      <div aria-live="polite" className="space-y-5">
+        <div>
+          <p className="text-[10px] uppercase tracking-widest font-semibold text-accent-text">{label}</p>
+          <p className="mt-1 text-4xl sm:text-5xl font-black text-accent tabular-nums leading-none">
+            {headline || '—'}
+          </p>
+          {subhead !== undefined && <p className="mt-2 min-h-5 text-sm text-prose-muted">{subhead}</p>}
+        </div>
 
-      {voice && (
-        <p className="text-lg sm:text-xl font-black text-prose leading-snug">{voice}</p>
-      )}
+        <p className="min-h-[2lh] text-lg sm:text-xl font-black text-prose leading-snug">{voice}</p>
+      </div>
 
       {stats && stats.length > 0 && (
         <dl className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-soft">
@@ -119,29 +125,6 @@ export function ResultLinks({
   )
 }
 
-// Two-or-three-way pill toggle (Car/Personal, Snowball/Avalanche…).
-export function Segmented<T extends string>({
-  value, options, onChange, label,
-}: {
-  value:    T
-  options:  { value: T; label: string }[]
-  onChange: (v: T) => void
-  label:    string
-}) {
-  return (
-    <div role="radiogroup" aria-label={label} className="flex flex-wrap gap-2">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          role="radio"
-          aria-checked={value === o.value}
-          onClick={() => onChange(o.value)}
-          className={`${PILL_BASE} ${value === o.value ? PILL_ACTIVE : PILL_INACTIVE}`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  )
-}
+// Segmented moved to components/ui (continuity plan P10); re-exported so the
+// calculators' imports didn't churn.
+export { Segmented } from '@/components/ui/Segmented'

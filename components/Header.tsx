@@ -128,11 +128,9 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const mobileSearchRef = useRef<HTMLInputElement>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const pathname    = usePathname()
   const browseRef   = useRef<HTMLDivElement>(null)
   const searchRef   = useRef<HTMLInputElement>(null)
-  const userMenuRef = useRef<HTMLDivElement>(null)
 
   const openSearch = useCallback(() => {
     setSearchOpen(true)
@@ -151,18 +149,6 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onMouse) }
   }, [catOpen])
 
-  // Close user menu on outside click or Escape
-  useEffect(() => {
-    if (!userMenuOpen) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setUserMenuOpen(false) }
-    function onMouse(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    document.addEventListener('mousedown', onMouse)
-    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onMouse) }
-  }, [userMenuOpen])
-
   // Cmd/Ctrl+K opens desktop search
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -177,7 +163,7 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
 
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false); setUserMenuOpen(false) }, [pathname])
+  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false) }, [pathname])
 
   const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
 

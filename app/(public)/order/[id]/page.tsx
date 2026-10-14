@@ -54,7 +54,6 @@ export default async function OrderPage({ params }: Props) {
           </div>
           <h1 className="text-2xl font-black text-prose mb-3">Payment confirmed!</h1>
           <p className="text-prose-muted mb-2">Finalizing your order — usually just a few seconds.</p>
-          <p className="text-prose-faint text-sm">This page will refresh automatically.</p>
           <OrderPoller />
         </div>
       </div>

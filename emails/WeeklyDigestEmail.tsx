@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { LABELS } from '@/lib/labels'
 import { BRAND } from '@/lib/brand'
+import { buildUnsubscribeUrl } from '@/lib/newsletter/unsubscribe-token'
 import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
 
 interface DigestItem {
@@ -40,7 +41,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
             {' · '}
             <a href={`${siteUrl}/affiliate-disclosure`} style={footerLink}>Disclosure</a>
             {' · '}
-            <a href={`${siteUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}`} style={footerLink}>Unsubscribe</a>
+            <a href={buildUnsubscribeUrl(email, siteUrl)} style={footerLink}>Unsubscribe</a>
           </p>
           <p style={{ color: '#374151', fontSize: '11px', margin: '8px 0 0 0' }}>
             Sent to {email}

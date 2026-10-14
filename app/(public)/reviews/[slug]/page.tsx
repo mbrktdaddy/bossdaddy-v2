@@ -629,7 +629,7 @@ export default async function ReviewPage({ params }: Props) {
 
         <AuthorBio username={author} className="mt-8" />
 
-        <NewsletterCard eyebrow="Liked this review?" interests={['newsletter', 'review_alerts']} className="mt-8" />
+        <NewsletterCard eyebrow="Liked this review?" interests={['review_alerts']} className="mt-8" />
 
         {/* ── Keep reading ── */}
         {/* Related guides — the reciprocal flywheel link. Reviews send readers

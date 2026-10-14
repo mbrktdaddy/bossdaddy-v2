@@ -10,6 +10,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getOrCreateAnonymousId } from './cookies'
 
 const SubscribeSchema = z.object({
+  // trim + lowercase here (not just in the UI) so the stored value always
+  // matches the lower(email) unique index from migration 163.
   email: z.string().trim().email().toLowerCase(),
   kind: z.enum(['yearly_weekends_checkin', 'sunday_moments']),
   kid_profile_id: z.string().uuid().optional().nullable(),
@@ -20,12 +22,25 @@ export type EmailActionResult<T = void> =
   | { ok: true; data?: T }
   | { ok: false; error: string }
 
+// `already: true` = this address is already on this list (for this kid). It is
+// a success, not an error — the UI shows a neutral line instead of the confirm.
+export type SubscribeResult =
+  | { ok: true; already: false; data: { id: string; unsubscribeToken: string } }
+  | { ok: true; already: true }
+  | { ok: false; error: string }
+
+// Postgres unique_violation — the idx_tool_email_subs_unique index (mig 163).
+const UNIQUE_VIOLATION = '23505'
+
 export async function subscribeToToolEmail(
   input: z.input<typeof SubscribeSchema>,
-): Promise<EmailActionResult<{ id: string; unsubscribeToken: string }>> {
+): Promise<SubscribeResult> {
   const parsed = SubscribeSchema.safeParse(input)
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    // Only the email is user-typed; the other fields are set by the page.
+    return parsed.error.issues[0]?.path[0] === 'email'
+      ? { ok: false, error: 'That email doesn’t look right.' }
+      : { ok: false, error: 'Couldn’t save that. Try again in a minute.' }
   }
 
   const supabase = await createClient()
@@ -50,10 +65,18 @@ export async function subscribeToToolEmail(
     .select('id, unsubscribe_token')
     .single()
 
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    // The unique index is the arbiter, so a double-submit or a race between
+    // two tabs lands here too — no check-then-insert window to lose.
+    if (error.code === UNIQUE_VIOLATION) return { ok: true, already: true }
+    // Raw Postgres text never reaches the browser; log it server-side only.
+    console.error('subscribeToToolEmail failed:', error.code, error.message)
+    return { ok: false, error: 'Couldn’t save that. Try again in a minute.' }
+  }
 
   return {
     ok: true,
+    already: false,
     data: {
       id: data.id as string,
       unsubscribeToken: data.unsubscribe_token as string,
@@ -70,7 +93,10 @@ export async function unsubscribeToolEmail(token: string): Promise<EmailActionRe
     .delete()
     .eq('unsubscribe_token', parsed.data)
 
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    console.error('unsubscribeToolEmail failed:', error.code, error.message)
+    return { ok: false, error: 'Couldn’t remove that. Try again in a minute.' }
+  }
 
   return { ok: true }
 }

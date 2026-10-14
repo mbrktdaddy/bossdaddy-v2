@@ -73,11 +73,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  // Status-bar / browser-chrome tint. Dark to match the dark header that sits
-  // at the top of every page (the body canvas is light zinc-100, but the header
-  // is what borders the status bar). Kept identical to the manifest's
-  // theme_color + background_color (#0a0a0a) so launch shows no color flash.
-  themeColor: '#0a0a0a',
+  // Status-bar / browser-chrome tint = the masthead. The page canvas is white, but
+  // the always-black header is what borders the status bar, so the bar matches it
+  // (#09090b = the --color-chrome token). Same value as the manifest's theme_color;
+  // the manifest's splash background_color deliberately differs — it follows the
+  // canvas (see app/manifest.ts).
+  themeColor: '#09090b',
 }
 
 export default function RootLayout({

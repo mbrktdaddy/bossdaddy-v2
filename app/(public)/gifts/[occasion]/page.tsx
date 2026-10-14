@@ -9,8 +9,7 @@ import { OCCASIONS, getOccasion } from '@/lib/gift-occasions'
 import { getCategoryBySlug } from '@/lib/categories'
 import RatingScore from '@/components/RatingScore'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
-import { EmailSignup } from '@/components/EmailSignup'
-import { CAPTURE_CARD } from '@/components/NewsletterCard'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import OccasionIcon from '@/components/OccasionIcon'
 import ArticleTOC from '@/components/collections/ArticleTOC'
 import EditorialMeta from '@/components/collections/EditorialMeta'
@@ -535,26 +534,20 @@ export default async function GiftOccasionPage({ params }: Props) {
                 </div>
               </section>
             ) : (
-              /* Empty state — proper SEO landing page with email capture */
-              <div className={`${CAPTURE_CARD} mb-10`}>
-                <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-                <Eyebrow className="mb-3">Coming Soon</Eyebrow>
-                <h2 className="text-2xl md:text-3xl font-black text-prose mb-3">
-                  The {occ.label} list is being built
-                </h2>
-                <p className="text-prose-muted leading-relaxed mb-6 max-w-xl">
-                  Boss Daddy is curating the {occ.label.toLowerCase()}{' '}guide right now — every pick hand-chosen, no corporate gift-list filler. Drop your email and you&apos;ll be the first to know when it goes live.
-                </p>
-                <div className="max-w-md">
-                  <EmailSignup
-                    heading={null}
-                    description={null}
-                    buttonLabel="Notify me"
-                    successMessage="You're in. We'll send the list the moment it's live."
-                    interests={['newsletter']}
-                  />
-                </div>
-              </div>
+              /* Empty state — proper SEO landing page with a NOTIFY capture.
+                 intent="notify" tags `notify:gift:<slug>` and never the digest:
+                 this used to save ['newsletter'], so "tell me when the list is
+                 live" silently enrolled people in the weekly email (B5). */
+              <NewsletterSignup
+                variant="card"
+                intent="notify"
+                topic={`gift:${occ.slug}`}
+                eyebrow="Coming soon"
+                heading={`The ${occ.label} list is being built`}
+                body={`Boss Daddy is curating the ${occ.label.toLowerCase()} guide right now — every pick hand-chosen, no corporate gift-list filler. Drop your email and you'll be the first to know when it goes live.`}
+                successMessage="You're in. We'll send the list the moment it's live."
+                className="mb-10"
+              />
             )}
 
             {pick && faqs.length > 0 && <FAQAccordion faqs={faqs} id="faq" />}

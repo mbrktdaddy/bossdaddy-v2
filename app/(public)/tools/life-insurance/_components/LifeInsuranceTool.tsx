@@ -123,7 +123,6 @@ export default function LifeInsuranceTool({ initial }: Props) {
         subhead={r.need === 0 ? undefined : `Estimated need ${fmtUsd(r.need)} · In place ${fmtUsd(r.have)}`}
         voice={voice}
         stats={stats}
-        tone={r.covered ? 'good' : 'neutral'}
       >
         <ResultLinks
           links={[{

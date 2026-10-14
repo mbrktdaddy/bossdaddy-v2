@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { XIcon } from '@/components/icons'
+import { OVERLAY_PANEL } from './overlay'
 
 // The one modal. Built on the native <dialog> + showModal(), so the browser
 // supplies what every hand-rolled overlay re-implemented (and mostly missed):
@@ -58,9 +59,9 @@ export function Modal({ onClose, label, labelledBy, size = 'md', dismissible = t
       onCancel={(e) => { e.preventDefault(); if (dismissible) onClose() }}
       // A click whose target is the <dialog> itself landed on the ::backdrop.
       onClick={(e) => { if (e.target === e.currentTarget && dismissible && closeOnBackdrop) onClose() }}
-      /* Hard Goods: the dialog is a 2px chrome box, no shadow — the backdrop
-         scrim does the separating. Chrome token for the scrim, not a raw shade. */
-      className={`m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose bg-surface border-2 border-chrome rounded-xl backdrop:bg-chrome/80 backdrop:backdrop-blur-sm`}
+      /* The overlay recipe (OVERLAY_PANEL): a 2px `border-prose` box, no shadow —
+         the backdrop scrim does the separating. Chrome token for the scrim. */
+      className={`m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose ${OVERLAY_PANEL} backdrop:bg-chrome/80 backdrop:backdrop-blur-sm`}
     >
       {/* The inner box covers the whole dialog, so only the ::backdrop is "outside". */}
       <div className={className}>{children}</div>

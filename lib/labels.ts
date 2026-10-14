@@ -196,6 +196,63 @@ export const LABELS = {
     cornerLabel: 'In your corner',
   },
 
+  // ─── Chrome + app-page nouns (continuity plan P15) ─────────────────────────
+  // Each was hard-coded in 3–5 places (the header menus, the activity panel,
+  // page H1s, <title>s) — and had already drifted: "Account Settings" in the
+  // menu and H1 vs "Account settings" on the account page's own button.
+  // Sentence case for nouns; the uppercase look is CSS, never the string.
+  messages: {
+    short:     'Messages',
+    pageTitle: 'Messages — Boss Daddy',
+  },
+  notifications: {
+    short:     'Notifications',
+    pageTitle: 'Notifications — Boss Daddy',
+    empty:     'You’re all caught up.',
+  },
+  // /account/settings. "Settings" in a menu that already says Account;
+  // "Account settings" anywhere it stands alone.
+  settings: {
+    short:     'Settings',
+    full:      'Account settings',
+    pageTitle: 'Account settings — Boss Daddy',
+    tagline:   'Your profile, sign-in, and who can reach you.',
+  },
+  // The topics row (CategoryBar), the header's Topics menu, the footer link.
+  topics: {
+    short: 'Topics',
+    all:   'All topics',
+  },
+  search: {
+    placeholder: 'Search reviews, guides, and gear…',
+    label:       'Search',
+  },
+
+  // The weekly digest + "notify me" captures — <NewsletterSignup> renders
+  // every string here. ⚠️ NEVER NAME A DAY: the digest cron runs Tuesday
+  // 14:00 UTC (vercel.json) and skips weeks with nothing new; the homepage
+  // promised "Sunday morning" for months (continuity plan B2). Cadence copy
+  // says "a week" and "when there's something new" — both true by construction.
+  newsletter: {
+    name:          'The Weekly Drop',
+    headline:      'One email a week.',
+    pitch:         'New reviews, what I’m testing, and the verdicts about to drop. No PR-speak.',
+    cadence:       'One email a week — only when there’s something new. No spam. No sponsors.',
+    smallPrint:    'Only when there’s something new. Unsubscribe anytime.',
+    unsubscribe:   'Unsubscribe anytime.',
+    cardHeading:   'Get the next one in your inbox',
+    join:          'Join free',
+    notify:        'Notify me',
+    emailLabel:    'Email address',
+    placeholder:   'you@example.com',
+    submitting:    'Sending…',
+    success:       'You’re in. Check your inbox.',
+    already:       'You’re already on the list.',
+    notifySuccess: 'You’re on the list. We’ll email you when it’s live.',
+    notifyAlready: 'You’re already on the list for this one.',
+    notifySmallPrint: 'One email when it’s live. That’s it.',
+  },
+
   // The private personal page at /account. The ROUTE is permanent (it's in
   // proxy.ts's auth guard and two email templates point at its settings child);
   // every word a member reads lives here.
@@ -404,6 +461,11 @@ export const LABELS = {
       metaDescription: 'How many weekends do you have left? Find out, then make them count.',
       spokeRole:       'Time',
       spokeBlurb:      'How many weekends do you have left with your kid? Pick a milestone. Get a number. Then make them count.',
+      // Page header + footer — the one tool page not yet on CalculatorPage
+      // (continuity Phase 7 moves it); lifted here so the move is a prop swap.
+      h1:              'How many weekends do you have left?',
+      tagline:         'Pick a milestone. Get a number. Then make them count.',
+      disclosure:      'Calendar math from the dates you enter — an estimate to plan around, not a promise.',
     },
 
     dadMath: {
@@ -622,6 +684,8 @@ export const LABELS = {
     //     from the past week. Internal DB enum / cron path remain
     //     'sunday_moments' per the naming doctrine; this is the public name.
     emails: {
+      /** Both opt-ins — a repeat sign-up for the same kid + cadence (unique index, mig 163). */
+      already: 'You’re already on it.',
       yearlyCheckin: {
         optInCta:    'Get a yearly check-in',
         optInHelp:   'One email a year, on the same date. Updated number, nothing else.',

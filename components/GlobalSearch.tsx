@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { buttonVariants } from '@/components/ui/Button'
+import { OVERLAY_PANEL } from '@/components/ui/overlay'
 import { SearchIcon } from '@/components/icons'
 
 interface SearchResults {
@@ -95,7 +96,7 @@ export default function GlobalSearch() {
         role="dialog"
         aria-modal="true"
         aria-label="Site search"
-        className="bg-surface border-2 border-chrome rounded-xl w-full max-w-2xl max-h-[70vh] flex flex-col"
+        className={`${OVERLAY_PANEL} w-full max-w-2xl max-h-[70vh] flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-4 py-3 border-b border-soft shrink-0">

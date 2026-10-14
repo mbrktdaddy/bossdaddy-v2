@@ -1,76 +1,48 @@
 'use server'
 
 import { headers } from 'next/headers'
-import { z } from 'zod'
-import * as React from 'react'
-import { createAdminClient } from '@/lib/supabase/admin'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
-import { WelcomeEmail } from '@/emails/WelcomeEmail'
-import { checkRateLimit } from '@/lib/rate-limit'
+import { subscribe } from '@/lib/newsletter/subscribe'
 
-const Schema = z.object({
-  email: z.string().email(),
-  interests: z.array(z.string().max(40)).max(10).optional(),
-})
+// Server actions over the one subscribe path (lib/newsletter/subscribe.ts —
+// the rules, the intents and the "why" live there).
+
+async function clientIp() {
+  const h = await headers()
+  return h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
+}
+
+// ── <NewsletterSignup> — a `<form action>` via useActionState ────────────────
+// Works before hydration (and with JS off): the form posts to the page, React
+// runs this, and the page re-renders in the returned state. That's what let
+// the old form-POST branch of /api/newsletter/subscribe retire — and with it
+// the redirect to `/?newsletter=…` that nothing ever read (B1: the homepage
+// signup gave no feedback at all).
+
+export type NewsletterFormState =
+  | { status: 'idle' }
+  | { status: 'success' | 'already' }
+  // `email` comes back so the field can be refilled — React resets the form
+  // after an action, and retyping an address because of a typo is the tax.
+  | { status: 'error'; message: string; email: string }
+
+export async function subscribeFromForm(_prev: NewsletterFormState, form: FormData): Promise<NewsletterFormState> {
+  const email = String(form.get('email') ?? '')
+  const intent = form.get('intent') === 'notify' ? 'notify' : 'digest'
+  const topic = form.get('topic') ? String(form.get('topic')) : undefined
+  const interests = String(form.get('interests') ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+
+  const result = await subscribe({ email, intent, topic, interests }, { ip: await clientIp() })
+  if (!result.ok) return { status: 'error', message: result.error, email }
+  return { status: result.already ? 'already' : 'success' }
+}
+
+// ── Legacy imperative call — `EmailSignup` (retires in continuity Phase 4) ───
 
 export type SubscribeResult =
   | { ok: true; alreadySubscribed: boolean }
   | { ok: false; error: string }
 
 export async function subscribeToNewsletter(input: { email: string; interests?: string[] }): Promise<SubscribeResult> {
-  const h = await headers()
-  const ip = h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'anonymous'
-
-  const { success } = await checkRateLimit(`newsletter:${ip}`, 'newsletter')
-  if (!success) return { ok: false, error: 'Too many requests. Try again later.' }
-
-  const parsed = Schema.safeParse(input)
-  if (!parsed.success) return { ok: false, error: 'Invalid email' }
-
-  const supabase = createAdminClient()
-  // Fetch `confirmed` too so we can suppress the welcome email on repeat
-  // signups. The DB upsert below stays idempotent (interests merge), but the
-  // welcome email shouldn't fire twice — that's the spammy pattern.
-  const { data: existing } = await supabase
-    .from('newsletter_subscribers')
-    .select('interests, confirmed')
-    .eq('email', parsed.data.email)
-    .maybeSingle()
-
-  const alreadySubscribed = existing?.confirmed === true
-
-  const mergedInterests = Array.from(
-    new Set([...(existing?.interests ?? []), ...(parsed.data.interests ?? [])]),
-  )
-
-  const { error: dbError } = await supabase
-    .from('newsletter_subscribers')
-    .upsert(
-      { email: parsed.data.email, confirmed: true, interests: mergedInterests },
-      { onConflict: 'email' },
-    )
-
-  if (dbError) {
-    console.error('Newsletter DB error:', dbError)
-  }
-
-  // Skip the welcome email for returning subscribers — they already received
-  // it. Also blocks the abuse vector where someone repeatedly submits another
-  // person's address to spam their inbox with welcome mail.
-  if (!alreadySubscribed) {
-    try {
-      const resend = getResend()
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bossdaddylife.com'
-      await resend.emails.send({
-        from: FROM_EMAIL,
-        to: parsed.data.email,
-        subject: "You're in, Boss. Welcome to the crew. 🔥",
-        react: React.createElement(WelcomeEmail, { email: parsed.data.email, siteUrl }),
-      })
-    } catch (err) {
-      console.error('Resend error:', err)
-    }
-  }
-
-  return { ok: true, alreadySubscribed }
+  const result = await subscribe({ email: input.email, intent: 'digest', interests: input.interests }, { ip: await clientIp() })
+  return result.ok ? { ok: true, alreadySubscribed: result.already } : { ok: false, error: result.error }
 }

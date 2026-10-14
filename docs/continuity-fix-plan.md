@@ -340,7 +340,10 @@ masthead, the "Unsubscribe" link appears in Gmail's header.
   **He commits.** Migrations: he applies them (B8's unique index).
 - **Sessions** (one focused block each; start by reading only that block):
   1. Phase 1 + Phase 2 — primitives, the bugs, the launch screen; the guard baseline is generated
-     LAST, then armed.
+     LAST, then armed. **Built 2026-10-14** (P1–P18, B1–B13; mig 163 applied). Deliberately left
+     for their phases: the 9 `error.tsx` → `RouteError` (Phase 5), `EmailSignup` callers (merch →
+     Phase 4/6), call-site adoption of the new `LABELS` nouns (Phases 3/8). B7 needs the
+     `NEWSLETTER_UNSUBSCRIBE_SECRET` env var on Vercel — unsigned links + no one-click header until set.
   2. Phases 3–5 — chrome & menus, signups, reader leftovers + auth.
   3. Phases 6–7 — commerce, tools.
   4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs.

@@ -33,6 +33,7 @@ const ALLOW = [
   /[\\/]cart[\\/]page\.tsx$/,
   /[\\/]order[\\/]/,
   /[\\/]tools[\\/]email-unsubscribe[\\/]/,
+  /[\\/]newsletter[\\/]unsubscribe[\\/]/,
   /[\\/]tools[\\/]family[\\/]/,
   /[\\/]tools[\\/]savings[\\/]/,
   // /goals + /goals/[id] — same category as savings: an authenticated personal

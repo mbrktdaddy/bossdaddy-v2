@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -22,6 +22,17 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
   const [busy, setBusy] = useState<string | null>(null)
   const [checkingOut, setCheckingOut] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+
+  // The checkout success path never resets `checkingOut` (we're navigating to
+  // Stripe). If the dad taps Back, the browser can restore this page from the
+  // back/forward cache with the button still stuck on "Redirecting" — clear it.
+  useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setCheckingOut(false)
+    }
+    window.addEventListener('pageshow', onPageShow)
+    return () => window.removeEventListener('pageshow', onPageShow)
+  }, [])
 
   function recalc(updated: CartItemWithDetails[]) {
     setItems(updated)
@@ -55,15 +66,19 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
       const res = await fetch('/api/checkout', { method: 'POST' })
       const json = await res.json()
       if (json.url) {
+        // Success = the browser is leaving for Stripe. Leave `checkingOut` set so
+        // the button stays disabled + "Redirecting…" until the page unloads —
+        // resetting it here flashes the button back to "Proceed to Checkout"
+        // (and re-clickable) during the navigation.
         window.location.href = json.url
-      } else {
-        setCheckoutError(json.error ?? 'Checkout failed. Please try again.')
+        return
       }
+      setCheckoutError(json.error ?? 'Checkout failed. Please try again.')
     } catch {
       setCheckoutError('Network error. Please try again.')
-    } finally {
-      setCheckingOut(false)
     }
+    // Only the error paths reach here.
+    setCheckingOut(false)
   }
 
   async function emptyCart() {
@@ -201,7 +216,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
         <button
           onClick={handleCheckout}
           disabled={checkingOut}
-          className={buttonVariants({ size: 'lg', className: 'w-full mt-1 disabled:bg-accent/40 disabled:text-white/40' })}
+          className={buttonVariants({ size: 'lg', className: 'w-full mt-1' })}
         >
           {checkingOut ? 'Redirecting to Stripe...' : 'Proceed to Checkout'}
         </button>

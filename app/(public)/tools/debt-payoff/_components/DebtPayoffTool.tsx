@@ -179,7 +179,6 @@ export default function DebtPayoffTool({ today, initial }: Props) {
               value: plan.minimumsOnly.paysOff ? dateAt(plan.minimumsOnly.months) : 'Never',
             },
           ]}
-          tone={plan.plan.paysOff ? 'good' : 'warn'}
         >
           {plan.plan.paysOff && (
             <>

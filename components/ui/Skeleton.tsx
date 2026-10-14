@@ -1,7 +1,12 @@
 // Loading-state primitives for `loading.tsx` files.
 // The pulse lives on the container (<SkeletonPage>), not on each block, so the
-// whole page breathes in sync. Blocks come in two tones: raised (default) for
+// whole page breathes in sync. Blocks come in two tones: solid (default) for
 // headings/images, `soft` for body lines.
+//
+// Light canvas (continuity plan P1): blocks are `surface-hover` (#f4f4f5), not
+// `surface-raised` (#fafafa) — the raised tone is 2% off white and the loading
+// screens read as a blank page. Separation is by fill here on purpose: a
+// skeleton has no edges to draw.
 
 interface SkeletonProps {
   className?: string
@@ -9,7 +14,7 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className = '', soft = false }: SkeletonProps) {
-  return <div className={`${soft ? 'bg-surface' : 'bg-surface-raised'} rounded ${className}`} />
+  return <div className={`${soft ? 'bg-surface-hover/60' : 'bg-surface-hover'} rounded ${className}`} />
 }
 
 export function SkeletonPage({ className = '', children }: { className?: string; children: React.ReactNode }) {
@@ -32,7 +37,7 @@ export function SkeletonTabs({ count = 6 }: { count?: number }) {
   return (
     <div className="flex gap-2 mb-8 overflow-hidden">
       {Array.from({ length: count }).map((_, i) => (
-        <Skeleton key={i} className="h-9 w-20 rounded-full shrink-0" />
+        <Skeleton key={i} className="h-11 w-20 rounded-md shrink-0" />
       ))}
     </div>
   )
@@ -42,7 +47,7 @@ export function SkeletonTabs({ count = 6 }: { count?: number }) {
 export function SkeletonCard({ imageClassName = 'h-44' }: { imageClassName?: string }) {
   return (
     <div className="bg-surface rounded-2xl overflow-hidden">
-      <div className={`${imageClassName} bg-surface-raised`} />
+      <div className={`${imageClassName} bg-surface-hover`} />
       <div className="p-5 space-y-3">
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-5 w-3/4" />

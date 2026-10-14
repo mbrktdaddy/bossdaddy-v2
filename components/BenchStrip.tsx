@@ -12,6 +12,15 @@ interface Props {
   /** One-liner after the heading in the black strip (sm+ only) — defaults to the
    *  canonical bench tagline. Pass null to hide; pass a string to override. */
   subhead?: string | null
+  /**
+   * Render as a full-width page section (the homepage band). The section and
+   * its padding live HERE, not at the call site, because this component
+   * returns null at zero items: a caller-owned padded, bordered <section>
+   * stayed behind as an empty strip between the orange newsletter block and
+   * the black About band whenever the bench was empty (continuity plan B13).
+   * A self-suppressing component owns its own wrapper.
+   */
+  asSection?: boolean
 }
 
 const STATUS_RANK: Record<string, number> = { testing: 0, queued: 1 }
@@ -28,6 +37,7 @@ export default async function BenchStrip({
   heading = 'On the Bench',
   ctaText = "See what's on the bench",
   subhead = LABELS.bench.shortTagline,
+  asSection = false,
 }: Props) {
   const admin = createAdminClient()
   const { data } = await admin
@@ -44,7 +54,7 @@ export default async function BenchStrip({
 
   if (items.length === 0) return null
 
-  return (
+  const strip = (
     <div className="border-2 border-chrome rounded-xl overflow-hidden bg-surface">
       {/* Header strip — a dark ZONE: the pulsing dot is the live-testing signal,
           the label is the module's name, the link is the one action. */}
@@ -112,5 +122,12 @@ export default async function BenchStrip({
         })}
       </ul>
     </div>
+  )
+
+  if (!asSection) return strip
+  return (
+    <section className="border-b border-soft">
+      <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">{strip}</div>
+    </section>
   )
 }
