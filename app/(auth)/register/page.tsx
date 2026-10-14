@@ -7,12 +7,26 @@ import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 import { claimMyPendingInvites } from '@/lib/dad-tools/savings-actions'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import PageHeader from '@/components/PageHeader'
+import { LABELS } from '@/lib/labels'
 
 export default function RegisterPage() {
+  // The heading lockup sits OUTSIDE the Suspense: only the form reads
+  // useSearchParams, so the page title paints immediately instead of waiting on it.
   return (
-    <Suspense fallback={null}>
-      <RegisterForm />
-    </Suspense>
+    <>
+      <PageHeader
+        size="compact"
+        eyebrow={LABELS.auth.register.eyebrow}
+        title={LABELS.auth.register.h1}
+        deck="Create your Boss Daddy account"
+        className="mb-6"
+      />
+      <Suspense fallback={null}>
+        <RegisterForm />
+      </Suspense>
+    </>
   )
 }
 
@@ -106,93 +120,78 @@ function RegisterForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-prose mb-2">Join the Crew</h1>
-        <p className="text-prose-muted mb-8 text-sm">Create your Boss Daddy account</p>
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field
+          label="Username"
+          autoComplete="off"
+          id="username"
+          type="text"
+          required
+          minLength={3}
+          value={username}
+          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
+          placeholder="bossdad42"
+        />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm text-prose-muted mb-1">
-              Username
-            </label>
-            <input
-              autoComplete="off"
-              id="username"
-              type="text"
-              required
-              minLength={3}
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="bossdad42"
-            />
+        <Field
+          label="Email"
+          autoComplete="username"
+          id="email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+        />
+
+        <Field
+          label="Password"
+          autoComplete="new-password"
+          id="password"
+          type="password"
+          required
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="8+ characters"
+        />
+
+        {error && (
+          <div role="alert" className="text-sm font-medium text-danger-ink bg-danger-bg border border-danger-line rounded-md px-4 py-3">
+            {error === 'already_exists' ? (
+              <p>
+                An account with that email already exists.{' '}
+                {/* Danger ink, not the accent link colour — orange on the pale
+                    danger fill is thin. py + -my = 44px hit area, no growth. */}
+                <Link
+                  href={`/login?next=${encodeURIComponent(redirectTo)}`}
+                  className="inline-block py-3 -my-3 font-semibold underline underline-offset-2 hover:no-underline"
+                >
+                  Sign in instead →
+                </Link>
+              </p>
+            ) : (
+              <p>{error}</p>
+            )}
           </div>
+        )}
 
-          <div>
-            <label htmlFor="email" className="block text-sm text-prose-muted mb-1">
-              Email
-            </label>
-            <input
-              autoComplete="username"
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="you@example.com"
-            />
-          </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className={buttonVariants({ className: 'w-full' })}
+        >
+          {loading ? 'Creating account...' : 'Create Account'}
+        </button>
+      </form>
 
-          <div>
-            <label htmlFor="password" className="block text-sm text-prose-muted mb-1">
-              Password
-            </label>
-            <input
-              autoComplete="new-password"
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="8+ characters"
-            />
-          </div>
-
-          {error && (
-            <div className="text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">
-              {error === 'already_exists' ? (
-                <p className="text-red-700">
-                  An account with that email already exists.{' '}
-                  <Link href={`/login?next=${encodeURIComponent(redirectTo)}`} className="text-accent-text-soft hover:text-accent font-semibold">
-                    Sign in instead →
-                  </Link>
-                </p>
-              ) : (
-                <p className="text-red-700">{error}</p>
-              )}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={buttonVariants({ className: 'w-full' })}
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-prose-faint">
-          Already have an account?{' '}
-          <Link href="/login" className="text-accent-text-soft hover:text-accent">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </main>
+      <p className="mt-6 text-center text-sm text-prose-faint">
+        Already have an account?{' '}
+        <Link href="/login" className="inline-block py-3 -my-3 font-semibold text-accent-text hover:text-accent">
+          Sign in
+        </Link>
+      </p>
+    </>
   )
 }

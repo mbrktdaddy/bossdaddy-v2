@@ -27,7 +27,7 @@ export default function RecentlyViewedStrip({ exclude, max = 5, className = '' }
   return (
     <section aria-label="Recently viewed" className={className}>
       <div className="mb-4">
-        <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
+        <span aria-hidden className="block h-px w-6 bg-accent mb-3" />
         <h2 className="text-lg font-black">Recently Viewed</h2>
       </div>
 
@@ -56,7 +56,7 @@ function RecentCard({ item, compact = false }: { item: ViewedItem; compact?: boo
   return (
     <Link
       href={href}
-      className={`group flex items-center gap-2.5 bg-surface border border-soft hover:border-accent-border/40 rounded-xl transition-colors ${
+      className={`group flex items-center gap-2.5 bg-surface border border-soft hover:border-prose rounded-xl transition-colors ${
         compact ? 'shrink-0 w-56 px-3 py-2.5' : 'w-56 px-3 py-2.5'
       }`}
     >

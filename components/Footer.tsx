@@ -17,7 +17,7 @@ interface BrowseLink { href: string; label: string; hint?: string }
 // whose first section is the topic grid. Radar, Bench and the gift guides are
 // reached inside Gear; comparisons and best-of inside Topics/Explore.
 const BROWSE: BrowseLink[] = [
-  { href: '/explore', label: 'Topics',           hint: LABELS.explore.tagline },
+  { href: '/explore', label: LABELS.topics.short, hint: LABELS.explore.tagline },
   { href: '/gear',    label: LABELS.gear.short },
   { href: '/shop',    label: LABELS.shop.short,  hint: LABELS.shop.tagline },
   { href: '/tools',   label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },

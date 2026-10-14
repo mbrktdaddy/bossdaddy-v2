@@ -18,6 +18,10 @@ const SIZE = {
   md: 'max-w-lg',
   lg: 'max-w-3xl',
   xl: 'max-w-6xl',
+  // The lightbox / gallery: the whole viewport, no panel — the photo is the
+  // content, the 90% chrome scrim is the frame. Controls inside use
+  // `IconButton tone="overlay"`. Still the native dialog: focus trap, Escape.
+  full: '',
 } as const
 
 interface ModalProps {
@@ -61,7 +65,9 @@ export function Modal({ onClose, label, labelledBy, size = 'md', dismissible = t
       onClick={(e) => { if (e.target === e.currentTarget && dismissible && closeOnBackdrop) onClose() }}
       /* The overlay recipe (OVERLAY_PANEL): a 2px `border-prose` box, no shadow —
          the backdrop scrim does the separating. Chrome token for the scrim. */
-      className={`m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose ${OVERLAY_PANEL} backdrop:bg-chrome/80 backdrop:backdrop-blur-sm`}
+      className={size === 'full'
+        ? 'm-0 w-screen h-dvh max-w-none max-h-none p-0 bg-transparent text-white border-0 backdrop:bg-chrome/90'
+        : `m-auto w-[calc(100%-2rem)] ${SIZE[size]} max-h-[calc(100dvh-2rem)] p-0 text-prose ${OVERLAY_PANEL} backdrop:bg-chrome/80 backdrop:backdrop-blur-sm`}
     >
       {/* The inner box covers the whole dialog, so only the ::backdrop is "outside". */}
       <div className={className}>{children}</div>

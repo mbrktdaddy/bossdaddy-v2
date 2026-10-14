@@ -5,10 +5,14 @@
 // the root-level PwaInstallProvider; this component only owns presentation +
 // per-device dismissal. Copy is parameterized so each surface can speak to its
 // own context. For the always-available entry point see InstallAppButton.
+//
+// ⚠️ Mounting this on a NEW route? Add the route's prefix to INLINE_INSTALL_ROUTES
+// in InstallPrompt.tsx — the floating phone prompt asks the same question and
+// must stay off any page that already shows this banner (never two install asks).
 
 import { useEffect, useState } from 'react'
 import { usePwaInstall } from '@/components/pwa/PwaInstallProvider'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Notice } from '@/components/ui/Notice'
 import { buttonVariants } from '@/components/ui/Button'
 
 const DISMISS_KEY = 'bd:pwa-install-dismissed-v1'
@@ -59,56 +63,33 @@ export default function InstallPWA({
 
   if (dismissed || isStandalone) return null
 
-  // Chrome / Edge / Android — native prompt available.
-  if (canPrompt) {
-    return (
-      <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
-        <div className="min-w-0 flex-1">
-          <Eyebrow className="mb-1">{headline}</Eyebrow>
-          <p className="text-sm text-prose-muted leading-snug">{body}</p>
-        </div>
-        <div className="flex flex-col gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => { void promptInstall() }}
-            className={buttonVariants()}
-          >
-            Install
-          </button>
-          <button
-            type="button"
-            onClick={onDismiss}
-            className="text-xs text-prose-faint hover:text-prose-muted transition-colors"
-          >
-            Not now
-          </button>
-        </div>
-      </div>
-    )
-  }
+  // Chrome / Edge / Android get the native prompt; iOS Safari has none, so it
+  // gets the manual Share → Add to Home Screen instructions instead. Anything
+  // else renders nothing.
+  if (!canPrompt && !iosVisible) return null
 
-  // iOS Safari — manual Share → Add to Home Screen instructions.
-  if (iosVisible) {
-    return (
-      <div className={`bg-accent-tint border border-accent-border/60 rounded-xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 ${className}`}>
-        <div className="min-w-0 flex-1">
-          <Eyebrow className="mb-1">{headline}</Eyebrow>
-          <p className="text-sm text-prose-muted leading-snug">
-            Tap the <span className="font-semibold text-prose">Share</span> button at the bottom of
-            Safari, then <span className="font-semibold text-prose">Add to Home Screen</span>.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="text-xs text-prose-faint hover:text-prose-muted transition-colors shrink-0 px-2 py-1"
-          aria-label="Dismiss"
-        >
-          ✕
+  // The shared Notice (continuity plan P17) — the old peach accent-tint box is
+  // gone. The X replaces the "Not now" text link (same dismiss, same memory) and
+  // is a 44px target on a phone; the Install button stays md for the same reason.
+  return (
+    <Notice
+      variant="inline"
+      title={headline}
+      onDismiss={onDismiss}
+      dismissLabel="Not now"
+      className={className}
+      action={canPrompt ? (
+        <button type="button" onClick={() => { void promptInstall() }} className={buttonVariants()}>
+          Install
         </button>
-      </div>
-    )
-  }
-
-  return null
+      ) : undefined}
+    >
+      {canPrompt ? body : (
+        <>
+          Tap the <span className="font-semibold text-prose">Share</span> button at the bottom of
+          Safari, then <span className="font-semibold text-prose">Add to Home Screen</span>.
+        </>
+      )}
+    </Notice>
+  )
 }

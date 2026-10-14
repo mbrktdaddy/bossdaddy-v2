@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useId } from 'react'
+import Link from 'next/link'
 import { subscribeFromForm, type NewsletterFormState } from '@/app/actions/newsletter'
 import { buttonVariants } from '@/components/ui/Button'
 import { fieldClass } from '@/components/ui/Field'
@@ -71,13 +72,19 @@ export function NewsletterSignup({
       intent={intent}
       topic={topic}
       interests={notify ? undefined : interests}
-      buttonLabel={buttonLabel ?? (onBlock ? BRAND.actionLine : notify ? L.notify : L.join)}
+      buttonLabel={buttonLabel ?? (onBlock ? BRAND.actionLine : notify ? L.notify : L.subscribe)}
       successMessage={state.status === 'already'
         ? (notify ? L.notifyAlready : L.already)
         : (successMessage ?? (notify ? L.notifySuccess : L.success))}
     />
   )
-  const smallPrint = notify ? L.notifySmallPrint : L.unsubscribe
+  // Digest footnote: the unsubscribe promise + the privacy link, everywhere.
+  const smallPrint = notify ? L.notifySmallPrint : (
+    <>
+      {L.unsubscribe} ·{' '}
+      <Link href="/privacy-policy" className="underline underline-offset-2 hover:text-prose">{L.privacy}</Link>
+    </>
+  )
 
   if (variant === 'inline') return <div id={id} className={`scroll-mt-24 ${className}`}>{form}</div>
 
@@ -94,7 +101,7 @@ export function NewsletterSignup({
           </div>
           <div>
             {form}
-            <p className="text-[13px] font-semibold">{notify ? smallPrint : L.smallPrint}</p>
+            <p className="text-[13px] font-semibold">{notify ? smallPrint : <>{L.blockLead} {smallPrint}</>}</p>
           </div>
         </div>
       </section>

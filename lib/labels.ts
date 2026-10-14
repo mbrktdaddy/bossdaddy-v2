@@ -238,10 +238,13 @@ export const LABELS = {
     headline:      'One email a week.',
     pitch:         'New reviews, what I’m testing, and the verdicts about to drop. No PR-speak.',
     cadence:       'One email a week — only when there’s something new. No spam. No sponsors.',
-    smallPrint:    'Only when there’s something new. Unsubscribe anytime.',
-    unsubscribe:   'Unsubscribe anytime.',
+    blockLead:     'Only when there’s something new.',
+    unsubscribe:   'Unsubscribe anytime',
+    privacy:       'Privacy',
     cardHeading:   'Get the next one in your inbox',
-    join:          'Join free',
+    // "Join" is reserved for creating an ACCOUNT — a newsletter button that
+    // says Join reads like a sign-up wall. Block = BRAND.actionLine ("Boss Up.").
+    subscribe:     'Subscribe',
     notify:        'Notify me',
     emailLabel:    'Email address',
     placeholder:   'you@example.com',
@@ -278,6 +281,35 @@ export const LABELS = {
     tagline:      'Your family, your people, and the things you’ve saved.',
     settingsCta:  'Account settings',
     savedHeading: 'Saved',
+  },
+
+  // The signed-OUT door: /login, /register, /forgot-password, /reset-password.
+  // Routes are permanent (proxy.ts redirects, Supabase redirect allowlist and the
+  // email templates all point at them); every heading a visitor reads lives here.
+  // `eyebrow` is the ROLE (the black label block above the H1) — it names what the
+  // page is FOR and never repeats the title. The three password-recovery states
+  // (ask → sent → set a new one, plus a dead link) share ONE eyebrow, because to the
+  // reader they are one errand. "Join" stays reserved for creating an account (see
+  // newsletter above). No `pageTitle`: these are client pages, which can't export
+  // metadata, and the (auth) layout already marks them noindex.
+  auth: {
+    login: {
+      eyebrow: 'Sign in',
+      h1:      'Welcome back, Boss',
+    },
+    register: {
+      eyebrow: 'Create account',
+      h1:      'Join the Crew',
+    },
+    recoveryEyebrow: 'Account recovery',
+    forgot: {
+      h1:     'Reset your password',
+      sentH1: 'Check your inbox',
+    },
+    reset: {
+      h1:        'Set new password',
+      invalidH1: 'This link isn’t valid',
+    },
   },
 
   // goals / goal_schedules / goal_occurrences tables → /goals route.

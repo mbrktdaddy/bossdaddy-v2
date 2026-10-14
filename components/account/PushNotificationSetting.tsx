@@ -7,6 +7,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
@@ -129,24 +130,23 @@ export default function PushNotificationSetting() {
             the app to your home screen first.
           </p>
           {denied && (
-            <p className="text-xs text-danger-ink mt-1.5">
+            <p className="text-xs font-semibold text-danger-ink mt-1.5">
               Notifications are blocked in your browser settings — turn them on there, then try again.
             </p>
           )}
-          {error && <p className="text-xs text-danger-ink mt-1.5">{error}</p>}
+          {error && <p role="alert" className="text-xs font-semibold text-danger-ink mt-1.5">{error}</p>}
         </div>
-        <button
-          type="button"
+        {/* Enable = the primary; Turn off = the quiet secondary. Same border and
+            size in both (Button guarantees it); min-w holds the width across
+            "Enable" / "Turn off" / the busy "…" so the copy beside it can't reflow. */}
+        <Button
+          variant={enabled ? 'secondary' : 'primary'}
           disabled={busy || denied}
           onClick={enabled ? disable : enable}
-          className={`shrink-0 min-h-[44px] px-4 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
-            enabled
-              ? 'bg-surface-raised border border-strong text-prose hover:bg-surface'
-              : 'bg-accent hover:bg-accent-hover text-white'
-          }`}
+          className="shrink-0 min-w-[8.5rem]"
         >
           {busy ? '…' : enabled ? 'Turn off' : 'Enable'}
-        </button>
+        </Button>
       </div>
     </Card>
   )

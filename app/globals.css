@@ -236,7 +236,6 @@
 
   /* Status — used sparingly */
   --color-forest:           var(--bd-success);
-  --color-copper:           var(--bd-orange);
 
   /* Chrome — masthead / footer / bottom-nav surface. Flush with the canvas
      on dark (dark-first makeover); one knob to make chrome more/less elevated

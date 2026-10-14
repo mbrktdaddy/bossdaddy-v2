@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { claimAnonymousData } from '@/lib/dad-tools/kid-actions'
 import { claimMyPendingInvites } from '@/lib/dad-tools/savings-actions'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field, fieldClass } from '@/components/ui/Field'
+import PageHeader from '@/components/PageHeader'
+import { LABELS } from '@/lib/labels'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -72,24 +75,24 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="block text-sm text-prose-muted mb-1">Email</label>
-        <input
-          autoComplete="username"
-          id="email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-          placeholder="you@example.com"
-        />
-      </div>
+      <Field
+        label="Email"
+        autoComplete="username"
+        id="email"
+        type="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="you@example.com"
+      />
 
+      {/* A raw label row + fieldClass, not <Field>: the "Forgot password?" link
+          sits on the label's line, which Field's label can't hold. */}
       <div>
-        <div className="flex items-center justify-between mb-1">
-          <label htmlFor="password" className="block text-sm text-prose-muted">Password</label>
-          <Link href="/forgot-password" className="text-xs text-prose-faint hover:text-accent-text-soft transition-colors">
+        <div className="flex items-center justify-between mb-1.5">
+          <label htmlFor="password" className="block text-sm font-semibold text-prose">Password</label>
+          {/* py + matching -my = a 44px hit area that doesn't change the row's height. */}
+          <Link href="/forgot-password" className="inline-block py-3.5 -my-3.5 text-xs font-semibold text-accent-text hover:text-accent">
             Forgot password?
           </Link>
         </div>
@@ -100,13 +103,13 @@ function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          className={fieldClass()}
           placeholder="••••••••"
         />
       </div>
 
       {error && (
-        <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-2">
+        <p role="alert" className="text-sm font-medium text-danger-ink bg-danger-bg border border-danger-line rounded-md px-4 py-2.5">
           {error}
         </p>
       )}
@@ -124,22 +127,25 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-prose mb-2">Welcome back, Boss</h1>
-        <p className="text-prose-muted mb-8 text-sm">Sign in to your account</p>
+    <>
+      <PageHeader
+        size="compact"
+        eyebrow={LABELS.auth.login.eyebrow}
+        title={LABELS.auth.login.h1}
+        deck="Sign in to your account"
+        className="mb-6"
+      />
 
-        <Suspense fallback={<div className="h-48 animate-pulse bg-surface rounded-lg" />}>
-          <LoginForm />
-        </Suspense>
+      <Suspense fallback={<div className="h-48 animate-pulse bg-surface rounded-md" />}>
+        <LoginForm />
+      </Suspense>
 
-        <p className="mt-6 text-center text-sm text-prose-faint">
-          New here?{' '}
-          <Link href="/register" className="text-accent-text-soft hover:text-accent">
-            Create an account
-          </Link>
-        </p>
-      </div>
-    </main>
+      <p className="mt-6 text-center text-sm text-prose-faint">
+        New here?{' '}
+        <Link href="/register" className="inline-block py-3 -my-3 font-semibold text-accent-text hover:text-accent">
+          Create an account
+        </Link>
+      </p>
+    </>
   )
 }

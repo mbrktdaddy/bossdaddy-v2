@@ -16,9 +16,12 @@
 // the delete policy; this is the same rule made visible, and it matches the
 // existing choice not to offer "Mark read" on an unanswered item either.
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { activityTime } from '@/lib/activity-time'
+import { LABELS } from '@/lib/labels'
 import { buttonVariants } from '@/components/ui/Button'
+import { UnreadDot } from '@/components/ui/CountBadge'
 
 interface NotificationRow {
   id:              string
@@ -33,9 +36,13 @@ interface NotificationRow {
   created_at:      string
 }
 
-function fmt(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
+// `activityTime` is locale- and timezone-dependent, and this list is server-rendered
+// from `initial` — formatting during SSR would paint the SERVER's clock and then
+// fail hydration. So the time slot stays empty (its line reserved) until the client
+// has mounted. useSyncExternalStore gives the server/client split without an effect:
+// the server snapshot (and the hydration pass) is false, the client's is true.
+const subscribeNoop = () => () => {}
+const useMounted = () => useSyncExternalStore(subscribeNoop, () => true, () => false)
 
 /** Unanswered and waiting on the user — the row that must not be deletable. */
 function isPendingAction(n: NotificationRow): boolean {
@@ -50,6 +57,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [bulkBusy, setBulkBusy]     = useState(false)
   const [notice, setNotice]         = useState<string | null>(null)
+  const mounted = useMounted()
 
   const load = useCallback(async () => {
     const res = await fetch('/api/notifications')
@@ -103,7 +111,10 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
 
   async function markRead(id: string) {
     setItems((prev) => prev.map((n) => n.id === id ? { ...n, read_at: new Date().toISOString() } : n))
-    await fetch(`/api/notifications/${id}/read`, { method: 'POST' })
+    // keepalive: "Open →" hard-navigates right after this fires — the unload would
+    // otherwise cancel the POST and the item would come back unread (same reason as
+    // the bell's markRead).
+    await fetch(`/api/notifications/${id}/read`, { method: 'POST', keepalive: true })
   }
   async function markAll() {
     const ts = new Date().toISOString()
@@ -184,7 +195,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
   }
 
   if (items.length === 0) {
-    return <p className="text-sm text-prose-faint py-12 text-center">You&apos;re all caught up.</p>
+    return <p className="text-sm text-prose-faint py-12 text-center">{LABELS.notifications.empty}</p>
   }
 
   return (
@@ -195,7 +206,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
             type="button"
             onClick={toggleAll}
             disabled={selectable.length === 0}
-            className="min-h-11 text-xs font-semibold text-accent hover:text-accent-hover disabled:opacity-40"
+            className="min-h-11 text-xs font-semibold text-accent-text hover:text-accent disabled:opacity-40"
           >
             {allSelected ? 'Clear selection' : `Select all (${selectable.length})`}
           </button>
@@ -206,7 +217,7 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
         )}
         <div className="flex items-center gap-4">
           {!selectMode && unread > 0 && (
-            <button type="button" onClick={markAll} className="min-h-11 text-xs text-accent hover:text-accent-hover font-semibold">
+            <button type="button" onClick={markAll} className="min-h-11 text-xs font-semibold text-accent-text hover:text-accent">
               Mark all read
             </button>
           )}
@@ -225,10 +236,13 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
       {items.map((n) => {
         const actionable = isPendingAction(n)
         const checked = chosenSet.has(n.id)
+        // Unread = a fill (surface-raised) + the dot — the same treatment as the bell
+        // panel's rows. The page's card edge also steps up a weight, because #fafafa
+        // on white is faint on its own. Selected = a stronger fill + the accent edge.
         const rowClass = `rounded-xl border p-4 ${
-          checked ? 'border-accent bg-accent-tint/40'
+          checked ? 'border-accent bg-surface-hover'
             : n.read_at ? 'border-soft bg-surface'
-            : 'border-accent-border/50 bg-accent-tint/40'
+            : 'border-strong bg-surface-raised'
         }`
 
         // In select mode the whole card is the tap target (a <label> wrapping the
@@ -250,12 +264,13 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                 />
               )
             ) : (
-              !n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />
+              // Always mounted (transparent once read) so "Mark read" never shifts the text.
+              <UnreadDot unread={!n.read_at} className="mt-1.5" />
             )}
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-prose">{n.title}</p>
               {n.body && <p className="text-sm text-prose-muted mt-0.5">{n.body}</p>}
-              <p className="text-xs text-prose-faint mt-1">{fmt(n.created_at)}</p>
+              <p className="text-xs text-prose-faint mt-1 min-h-4">{mounted ? activityTime(n.created_at) : ''}</p>
 
               {selectMode ? (
                 actionable && (
@@ -265,14 +280,16 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                 )
               ) : (
                 <>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  {/* 44px targets: the row's controls are text links, and a bare text-xs
+                      link is ~16px tall. */}
+                  <div className="flex flex-wrap gap-x-5 mt-1">
                     {n.link && (
-                      <a href={n.link} onClick={() => !n.read_at && markRead(n.id)} className="text-xs font-semibold text-accent hover:text-accent-hover">
+                      <a href={n.link} onClick={() => !n.read_at && markRead(n.id)} className="inline-flex items-center min-h-11 text-xs font-semibold text-accent-text hover:text-accent">
                         Open →
                       </a>
                     )}
                     {!n.read_at && !actionable && (
-                      <button type="button" onClick={() => markRead(n.id)} className="text-xs text-prose-faint hover:text-prose">
+                      <button type="button" onClick={() => markRead(n.id)} className="inline-flex items-center min-h-11 text-xs font-semibold text-prose-muted hover:text-prose">
                         Mark read
                       </button>
                     )}
@@ -280,11 +297,11 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
                   {actionable && (
                     <div className="flex gap-2 mt-2">
                       <button type="button" onClick={() => act(n.id, 'accept')} disabled={busyId === n.id}
-                        className={buttonVariants({ size: 'sm' })}>
+                        className={buttonVariants({ size: 'md' })}>
                         {busyId === n.id ? '…' : 'Accept'}
                       </button>
                       <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
-                        className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
+                        className={buttonVariants({ variant: 'outline', size: 'md' })}>
                         Decline
                       </button>
                     </div>
@@ -317,22 +334,22 @@ export default function NotificationFeed({ initial }: { initial: NotificationRow
               {confirmingDelete ? (
                 <>
                   <button type="button" onClick={() => setConfirmingDelete(false)}
-                    className="px-3 py-2.5 text-xs font-semibold text-prose-muted hover:text-prose">
+                    className={buttonVariants({ variant: 'outline', size: 'md' })}>
                     Keep them
                   </button>
                   <button type="button" onClick={() => bulk('delete')} disabled={bulkBusy}
-                    className={buttonVariants({ size: 'sm' })}>
+                    className={buttonVariants({ size: 'md' })}>
                     {bulkBusy ? '…' : `Delete ${chosen.length}`}
                   </button>
                 </>
               ) : (
                 <>
                   <button type="button" onClick={() => bulk('read')} disabled={bulkBusy || chosen.length === 0}
-                    className="px-4 py-2.5 rounded-lg border border-soft bg-surface hover:bg-surface-hover disabled:opacity-40 text-xs font-semibold text-prose transition-colors">
+                    className={buttonVariants({ variant: 'outline', size: 'md' })}>
                     Mark read
                   </button>
                   <button type="button" onClick={() => setConfirmingDelete(true)} disabled={bulkBusy || chosen.length === 0}
-                    className="px-4 py-2.5 rounded-lg border border-soft bg-surface hover:bg-surface-hover disabled:opacity-40 text-xs font-semibold text-prose-muted transition-colors">
+                    className={buttonVariants({ variant: 'outline', size: 'md' })}>
                     Delete
                   </button>
                 </>

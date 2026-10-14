@@ -7,16 +7,25 @@
 //
 // Realtime channels are created synchronously from the `userId` prop (no async
 // getUser race) with a unique topic per mount — same fix as the old split
-// components, kept here. Styled with explicit zinc-dark classes to sit
-// cohesively next to the account dropdown in the dark header (and the dark
-// dashboard nav).
+// components, kept here.
+//
+// COMPOSED FROM THE MENU PRIMITIVES, NOT <Menu>: this panel needs to know when it
+// opens (to land on whichever tab has unread), so it owns `useDisclosure` and
+// hands it to <MenuPanel>. Open/close, Esc, outside-press and close-on-navigation
+// all come from the hook — nothing here re-implements them. The header is a
+// `data-theme="dark"` zone, so the panel inherits the dark tokens and its 2px
+// white edge (the overlay recipe) with no colour classes of its own.
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { activityTime } from '@/lib/activity-time'
+import { LABELS } from '@/lib/labels'
+import { useDisclosure } from '@/lib/hooks/useDisclosure'
 import { buttonVariants } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
+import { CountBadge, UnreadDot } from '@/components/ui/CountBadge'
+import { MenuPanel, MenuTabs, MenuDivider, MenuFooterLink } from '@/components/ui/Menu'
 import { CheckIcon } from '@/components/icons'
 
 interface NotificationRow {
@@ -44,26 +53,30 @@ interface ConversationSummary {
 interface ActivityMenuProps {
   userId: string
   /**
-   * Which edge of the bell the sm+ dropdown anchors to. `end` (default) hangs the
-   * panel off the bell's right edge — right for the header, where the bell sits at
-   * the far right. `start` anchors the left edge instead — for the dashboard
-   * sidebar, where the bell is at the left of a 240px rail and a right-anchored
-   * 320px panel would open ~100px off the left of the screen. Phones ignore this
-   * (the panel is pinned to the viewport there).
+   * `end` (default) is the HEADER mount: the panel opens in the masthead slot —
+   * one line under the orange rule, flush with the right gutter, the same line
+   * Account and Topics use (`placement="masthead"`). `start` is the dashboard
+   * sidebar, where the bell sits at the left of a 240px rail: there the panel
+   * must hang off the bell's LEFT edge (`placement="trigger"`), because a
+   * masthead-positioned panel would resolve against the sidebar, not a header.
+   * Phones ignore both (the panel is pinned to the viewport under the masthead).
    */
   align?: 'start' | 'end'
 }
 
+// Row recipe shared by both tabs. Hover is its own fill (surface-hover), distinct
+// from the unread fill (surface-raised) — on the old panel hover was `surface`,
+// i.e. the panel's own colour, so rows had no hover at all.
+const ROW = 'border-b border-soft last:border-0 hover:bg-surface-hover transition-colors'
+
 export default function ActivityMenu({ userId, align = 'end' }: ActivityMenuProps) {
-  const [open, setOpen]   = useState(false)
+  const disclosure = useDisclosure()
   const [tab, setTab]     = useState<'notifications' | 'messages'>('notifications')
   const [notifs, setNotifs]         = useState<NotificationRow[]>([])
   const [notifUnread, setNotifUnread] = useState(0)
   const [convs, setConvs]           = useState<ConversationSummary[]>([])
   const [msgUnread, setMsgUnread]   = useState(0)
   const [busyId, setBusyId]         = useState<string | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const pathname = usePathname()
 
   const loadNotifs = useCallback(async () => {
     const res = await fetch('/api/notifications', { cache: 'no-store' })
@@ -123,27 +136,11 @@ export default function ActivityMenu({ userId, align = 'end' }: ActivityMenuProp
     }
   }, [loadNotifs, loadMsgs])
 
-  // Close on client-side navigation. Opening a conversation (or any in-panel
-  // <Link>) changes the route but doesn't trigger outside-click, so the panel
-  // would otherwise linger on the destination page. No-op on mount.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setOpen(false) }, [pathname])
-
-  // Close on outside click.
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    if (open) document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [open])
-
-  // Open to whichever tab has unread (messages only if notifs are clear).
+  // Open to whichever tab has unread (messages only if notifs are clear). Close-on-
+  // route-change and outside-press are the disclosure's job, not ours.
   function toggleOpen() {
-    setOpen((o) => {
-      if (!o && notifUnread === 0 && msgUnread > 0) setTab('messages')
-      return !o
-    })
+    if (!disclosure.open && notifUnread === 0 && msgUnread > 0) setTab('messages')
+    disclosure.toggle()
   }
 
   async function markRead(id: string) {
@@ -195,127 +192,121 @@ export default function ActivityMenu({ userId, align = 'end' }: ActivityMenuProp
   }
 
   const totalUnread = notifUnread + msgUnread
-
-  const tabBtn = (key: 'notifications' | 'messages', label: string, count: number) => (
-    <button
-      type="button"
-      onClick={() => setTab(key)}
-      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
-        tab === key
-          ? 'border-accent text-prose'
-          : 'border-transparent text-prose-muted hover:text-prose'
-      }`}
-    >
-      {label}
-      {count > 0 && (
-        <span className="min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold text-white bg-accent rounded-full leading-none">
-          {count > 9 ? '9+' : count}
-        </span>
-      )}
-    </button>
-  )
+  const placement = align === 'start' ? 'trigger' : 'masthead'
 
   return (
-    <div ref={menuRef} className="relative">
-      <button
-        type="button"
+    // Masthead: NO `relative` here — the panel must position against the header's
+    // own `relative h-16` container, or it opens at this trigger's height and x.
+    // `flex` so the wrapper is exactly the button's 44px (a block wrapper around an
+    // inline-flex button adds a baseline gap).
+    <div className={placement === 'masthead' ? 'flex' : 'relative flex'}>
+      <IconButton
+        {...disclosure.triggerProps}
         onClick={toggleOpen}
-        aria-label={totalUnread > 0 ? `Activity (${totalUnread} unread)` : 'Activity'}
-        className="relative p-2 text-prose-muted hover:text-prose rounded-lg hover:bg-surface-raised/60 transition-colors"
+        label={totalUnread > 0 ? `Activity, ${totalUnread} unread` : 'Activity'}
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
-        {totalUnread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-bold text-white bg-accent rounded-full leading-none">
-            {totalUnread > 9 ? '9+' : totalUnread}
-          </span>
-        )}
-      </button>
+        <CountBadge count={totalUnread} className="absolute -top-0.5 -right-0.5" />
+      </IconButton>
 
-      {open && (
-        /* Phones: pinned to the viewport (the bell sits left of the search + menu
-            icons, so a panel anchored to its right edge ran off the LEFT of the
-            screen). sm+: the anchored dropdown. The sticky header is at top:0, so
-            `top-[4.25rem]` lands just under it whether `fixed` resolves against
-            the viewport or against the blurred header box. */
-        <div className={`fixed inset-x-3 top-[4.25rem] w-auto sm:absolute sm:inset-x-auto sm:top-auto ${align === 'start' ? 'sm:left-0' : 'sm:right-0'} sm:mt-2 sm:w-80 sm:max-w-[90vw] bg-surface-raised border border-strong rounded-xl shadow-2xl z-50 overflow-hidden`}>
-          {/* Tabs */}
-          <div className="flex">
-            {tabBtn('notifications', 'Notifications', notifUnread)}
-            {tabBtn('messages', 'Messages', msgUnread)}
-          </div>
+      {disclosure.open && (
+        // Phones: pinned under the masthead (`pinOnPhone`) — the bell sits left of
+        // the search + menu icons, so a panel anchored to its right edge would run
+        // off the LEFT of the screen. sm+: the masthead slot (or, in the dashboard
+        // rail, the trigger's left edge).
+        <MenuPanel disclosure={disclosure} label="Activity" width="feed" pinOnPhone align={align} placement={placement}>
+          <MenuTabs
+            label="Activity"
+            value={tab}
+            onChange={setTab}
+            tabs={[
+              { value: 'notifications', label: LABELS.notifications.short, count: notifUnread },
+              { value: 'messages',      label: LABELS.messages.short,      count: msgUnread },
+            ]}
+          />
 
           {tab === 'notifications' ? (
             <>
               {notifUnread > 0 && (
-                <div className="flex justify-end px-4 py-1.5 border-b border-strong">
-                  <button type="button" onClick={markAll} className="text-xs text-accent-text hover:text-accent font-semibold">
+                <div className="-mx-1.5 flex justify-end px-3 border-b border-soft">
+                  <button
+                    type="button"
+                    onClick={markAll}
+                    className="inline-flex items-center min-h-11 px-3 rounded-md text-xs font-semibold text-accent-text hover:bg-surface-hover transition-colors"
+                  >
                     Mark all read
                   </button>
                 </div>
               )}
-              <div className="max-h-[60vh] overflow-y-auto">
+              <div className="-mx-1.5 max-h-[60vh] overflow-y-auto">
                 {notifs.length === 0 ? (
-                  <p className="px-4 py-8 text-center text-sm text-prose-muted">You&apos;re all caught up.</p>
+                  <p className="px-4 py-8 text-center text-sm text-prose-muted">{LABELS.notifications.empty}</p>
                 ) : (
                   notifs.map((n) => {
                     const actionable = n.action_required && (!n.action_state || n.action_state === 'pending')
                     return (
-                      <div key={n.id} className={`px-4 py-3 border-b border-strong/60 last:border-0 ${n.read_at ? '' : 'bg-surface-hover/40'}`}>
-                        <div className="flex items-start gap-2">
-                          {!n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-accent shrink-0" />}
+                      // Unread = a row fill + the dot. The dot is ALWAYS mounted
+                      // (transparent once read) so marking a row read never shifts
+                      // its text sideways; the check slot is held for the same reason.
+                      <div key={n.id} className={`pl-4 pr-2 py-3 ${ROW} ${n.read_at ? '' : 'bg-surface-raised'}`}>
+                        <div className="flex items-start gap-3">
+                          <UnreadDot unread={!n.read_at} className="mt-1.5" />
                           <button type="button" onClick={() => openNotif(n)} className="block flex-1 min-w-0 text-left">
                             <p className="text-sm font-semibold text-prose leading-snug">{n.title}</p>
                             {n.body && <p className="text-xs text-prose-muted mt-0.5 leading-snug">{n.body}</p>}
                             <p className="text-[11px] text-prose-faint mt-1">{activityTime(n.created_at)}</p>
                           </button>
-                          {!n.read_at && (
-                            <button
-                              type="button"
-                              onClick={() => markRead(n.id)}
-                              aria-label="Mark as read"
+                          {n.read_at ? (
+                            <span aria-hidden className="w-11 shrink-0 -mr-2" />
+                          ) : (
+                            // 44px target in a ~60px row: the negative margins let the
+                            // button overhang the row's padding instead of growing it.
+                            <IconButton
+                              label="Mark as read"
                               title="Mark as read"
-                              className="shrink-0 p-1 -mr-1 text-prose-faint hover:text-accent transition-colors"
+                              onClick={() => markRead(n.id)}
+                              className="-my-3 -mr-2"
                             >
                               <CheckIcon className="w-4 h-4" strokeWidth={2} />
-                            </button>
+                            </IconButton>
                           )}
                         </div>
                         {actionable && (
-                          <div className="flex gap-2 mt-2 pl-4">
+                          // pl-5 = the dot (8px) + its gap (12px): buttons line up under the text.
+                          <div className="flex gap-2 mt-2 pl-5">
                             <button type="button" onClick={() => act(n.id, 'accept')} disabled={busyId === n.id}
-                              className={buttonVariants({ size: 'sm' })}>
+                              className={buttonVariants({ size: 'md' })}>
                               {busyId === n.id ? '…' : 'Accept'}
                             </button>
                             <button type="button" onClick={() => act(n.id, 'decline')} disabled={busyId === n.id}
-                              className="px-3 py-1.5 bg-surface-raised hover:bg-surface-hover disabled:opacity-40 text-prose text-xs font-semibold rounded-lg transition-colors">
+                              className={buttonVariants({ variant: 'outline', size: 'md' })}>
                               Decline
                             </button>
                           </div>
                         )}
                         {n.action_required && n.action_state && n.action_state !== 'pending' && (
-                          <p className="text-[11px] text-prose-faint mt-1.5 pl-4 capitalize">{n.action_state}</p>
+                          <p className="text-[11px] text-prose-faint mt-1.5 pl-5 capitalize">{n.action_state}</p>
                         )}
                       </div>
                     )
                   })
                 )}
               </div>
-              <Link href="/account/notifications" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-strong">
-                View all notifications
-              </Link>
+              <MenuDivider />
+              <MenuFooterLink href="/account/notifications">View all notifications</MenuFooterLink>
             </>
           ) : (
             <>
-              <div className="max-h-[60vh] overflow-y-auto">
+              <div className="-mx-1.5 max-h-[60vh] overflow-y-auto">
                 {convs.length === 0 ? (
                   <p className="px-4 py-8 text-center text-sm text-prose-muted">No conversations yet.</p>
                 ) : (
                   convs.slice(0, 8).map((c) => (
                     <Link key={c.id} href={`/account/messages/${c.id}`}
                       onClick={() => openConversation(c)}
-                      className={`flex items-center gap-3 px-4 py-3 border-b border-strong/60 last:border-0 hover:bg-surface-hover/50 transition-colors ${c.unread && !c.muted ? 'bg-surface-hover/40' : ''}`}>
+                      className={`flex items-center gap-3 px-4 py-3 ${ROW} ${c.unread && !c.muted ? 'bg-surface-raised' : ''}`}>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-baseline gap-2">
                           <p className="text-sm font-semibold text-prose truncate">{peerName(c)}</p>
@@ -335,22 +326,18 @@ export default function ActivityMenu({ userId, align = 'end' }: ActivityMenuProp
                         )}
                       </div>
                       {c.unreadCount > 0 && (
-                        <span className={`shrink-0 inline-flex min-w-5 h-5 items-center justify-center rounded-full px-1.5 text-[11px] font-black tabular-nums ${
-                          c.muted ? 'bg-surface-hover text-prose-muted' : 'bg-accent text-white'
-                        }`}>
-                          {c.unreadCount > 9 ? '9+' : c.unreadCount}
-                        </span>
+                        // A muted thread's count is information, not an alert.
+                        <CountBadge count={c.unreadCount} tone={c.muted ? 'muted' : 'accent'} className="shrink-0" />
                       )}
                     </Link>
                   ))
                 )}
               </div>
-              <Link href="/account/messages" className="block px-4 py-2.5 text-center text-xs font-semibold text-accent-text hover:text-accent border-t border-strong">
-                All messages
-              </Link>
+              <MenuDivider />
+              <MenuFooterLink href="/account/messages">All messages</MenuFooterLink>
             </>
           )}
-        </div>
+        </MenuPanel>
       )}
     </div>
   )

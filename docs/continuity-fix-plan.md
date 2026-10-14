@@ -344,7 +344,12 @@ masthead, the "Unsubscribe" link appears in Gmail's header.
      for their phases: the 9 `error.tsx` → `RouteError` (Phase 5), `EmailSignup` callers (merch →
      Phase 4/6), call-site adoption of the new `LABELS` nouns (Phases 3/8). B7 needs the
      `NEWSLETTER_UNSUBSCRIBE_SECRET` env var on Vercel — unsigned links + no one-click header until set.
-  2. Phases 3–5 — chrome & menus, signups, reader leftovers + auth.
+  2. Phases 3–5 — chrome & menus, signups, reader leftovers + auth. **Built 2026-10-14**
+     (baseline 162 → 118). Follow-ups found, not yet done: `/tools/email-unsubscribe` still
+     unsubscribes on GET (B7's bug class, tool emails); `weekends-until/_components/Result.tsx`
+     `border-faint` (Phase 7); `CommentList` row now mixes the 44px like chip with small text links
+     (Phase 8); `OffTheBench` card body (hover lift, tint stub) untouched; no `BellIcon`/`UserIcon`
+     in `components/icons.tsx` (inline SVGs remain in the menus).
   3. Phases 6–7 — commerce, tools.
   4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs.
 - Rough size: ~180 files across all phases (Phase 7 is the largest, ~45).

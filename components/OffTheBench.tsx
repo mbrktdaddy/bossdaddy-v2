@@ -89,7 +89,7 @@ export default async function OffTheBench({ limit = 3, className = '' }: Props) 
                   <CheckCircleIcon className="w-8 h-8" strokeWidth={1.5} />
                 </div>
               )}
-              <span className="absolute top-2 left-2 inline-flex items-center bg-surface-sunken/85 backdrop-blur border border-soft rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-accent-text-soft">
+              <span className="absolute top-2 left-2 inline-flex items-center bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em] leading-none">
                 Reviewed
               </span>
             </div>

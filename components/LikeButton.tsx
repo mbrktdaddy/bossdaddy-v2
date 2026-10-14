@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLoginHref } from '@/lib/use-login-href'
+import { PILL_BASE, PILL_INACTIVE } from '@/components/ui/PillFilterStrip'
 
 interface Props {
   contentType: 'review' | 'guide' | 'comment'
@@ -45,54 +46,39 @@ export default function LikeButton({ contentType, contentId, size = 'md' }: Prop
 
   if (!ready) return null
 
-  if (size === 'sm') {
-    return (
-      <button
-        onClick={toggle}
-        disabled={loading}
-        aria-pressed={liked}
-        aria-label={liked ? 'Unlike' : 'Like'}
-        className={`flex items-center gap-1.5 text-xs transition-colors disabled:opacity-50 ${
-          liked ? 'text-red-700' : 'text-prose-faint hover:text-prose-muted'
-        }`}
-      >
-        <svg
-          className={`w-3.5 h-3.5 transition-transform ${liked ? 'scale-110' : ''}`}
-          fill={liked ? 'currentColor' : 'none'}
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-        <span>{count > 0 ? count : liked ? 'Liked' : 'Like'}</span>
-      </button>
-    )
-  }
-
+  // The square chip (Hard Goods, brand-guide §6): PILL_BASE is the geometry, so
+  // liking changes colour and the heart's fill and NOTHING else. The "Like" /
+  // "Liked" text swap and the old scale-110 on the icon both moved the box, so
+  // the label is constant and aria-pressed carries the state for assistive tech.
+  // Liked = the orange fill; white ink on an orange CHIP at 11px caps is
+  // sanctioned (white BODY text on orange is not). `border-accent` keeps the
+  // 2px edge, so unliked → liked never resizes. No hover change on the liked
+  // fill: `hover:bg-accent-hover` is the hand-rolled-primary-button tell.
+  // `size="sm"` (comment footers) only shrinks the heart — the 44px tap floor
+  // stays, because a 36px target on a phone is the bug, not the density.
   return (
     <button
+      type="button"
       onClick={toggle}
       disabled={loading}
       aria-pressed={liked}
       aria-label={liked ? 'Unlike' : 'Like'}
-      className={`flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-semibold transition-colors disabled:opacity-50 ${
-        liked
-          ? 'bg-red-500/10 border-red-500/40 text-red-400'
-          : 'bg-surface border-soft text-prose-muted hover:border-strong hover:text-prose hover:bg-surface-raised'
+      className={`${PILL_BASE} disabled:opacity-50 ${
+        liked ? 'bg-accent text-white border-accent' : PILL_INACTIVE
       }`}
     >
       <svg
-        className={`w-4 h-4 transition-transform ${liked ? 'scale-110' : ''}`}
+        className={size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'}
         fill={liked ? 'currentColor' : 'none'}
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeWidth={2}
+        aria-hidden
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
-      <span>{liked ? 'Liked' : 'Like'}</span>
-      {count > 0 && <span className="tabular-nums opacity-80">{count}</span>}
+      <span>Like</span>
+      {count > 0 && <span className="tabular-nums">{count}</span>}
     </button>
   )
 }

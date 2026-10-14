@@ -27,7 +27,7 @@ interface NoticeProps {
   title?: React.ReactNode
   /** The supporting line under the title. */
   children?: React.ReactNode
-  /** One button or link — `buttonVariants({ size: 'sm' })`. */
+  /** One button or link — `buttonVariants()` (md, 44px: these sit on phones). */
   action?: React.ReactNode
   onDismiss?: () => void
   dismissLabel?: string

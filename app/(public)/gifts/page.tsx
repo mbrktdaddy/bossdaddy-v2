@@ -119,12 +119,17 @@ export default async function GiftsIndexPage() {
 
       {/* Newsletter pitch — the form itself, in place. This used to link to
           `/#newsletter`, an id nothing on the homepage carried (B3), so "Get on
-          the list" dropped people at the top of the homepage. */}
+          the list" dropped people at the top of the homepage. intent="notify"
+          tags `notify:gifts:season` — it's a heads-up before each holiday, not
+          the weekly digest, so it must not enrol anyone in that (B5). */}
       <NewsletterSignup
         variant="card"
+        intent="notify"
+        topic="gifts:season"
+        eyebrow="Gift alerts"
         headingAs="h3"
         heading="New gift guides drop with the seasons"
-        body="Subscribe to the Boss Daddy Crew for fresh gift picks before each major holiday."
+        body="Get an email when a new gift guide drops — fresh picks before each major holiday."
         className="mt-16 max-w-2xl mx-auto"
       />
       </div>

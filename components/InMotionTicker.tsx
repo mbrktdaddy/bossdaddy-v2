@@ -103,11 +103,11 @@ export default async function InMotionTicker() {
     <section
       data-theme="dark" /* dark BAND — stays near-black on the light canvas (lib/canvas.ts) */
       aria-label="Currently in motion on Boss Daddy"
-      className="relative bg-chrome border-b border-copper/40"
+      className="relative bg-chrome border-b border-accent/40"
     >
       <div className="max-w-6xl mx-auto px-6 py-2">
         <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide text-xs whitespace-nowrap">
-          <span className="shrink-0 text-copper font-black uppercase tracking-[0.18em]">In Motion</span>
+          <span className="shrink-0 text-accent font-black uppercase tracking-[0.18em]">In Motion</span>
           <span aria-hidden className="shrink-0 text-prose-faint">·</span>
           {items.map((item, i) => {
             const meta = STATUS_META[item.status] ?? STATUS_META.testing
@@ -118,8 +118,8 @@ export default async function InMotionTicker() {
                   href={href}
                   className="inline-flex items-center gap-1.5 text-prose-muted hover:text-prose transition-colors"
                 >
-                  <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-copper" />
-                  <span className="text-copper/90 font-semibold tracking-wide">{meta.label}:</span>
+                  <StatusIcon kind={meta.kind} className="w-3.5 h-3.5 shrink-0 text-accent" />
+                  <span className="text-accent/90 font-semibold tracking-wide">{meta.label}:</span>
                   <span className="font-medium">{item.title}</span>
                 </Link>
                 {i < items.length - 1 && (
@@ -132,7 +132,7 @@ export default async function InMotionTicker() {
           <Link
             href="/bench"
             title={LABELS.bench.tagline}
-            className="shrink-0 inline-flex items-center gap-1 text-copper hover:text-zinc-50 transition-colors font-semibold uppercase tracking-widest"
+            className="shrink-0 inline-flex items-center gap-1 text-accent hover:text-zinc-50 transition-colors font-semibold uppercase tracking-widest"
           >
             See the Bench — what&apos;s next →
           </Link>

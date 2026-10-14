@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { CheckCircleIcon, XIcon } from '@/components/icons'
+import { Notice } from '@/components/ui/Notice'
 
 interface GradVote {
   reviewSlug: string
@@ -56,38 +56,26 @@ export function VotePayoffBanner() {
     setItems([])
   }
 
+  // The shared Notice (continuity plan P17) — the old peach accent-tint box is
+  // gone. The leading check icon went with it: the title already says "reviewed",
+  // and Notice has no icon slot on purpose (one recipe, no per-surface variants).
   return (
-    <div className="mb-8 flex items-start gap-3 rounded-xl bg-accent-tint border border-accent-border/50 p-4">
-      <span className="mt-0.5 shrink-0 text-accent-text-soft" aria-hidden>
-        <CheckCircleIcon className="w-5 h-5" strokeWidth={1.8} />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm text-accent-text/90">
-          <strong className="text-accent-text-soft">You voted for this — it&apos;s reviewed.</strong>{' '}
-          <Link
-            href={`/reviews/${lead.reviewSlug}`}
-            className="font-semibold underline decoration-accent-border/60 underline-offset-2 hover:text-accent-text-soft"
-          >
-            {lead.title}
-          </Link>{' '}
-          is off the bench and fully tested.
-          {extra > 0 && (
-            <>
-              {' '}
-              <Link href="/reviews" className="font-semibold hover:text-accent-text-soft">
-                +{extra} more you voted for →
-              </Link>
-            </>
-          )}
-        </p>
-      </div>
-      <button
-        onClick={dismiss}
-        aria-label="Dismiss"
-        className="shrink-0 -mt-1 -mr-1 p-1 text-accent-text/50 hover:text-accent-text-soft transition-colors"
+    <Notice variant="inline" className="mb-8" title="You voted for this — it’s reviewed." onDismiss={dismiss}>
+      <Link
+        href={`/reviews/${lead.reviewSlug}`}
+        className="font-semibold text-prose underline decoration-accent underline-offset-2 hover:text-accent-text"
       >
-        <XIcon className="w-4 h-4" strokeWidth={2} />
-      </button>
-    </div>
+        {lead.title}
+      </Link>{' '}
+      is off the bench and fully tested.
+      {extra > 0 && (
+        <>
+          {' '}
+          <Link href="/reviews" className="font-semibold text-prose hover:text-accent-text">
+            +{extra} more you voted for →
+          </Link>
+        </>
+      )}
+    </Notice>
   )
 }

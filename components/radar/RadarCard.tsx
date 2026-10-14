@@ -107,7 +107,7 @@ export function RadarCard({ item, headingLevel: Heading = 'h3' }: Props) {
                 <span className="text-sm font-semibold text-prose group-hover:text-accent-text-soft transition-colors">Moved to the Bench</span>
                 <StatusBadge status={outcome.status} />
               </span>
-              <span aria-hidden className="text-prose-faint group-hover:text-copper transition-colors">→</span>
+              <span aria-hidden className="text-prose-faint group-hover:text-accent transition-colors">→</span>
             </Link>
           )}
 

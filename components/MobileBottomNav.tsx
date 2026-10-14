@@ -165,7 +165,7 @@ export default function MobileBottomNav() {
         key={href}
         href={href}
         className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors ${
-          active ? 'text-copper' : 'text-prose-faint hover:text-prose-muted'
+          active ? 'text-accent' : 'text-prose-faint hover:text-prose-muted'
         }`}
         aria-current={active ? 'page' : undefined}
       >
@@ -184,7 +184,9 @@ export default function MobileBottomNav() {
       aria-label="Primary mobile navigation"
       // Slides away while reading (useBottomNavHidden). The extra 1.5rem carries the
       // Ask button, which bulges above the strip, fully off-screen with it.
-      className={`fixed bottom-0 left-0 right-0 z-40 md:hidden bg-chrome/95 backdrop-blur-sm border-t border-soft transition-transform duration-300 ${
+      // SOLID chrome, like the masthead (Hard Goods): the old 95% + blur let the
+      // white page grey the strip as it scrolled under — a frosted SaaS tab bar.
+      className={`fixed bottom-0 left-0 right-0 z-40 md:hidden bg-chrome border-t border-soft transition-transform duration-300 ${
         scrolledAway ? 'translate-y-[calc(100%+1.5rem)]' : 'translate-y-0'
       }`}
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}

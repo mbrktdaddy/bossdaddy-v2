@@ -187,7 +187,7 @@ export default async function ExplorePage() {
             {CATEGORIES.map((cat) => (
               <Card as="li" tone="chrome" key={cat.slug}>
                 <Link href={`/category/${cat.slug}`} className="group flex flex-col gap-3 p-4 sm:p-5 h-full min-h-[44px]">
-                  <CategoryIcon slug={cat.slug} className="w-6 h-6 text-copper shrink-0" />
+                  <CategoryIcon slug={cat.slug} className="w-6 h-6 text-accent shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm sm:text-base font-extrabold text-prose leading-snug group-hover:text-accent transition-colors">
                       {cat.label}

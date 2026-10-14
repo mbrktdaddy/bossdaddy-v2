@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CATEGORIES } from '@/lib/categories'
+import { LABELS } from '@/lib/labels'
 
 /**
  * The topics row under the masthead — every width since Hard Goods (A2, the
@@ -22,7 +23,7 @@ import { CATEGORIES } from '@/lib/categories'
 export default function CategoryBar() {
   const pathname = usePathname()
   return (
-    <nav aria-label="Topics" className="bg-background border-b border-soft">
+    <nav aria-label={LABELS.topics.short} className="bg-background border-b border-soft">
       <div className="overflow-x-auto scrollbar-hide">
         {/* Phone: left-packed scroller, first label flush with the gutter.
             lg+: the group is CENTRED in the container with dividers between

@@ -16,8 +16,7 @@
 // mobile drawer. Resolving auth twice on one page is fine — both calls read the
 // browser client's local session, which is synchronous and networkless.
 
-import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -25,7 +24,18 @@ import { LABELS } from '@/lib/labels'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import ActivityMenu from '@/components/ActivityMenu'
 import { buttonVariants } from '@/components/ui/Button'
+import { Avatar } from '@/components/ui/Avatar'
+import { Menu, MenuItem, MenuLabel, MenuDivider } from '@/components/ui/Menu'
 import { ChevronDownIcon, DownloadIcon, EnvelopeIcon } from '@/components/icons'
+
+/** A one-path outline icon. Menu rows size + colour it (`[&_svg]` in MenuItem), so no classes here. */
+function PathIcon({ d }: { d: string }) {
+  return (
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  )
+}
 
 interface AuthUser {
   userId: string | null
@@ -110,154 +120,113 @@ export function useAuthUser(): AuthUser {
 export default function AccountMenu({ withBell = true }: { withBell?: boolean } = {}) {
   const { username, role, avatarUrl, userId, resolved } = useAuthUser()
   const pathname = usePathname()
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const userMenuRef = useRef<HTMLDivElement>(null)
-  const profileHref = '/account/settings'
   const hasDashboard = role === 'author' || role === 'admin'
   const vis = 'hidden md:block'
-
-  useEffect(() => {
-    if (!userMenuOpen) return
-    function onDoc(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setUserMenuOpen(false)
-    }
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setUserMenuOpen(false) }
-    document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDoc)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [userMenuOpen])
 
   return (
     <>
       {withBell && username && userId && <ActivityMenu userId={userId} />}
       {!resolved ? (
         // Neutral placeholder during the first-frame auth check — matches the
-        // avatar-trigger footprint so a signed-in user goes skeleton→avatar,
-        // never "Sign In"→avatar, and logged-out sees no jarring text pop.
-        <div className={`${vis} w-8 h-8 rounded-full bg-surface-raised animate-pulse`} aria-hidden />
+        // avatar-trigger footprint (44px, square-cornered like the trigger) so a
+        // signed-in user goes skeleton→avatar, never "Sign In"→avatar, and
+        // logged-out sees no jarring text pop.
+        <div className={`${vis} w-11 h-11 rounded-md bg-surface-raised animate-pulse`} aria-hidden />
       ) : username ? (
-        <div ref={userMenuRef} className={`${vis} relative`}>
-          <button
-            onClick={() => setUserMenuOpen(!userMenuOpen)}
-            className={`flex items-center gap-2 p-1 pr-3 rounded-full transition-colors ${
-              userMenuOpen ? 'bg-surface-hover' : 'bg-surface-raised hover:bg-surface-hover'
-            }`}
-            aria-label="Account menu"
-            aria-expanded={userMenuOpen}
-          >
-            <div className="w-7 h-7 rounded-full overflow-hidden bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt="" width={28} height={28} className="object-cover w-full h-full" unoptimized />
-              ) : (
-                username[0].toUpperCase()
-              )}
-            </div>
-            {/* SM AND UP ONLY. The handle costs up to 120px, and with the bell beside it
-                the trigger ran ~180px — which collided with the wordmark at 393px back
-                when the tools chrome kept this whole menu visible on a phone. It is also
-                redundant: the panel this button opens leads with @{username}. So the
-                trigger is avatar + chevron on a narrow screen, which is what every app
-                chrome does, and the name appears the moment there's room for it. */}
-            <span className="hidden sm:inline text-sm text-prose-muted max-w-[120px] truncate">
-              @{username}
-            </span>
-            <ChevronDownIcon className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} strokeWidth={2.5} />
-          </button>
-
-          {userMenuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-surface-raised border border-strong rounded-xl p-1.5 z-50">
-              <div className="px-3 py-2 border-b border-soft mb-1">
-                <p className="text-[10px] uppercase tracking-widest text-prose-muted font-semibold">Signed in as</p>
-                <p className="text-sm font-bold text-prose truncate">@{username}</p>
-              </div>
-              <Link
-                href={profileHref}
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-              >
-                <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                {LABELS.settings.full}
-              </Link>
-              {/* Account sits ABOVE Settings — it's the page a member actually wants,
-                  and it used to be reachable only by going to a settings URL. Label via
-                  LABELS.account (was a hardcoded "Your Stuff" in four places). */}
-              <Link
-                href="/account"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-              >
-                <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />
-                </svg>
-                {LABELS.account.short}
-              </Link>
-              <Link
-                href="/account/connections"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-              >
-                <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                {LABELS.contacts.short}
-                <ConnectionBadge />
-              </Link>
-              <Link
-                href="/account/messages"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-              >
-                <EnvelopeIcon className="w-4 h-4 text-prose-faint" strokeWidth={1.8} />
-                Messages
-              </Link>
-              {hasDashboard && (
-                <Link
-                  href="/dashboard"
-                  onClick={() => setUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-                >
-                  <svg className="w-4 h-4 text-prose-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />
-                  </svg>
-                  Dashboard
-                </Link>
-              )}
-              <Link
-                href="/install"
-                onClick={() => setUserMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors"
-              >
-                <DownloadIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
-                {LABELS.app.short}
-              </Link>
-              <div className="border-t border-soft mt-1 pt-1">
-                <form action="/api/auth/signout" method="POST">
-                  <button
-                    type="submit"
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-prose-muted hover:bg-danger-bg hover:text-danger-ink transition-colors text-left"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Sign Out
-                  </button>
-                </form>
-              </div>
-            </div>
+        // `placement="masthead"`: the panel opens on the same line as Topics and
+        // Activity — 8px under the header's orange rule, flush with the right
+        // gutter. Menu drops its own `relative` for that, so there must be none
+        // between this trigger and the header's `relative h-16` container either.
+        <Menu
+          placement="masthead"
+          label={LABELS.account.short}
+          className={vis}
+          trigger={({ open, ...triggerProps }) => (
+            // The one non-IconButton trigger in the chrome (it carries a handle),
+            // and the only pill it ever was: now a 44px square-cornered chip, with
+            // the avatar inside staying round. Open = fill only, never geometry.
+            <button
+              {...triggerProps}
+              aria-label="Account menu"
+              className={`flex items-center gap-2 h-11 pl-1.5 pr-3 rounded-md transition-colors ${
+                open ? 'bg-surface-hover' : 'bg-surface-raised hover:bg-surface-hover'
+              }`}
+            >
+              <Avatar src={avatarUrl} name={username} size={32} />
+              {/* SM AND UP ONLY. The handle costs up to 120px, and with the bell beside it
+                  the trigger ran ~180px — which collided with the wordmark at 393px back
+                  when the tools chrome kept this whole menu visible on a phone. It is also
+                  redundant: the panel this button opens leads with @{username}. So the
+                  trigger is avatar + chevron on a narrow screen, which is what every app
+                  chrome does, and the name appears the moment there's room for it. */}
+              <span className="hidden sm:inline text-sm text-prose-muted max-w-[120px] truncate">
+                @{username}
+              </span>
+              <ChevronDownIcon className={`w-3 h-3 text-prose-faint transition-transform duration-200 ${open ? 'rotate-180' : ''}`} strokeWidth={2.5} />
+            </button>
           )}
-        </div>
+        >
+          <MenuLabel>Signed in as</MenuLabel>
+          <p className="px-3 pb-2 text-sm font-bold text-prose truncate">@{username}</p>
+          <MenuDivider />
+          {/* Account sits ABOVE Settings — it's the page a member actually wants,
+              and it used to be reachable only by going to a settings URL. Labels via
+              LABELS (Account was a hardcoded "Your Stuff" in four places; "Settings"
+              is the short form because this menu already says Account). */}
+          <MenuItem
+            href="/account"
+            icon={<PathIcon d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm4 4h8M8 14h5" />}
+          >
+            {LABELS.account.short}
+          </MenuItem>
+          <MenuItem
+            href="/account/settings"
+            icon={<PathIcon d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />}
+          >
+            {LABELS.settings.short}
+          </MenuItem>
+          <MenuItem
+            href="/account/connections"
+            icon={<PathIcon d="M17 20h5v-1a4 4 0 00-3-3.87M9 20H4v-1a4 4 0 013-3.87m10-4.63a3 3 0 11-6 0 3 3 0 016 0z" />}
+          >
+            {LABELS.contacts.short}
+            <ConnectionBadge />
+          </MenuItem>
+          <MenuItem href="/account/messages" icon={<EnvelopeIcon />}>
+            {LABELS.messages.short}
+          </MenuItem>
+          {hasDashboard && (
+            <MenuItem
+              href="/dashboard"
+              icon={<PathIcon d="M4 6h6v6H4zM14 6h6v4h-6zM14 14h6v4h-6zM4 16h6v2H4z" />}
+            >
+              Dashboard
+            </MenuItem>
+          )}
+          <MenuItem href="/install" icon={<DownloadIcon />}>
+            {LABELS.app.short}
+          </MenuItem>
+          <MenuDivider />
+          {/* A real form POST (the signout route clears the session cookies and
+              redirects). `type="submit"` is the one MenuItem that does NOT close the
+              panel: closing unmounts this form mid-submit and the POST never leaves.
+              The navigation that follows closes it. */}
+          <form action="/api/auth/signout" method="POST">
+            <MenuItem
+              type="submit"
+              icon={<PathIcon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />}
+            >
+              Sign Out
+            </MenuItem>
+          </form>
+        </Menu>
       ) : (
         // Join is the visitor's reason to sign up — "Sign In" alone only speaks
         // to people who already have an account.
         <div className="hidden md:flex items-center gap-2">
           <Link
             href={`/login?next=${encodeURIComponent(pathname)}`}
-            className="text-sm px-3 py-2 rounded-lg text-prose-muted hover:text-prose transition-colors"
+            className="inline-flex items-center min-h-11 text-sm px-3 rounded-lg text-prose-muted hover:text-prose transition-colors"
           >
             Sign In
           </Link>

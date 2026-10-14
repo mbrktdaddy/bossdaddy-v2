@@ -35,14 +35,3 @@ export async function subscribeFromForm(_prev: NewsletterFormState, form: FormDa
   if (!result.ok) return { status: 'error', message: result.error, email }
   return { status: result.already ? 'already' : 'success' }
 }
-
-// ── Legacy imperative call — `EmailSignup` (retires in continuity Phase 4) ───
-
-export type SubscribeResult =
-  | { ok: true; alreadySubscribed: boolean }
-  | { ok: false; error: string }
-
-export async function subscribeToNewsletter(input: { email: string; interests?: string[] }): Promise<SubscribeResult> {
-  const result = await subscribe({ email: input.email, intent: 'digest', interests: input.interests }, { ip: await clientIp() })
-  return result.ok ? { ok: true, alreadySubscribed: result.already } : { ok: false, error: result.error }
-}

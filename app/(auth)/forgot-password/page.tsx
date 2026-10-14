@@ -4,7 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { buttonVariants } from '@/components/ui/Button'
-import { EnvelopeIcon } from '@/components/icons'
+import { Field } from '@/components/ui/Field'
+import PageHeader from '@/components/PageHeader'
+import { LABELS } from '@/lib/labels'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -33,74 +35,78 @@ export default function ForgotPasswordPage() {
     setLoading(false)
   }
 
+  // The "sent" state keeps the same left-aligned lockup as the form (the old
+  // centred envelope-in-a-circle was a one-off; the label block + rule carry it).
   if (sent) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-        <div className="w-full max-w-sm text-center">
-          <div className="w-14 h-14 rounded-full bg-accent-tint border border-accent-border/50 flex items-center justify-center mx-auto mb-6">
-            <EnvelopeIcon className="w-6 h-6 text-accent-text-soft" strokeWidth={2} />
-          </div>
-          <h1 className="text-2xl font-black text-prose mb-2">Check your inbox</h1>
-          <p className="text-prose-muted text-sm mb-6">
-            We sent a reset link to <span className="text-accent-text-soft">{email}</span>. Click it to set a new password.
-          </p>
-          <p className="text-prose-faint text-xs">
-            Didn&apos;t get it? Check your spam folder or{' '}
-            <button onClick={() => setSent(false)} className="text-accent-text-soft hover:text-accent">
-              try again
-            </button>
-            .
-          </p>
-        </div>
-      </main>
+      <>
+        <PageHeader
+          size="compact"
+          eyebrow={LABELS.auth.recoveryEyebrow}
+          title={LABELS.auth.forgot.sentH1}
+          className="mb-6"
+        />
+        <p className="text-sm text-prose-muted leading-relaxed">
+          We sent a reset link to <span className="font-semibold text-prose">{email}</span>. Click it to set a new password.
+        </p>
+        <p className="mt-4 text-sm text-prose-faint">
+          Didn&apos;t get it? Check your spam folder or{' '}
+          <button
+            type="button"
+            onClick={() => setSent(false)}
+            className="inline-block py-3 -my-3 font-semibold text-accent-text hover:text-accent"
+          >
+            try again
+          </button>
+          .
+        </p>
+      </>
     )
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-black text-prose mb-2">Reset your password</h1>
-        <p className="text-prose-muted mb-8 text-sm">
-          Enter your email and we&apos;ll send you a reset link.
-        </p>
+    <>
+      <PageHeader
+        size="compact"
+        eyebrow={LABELS.auth.recoveryEyebrow}
+        title={LABELS.auth.forgot.h1}
+        deck="Enter your email and we’ll send you a reset link."
+        className="mb-6"
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm text-prose-muted mb-1">Email</label>
-            <input
-              autoComplete="username"
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="you@example.com"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field
+          label="Email"
+          autoComplete="username"
+          id="email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+        />
 
-          {error && (
-            <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-2">
-              {error}
-            </p>
-          )}
+        {error && (
+          <p role="alert" className="text-sm font-medium text-danger-ink bg-danger-bg border border-danger-line rounded-md px-4 py-2.5">
+            {error}
+          </p>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={buttonVariants({ className: 'w-full' })}
-          >
-            {loading ? 'Sending…' : 'Send Reset Link'}
-          </button>
-        </form>
+        <button
+          type="submit"
+          disabled={loading}
+          className={buttonVariants({ className: 'w-full' })}
+        >
+          {loading ? 'Sending…' : 'Send Reset Link'}
+        </button>
+      </form>
 
-        <p className="mt-6 text-center text-sm text-prose-faint">
-          Remember it?{' '}
-          <Link href="/login" className="text-accent-text-soft hover:text-accent">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </main>
+      <p className="mt-6 text-center text-sm text-prose-faint">
+        Remember it?{' '}
+        <Link href="/login" className="inline-block py-3 -my-3 font-semibold text-accent-text hover:text-accent">
+          Sign in
+        </Link>
+      </p>
+    </>
   )
 }

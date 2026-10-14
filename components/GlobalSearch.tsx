@@ -13,6 +13,12 @@ interface SearchResults {
   collections: { id: string; title: string; slug: string; collection_type: string; is_visible: boolean }[]
 }
 
+// The dashboard's CONTENT search (guides, reviews, collections, media — admin
+// API), not the site search in the masthead, so it keeps its own placeholder.
+// Result rows hover to `surface-hover`: the panel is `surface` (the overlay
+// recipe), so the old `hover:bg-surface` was the panel's own colour — no hover —
+// and the keyboard-selected row (`surface-raised`) read as a different state
+// than hover. Both are the same fill now.
 export default function GlobalSearch() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -109,7 +115,7 @@ export default function GlobalSearch() {
             onKeyDown={handleKeyDown}
             placeholder="Search guides, reviews, collections, media…"
             aria-label="Search"
-            className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-hover rounded text-sm"
+            className="flex-1 bg-transparent text-prose placeholder:text-prose-faint focus:outline-none focus-visible:ring-1 focus-visible:ring-accent-hover rounded text-base sm:text-sm"
           />
           {loading && <span className="w-3 h-3 border-2 border-strong border-t-accent rounded-full animate-spin shrink-0" />}
           <button onClick={() => setOpen(false)} className="text-xs text-prose-faint hover:text-prose-muted">Esc</button>
@@ -132,7 +138,7 @@ export default function GlobalSearch() {
                         key={a.id}
                         onClick={() => navigate(`/dashboard/guides/${a.id}`)}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
+                          cursor === flatIdx ? 'bg-surface-hover' : 'hover:bg-surface-hover'
                         }`}
                       >
                         <p className="text-sm text-prose truncate">{a.title}</p>
@@ -153,7 +159,7 @@ export default function GlobalSearch() {
                         key={r.id}
                         onClick={() => navigate(`/dashboard/reviews/${r.id}`)}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
+                          cursor === flatIdx ? 'bg-surface-hover' : 'hover:bg-surface-hover'
                         }`}
                       >
                         <p className="text-sm text-prose truncate">{r.title}</p>
@@ -174,7 +180,7 @@ export default function GlobalSearch() {
                         key={m.id}
                         onClick={() => navigate('/dashboard/media')}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center gap-3 ${
-                          cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
+                          cursor === flatIdx ? 'bg-surface-hover' : 'hover:bg-surface-hover'
                         }`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -199,7 +205,7 @@ export default function GlobalSearch() {
                         key={c.id}
                         onClick={() => navigate(`/dashboard/admin/picks/${c.id}`)}
                         className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                          cursor === flatIdx ? 'bg-surface-raised' : 'hover:bg-surface'
+                          cursor === flatIdx ? 'bg-surface-hover' : 'hover:bg-surface-hover'
                         }`}
                       >
                         <p className="text-sm text-prose truncate">{c.title}</p>

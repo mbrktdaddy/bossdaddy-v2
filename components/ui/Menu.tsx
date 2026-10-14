@@ -28,8 +28,8 @@ import { CountBadge } from './CountBadge'
 const MenuContext = createContext<{ close: (restoreFocus?: boolean) => void } | null>(null)
 
 // Literal class strings only — Tailwind can't see `sm:${x}`.
-const WIDTH = { default: 'w-56', feed: 'w-80' } as const
-const WIDTH_SM = { default: 'sm:w-56', feed: 'sm:w-80' } as const
+const WIDTH = { default: 'w-56', feed: 'w-80', mega: 'w-[min(680px,calc(100%-3rem))]' } as const
+const WIDTH_SM = { default: 'sm:w-56', feed: 'sm:w-80', mega: 'sm:w-[min(680px,calc(100%-3rem))]' } as const
 const SIDE = { start: 'left-0', end: 'right-0' } as const
 const SIDE_SM = { start: 'sm:left-0', end: 'sm:right-0' } as const
 
@@ -40,15 +40,29 @@ interface PanelLayout {
   /**
    * Phones only: pin the panel to the viewport under the masthead instead of
    * anchoring it to the trigger. For triggers that sit mid-header, where an
-   * anchored w-80 panel runs off the screen edge. 4.25rem = 64px masthead + 4px rule.
+   * anchored w-80 panel runs off the screen edge. 4.75rem = 64px masthead +
+   * the 4px rule + 8px air — the same line `placement="masthead"` uses.
    */
   pinOnPhone?: boolean
+  /**
+   * `trigger` (default) — anchored to the trigger's edge.
+   * `masthead` — every header menu (Topics, Account, Activity) opens on ONE
+   * line: 8px under the 4px orange rule, flush with the header's right gutter.
+   * Anchored to a trigger, each opened at its own height (a 44px icon in a
+   * 64px bar puts `top-full` at 54px — over the rule) and its own x. The Menu
+   * wrapper drops `relative`, so the panel positions against the header's
+   * `relative h-16` container.
+   */
+  placement?: 'trigger' | 'masthead'
 }
 
-function panelClass({ align = 'end', width = 'default', pinOnPhone = false }: PanelLayout) {
+function panelClass({ align = 'end', width = 'default', pinOnPhone = false, placement = 'trigger' }: PanelLayout) {
+  const masthead = placement === 'masthead'
+  const desktop = masthead ? 'top-full mt-3 right-4 sm:right-6' : `top-full mt-2 ${SIDE[align]}`
+  const desktopSm = masthead ? 'sm:top-full sm:mt-3 sm:right-6' : `sm:top-full sm:mt-2 ${SIDE_SM[align]}`
   const place = pinOnPhone
-    ? `fixed inset-x-3 top-[4.25rem] w-auto sm:absolute sm:inset-x-auto sm:top-full sm:mt-2 ${SIDE_SM[align]} ${WIDTH_SM[width]}`
-    : `absolute top-full mt-2 ${SIDE[align]} ${WIDTH[width]}`
+    ? `fixed inset-x-3 top-[4.75rem] w-auto sm:absolute sm:inset-x-auto ${desktopSm} ${WIDTH_SM[width]}`
+    : `absolute ${desktop} ${WIDTH[width]}`
   return `${place} max-w-[calc(100vw-1.5rem)] z-50 p-1.5 text-prose ${OVERLAY_PANEL}`
 }
 
@@ -83,7 +97,7 @@ export function Menu({
 }) {
   const disclosure = useDisclosure()
   return (
-    <div className={`relative ${className}`}>
+    <div className={`${layout.placement === 'masthead' ? '' : 'relative'} ${className}`}>
       {trigger({ ...disclosure.triggerProps, open: disclosure.open })}
       {disclosure.open && (
         <MenuPanel disclosure={disclosure} label={label} className={panelClassName} {...layout}>
@@ -100,15 +114,32 @@ const ITEM =
   // The icon recipe, applied from here so call sites pass a bare icon.
   '[&_svg]:w-4 [&_svg]:h-4 [&_svg]:shrink-0 [&_svg]:[stroke-width:1.8]'
 
-function itemTone(current: boolean, danger: boolean) {
+type IconTone = 'muted' | 'accent'
+
+function itemTone(current: boolean, danger: boolean, iconTone: IconTone = 'muted') {
   if (danger) return 'text-danger-ink hover:bg-danger-bg [&_svg]:text-danger-ink'
+  // `accent` icons: a grid of category glyphs (Topics) — the orange is the
+  // section's one warm note inside the black chrome. Everything else stays quiet.
+  const icon = iconTone === 'accent' ? '[&_svg]:text-accent-text' : current ? '[&_svg]:text-prose-muted' : '[&_svg]:text-prose-faint'
   // Current = fill only (state changes colour, never geometry).
-  if (current) return 'bg-surface-hover text-prose [&_svg]:text-prose-muted'
-  return 'text-prose-muted hover:bg-surface-hover hover:text-prose [&_svg]:text-prose-faint'
+  if (current) return `bg-surface-hover text-prose ${icon}`
+  return `text-prose-muted hover:bg-surface-hover hover:text-prose ${icon}`
+}
+
+/**
+ * The row recipe as a string, for a list that isn't a dropdown — the mobile
+ * drawer — so it reads identically to the menus without a Menu around it.
+ * Mirrors `buttonVariants`: the caller owns the element (Link, button, form).
+ */
+export function menuItemClass({
+  current = false, danger = false, iconTone = 'muted', className = '',
+}: { current?: boolean; danger?: boolean; iconTone?: IconTone; className?: string } = {}) {
+  return `${ITEM} ${itemTone(current, danger, iconTone)}${className ? ` ${className}` : ''}`
 }
 
 type MenuItemProps = {
   icon?: React.ReactNode
+  iconTone?: IconTone
   /** The page you're on — fill + aria-current. */
   current?: boolean
   danger?: boolean
@@ -126,9 +157,9 @@ type MenuItemProps = {
   | { href?: never; onSelect?: never; type: 'submit'; disabled?: boolean }
 )
 
-export function MenuItem({ icon, current = false, danger = false, className = '', children, ...rest }: MenuItemProps) {
+export function MenuItem({ icon, iconTone, current = false, danger = false, className = '', children, ...rest }: MenuItemProps) {
   const ctx = useContext(MenuContext)
-  const cls = `${ITEM} ${itemTone(current, danger)} ${className}`
+  const cls = menuItemClass({ current, danger, iconTone, className })
   const body = <>{icon}{children}</>
 
   if (rest.href !== undefined) {

@@ -3,55 +3,53 @@
 // Opt-out toggle for new-message emails (the debounced digest sent by the
 // message-emails cron). Writes profiles.email_new_message on the user's own
 // row via the profiles self-update RLS policy — same path as avatar/bio edits.
-// Optimistic; reverts on failure.
+// Optimistic; reverts on failure AND says so — a toggle that silently flips
+// back reads as "I tapped it and nothing happened".
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Switch } from '@/components/ui/Switch'
 
 export default function MessageEmailToggle({ initialEnabled }: { initialEnabled: boolean }) {
+  const switchId = useId()
   const [enabled, setEnabled] = useState(initialEnabled)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  async function toggle() {
+  async function toggle(next: boolean) {
     if (saving) return
-    const next = !enabled
+    setError(null)
     setEnabled(next)
     setSaving(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setEnabled(!next); setSaving(false); return }
-    const { error } = await supabase.from('profiles').update({ email_new_message: next }).eq('id', user.id)
-    if (error) setEnabled(!next)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('signed out')
+      const { error: writeError } = await supabase.from('profiles').update({ email_new_message: next }).eq('id', user.id)
+      if (writeError) throw writeError
+    } catch {
+      setEnabled(!next)
+      setError('Couldn’t save that. Try again.')
+    }
     setSaving(false)
   }
 
   return (
     <Card className="p-6 mb-6">
-      <Eyebrow className="mb-4">Notifications</Eyebrow>
+      <Eyebrow className="mb-4">Email</Eyebrow>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-prose">Email me about new messages</p>
+          <label htmlFor={switchId} className="block text-sm font-semibold text-prose">Email me about new messages</label>
           <p className="text-xs text-prose-faint mt-0.5 leading-snug">
             A quiet heads-up when someone messages you and you haven&apos;t seen it yet — never the
             message itself.
           </p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          aria-label="Email me about new messages"
-          disabled={saving}
-          onClick={toggle}
-          className="relative shrink-0 flex items-center min-h-[44px] disabled:opacity-50"
-        >
-          <span className={`relative w-11 h-6 rounded-full transition-colors ${enabled ? 'bg-accent' : 'bg-surface-raised border border-strong'}`}>
-            <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : ''}`} />
-          </span>
-        </button>
+        <Switch id={switchId} checked={enabled} onChange={toggle} disabled={saving} />
       </div>
+      {error && <p role="alert" className="mt-3 text-sm font-semibold text-danger-ink">{error}</p>}
     </Card>
   )
 }

@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import PageHeader from '@/components/PageHeader'
+import { LABELS } from '@/lib/labels'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -66,84 +69,81 @@ export default function ResetPasswordPage() {
   // Arrived with no session — don't offer a form that can't work.
   if (authed === false) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-        <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-black text-prose mb-2">This link isn&apos;t valid</h1>
-          <p className="text-prose-muted mb-8 text-sm">
-            Password reset links can only be used once, and they expire. Request a fresh one and
-            we&apos;ll email you a new link.
-          </p>
-          <a
-            href="/forgot-password"
-            className={buttonVariants({ className: 'w-full' })}
-          >
-            Request a new reset link
-          </a>
-          <p className="text-prose-faint text-xs mt-4 text-center">
-            Already know your password?{' '}
-            <a href="/login" className="text-accent-text-soft hover:text-accent">Sign in</a>
-          </p>
-        </div>
-      </main>
+      <>
+        <PageHeader
+          size="compact"
+          eyebrow={LABELS.auth.recoveryEyebrow}
+          title={LABELS.auth.reset.invalidH1}
+          deck="Password reset links can only be used once, and they expire. Request a fresh one and we’ll email you a new link."
+          className="mb-6"
+        />
+        <a
+          href="/forgot-password"
+          className={buttonVariants({ className: 'w-full' })}
+        >
+          Request a new reset link
+        </a>
+        <p className="mt-4 text-center text-sm text-prose-faint">
+          Already know your password?{' '}
+          <a href="/login" className="inline-block py-3 -my-3 font-semibold text-accent-text hover:text-accent">Sign in</a>
+        </p>
+      </>
     )
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-surface-sunken px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-black text-prose mb-2">Set new password</h1>
-        <p className="text-prose-muted mb-8 text-sm">Choose a strong password for your account.</p>
+    <>
+      <PageHeader
+        size="compact"
+        eyebrow={LABELS.auth.recoveryEyebrow}
+        title={LABELS.auth.reset.h1}
+        deck="Choose a strong password for your account."
+        className="mb-6"
+      />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="password" className="block text-sm text-prose-muted mb-1">New password</label>
-            <input
-              autoComplete="new-password"
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="8+ characters"
-            />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field
+          label="New password"
+          autoComplete="new-password"
+          id="password"
+          type="password"
+          required
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="8+ characters"
+        />
+
+        <Field
+          label="Confirm password"
+          autoComplete="new-password"
+          id="confirm"
+          type="password"
+          required
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          placeholder="Same password again"
+        />
+
+        {error && (
+          <div role="alert" className="text-sm font-medium text-danger-ink bg-danger-bg border border-danger-line rounded-md px-4 py-2.5">
+            <p>{error}</p>
+            {needsNewLink && (
+              <a href="/forgot-password" className="inline-block py-3 -my-3 font-semibold underline underline-offset-2 hover:no-underline">
+                Request a new reset link →
+              </a>
+            )}
           </div>
+        )}
 
-          <div>
-            <label htmlFor="confirm" className="block text-sm text-prose-muted mb-1">Confirm password</label>
-            <input
-              autoComplete="new-password"
-              id="confirm"
-              type="password"
-              required
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg bg-surface border border-strong text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
-              placeholder="Same password again"
-            />
-          </div>
-
-          {error && (
-            <div className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-2">
-              <p>{error}</p>
-              {needsNewLink && (
-                <a href="/forgot-password" className="text-accent-text-soft hover:text-accent text-xs mt-1 inline-block">
-                  Request a new reset link →
-                </a>
-              )}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || authed === null}
-            className={buttonVariants({ className: 'w-full' })}
-          >
-            {loading ? 'Updating…' : 'Update Password'}
-          </button>
-        </form>
-      </div>
-    </main>
+        <button
+          type="submit"
+          disabled={loading || authed === null}
+          className={buttonVariants({ className: 'w-full' })}
+        >
+          {loading ? 'Updating…' : 'Update Password'}
+        </button>
+      </form>
+    </>
   )
 }

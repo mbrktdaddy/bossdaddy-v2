@@ -1,8 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { EmailSignup } from '@/components/EmailSignup'
-import { CAPTURE_CARD } from '@/components/NewsletterCard'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 
 /**
@@ -10,7 +9,7 @@ import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
  * store split out on 2026-09-29).
  *
  * Two states:
- *   - Empty (no merch live yet): tight callout + inline email capture
+ *   - Empty (no merch live yet): the notify capture card (never the digest)
  *   - Live (>=1 product available or coming_soon): 3-up grid
  */
 export async function MerchGrid() {
@@ -29,26 +28,18 @@ export async function MerchGrid() {
   return (
     <section>
         {isEmpty ? (
-          /* Empty state — tight callout + email capture */
-          <div className={CAPTURE_CARD}>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <div className="flex-1">
-                <p className="text-base text-prose-muted leading-relaxed">
-                  Branded gear, coming soon — apparel, drinkware, and accessories built for the dads who get it done.
-                  Get notified when the first drop lands.
-                </p>
-              </div>
-              <div className="sm:max-w-xs sm:w-full">
-                <EmailSignup
-                  heading={null}
-                  description={null}
-                  buttonLabel="Notify me"
-                  successMessage="You're on the list."
-                  interests={['shop_launch']}
-                />
-              </div>
-            </div>
-          </div>
+          /* Empty state — a NOTIFY capture. intent="notify" tags `notify:shop:launch`
+             and never the digest, so "tell me when the first drop lands" doesn't
+             silently enrol anyone in the weekly email (B5). */
+          <NewsletterSignup
+            variant="card"
+            intent="notify"
+            topic="shop:launch"
+            eyebrow="Coming soon"
+            heading="The first drop is on the way"
+            body="Branded gear — apparel, drinkware, and accessories built for the dads who get it done. Get notified when the first drop lands."
+            successMessage="You're on the list. We'll email you when the first drop lands."
+          />
         ) : (
           /* Live state — 3-up grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

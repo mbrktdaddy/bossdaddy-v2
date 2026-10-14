@@ -13,7 +13,11 @@ import AccountMenu, { useAuthUser } from '@/components/AccountMenu'
 import ConnectionBadge from '@/components/account/ConnectionBadge'
 import { isImmersiveRoute } from '@/lib/immersive-routes'
 import { buttonVariants } from '@/components/ui/Button'
-import { BagIcon, ChevronDownIcon, ChevronRightIcon, EnvelopeIcon, SearchIcon, XIcon } from '@/components/icons'
+import { fieldClass } from '@/components/ui/Field'
+import { IconButton } from '@/components/ui/IconButton'
+import { Avatar } from '@/components/ui/Avatar'
+import { Menu, MenuItem, MenuLabel, MenuDivider, MenuFooterLink, menuItemClass } from '@/components/ui/Menu'
+import { BagIcon, ChevronDownIcon, SearchIcon, XIcon } from '@/components/icons'
 
 // Collections (comparisons / best-of / stacks / gift guides) are NOT in this
 // chrome at all (nav-ia-plan Phase I-4, 2026-10-08). They are formats, not
@@ -76,8 +80,17 @@ const BOSS_LINKS = [
   },
 ]
 
-// One heading style for every Browse group, desktop and mobile alike.
-const MENU_HEADING = 'text-xs text-copper uppercase tracking-widest font-semibold'
+// One heading style for every Browse group, desktop and mobile alike — the
+// Eyebrow recipe (MenuLabel). It was `text-copper`, an orange alias, retired 2026-10-14.
+const MENU_HEADING = 'text-xs text-eyebrow uppercase tracking-widest font-semibold'
+
+// The masthead nav item (Hard Goods, the approved mockup's `.nav a`): Montserrat
+// bold 14px, muted at rest, white on hover. ACTIVE = ORANGE TEXT, never a fill —
+// the old `bg-accent text-white` put 14px white text on orange (3.6:1 on the
+// zone orange, fails AA) and was the last pill in the chrome. Matches the
+// bottom strip's active tab. Colour is the only state; geometry never moves.
+const NAV_ITEM = 'inline-flex items-center gap-1.5 h-11 px-3 rounded-md font-display font-bold text-sm transition-colors'
+const navTone = (active: boolean) => (active ? 'text-accent' : 'text-prose-muted hover:text-prose')
 
 // Pages that live inside the Browse menu — the trigger lights up on these.
 const BROWSE_PREFIXES = ['/category/', '/reviews/category', '/guides/category', '/gear/radar', '/bench', '/shop']
@@ -96,22 +109,32 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href)
 }
 
-function BrowseRow({ href, label, blurb, icon, onNavigate }: {
-  href: string; label: string; blurb: string; icon: ReactNode; onNavigate: () => void
-}) {
+/** The two-line label for a "From Boss Daddy" row — the place + what it is. */
+function BrowseLabel({ label, blurb }: { label: string; blurb: string }) {
   return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      className="flex items-start gap-2.5 p-2.5 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
-    >
-      <span className="text-copper mt-0.5 shrink-0">{icon}</span>
-      <div className="min-w-0">
-        <p className="text-sm font-bold text-prose leading-tight">{label}</p>
-        <p className="text-xs text-prose-muted mt-0.5 line-clamp-1">{blurb}</p>
-      </div>
-    </Link>
+    <span className="min-w-0 py-2">
+      <span className="block text-sm font-bold text-prose leading-tight">{label}</span>
+      <span className="block text-xs text-prose-muted mt-0.5 line-clamp-1">{blurb}</span>
+    </span>
   )
+}
+
+/** Fixed-width icon slot, so the bench's live dot lines up with the svg glyphs. */
+function BrowseIcon({ icon }: { icon: ReactNode }) {
+  return <span className="shrink-0 inline-flex w-4 justify-center text-accent-text">{icon}</span>
+}
+
+// The account destinations in AccountMenu's order (Account first — that row
+// carries the avatar in the drawer). The drawer mirrors the desktop menu so the
+// account is one place on both; the pending-requests badge rides on Contacts.
+function accountLinks(hasDashboard: boolean): { href: string; label: string; badge?: boolean }[] {
+  return [
+    { href: '/account/settings', label: LABELS.settings.short },
+    { href: '/account/connections', label: LABELS.contacts.short, badge: true },
+    { href: '/account/messages', label: LABELS.messages.short },
+    ...(hasDashboard ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+    { href: '/install', label: LABELS.app.short },
+  ]
 }
 
 // `giftSeason` comes from the server layout (`isGiftSeason()` in
@@ -123,31 +146,17 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   const hasDashboard = role === 'author' || role === 'admin'
 
   const [mobileOpen, setMobileOpen]   = useState(false)
-  const [catOpen, setCatOpen]         = useState(false)
   const [searchOpen, setSearchOpen]   = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const mobileSearchRef = useRef<HTMLInputElement>(null)
   const [mobileCatOpen, setMobileCat] = useState(false)
   const pathname    = usePathname()
-  const browseRef   = useRef<HTMLDivElement>(null)
   const searchRef   = useRef<HTMLInputElement>(null)
 
   const openSearch = useCallback(() => {
     setSearchOpen(true)
     setTimeout(() => searchRef.current?.focus(), 50)
   }, [])
-
-  // Close mega-menu on outside click or Escape
-  useEffect(() => {
-    if (!catOpen) return
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setCatOpen(false) }
-    function onMouse(e: MouseEvent) {
-      if (browseRef.current && !browseRef.current.contains(e.target as Node)) setCatOpen(false)
-    }
-    document.addEventListener('keydown', onKey)
-    document.addEventListener('mousedown', onMouse)
-    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onMouse) }
-  }, [catOpen])
 
   // Cmd/Ctrl+K opens desktop search
   useEffect(() => {
@@ -163,7 +172,7 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
 
   // Close menus on route change
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setMobileOpen(false); setCatOpen(false); setSearchOpen(false); setMobileSearchOpen(false) }, [pathname])
+  useEffect(() => { setMobileOpen(false); setSearchOpen(false); setMobileSearchOpen(false) }, [pathname])
 
   const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
 
@@ -208,63 +217,57 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
             members' home) sits on the right with the account. Home is omitted
             (the logo is the home affordance). */}
         <nav aria-label="Site navigation" className="hidden md:flex items-center gap-1">
-          {/* Topics mega-menu trigger — first, because readers navigate by
-              subject. NOT `relative`: the panel anchors to the header container
-              so its full width never runs off-screen at md. */}
-          <div ref={browseRef}>
-            <button
-              onClick={() => setCatOpen(!catOpen)}
-              className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                catOpen || isBrowseActive
-                  ? 'bg-accent text-white'
-                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-              }`}
-            >
-              Topics
-              <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
-            </button>
-
-            {/* Mega-menu panel — two columns, ONE kind of thing per column,
-                equal heading weight: Topics · From Boss Daddy. */}
-            {catOpen && (
-              <div className="absolute right-4 sm:right-6 top-full mt-2 w-[min(680px,calc(100%-3rem))] bg-surface-raised border border-strong rounded-xl p-6 z-50 grid grid-cols-[1.6fr_1fr] gap-6">
-                <div>
-                  <p className={`${MENU_HEADING} mb-3`}>Topics</p>
-                  <div className="grid grid-cols-2 gap-x-2">
-                    {CATEGORIES.map((cat) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/category/${cat.slug}`}
-                        onClick={() => setCatOpen(false)}
-                        className="flex items-center gap-2.5 px-2.5 py-2 -mx-1 rounded-xl hover:bg-surface-hover transition-colors min-h-[44px]"
-                      >
-                        <CategoryIcon slug={cat.slug} className="w-5 h-5 text-copper shrink-0" />
-                        <span className="text-sm font-semibold text-prose leading-tight">{cat.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-l border-strong pl-6">
-                  <p className={`${MENU_HEADING} mb-3`}>From Boss Daddy</p>
-                  {BOSS_LINKS.map((b) => (
-                    <BrowseRow key={b.href} {...b} onNavigate={() => setCatOpen(false)} />
+          {/* Topics mega-menu — first, because readers navigate by subject.
+              `placement="masthead"`: the panel anchors to the header container
+              (the `relative h-16` div), not the trigger, so it opens on the same
+              line as the Account and Activity menus — 8px under the orange rule,
+              flush with the right gutter — and its full width never runs off
+              screen at md. Two columns, ONE kind of thing per column, equal
+              heading weight: Topics · From Boss Daddy. */}
+          <Menu
+            placement="masthead"
+            width="mega"
+            label={LABELS.topics.short}
+            trigger={({ open, ...props }) => (
+              <button type="button" {...props} className={`${NAV_ITEM} ${open ? 'text-prose' : navTone(isBrowseActive)}`}>
+                {LABELS.topics.short}
+                <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} strokeWidth={2} />
+              </button>
+            )}
+          >
+            <div className="grid grid-cols-[1.6fr_1fr] gap-4 p-3">
+              <div>
+                <MenuLabel>{LABELS.topics.short}</MenuLabel>
+                <div className="grid grid-cols-2 gap-x-1">
+                  {CATEGORIES.map((cat) => (
+                    <MenuItem
+                      key={cat.slug}
+                      href={`/category/${cat.slug}`}
+                      current={pathname === `/category/${cat.slug}`}
+                      iconTone="accent"
+                      icon={<CategoryIcon slug={cat.slug} />}
+                    >
+                      <span className="truncate">{cat.label}</span>
+                    </MenuItem>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
+
+              <div className="border-l border-soft pl-4">
+                <MenuLabel>From Boss Daddy</MenuLabel>
+                {BOSS_LINKS.map((b) => (
+                  <MenuItem key={b.href} href={b.href} current={isActive(pathname, b.href)} iconTone="accent" icon={<BrowseIcon icon={b.icon} />}>
+                    <BrowseLabel label={b.label} blurb={b.blurb} />
+                  </MenuItem>
+                ))}
+              </div>
+            </div>
+            <MenuDivider />
+            <MenuFooterLink href="/explore">{LABELS.topics.all} →</MenuFooterLink>
+          </Menu>
 
           {NAV_LINKS.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(pathname, href)
-                  ? 'bg-accent text-white'
-                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-              }`}
-            >
+            <Link key={href} href={href} aria-current={isActive(pathname, href) ? 'page' : undefined} className={`${NAV_ITEM} ${navTone(isActive(pathname, href))}`}>
               {label}
             </Link>
           ))}
@@ -272,14 +275,7 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
           {/* Gifts — an INTENT, so it earns a slot, but only in season (1 Oct –
               26 Dec; Phase I-6). The rest of the year it lives inside Gear. */}
           {giftSeason && (
-            <Link
-              href="/gifts"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(pathname, '/gifts')
-                  ? 'bg-accent text-white'
-                  : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-              }`}
-            >
+            <Link href="/gifts" aria-current={isActive(pathname, '/gifts') ? 'page' : undefined} className={`${NAV_ITEM} ${navTone(isActive(pathname, '/gifts'))}`}>
               {LABELS.gifts.short}
             </Link>
           )}
@@ -287,39 +283,50 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
 
         {/* Right side */}
         <div className="flex items-center gap-1">
-          {/* Search — ⌘K pill (Clean masthead), expands to an input on click. */}
+          {/* Search — the mockup's masthead field: on lg+ a field-shaped box with
+              the placeholder + ⌘K; at md an icon button. Either expands to a
+              real input on click (or ⌘K). */}
           <div className="hidden md:flex items-center">
             {searchOpen ? (
               <form
                 action="/search"
+                role="search"
                 onBlur={(e) => {
                   if (!e.currentTarget.contains(e.relatedTarget as Node)) setSearchOpen(false)
                 }}
               >
                 <div className="relative">
+                  <label htmlFor="header-search" className="sr-only">{LABELS.search.label}</label>
                   <input
+                    id="header-search"
                     ref={searchRef}
                     name="q"
                     type="search"
                     autoComplete="off"
-                    placeholder="Search..."
+                    placeholder={LABELS.search.placeholder}
                     onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false) }}
-                    className="w-44 lg:w-56 pl-8 pr-3 py-1.5 bg-surface-raised border border-strong focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none transition-colors"
+                    className={fieldClass({ className: 'w-56 lg:w-64 pl-9' })}
                   />
-                  <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-prose-faint" strokeWidth={2} />
+                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint pointer-events-none" strokeWidth={2} />
                 </div>
               </form>
             ) : (
-              <button
-                onClick={openSearch}
-                aria-label="Search"
-                aria-keyshortcuts="Meta+K Ctrl+K"
-                className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-lg bg-surface-raised border border-strong text-prose-muted hover:text-prose hover:border-zinc-600 transition-colors text-sm"
-              >
-                <SearchIcon className="w-4 h-4 shrink-0" strokeWidth={2} />
-                <span className="hidden lg:inline text-xs text-prose-muted">Search</span>
-                <kbd className="text-[10px] font-mono bg-surface-hover border border-zinc-600 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
-              </button>
+              <>
+                <IconButton label={LABELS.search.label} onClick={openSearch} aria-keyshortcuts="Meta+K Control+K" className="lg:hidden">
+                  <SearchIcon className="w-5 h-5" strokeWidth={2} />
+                </IconButton>
+                <button
+                  type="button"
+                  onClick={openSearch}
+                  aria-label={LABELS.search.label}
+                  aria-keyshortcuts="Meta+K Control+K"
+                  className="hidden lg:inline-flex items-center gap-2 h-11 min-w-[220px] px-3 rounded-md border border-strong text-prose-muted hover:text-prose hover:border-prose transition-colors"
+                >
+                  <SearchIcon className="w-4 h-4 shrink-0" strokeWidth={2} />
+                  <span className="flex-1 text-left text-[13px]">{LABELS.search.placeholder}</span>
+                  <kbd className="text-[10px] font-mono border border-strong rounded-sm px-1.5 py-0.5 leading-none text-prose-faint">⌘K</kbd>
+                </button>
+              </>
             )}
           </div>
 
@@ -328,9 +335,8 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
               rather than the publication. Same glyph as the mobile Tools tab. */}
           <Link
             href={TOOLS_HREF}
-            className={`hidden md:flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isToolsActive(pathname) ? 'text-prose' : 'text-prose-muted hover:text-prose hover:bg-surface-raised'
-            }`}
+            aria-current={isToolsActive(pathname) ? 'page' : undefined}
+            className={`hidden md:inline-flex ${NAV_ITEM} ${navTone(isToolsActive(pathname))}`}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden>
               <rect x="3" y="8.25" width="18" height="12" rx="1.5" />
@@ -354,35 +360,38 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
           {/* Mobile search — an icon that opens the search row, instead of a
               permanent field on every page (it made the mobile header ~7.5rem). */}
           {!isImmersiveRoute(pathname) && pathname !== '/search' && (
-            <button
+            <IconButton
+              label={mobileSearchOpen ? 'Close search' : LABELS.search.label}
+              aria-expanded={mobileSearchOpen}
+              aria-controls={mobileSearchOpen ? 'mobile-search' : undefined}
               onClick={() => {
                 const next = !mobileSearchOpen
                 setMobileSearchOpen(next)
                 setMobileOpen(false)
                 if (next) setTimeout(() => mobileSearchRef.current?.focus(), 50)
               }}
-              aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
-              aria-expanded={mobileSearchOpen}
-              className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
+              className="md:hidden"
             >
               {mobileSearchOpen ? <XIcon className="w-5 h-5" strokeWidth={2} /> : <SearchIcon className="w-5 h-5" strokeWidth={2} />}
-            </button>
+            </IconButton>
           )}
 
           {/* Hamburger */}
-          <button
+          <IconButton
+            label={mobileOpen ? 'Close menu' : 'Menu'}
+            aria-expanded={mobileOpen}
+            aria-controls={mobileOpen ? 'mobile-drawer' : undefined}
             onClick={() => { setMobileOpen(!mobileOpen); setMobileSearchOpen(false) }}
-            className="md:hidden p-3 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised/60 transition-colors"
-            aria-label="Toggle menu"
+            className="md:hidden"
           >
             {mobileOpen ? (
               <XIcon className="w-5 h-5" strokeWidth={2} />
             ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
-          </button>
+          </IconButton>
         </div>
       </div>
 
@@ -391,60 +400,58 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
           carries minimal chrome, and that fixed-height surface's CSS fallback
           assumes a 4rem header — this row would push its composer off-screen. */}
       {mobileSearchOpen && !isImmersiveRoute(pathname) && (
-      <div className="md:hidden px-4 pb-3">
-        <form action="/search">
+      <div id="mobile-search" className="md:hidden px-4 pt-1 pb-3">
+        <form action="/search" role="search">
           <div className="relative">
+            <label htmlFor="mobile-search-input" className="sr-only">{LABELS.search.label}</label>
             <input
+              id="mobile-search-input"
               ref={mobileSearchRef}
               name="q"
               type="search"
               autoComplete="off"
-              placeholder="Search reviews and guides..."
-              className="w-full pl-9 pr-3 py-2.5 bg-surface-raised border border-strong rounded-xl text-base text-prose placeholder:text-prose-faint focus:outline-none focus:border-copper focus-visible:ring-1 focus-visible:ring-copper/50 transition-colors"
+              placeholder={LABELS.search.placeholder}
+              className={fieldClass({ className: 'pl-9' })}
             />
-            <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint" strokeWidth={2} />
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-prose-faint pointer-events-none" strokeWidth={2} />
           </div>
         </form>
       </div>
       )}
 
-      {/* Mobile drawer — dark to match nav.
-          max-h subtracts the 4rem sticky header AND the iOS safe-area
-          inset (home indicator on iPhone, address bar on some browsers)
-          so the last items aren't hidden behind browser chrome.
-          The trailing pb-[env(safe-area-inset-bottom)] pads the inner
-          content for the same reason on devices where the safe area is
-          a real cutout. */}
+      {/* Mobile drawer — part of the chrome zone, so it's black like the masthead.
+          max-h subtracts the sticky header (4rem + its 4px orange rule) AND the
+          safe-area inset (home indicator on iPhone, address bar on some
+          browsers) so the last rows aren't hidden behind browser chrome; the
+          trailing padding covers devices where the safe area is a real cutout.
+          Every row is the menus' row (`menuItemClass`, 44px) — the drawer is the
+          phone's version of the Topics + Account menus, so it reads the same. */}
       {mobileOpen && (
         <div
+          id="mobile-drawer"
           className="md:hidden border-t border-soft bg-chrome overflow-y-auto"
           style={{
-            maxHeight: 'calc(100dvh - 4rem - env(safe-area-inset-bottom))',
+            maxHeight: 'calc(100dvh - 4.25rem - env(safe-area-inset-bottom))',
             paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
           }}
         >
           {/* The drawer holds ONLY what the bottom tab strip doesn't. Since
               Phase I the strip carries every spine anchor (Home · Explore · Ask ·
               Gear · Tools), so there is no lead row here at all — the drawer is
-              the three Browse groups and the account door. Get the App moved to
-              InstallPrompt — a one-time nudge beats a permanent row. */}
+              the Browse groups and the account. */}
 
           {/* Gifts in season is the one pillar the bottom strip doesn't carry
               (it lives under the strip's Gear tab), so it gets the drawer's
               single lead row — same slot Gear used before Phase I. */}
           {giftSeason && (
-            <nav aria-label="Seasonal" className="px-4 pt-3">
+            <nav aria-label="Seasonal" className="px-3 pt-3">
               <Link
                 href="/gifts"
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive(pathname, '/gifts')
-                    ? 'bg-accent text-white'
-                    : 'text-prose hover:bg-surface-raised'
-                }`}
+                aria-current={isActive(pathname, '/gifts') ? 'page' : undefined}
+                className={menuItemClass({ current: isActive(pathname, '/gifts'), className: 'font-display font-bold' })}
               >
                 {LABELS.gifts.short}
-                <ChevronRightIcon className="w-4 h-4 text-prose-faint" strokeWidth={2} />
               </Link>
             </nav>
           )}
@@ -452,101 +459,107 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
           {/* Browse — the same two groups as the desktop mega-menu, same
               heading style. Topics stays collapsible (10 rows); the other is
               short enough to show open. */}
-          <div className={`px-4 pb-2 ${giftSeason ? 'pt-5 border-t border-soft mt-3' : 'pt-3'}`}>
+          <div className={`px-3 pb-2 ${giftSeason ? 'pt-3 border-t border-soft mt-3' : 'pt-2'}`}>
             <button
+              type="button"
               onClick={() => setMobileCat(!mobileCatOpen)}
               aria-expanded={mobileCatOpen}
-              className={`flex items-center justify-between w-full min-h-[44px] ${MENU_HEADING}`}
+              aria-controls={mobileCatOpen ? 'mobile-topics' : undefined}
+              className={`flex items-center justify-between w-full min-h-11 px-3 ${MENU_HEADING}`}
             >
-              Topics
+              {LABELS.topics.short}
               <ChevronDownIcon className={`w-4 h-4 transition-transform ${mobileCatOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
             </button>
             {mobileCatOpen && (
-              <div className="grid grid-cols-2 gap-2 pt-1 pb-3">
-                {CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.slug}
-                    href={`/category/${cat.slug}`}
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                      pathname === `/category/${cat.slug}`
-                        ? 'bg-accent text-white'
-                        : 'bg-surface-raised text-prose-muted hover:text-prose hover:bg-surface-hover'
-                    }`}
-                  >
-                    <CategoryIcon slug={cat.slug} className="w-4 h-4 text-copper" />
-                    <span className="truncate">{cat.label}</span>
-                  </Link>
-                ))}
+              <div id="mobile-topics" className="grid grid-cols-2 gap-x-1 pb-2">
+                {CATEGORIES.map((cat) => {
+                  const current = pathname === `/category/${cat.slug}`
+                  return (
+                    <Link
+                      key={cat.slug}
+                      href={`/category/${cat.slug}`}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={current ? 'page' : undefined}
+                      className={menuItemClass({ current, iconTone: 'accent' })}
+                    >
+                      <CategoryIcon slug={cat.slug} />
+                      <span className="truncate">{cat.label}</span>
+                    </Link>
+                  )
+                })}
+                <Link
+                  href="/explore"
+                  onClick={() => setMobileOpen(false)}
+                  className={menuItemClass({ className: 'col-span-2 font-display font-extrabold text-[11px] uppercase tracking-[0.1em]' })}
+                >
+                  {LABELS.topics.all} →
+                </Link>
               </div>
             )}
           </div>
 
-          <div className="px-4 pb-4 border-t border-soft pt-4">
-            <p className={`${MENU_HEADING} mb-2`}>From Boss Daddy</p>
-            <div className="grid grid-cols-3 gap-2">
-              {BOSS_LINKS.map((b) => (
-                <Link key={b.href} href={b.href} onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
-                  <span className="text-copper shrink-0">{b.icon}</span>
-                  <span className="text-xs font-semibold text-prose-muted truncate">{b.short}</span>
-                </Link>
-              ))}
-            </div>
+          <div className="px-3 pb-3 border-t border-soft pt-3">
+            <p className={`${MENU_HEADING} px-3 pb-1`}>From Boss Daddy</p>
+            {BOSS_LINKS.map((b) => (
+              <Link
+                key={b.href}
+                href={b.href}
+                onClick={() => setMobileOpen(false)}
+                aria-current={isActive(pathname, b.href) ? 'page' : undefined}
+                className={menuItemClass({ current: isActive(pathname, b.href), iconTone: 'accent' })}
+              >
+                <BrowseIcon icon={b.icon} />
+                <BrowseLabel label={b.label} blurb={b.blurb} />
+              </Link>
+            ))}
           </div>
 
-          {/* Auth / account */}
-          <div className="px-4 pb-4 border-t border-soft pt-3 mt-1">
+          {/* Account — the same destinations, in the same order, as the
+              desktop AccountMenu, so the account is one place on both. The
+              pending-requests badge rides on Contacts, where the requests are. */}
+          <div className="px-3 border-t border-soft pt-3">
             {username ? (
-              // One row for the account, not seven. Settings and Connections are
-              // linked from /account itself, so the drawer only needs the door in;
-              // the pending-requests badge rides on that row so it isn't lost.
-              // Messages keeps its own tile — it's the one people want fast.
-              <div className="flex flex-col gap-2">
+              <nav aria-label={LABELS.account.short}>
                 <Link
                   href="/account"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-raised transition-colors"
+                  aria-current={pathname === '/account' ? 'page' : undefined}
+                  className={menuItemClass({ current: pathname === '/account' })}
                 >
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-accent flex items-center justify-center text-sm font-bold text-white shrink-0">
-                    {avatarUrl ? (
-                      <Image src={avatarUrl} alt="" width={36} height={36} className="object-cover w-full h-full" unoptimized />
-                    ) : (
-                      username[0].toUpperCase()
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-prose truncate">@{username}</p>
-                    <p className="text-xs text-prose-muted">{LABELS.account.short}</p>
-                  </div>
-                  <ConnectionBadge />
-                  <ChevronRightIcon className="w-4 h-4 text-prose-faint shrink-0" strokeWidth={2} />
+                  <Avatar src={avatarUrl} name={username} size={32} />
+                  <span className="min-w-0 py-1.5">
+                    <span className="block text-sm font-bold text-prose truncate">@{username}</span>
+                    <span className="block text-xs text-prose-muted">{LABELS.account.short}</span>
+                  </span>
                 </Link>
-                <div className={`grid gap-2 ${hasDashboard ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                  <Link href="/account/messages" onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
-                    <EnvelopeIcon className="w-4 h-4 text-copper shrink-0" strokeWidth={1.8} />
-                    <span className="text-xs font-semibold text-prose-muted">Messages</span>
+                {accountLinks(hasDashboard).map((r) => (
+                  <Link
+                    key={r.href}
+                    href={r.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={pathname.startsWith(r.href) ? 'page' : undefined}
+                    className={menuItemClass({ current: pathname.startsWith(r.href) })}
+                  >
+                    <span className="flex-1">{r.label}</span>
+                    {r.badge && <ConnectionBadge />}
                   </Link>
-                  {hasDashboard && (
-                    <Link href="/dashboard" onClick={() => setMobileOpen(false)} className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
-                      <span className="text-xs font-semibold text-prose-muted">Dashboard</span>
-                    </Link>
-                  )}
-                  <form action="/api/auth/signout" method="POST" className="contents">
-                    <button type="submit" className={buttonVariants({ variant: 'secondary', className: 'px-2' })}>
-                      <span className="text-xs font-semibold text-prose-muted">Sign Out</span>
-                    </button>
-                  </form>
-                </div>
-              </div>
+                ))}
+                <MenuDivider />
+                <form action="/api/auth/signout" method="POST">
+                  <button type="submit" className={menuItemClass()}>
+                    Sign out
+                  </button>
+                </form>
+              </nav>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 px-1 pt-1">
                 <Link href={`/register?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
                   className={buttonVariants()}>
                   Join free
                 </Link>
                 <Link href={`/login?next=${encodeURIComponent(pathname)}`} onClick={() => setMobileOpen(false)}
-                  className={buttonVariants({ variant: 'secondary' })}>
-                  Sign In
+                  className={buttonVariants({ variant: 'outline' })}>
+                  Sign in
                 </Link>
               </div>
             )}

@@ -54,7 +54,9 @@ export default async function AdminNewsletterPage() {
         <Stat label="Total"           value={total.toLocaleString()} />
         <Stat label="Confirmed"       value={confirmed.toLocaleString()} />
         <Stat label="Newsletter"      value={(interestCounts['newsletter']    ?? 0).toLocaleString()} />
-        <Stat label="Shop launch"     value={(interestCounts['shop_launch']   ?? 0).toLocaleString()} />
+        {/* Shop signups are tagged `notify:shop:launch` since the notify/digest
+            split (lib/newsletter/subscribe.ts); `shop_launch` is the legacy tag. */}
+        <Stat label="Shop launch"     value={((interestCounts['notify:shop:launch'] ?? 0) + (interestCounts['shop_launch'] ?? 0)).toLocaleString()} />
       </div>
 
       {/* Interests breakdown (recent 50) */}

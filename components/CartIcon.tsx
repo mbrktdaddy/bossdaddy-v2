@@ -1,9 +1,28 @@
 'use client'
 
+// The header cart. It RESERVES ITS SLOT on md+ — always rendered, badge only
+// when there's something in it. The count arrives from a client fetch after
+// hydration, and when the icon itself only appeared with the first item the
+// whole cluster (Tools, bell, account) slid left by a button-width the moment
+// it landed. Now only the badge appears, which takes no space.
+//
+// PHONES KEEP SHOW/HIDE (`max-md:hidden` at zero): the masthead's right cluster
+// there is bell + search + menu = 132px beside a ~165px logo lockup, so a
+// permanent fourth 44px slot has no room at 360–393px (the Galaxy widths).
+// A phone only pays for the cart once there's something in it, which is the old
+// "secondary commerce" rule, kept where space forces it.
+//
+// It is a LINK (middle-click, prefetch, "open in new tab"), not a button that
+// calls router.push — so it can't be <IconButton>, which only renders a
+// <button>. It wears IconButton's exact recipe instead; keep the two in step.
+
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CART_UPDATED_EVENT } from '@/lib/cart-events'
+import { CountBadge } from '@/components/ui/CountBadge'
+import { iconButtonClass } from '@/components/ui/IconButton'
+import { BagIcon } from '@/components/icons'
 
 export default function CartIcon() {
   const [count, setCount] = useState(0)
@@ -25,24 +44,14 @@ export default function CartIcon() {
     return () => window.removeEventListener(CART_UPDATED_EVENT, fetchCount)
   }, [fetchCount])
 
-  // Secondary commerce — don't carry a cart icon for the majority who never
-  // shop merch. It appears only once there's something in the cart.
-  if (count === 0) return null
-
   return (
     <Link
       href="/cart"
-      aria-label={count > 0 ? `Cart (${count} item${count !== 1 ? 's' : ''})` : 'Cart'}
-      className="relative p-2 rounded-lg text-prose-muted hover:text-prose hover:bg-surface-raised transition-colors"
+      aria-label={count > 0 ? `Cart, ${count} item${count !== 1 ? 's' : ''}` : 'Cart'}
+      className={iconButtonClass({ className: count > 0 ? '' : 'max-md:hidden' })}
     >
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>
-      {count > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
-          {count > 9 ? '9+' : count}
-        </span>
-      )}
+      <BagIcon className="w-5 h-5" strokeWidth={2} />
+      <CountBadge count={count} className="absolute -top-0.5 -right-0.5" />
     </Link>
   )
 }

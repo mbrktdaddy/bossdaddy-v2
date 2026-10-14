@@ -10,8 +10,14 @@
 //
 // Renders NOTHING at zero, and nothing on failure. A badge showing 0 is worse
 // than no badge — it draws the eye to say there's nothing to see.
+//
+// The stamp is the shared <CountBadge> (it used to be a hand-rolled rounded-full
+// pill — one of six count dots that disagreed). CountBadge is aria-hidden, so the
+// count is spoken through an sr-only sibling instead; it's absolutely positioned,
+// so it adds nothing to the row's flex gap.
 
 import { useEffect, useState } from 'react'
+import { CountBadge } from '@/components/ui/CountBadge'
 
 export default function ConnectionBadge() {
   const [count, setCount] = useState(0)
@@ -28,11 +34,9 @@ export default function ConnectionBadge() {
   if (count < 1) return null
 
   return (
-    <span
-      aria-label={`${count} waiting on you`}
-      className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-accent px-1.5 py-0.5 text-[11px] font-black leading-none text-white"
-    >
-      {count > 9 ? '9+' : count}
-    </span>
+    <>
+      <CountBadge count={count} className="ml-auto" />
+      <span className="sr-only">{count} waiting on you</span>
+    </>
   )
 }
