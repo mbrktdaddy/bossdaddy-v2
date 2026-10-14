@@ -226,7 +226,8 @@ export const LABELS = {
   // orange rule IS the topics nav, and the masthead's first word is Explore.
   topics: {
     short: 'Topics',
-    all:   'All topics',
+    // No `all` here any more: the door to /explore is labelled with the
+    // destination's own name (`LABELS.explore.short`), never "All topics".
   },
   search: {
     placeholder: 'Search reviews, guides, and gear…',

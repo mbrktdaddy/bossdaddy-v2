@@ -459,12 +459,17 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
                     </Link>
                   )
                 })}
+                {/* The door to /explore carries the destination's own name — the
+                    strip tab and the page H1 both say Explore, and "All topics →"
+                    was the same place under a second word. "Topics" above is a
+                    GROUP heading over the category links, not a destination, so
+                    it keeps its word (one word per place applies to places). */}
                 <Link
                   href="/explore"
                   onClick={() => setMobileOpen(false)}
                   className={menuItemClass({ className: 'col-span-2 font-display font-extrabold text-[11px] uppercase tracking-[0.1em]' })}
                 >
-                  {LABELS.topics.all} →
+                  {LABELS.explore.short} →
                 </Link>
               </div>
             )}
