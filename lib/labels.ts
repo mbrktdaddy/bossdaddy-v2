@@ -107,7 +107,7 @@ export const LABELS = {
   explore: {
     short:   'Explore',
     full:    'Explore',
-    tagline: 'Every topic and every format in one place — reviews, guides, comparisons and best-of lists, newest first.',
+    tagline: 'Every guide and every review we’ve published, by topic. Start with what you’re trying to solve.',
   },
 
   // guides table (formerly articles) → /guides

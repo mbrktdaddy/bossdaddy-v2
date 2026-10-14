@@ -478,6 +478,34 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
      grid into a grouped text directory; every occasion URL stays linked.
   Still owed: a holiday gift guide before Black Friday — the slot stays dark until one is
   live, by design.
+- **I-8 Explore rebuilt, guides leading — BUILT 2026-10-14** (operator walkthrough: the page
+  was "a bunch of boxes at the top telling me to pick a topic, review, or guide … plain,
+  boring … not resembling a finished product"). Diagnosis: every tier duplicated a
+  neighbour — the topic grid repeated the `CategoryBar` 44px above it (since I-7 the row IS
+  the topics nav); the format boxes were two links once Comparisons / Best Of
+  self-suppressed; the 12-row latest was the homepage rail doubled — and the grid ran the
+  utility lane's 2px chrome box on an editorial surface, so nothing on the first two
+  screens was content. Rebuilt as the DIRECTORY, led by content:
+  1. **Search first** — a plain GET form into `/search` (no client JS; the phone masthead
+     hides search behind an icon). `fieldClass` lg + `buttonVariants` lg, the newsletter pair.
+  2. **Formats as square chips**, not boxes — "All" is this page, the rest link the
+     archives, presence-gated. A chip says "shape"; a heavy box says "destination"
+     (invariant 10).
+  3. **One `TopicBlock` per category**, taxonomy order, EVERY category — lead + 3 rows, the
+     module the homepage Library and both listings already run. Empty topics keep their
+     header and say "Nothing published here yet" → `/bench` (new `emptyBody` prop;
+     uniformity over tidy gaps). `CredibilityBreak` mid-run, as on the listings.
+  4. **Closer** — two `ToolCard` black tiles: Ask the Boss, and the Bench.
+  **Guides lead.** The featured guide if flagged, else the newest; the rows are the newest
+  of EVERY format (guides, reviews, reading collections by `dominant_category`) with the
+  format prefix (`TopicItem.kind` → `ContentRow kind`), so a review is never more than one
+  row away. A topic with no guide leads on its newest review. Why: reviews already open the
+  homepage, fill Boss Approved and own the whole Gear lane; Explore is the READING door;
+  guides carry the voice; Table Duty / Watch Duty exist only as guides. **Not a second
+  `/guides`:** the format mix is what keeps the two pages distinct — never filter Explore
+  down to one format. `LABELS.explore.tagline` is reader-facing now ("…by topic. Start with
+  what you're trying to solve."). Owed: his phone walkthrough — ten blocks is a long page;
+  lead + 2 rows (`TOPIC_BLOCK_SIZE = 3`) is the dial if it runs long.
 
 **Invariant 10 (new):** a content FORMAT never gets a nav slot; a TOPIC or an INTENT
 (gifts, deals, shop) does. If a format's count would show `0` anywhere in chrome, the

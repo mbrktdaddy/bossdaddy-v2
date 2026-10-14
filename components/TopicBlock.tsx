@@ -7,6 +7,11 @@ export interface TopicItem {
   id: string
   href: string
   eyebrow: string
+  /** Content FORMAT ("Guide", "Review") — set on MIXED directories only (Explore),
+   *  where the format is the one thing the headline doesn't say. Rows render it
+   *  ahead of the eyebrow; single-format directories omit it: there the format is
+   *  the page. */
+  kind?: string
   headline: string
   /** Small line under the headline in row form; ignored on the lead card. */
   sub?: string | null
@@ -36,6 +41,13 @@ interface Props {
    * fall out of step with the others.
    */
   index?: number
+  /**
+   * Rendered in place of the lead + rows when `items` is empty. Without it an
+   * empty block renders nothing (the listings filter empties out before they get
+   * here). Explore passes one: it is the directory of EVERY topic, so an empty
+   * topic keeps its header and says so — a uniform run of modules over tidy gaps.
+   */
+  emptyBody?: React.ReactNode
 }
 
 /**
@@ -55,10 +67,10 @@ interface Props {
  * whose only real job is the module's shape.
  */
 export default function TopicBlock({
-  label, viewAllHref, viewAllCount, description, items, cta, on = 'surface', index = 0,
+  label, viewAllHref, viewAllCount, description, items, cta, on = 'surface', index = 0, emptyBody,
 }: Props) {
   const [lead, ...rows] = items
-  if (!lead) return null
+  if (!lead && !emptyBody) return null
 
   // Alternating handedness (settled 2026-08-03): modules run serpentine down the
   // page — even blocks lead-left, odd blocks lead-right, rows mirroring with them.
@@ -80,42 +92,47 @@ export default function TopicBlock({
         <p className="-mt-3 mb-6 text-sm text-prose-faint line-clamp-1">{description}</p>
       )}
 
-      {/* Ordering is done with `lg:order-*`, NOT by reordering the children. DOM
-          order stays lead-then-rows so the single-column mobile stack always opens
-          on the lead card, whichever way round the desktop module runs. */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
-        <div className={flip ? 'lg:order-2' : undefined}>
-          <LeadCard
-            href={lead.href}
-            title={lead.headline}
-            imageUrl={lead.imageUrl}
-            eyebrow={lead.eyebrow}
-            excerpt={lead.excerpt}
-            meta={lead.meta}
-            cta={cta}
-            on={on}
-          />
-        </div>
-        {rows.length > 0 && (
-          <div className={`flex flex-col lg:-mt-5 ${flip ? 'lg:order-1' : ''}`}>
-            {rows.map((it, i) => (
-              <ContentRow
-                key={it.id}
-                href={it.href}
-                eyebrow={it.eyebrow}
-                headline={it.headline}
-                sub={it.sub}
-                excerpt={it.excerpt}
-                meta={it.meta}
-                imageUrl={it.imageUrl}
-                rating={it.rating}
-                isLast={i === rows.length - 1}
-                flip={flip}
-              />
-            ))}
+      {!lead ? (
+        <div className="py-2">{emptyBody}</div>
+      ) : (
+        /* Ordering is done with `lg:order-*`, NOT by reordering the children. DOM
+           order stays lead-then-rows so the single-column mobile stack always opens
+           on the lead card, whichever way round the desktop module runs. */
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
+          <div className={flip ? 'lg:order-2' : undefined}>
+            <LeadCard
+              href={lead.href}
+              title={lead.headline}
+              imageUrl={lead.imageUrl}
+              eyebrow={lead.eyebrow}
+              excerpt={lead.excerpt}
+              meta={lead.meta}
+              cta={cta}
+              on={on}
+            />
           </div>
-        )}
-      </div>
+          {rows.length > 0 && (
+            <div className={`flex flex-col lg:-mt-5 ${flip ? 'lg:order-1' : ''}`}>
+              {rows.map((it, i) => (
+                <ContentRow
+                  key={it.id}
+                  href={it.href}
+                  kind={it.kind}
+                  eyebrow={it.eyebrow}
+                  headline={it.headline}
+                  sub={it.sub}
+                  excerpt={it.excerpt}
+                  meta={it.meta}
+                  imageUrl={it.imageUrl}
+                  rating={it.rating}
+                  isLast={i === rows.length - 1}
+                  flip={flip}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   )
 }
