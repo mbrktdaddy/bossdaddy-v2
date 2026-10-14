@@ -141,7 +141,7 @@ export async function GET(request: Request) {
               fontWeight: 600,
               color: ORANGE,
               border: `1px solid ${ORANGE}`,
-              borderRadius: 9999,
+              borderRadius: 4,
               padding: '4px 12px',
               letterSpacing: '0.14em',
               textTransform: 'uppercase',

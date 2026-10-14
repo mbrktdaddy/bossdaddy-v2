@@ -17,7 +17,7 @@
  * After a template bump, still re-scrape already-shared links in each platform's
  * debugger (e.g. Facebook Sharing Debugger) — they won't re-fetch on their own.
  */
-export const OG_TEMPLATE_VERSION = 6
+export const OG_TEMPLATE_VERSION = 7
 
 /**
  * PUBLIC path the social card is advertised on. Deliberately NOT under `/api/`.

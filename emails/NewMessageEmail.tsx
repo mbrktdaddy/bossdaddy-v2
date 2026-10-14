@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL, EMAIL_COLORS as C } from './_components/EmailLayout'
 
 interface Props {
   /** Display names of members with unread messages (already de-duped). */
@@ -43,13 +43,13 @@ export function NewMessageEmail({
         </p>
       }
     >
-      <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
+      <p style={{ color: C.faint, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
         Messages
       </p>
-      <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
+      <h1 style={{ color: C.heading, fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
         {headline}
       </h1>
-      <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+      <p style={{ color: C.text, fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
         Open Boss Daddy to read and reply. We keep the message itself private — you&apos;ll
         find it waiting in your inbox.
       </p>

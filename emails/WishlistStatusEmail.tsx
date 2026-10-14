@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EmailLayout, EmailButton } from './_components/EmailLayout'
+import { EmailLayout, EmailButton, EMAIL_COLORS as C } from './_components/EmailLayout'
 
 type WishlistStatus = 'queued' | 'testing' | 'reviewed'
 
@@ -31,7 +31,7 @@ const CONFIG: Record<WishlistStatus, {
     subtext: 'It\'s in line for real-world testing. You\'ll hear from me again when testing starts and when the review\'s out.',
     cta: 'See where it stands',
     ctaPath: (item) => `/bench/${item.slug}`,
-    accent: '#60a5fa',
+    accent: '#1d4ed8',
   },
   testing: {
     subject: (t) => `I'm testing ${t} this week`,
@@ -40,7 +40,7 @@ const CONFIG: Record<WishlistStatus, {
     subtext: 'Boss Daddy is putting this through real-world use. The honest verdict — pros, cons, whether it\'s worth the money — is coming in 2–3 weeks.',
     cta: 'Watch progress',
     ctaPath: (item) => `/bench/${item.slug}`,
-    accent: '#4ade80',
+    accent: '#15803d',
   },
   reviewed: {
     subject: (t) => `Review of ${t} is live`,
@@ -49,7 +49,7 @@ const CONFIG: Record<WishlistStatus, {
     subtext: 'You asked to be notified when this dropped. Here\'s the honest, dad-tested verdict.',
     cta: 'Read the review',
     ctaPath: (item) => item.reviewSlug ? `/reviews/${item.reviewSlug}` : `/bench/${item.slug}`,
-    accent: '#CC5500',
+    accent: C.orange,
   },
 }
 
@@ -64,44 +64,49 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
       siteUrl={siteUrl}
       footer={
         <>
-          <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: '#6b6b6b', lineHeight: 1.6 }}>
-            You&apos;re receiving this because you voted for or followed <a href={benchUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>{itemTitle}</a> on Boss Daddy.
+          <p style={{ margin: '0 0 6px 0', fontSize: '11px', color: C.faint, lineHeight: 1.6 }}>
+            You&apos;re receiving this because you voted for or followed <a href={benchUrl} style={{ color: C.link, textDecoration: 'underline' }}>{itemTitle}</a> on Boss Daddy.
           </p>
-          <p style={{ margin: 0, fontSize: '11px', color: '#6b6b6b' }}>
-            <a href={`${siteUrl}/account/settings`} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Manage notifications</a>
+          <p style={{ margin: 0, fontSize: '11px', color: C.faint }}>
+            <a href={`${siteUrl}/account/settings`} style={{ color: C.link, textDecoration: 'underline' }}>Manage notifications</a>
             {unsubscribeUrl && (
               <>
                 {' · '}
-                <a href={unsubscribeUrl} style={{ color: '#9ca3af', textDecoration: 'underline' }}>Unsubscribe</a>
+                <a href={unsubscribeUrl} style={{ color: C.link, textDecoration: 'underline' }}>Unsubscribe</a>
               </>
             )}
             {' · '}
-            <a href={siteUrl} style={{ color: '#9ca3af', textDecoration: 'none' }}>BossDaddyLife.com</a>
+            <a href={siteUrl} style={{ color: C.link, textDecoration: 'none' }}>BossDaddyLife.com</a>
           </p>
         </>
       }
     >
-      <p style={{
-        margin: '0 0 12px 0',
-        color: cfg.accent,
-        fontSize: '11px',
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        letterSpacing: '0.2em',
-      }}>
-        — {cfg.eyebrow}
+      <p style={{ margin: '0 0 12px 0' }}>
+        <span style={{
+          display: 'inline-block',
+          backgroundColor: cfg.accent,
+          color: '#ffffff',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          fontSize: '11px',
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+        }}>
+          {cfg.eyebrow}
+        </span>
       </p>
 
-      <h1 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: 900, color: '#ffffff', lineHeight: 1.2 }}>
+      <h1 style={{ margin: '0 0 12px 0', fontSize: '24px', fontWeight: 900, color: C.heading, lineHeight: 1.2 }}>
         {cfg.headline}
       </h1>
 
-      <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: '#a1a1a1', lineHeight: 1.6 }}>
+      <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: C.text, lineHeight: 1.6 }}>
         {cfg.subtext}
       </p>
 
       {/* Item card */}
-      <table width="100%" cellPadding={0} cellSpacing={0} style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '12px', marginBottom: '24px' }}>
+      <table width="100%" cellPadding={0} cellSpacing={0} style={{ backgroundColor: C.footer, border: `1px solid ${C.line}`, borderRadius: '4px', marginBottom: '24px' }}>
         <tr>
           {itemImageUrl && (
             <td width="80" style={{ padding: '12px 0 12px 12px', verticalAlign: 'middle' }}>
@@ -111,15 +116,15 @@ export function WishlistStatusEmail({ status, itemTitle, itemSlug, itemImageUrl,
                 alt={itemTitle}
                 width={64}
                 height={64}
-                style={{ display: 'block', width: '64px', height: '64px', objectFit: 'contain', backgroundColor: '#0a0a0a', borderRadius: '8px' }}
+                style={{ display: 'block', width: '64px', height: '64px', objectFit: 'contain', backgroundColor: C.card, borderRadius: '4px' }}
               />
             </td>
           )}
           <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
-            <p style={{ margin: '0 0 2px 0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280' }}>
+            <p style={{ margin: '0 0 2px 0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: C.faint }}>
               On the Bench
             </p>
-            <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.3 }}>
+            <p style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: C.heading, lineHeight: 1.3 }}>
               {itemTitle}
             </p>
           </td>

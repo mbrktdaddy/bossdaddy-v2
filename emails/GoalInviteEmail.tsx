@@ -1,5 +1,7 @@
 import * as React from 'react'
-import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+import { EmailLayout, EmailButton, EMAIL_COLORS, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+
+const C = EMAIL_COLORS
 
 interface Props {
   inviterName: string          // "Mark" or "@mark"
@@ -46,27 +48,27 @@ export function GoalInviteEmail({
         </p>
       }
     >
-      <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
+      <p style={{ color: C.faint, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
         He asked for you
       </p>
-      <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
+      <h1 style={{ color: C.heading, fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
         {inviterName} wants you in his corner.
       </h1>
-      <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 20px 0' }}>
-        He&apos;s working on <strong style={{ color: '#ffffff' }}>{goalTitle}</strong> and
+      <p style={{ color: C.text, fontSize: '15px', lineHeight: 1.6, margin: '0 0 20px 0' }}>
+        He&apos;s working on <strong style={{ color: C.heading }}>{goalTitle}</strong> and
         picked you to keep him honest about it.
       </p>
 
-      <table width='100%' cellPadding={0} cellSpacing={0} style={{ margin: '0 0 24px 0', backgroundColor: '#18181b', borderRadius: '8px', border: '1px solid #27272a' }}>
+      <table width='100%' cellPadding={0} cellSpacing={0} style={{ margin: '0 0 24px 0', backgroundColor: C.footer, borderRadius: '4px', border: `1px solid ${C.line}` }}>
         <tr>
           <td style={{ padding: '16px 20px' }}>
-            <p style={{ color: '#ffffff', fontSize: '14px', fontWeight: 700, margin: '0 0 6px 0' }}>
+            <p style={{ color: C.heading, fontSize: '14px', fontWeight: 700, margin: '0 0 6px 0' }}>
               {tierLabel}
             </p>
-            <p style={{ color: '#9ca3af', fontSize: '13px', lineHeight: 1.6, margin: '0 0 4px 0' }}>
+            <p style={{ color: C.text, fontSize: '13px', lineHeight: 1.6, margin: '0 0 4px 0' }}>
               {tierSees}
             </p>
-            <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: C.faint, fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
               {tierBlind}
             </p>
           </td>
@@ -75,12 +77,12 @@ export function GoalInviteEmail({
 
       <EmailButton href={acceptUrl}>See what he&apos;s asking →</EmailButton>
 
-      <p style={{ color: '#6b7280', fontSize: '12px', margin: '24px 0 0 0', lineHeight: 1.5 }}>
+      <p style={{ color: C.faint, fontSize: '12px', margin: '24px 0 0 0', lineHeight: 1.5 }}>
         This is the only email you&apos;ll get about it. Say yes and you can look
         whenever you like, but nothing is ever sent to you about a day he missed —
         and you can step out any time without asking him.
       </p>
-      <p style={{ color: '#6b7280', fontSize: '12px', margin: '12px 0 0 0', lineHeight: 1.5 }}>
+      <p style={{ color: C.faint, fontSize: '12px', margin: '12px 0 0 0', lineHeight: 1.5 }}>
         Link expires in 7 days. If you don&apos;t know {inviterName}, ignore this —
         the invite quietly expires on its own.
       </p>

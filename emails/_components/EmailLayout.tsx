@@ -1,6 +1,7 @@
 import * as React from 'react'
 
-// The one email shell: dark canvas, 560px card, logo header, body, footer.
+// The one email shell (Hard Goods, light): grey canvas, white 560px card, black masthead
+// with a 4px orange rule, body, footer. Palette follows brand-guide §2 light-page tokens.
 // Every template in emails/ renders inside <EmailLayout> and uses <EmailButton>
 // for its CTA — so the brand frame changes in one place.
 //
@@ -9,17 +10,18 @@ import * as React from 'react'
 // at send time (see feedback_resend_from_email_gotcha).
 
 export const EMAIL_COLORS = {
-  canvas:  '#0a0a0a',
-  card:    '#111111',
-  header:  '#111114',
-  footer:  '#0d0d0d',
-  line:    '#222226',
+  canvas:  '#f4f4f5',
+  card:    '#ffffff',
+  header:  '#09090b',
+  footer:  '#fafafa',
+  line:    '#e4e4e7',
   orange:  '#CC5500',
-  heading: '#ffffff',
-  text:    '#9ca3af',
-  faint:   '#6b7280',
-  fainter: '#4b5563',
-  link:    '#f48a4a',
+  heading: '#18181b',
+  text:    '#52525b',
+  faint:   '#71717a',
+  fainter: '#71717a',
+  link:    '#B85A14',
+  ink:     '#09090b',
 } as const
 
 const C = EMAIL_COLORS
@@ -47,11 +49,11 @@ export function EmailLayout({ siteUrl = DEFAULT_SITE_URL, footer, children }: Em
         <table width='100%' cellPadding={0} cellSpacing={0} style={{ backgroundColor: C.canvas, padding: '40px 20px' }}>
           <tr>
             <td align='center'>
-              <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: C.card, borderRadius: '12px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
+              <table width='560' cellPadding={0} cellSpacing={0} style={{ backgroundColor: C.card, borderRadius: '4px', overflow: 'hidden', maxWidth: '560px', width: '100%' }}>
 
                 {/* Header */}
                 <tr>
-                  <td style={{ backgroundColor: C.header, padding: '24px 40px', borderBottom: `1px solid ${C.line}` }}>
+                  <td style={{ backgroundColor: C.header, padding: '20px 40px', borderBottom: `4px solid ${C.orange}` }}>
                     <table cellPadding={0} cellSpacing={0}>
                       <tr>
                         <td style={{ paddingRight: '12px', verticalAlign: 'middle' }}>
@@ -59,7 +61,7 @@ export function EmailLayout({ siteUrl = DEFAULT_SITE_URL, footer, children }: Em
                           <img src={`${siteUrl}/images/bd-logo-icon.png`} alt='Boss Daddy' width={36} height={36} style={{ display: 'block' }} />
                         </td>
                         <td style={{ verticalAlign: 'middle' }}>
-                          <p style={{ margin: 0, color: C.orange, fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
+                          <p style={{ margin: 0, color: '#ffffff', fontWeight: 900, fontSize: '20px', letterSpacing: '-0.5px' }}>
                             BOSS DADDY LIFE
                           </p>
                         </td>
@@ -94,10 +96,10 @@ export function EmailButton({ href, children, style }: { href: string; children:
   return (
     <table cellPadding={0} cellSpacing={0} style={{ margin: '8px 0 0 0', ...style }}>
       <tr>
-        <td style={{ backgroundColor: C.orange, borderRadius: '8px' }}>
+        <td style={{ backgroundColor: C.ink, borderRadius: '4px' }}>
           <a
             href={href}
-            style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 700, fontSize: '15px', textDecoration: 'none' }}
+            style={{ display: 'inline-block', padding: '14px 28px', color: '#ffffff', fontWeight: 800, fontSize: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none' }}
           >
             {children}
           </a>

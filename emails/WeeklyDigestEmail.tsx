@@ -2,7 +2,7 @@ import * as React from 'react'
 import { LABELS } from '@/lib/labels'
 import { BRAND } from '@/lib/brand'
 import { buildUnsubscribeUrl } from '@/lib/newsletter/unsubscribe-token'
-import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL, EMAIL_COLORS as C } from './_components/EmailLayout'
 
 interface DigestItem {
   type: 'review' | 'guide'
@@ -21,12 +21,6 @@ interface Props {
   siteUrl?: string
 }
 
-const ORANGE = '#CC5500'
-const BORDER = '#1f1f1f'
-const TEXT   = '#ffffff'
-const MUTED  = '#9ca3af'
-const FAINT  = '#6b7280'
-
 export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_SITE_URL }: Props) {
   const reviews = items.filter((i) => i.type === 'review')
   const guides  = items.filter((i) => i.type === 'guide')
@@ -43,7 +37,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
             {' · '}
             <a href={buildUnsubscribeUrl(email, siteUrl)} style={footerLink}>Unsubscribe</a>
           </p>
-          <p style={{ color: '#374151', fontSize: '11px', margin: '8px 0 0 0' }}>
+          <p style={{ color: C.faint, fontSize: '11px', margin: '8px 0 0 0' }}>
             Sent to {email}
           </p>
         </>
@@ -53,13 +47,13 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
       <table width='100%' cellPadding={0} cellSpacing={0}>
         <tr>
           <td style={{ padding: '0 0 16px 0' }}>
-            <p style={{ margin: '0 0 8px 0', color: FAINT, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+            <p style={{ margin: '0 0 8px 0', color: C.faint, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
               {weekLabel}
             </p>
-            <h1 style={{ color: TEXT, fontSize: '24px', fontWeight: 900, margin: '0 0 12px 0', lineHeight: '1.2' }}>
+            <h1 style={{ color: C.heading, fontSize: '24px', fontWeight: 900, margin: '0 0 12px 0', lineHeight: '1.2' }}>
               What dropped this week
             </h1>
-            <p style={{ color: MUTED, fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
+            <p style={{ color: C.text, fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
               {items.length === 1
                 ? "One new piece this week. Worth your time."
                 : `${items.length} new pieces this week. The good stuff first.`}
@@ -73,7 +67,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
         <table width='100%' cellPadding={0} cellSpacing={0}>
           <tr>
             <td style={{ padding: '16px 0 0 0' }}>
-              <p style={{ color: ORANGE, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
+              <p style={{ color: C.link, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
                 ★ New {LABELS.reviews.plural}
               </p>
               {reviews.map((r) => (
@@ -89,7 +83,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
         <table width='100%' cellPadding={0} cellSpacing={0}>
           <tr>
             <td style={{ padding: '16px 0 0 0' }}>
-              <p style={{ color: ORANGE, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
+              <p style={{ color: C.link, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', margin: '24px 0 12px 0' }}>
                 {LABELS.guides.plural}
               </p>
               {guides.map((a) => (
@@ -113,8 +107,8 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
       <table width='100%' cellPadding={0} cellSpacing={0}>
         <tr>
           <td style={{ padding: '4px 0 0 0' }}>
-            <p style={{ color: ORANGE, fontWeight: 800, fontSize: '15px', margin: '0 0 2px 0' }}>{BRAND.tagline}</p>
-            <p style={{ color: FAINT, fontSize: '13px', margin: 0 }}>— The Boss</p>
+            <p style={{ color: C.link, fontWeight: 800, fontSize: '15px', margin: '0 0 2px 0' }}>{BRAND.tagline}</p>
+            <p style={{ color: C.faint, fontSize: '13px', margin: 0 }}>— The Boss</p>
           </td>
         </tr>
       </table>
@@ -127,20 +121,20 @@ function ItemRow({ item, siteUrl }: { item: DigestItem; siteUrl: string }) {
   return (
     <table width='100%' cellPadding={0} cellSpacing={0} style={{ marginBottom: '12px' }}>
       <tr>
-        <td style={{ padding: '14px', backgroundColor: '#0d0d0d', border: `1px solid ${BORDER}`, borderRadius: '8px' }}>
+        <td style={{ padding: '14px', backgroundColor: C.footer, border: `1px solid ${C.line}`, borderRadius: '4px' }}>
           <a href={url} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-            <p style={{ color: TEXT, fontWeight: 700, fontSize: '15px', margin: '0 0 6px 0', lineHeight: '1.3' }}>
+            <p style={{ color: C.heading, fontWeight: 700, fontSize: '15px', margin: '0 0 6px 0', lineHeight: '1.3' }}>
               {item.title}
               {item.type === 'review' && item.rating != null && (
-                <span style={{ color: ORANGE, fontWeight: 700, marginLeft: '8px' }}>· {item.rating}/10</span>
+                <span style={{ color: C.link, fontWeight: 700, marginLeft: '8px' }}>· {item.rating}/10</span>
               )}
             </p>
             {item.excerpt && (
-              <p style={{ color: MUTED, fontSize: '13px', lineHeight: '1.5', margin: 0 }}>
+              <p style={{ color: C.text, fontSize: '13px', lineHeight: '1.5', margin: 0 }}>
                 {item.excerpt.length > 120 ? item.excerpt.slice(0, 120).trimEnd() + '…' : item.excerpt}
               </p>
             )}
-            <p style={{ color: ORANGE, fontSize: '12px', fontWeight: 600, margin: '8px 0 0 0' }}>
+            <p style={{ color: C.link, fontSize: '12px', fontWeight: 600, margin: '8px 0 0 0' }}>
               Read {item.type === 'review' ? 'review' : 'guide'} →
             </p>
           </a>

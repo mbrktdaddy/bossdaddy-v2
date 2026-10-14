@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
 
   const Brand = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-      <span style={{ color: '#f48a4a', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>BOSS</span>
+      <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>BOSS</span>
       <span style={{ color: '#ffffff', fontWeight: 900, fontSize: '22px', letterSpacing: '-0.5px' }}>DADDY LIFE</span>
     </div>
   )
@@ -105,12 +105,12 @@ export async function GET(request: NextRequest) {
   const Badges = (
     <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
       {typeLabel && (
-        <span style={{ backgroundColor: '#CC5500', color: '#ffffff', fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '100px', letterSpacing: '0.08em' }}>
+        <span style={{ backgroundColor: '#CC5500', color: '#ffffff', fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '4px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           {typeLabel}
         </span>
       )}
       {categoryLabel && (
-        <span style={{ backgroundColor: 'rgba(255,255,255,0.14)', color: '#f3f4f6', fontSize: '13px', fontWeight: 600, padding: '6px 14px', borderRadius: '100px' }}>
+        <span style={{ backgroundColor: 'rgba(255,255,255,0.14)', color: '#f3f4f6', fontSize: '13px', fontWeight: 700, padding: '6px 14px', borderRadius: '4px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           {categoryLabel}
         </span>
       )}
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '24px' }}>
       <span style={{ color: '#d1d5db', fontSize: '16px' }}>bossdaddylife.com</span>
       {cta ? (
-        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#CC5500', color: '#ffffff', fontSize: '18px', fontWeight: 700, padding: '12px 24px', borderRadius: '100px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: '#CC5500', color: '#ffffff', fontSize: '18px', fontWeight: 700, padding: '12px 24px', borderRadius: '4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           {cta} →
         </div>
       ) : (
@@ -142,6 +142,7 @@ export async function GET(request: NextRequest) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={bg} alt="" width={OG_W} height={OG_H} style={{ position: 'absolute', top: 0, left: 0, width: `${OG_W}px`, height: `${OG_H}px`, objectFit: 'cover' }} />
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(10,10,10,0.30) 0%, rgba(10,10,10,0.35) 45%, rgba(10,10,10,0.92) 100%)' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', backgroundColor: '#CC5500' }} />
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%', padding: '56px' }}>
         {Brand}
         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -157,6 +158,7 @@ export async function GET(request: NextRequest) {
     // to be display:flex; the flat layout used before tripped that).
     <div style={{ width: `${OG_W}px`, height: `${OG_H}px`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', backgroundColor: '#0a0a0a', padding: '56px', position: 'relative', fontFamily: 'Arial, sans-serif' }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(ellipse at top left, rgba(204, 85, 0, 0.15) 0%, transparent 60%)' }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', backgroundColor: '#CC5500' }} />
       {Brand}
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
         {Badges}

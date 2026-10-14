@@ -1,5 +1,7 @@
 import * as React from 'react'
-import { EmailLayout, EmailButton, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+import { EmailLayout, EmailButton, EMAIL_COLORS, footerText, footerLink, DEFAULT_SITE_URL } from './_components/EmailLayout'
+
+const C = EMAIL_COLORS
 
 interface Props {
   goalName:        string
@@ -33,14 +35,14 @@ export function SavingsSpouseNudgeEmail({
         </p>
       }
     >
-      <p style={{ color: '#9ca3af', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
+      <p style={{ color: C.faint, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: '0 0 8px 0' }}>
         Savings · {goalName}
       </p>
-      <h1 style={{ color: '#ffffff', fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
+      <h1 style={{ color: C.heading, fontSize: '24px', fontWeight: 800, margin: '0 0 16px 0', lineHeight: 1.3 }}>
         {partnerName}{' '}hasn&apos;t logged today — want to cover it?
       </h1>
-      <p style={{ color: '#9ca3af', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
-        The goal is at <strong style={{ color: '#ffffff' }}>{totalSavedLabel}</strong>. {amountLabel} from you keeps the streak alive for both of you. Whoever shows up that day, the goal stays on track.
+      <p style={{ color: C.text, fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+        The goal is at <strong style={{ color: C.heading }}>{totalSavedLabel}</strong>. {amountLabel} from you keeps the streak alive for both of you. Whoever shows up that day, the goal stays on track.
       </p>
 
       <EmailButton href={goalUrl}>Cover {amountLabel} →</EmailButton>
