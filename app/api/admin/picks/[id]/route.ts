@@ -7,6 +7,7 @@ import { OCCASIONS } from '@/lib/gift-occasions'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { snapshotRevision } from '@/lib/revisions'
 import { CollectionUpdateSchema } from '@/lib/collections/schema'
+import { revalidateGiftGuidePaths } from '@/lib/revalidate'
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -111,7 +112,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { data: pick } = await admin.from('collections').select('*').eq('id', id).single()
   revalidatePath('/picks')
-  revalidatePath('/gifts')
+  revalidateGiftGuidePaths()
   revalidatePath('/comparisons')
   revalidatePath('/stacks')
   revalidatePath('/')
@@ -160,7 +161,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidatePath('/picks')
-  revalidatePath('/gifts')
+  revalidateGiftGuidePaths()
   revalidatePath('/comparisons')
   revalidatePath('/stacks')
   revalidatePath('/')

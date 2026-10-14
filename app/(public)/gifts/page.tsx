@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import { buildSocialMetadata } from '@/lib/og'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { OCCASIONS, OCCASION_GROUPS } from '@/lib/gift-occasions'
-import OccasionIcon from '@/components/OccasionIcon'
+import { OCCASIONS, OCCASION_GROUPS, getSeasonalOccasions } from '@/lib/gift-occasions'
+import type { SeasonalGift } from '@/lib/collections/seasonal-gifts'
+import OccasionTiles from '@/components/collections/OccasionTiles'
 import CollectionListingHeader from '@/components/collections/CollectionListingHeader'
 import EditorialHeader from '@/components/EditorialHeader'
 import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
@@ -27,111 +27,109 @@ export function generateMetadata(): Metadata {
 export default async function GiftsIndexPage() {
   const supabase = createAnonClient()
 
-  // Find which occasions have published gift guides so we can show status
-  // indicators. A guide only counts as "live" once it has at least one pick —
-  // an empty collection still reads as "Coming Soon", matching the detail page
-  // empty state. We pull the item count inline to avoid an N+1 per occasion.
-  const { data: liveGifts } = await supabase
+  // Every published gift guide, newest first. A guide only counts as LIVE once
+  // it holds at least one pick — an empty collection still routes to the
+  // detail page's "Coming soon" state, which no shelf should link to. The item
+  // count rides inline to avoid an N+1 per occasion.
+  const { data: rows } = await supabase
     .from('collections')
-    .select('occasion, slug, title, hero_image_url, published_at, collection_items(count)')
+    .select('occasion, hero_image_url, published_at, collection_items(count)')
     .eq('collection_type', 'gift_guide')
     .eq('is_visible', true)
     .not('published_at', 'is', null)
     .order('published_at', { ascending: false })
 
-  const liveByOccasion = new Map<string, { slug: string; title: string; hero_image_url: string | null; populated: boolean }>()
-  for (const g of (liveGifts ?? [])) {
-    // Keep the latest published collection per occasion (rows arrive newest
-    // first), mirroring the detail page's single-collection selection.
-    if (g.occasion && !liveByOccasion.has(g.occasion)) {
-      const count = Array.isArray(g.collection_items) ? (g.collection_items[0]?.count ?? 0) : 0
-      liveByOccasion.set(g.occasion, {
-        slug: g.slug,
-        title: g.title,
-        hero_image_url: g.hero_image_url ?? null,
-        populated: count > 0,
-      })
+  // Newest published collection wins per occasion (rows arrive newest first),
+  // mirroring the /gifts/[occasion] page's selection.
+  const liveByOccasion = new Map<string, { heroImageUrl: string | null }>()
+  for (const r of rows ?? []) {
+    const count = Array.isArray(r.collection_items) ? (r.collection_items[0]?.count ?? 0) : 0
+    if (r.occasion && count > 0 && !liveByOccasion.has(r.occasion)) {
+      liveByOccasion.set(r.occasion, { heroImageUrl: r.hero_image_url ?? null })
     }
   }
 
-  // The first tile that actually has an image is the LCP candidate. Many tiles
-  // render an icon instead, so "index 0" can't be used. Eager, not `priority`:
-  // no preload, so it can't contend with above-the-fold content on mobile if
-  // it lands below the fold there.
-  const eagerOccasion = OCCASION_GROUPS
-    .flatMap((group) => OCCASIONS.filter((o) => o.group === group.id))
-    .find((o) => liveByOccasion.get(o.value)?.hero_image_url)?.value
+  // The live shelf: in-season occasions first, in the order /gear and the
+  // homepage band use, then everything else in taxonomy order (stable sort).
+  const seasonalOrder = getSeasonalOccasions().map((o) => o.value)
+  const rank = (value: string) => {
+    const i = seasonalOrder.indexOf(value as (typeof seasonalOrder)[number])
+    return i === -1 ? seasonalOrder.length : i
+  }
+  const live: SeasonalGift[] = OCCASIONS
+    .filter((occ) => liveByOccasion.has(occ.value))
+    .sort((a, b) => rank(a.value) - rank(b.value))
+    .map((occ) => ({ occ, heroImageUrl: liveByOccasion.get(occ.value)?.heroImageUrl ?? null }))
 
-  // Gift guides keep their occasion grid rather than CollectionGrid's flat list: a
-  // reader shops by occasion, and unwritten occasions still earn a "Coming Soon" tile.
   return (
     <>
       <CollectionListingHeader tab="gifts" />
       <div className="max-w-6xl mx-auto px-6 pt-8 pb-12">
-      {/* Grouped occasion grid */}
-      {OCCASION_GROUPS.map((group) => (
-        <section key={group.id} className="mb-14">
-          <EditorialHeader eyebrow="Gift guides" title={group.label} />
+        {/* The guides that exist ARE the page. Until 2026-10-14 this was a
+            30-tile occasion grid with a "Coming soon" stamp on every unwritten
+            one — with a single live guide that read as 29 dead-ends under a
+            top-level nav link. Now the live shelf leads (the same tiles /gear
+            and the homepage band use) and the calendar is a directory under it. */}
+        {live.length > 0 && (
+          <section className="mb-14">
+            <EditorialHeader eyebrow="Gift guides" title="Ready now" />
+            <OccasionTiles gifts={live} />
+          </section>
+        )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {OCCASIONS.filter((o) => o.group === group.id).map((occ) => {
-              const guide = liveByOccasion.get(occ.value)
-              const populated = guide?.populated ?? false
-              return (
-                <Link
-                  key={occ.value}
-                  href={`/gifts/${occ.slug}`}
-                  className="group flex flex-col"
-                >
-                  <div className="relative aspect-[4/3] bg-surface-raised rounded-xl overflow-hidden flex items-center justify-center">
-                    {guide?.hero_image_url ? (
-                      <Image
-                        src={guide.hero_image_url}
-                        alt={occ.label}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        loading={occ.value === eagerOccasion ? 'eager' : undefined}
-                      />
-                    ) : (
-                      <OccasionIcon value={occ.value} className="w-12 h-12 text-prose-faint" />
-                    )}
-                    {!populated && (
-                      <span className="absolute top-2 left-2 bg-chrome text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em]">
-                        Coming soon
-                      </span>
-                    )}
-                  </div>
-                  <div className="pt-3 flex-1 flex flex-col">
-                    <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors leading-snug mb-1">
-                      {occ.label}
-                    </p>
-                    <p className="text-xs text-prose-faint leading-relaxed line-clamp-2 flex-1">
-                      {occ.shortBlurb}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
+        {/* The occasion directory. Every /gifts/[slug] URL stays linked — they
+            compound SEO across years — as a quiet grouped list rather than a
+            tile each. A live occasion is bold with the accent dot; the rest
+            read as the calendar, not as missing content. */}
+        <section className="mb-14">
+          <EditorialHeader eyebrow="Every occasion" title="On the calendar" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8">
+            {OCCASION_GROUPS.map((group) => (
+              <div key={group.id}>
+                <h3 className="text-xs text-eyebrow uppercase tracking-widest font-semibold mb-1">{group.label}</h3>
+                <ul>
+                  {OCCASIONS.filter((o) => o.group === group.id).map((occ) => {
+                    const isLive = liveByOccasion.has(occ.value)
+                    return (
+                      <li key={occ.value}>
+                        <Link
+                          href={`/gifts/${occ.slug}`}
+                          className={`flex items-center gap-2 min-h-11 text-sm transition-colors hover:text-accent ${
+                            isLive ? 'font-extrabold text-prose' : 'text-prose-muted'
+                          }`}
+                        >
+                          {occ.label}
+                          {isLive && (
+                            <>
+                              <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-accent" />
+                              <span className="sr-only">(live)</span>
+                            </>
+                          )}
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
           </div>
         </section>
-      ))}
 
-      {/* Newsletter pitch — the form itself, in place. This used to link to
-          `/#newsletter`, an id nothing on the homepage carried (B3), so "Get on
-          the list" dropped people at the top of the homepage. intent="notify"
-          tags `notify:gifts:season` — it's a heads-up before each holiday, not
-          the weekly digest, so it must not enrol anyone in that (B5). */}
-      <NewsletterSignup
-        variant="card"
-        intent="notify"
-        topic="gifts:season"
-        eyebrow="Gift alerts"
-        headingAs="h3"
-        heading="New gift guides drop with the seasons"
-        body="Get an email when a new gift guide drops — fresh picks before each major holiday."
-        className="mt-16 max-w-2xl mx-auto"
-      />
+        {/* Newsletter pitch — the form itself, in place. This used to link to
+            `/#newsletter`, an id nothing on the homepage carried (B3), so "Get on
+            the list" dropped people at the top of the homepage. intent="notify"
+            tags `notify:gifts:season` — it's a heads-up before each holiday, not
+            the weekly digest, so it must not enrol anyone in that (B5). */}
+        <NewsletterSignup
+          variant="card"
+          intent="notify"
+          topic="gifts:season"
+          eyebrow="Gift alerts"
+          headingAs="h3"
+          heading="New gift guides drop with the seasons"
+          body="Get an email when a new gift guide drops — fresh picks before each major holiday."
+          className="mt-16 max-w-2xl mx-auto"
+        />
       </div>
     </>
   )

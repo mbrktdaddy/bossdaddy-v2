@@ -124,7 +124,10 @@ export const LABELS = {
 
   // gift_guide collections → /gifts (routed by occasion, not collection slug)
   gifts: {
-    short:    'Gift Guides',
+    // The nav word is the INTENT ("Gifts" — the mockup's word; invariant 10),
+    // not the format: "Gift Guides" cost 81px of masthead text and said "guides".
+    // `full` is the H1 / page title; the seasonal nav slot and breadcrumb use `short`.
+    short:    'Gifts',
     full:     'Gift Guides',
     singular: 'Gift Guide',
   },
@@ -218,7 +221,9 @@ export const LABELS = {
     pageTitle: 'Account settings — Boss Daddy',
     tagline:   'Your profile, sign-in, and who can reach you.',
   },
-  // The topics row (CategoryBar), the header's Topics menu, the footer link.
+  // The topics row (CategoryBar) and the mobile drawer's Topics group. The
+  // masthead no longer carries a Topics menu (2026-10-14): the row under the
+  // orange rule IS the topics nav, and the masthead's first word is Explore.
   topics: {
     short: 'Topics',
     all:   'All topics',

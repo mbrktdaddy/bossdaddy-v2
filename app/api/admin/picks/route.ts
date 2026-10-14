@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/auth-cache'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { PickListSchema } from '@/lib/collections/schema'
+import { revalidateGiftGuidePaths } from '@/lib/revalidate'
 
 export async function GET() {
   const supabase = await createClient()
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
   }
 
   revalidatePath('/picks')
-  revalidatePath('/gifts')
+  revalidateGiftGuidePaths()
   revalidatePath('/')
   if (parsed.data.occasion) {
     const { OCCASIONS } = await import('@/lib/gift-occasions')

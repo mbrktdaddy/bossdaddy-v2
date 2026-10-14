@@ -16,7 +16,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { fieldClass } from '@/components/ui/Field'
 import { IconButton } from '@/components/ui/IconButton'
 import { Avatar } from '@/components/ui/Avatar'
-import { Menu, MenuItem, MenuLabel, MenuDivider, MenuFooterLink, menuItemClass } from '@/components/ui/Menu'
+import { MenuDivider, menuItemClass } from '@/components/ui/Menu'
 import { BagIcon, ChevronDownIcon, SearchIcon, XIcon } from '@/components/icons'
 
 // Collections (comparisons / best-of / stacks / gift guides) are NOT in this
@@ -25,25 +25,37 @@ import { BagIcon, ChevronDownIcon, SearchIcon, XIcon } from '@/components/icons'
 // hubs, stacks and gift guides through /gear. The Vault hub that used to sit
 // over them 301s to /gear.
 //
-// ⚠️ THE PILLARS (nav-ia-plan Phase I, 2026-10-08): Topics · Gear · Shop · Tools.
-// A nav slot goes to a TOPIC or an INTENT (gear, shop, tools, seasonal gifts) — never
-// to a content FORMAT (invariant 10). Reviews and Guides used to be spine anchors
-// here; they are article shapes inside Topics now, reached through the mega-menu,
-// the category hubs and /explore. Every surface that lists the pillars renders them
-// in this order — this bar, the Footer's Browse column, and (as Home · Explore ·
-// [Ask] · Gear · Tools) `MobileBottomNav`. Add a pillar in all three places or the
-// site reads differently depending on where you look.
+// ⚠️ THE PILLARS (nav-ia-plan Phase I, 2026-10-08; I-7, 2026-10-14): Explore ·
+// Gear · Shop · Tools. A nav slot goes to a PLACE or an INTENT (explore, gear,
+// shop, tools, seasonal gifts) — never to a content FORMAT (invariant 10).
+// Reviews and Guides used to be spine anchors here; they are article shapes
+// inside Explore now, reached through the index, the topics row and the
+// category hubs. Every surface that lists the pillars renders them in this
+// order AND BY THE SAME WORD — this bar, the Footer's Browse column, and (as
+// Home · Explore · [Ask] · Gear · Tools) `MobileBottomNav`. Add a pillar in all
+// three places or the site reads differently depending on where you look; call
+// /explore "Topics" in one of them and it reads as two destinations (that was
+// the 2026-10-14 confusion).
 //
-// DESKTOP splits by audience: Topics ▾ · Gear · Shop on the left (the publication
-// and its places), Tools on the right beside the account (the members' home).
-// Home is omitted — the logo is the home affordance.
+// NO TOPICS MENU HERE (I-7). The topics row (`CategoryBar`) sits 44px under
+// this bar on every public page at every width and already carries the active
+// state — the Wirecutter / Men's Health shape the Hard Goods mockup cites is
+// masthead = places, strip = topics. A Topics ▾ mega-menu stacked on the row
+// was a second topics nav, ~85px of the bar, and the thing that put the
+// masthead over capacity below ~1150px. Radar and the Bench, which rode in its
+// second column, are the gear pipeline and live on /gear (and in the drawer).
+//
+// DESKTOP splits by audience: Explore · Gear · Shop on the left (the
+// publication and its places), Tools on the right beside the account (the
+// members' home). Home is omitted — the logo is the home affordance.
 //
 // MOBILE: every pillar is on the bottom strip, so the drawer below carries NO lead
 // rows; it holds only the Browse groups (Topics, From Boss Daddy) and the account
 // door. Reasoning is in `MobileBottomNav.tsx`.
 const NAV_LINKS = [
-  { href: '/gear', label: LABELS.gear.short },
-  { href: '/shop', label: LABELS.shop.short },
+  { href: '/explore', label: LABELS.explore.short },
+  { href: '/gear',    label: LABELS.gear.short },
+  { href: '/shop',    label: LABELS.shop.short },
 ]
 
 // "From Boss Daddy" — the Browse menu's second column: places that are Boss
@@ -92,9 +104,6 @@ const MENU_HEADING = 'text-xs text-eyebrow uppercase tracking-widest font-semibo
 const NAV_ITEM = 'inline-flex items-center gap-1.5 h-11 px-3 rounded-md font-display font-bold text-sm transition-colors'
 const navTone = (active: boolean) => (active ? 'text-accent' : 'text-prose-muted hover:text-prose')
 
-// Pages that live inside the Browse menu — the trigger lights up on these.
-const BROWSE_PREFIXES = ['/category/', '/reviews/category', '/guides/category', '/gear/radar', '/bench', '/shop']
-
 const TOOLS_HREF = '/tools'
 
 // Mirrors MobileBottomNav's Tools `match`: /goals and /today belong to Tools; the
@@ -104,8 +113,16 @@ function isToolsActive(pathname: string) {
   return ['/tools', '/goals', '/today'].some((p) => pathname.startsWith(p))
 }
 
+// Mirrors MobileBottomNav's Explore `match`: every READING surface — the index,
+// the format listings, the category hubs — but NOT /search (the header's own).
+const EXPLORE_ROOTS = ['/explore', '/reviews', '/guides', '/comparisons', '/picks', '/category']
+function isExploreActive(pathname: string) {
+  return EXPLORE_ROOTS.some((r) => pathname === r || pathname.startsWith(`${r}/`))
+}
+
 function isActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/'
+  if (href === '/explore') return isExploreActive(pathname)
   return pathname.startsWith(href)
 }
 
@@ -174,8 +191,6 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); setSearchOpen(false); setMobileSearchOpen(false) }, [pathname])
 
-  const isBrowseActive = BROWSE_PREFIXES.some((p) => pathname.startsWith(p))
-
   return (
     <header
       data-theme="dark" /* chrome ZONE — stays near-black on the light canvas (lib/canvas.ts) */
@@ -213,59 +228,11 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
 
         {/* Desktop nav */}
         {/* Desktop splits by AUDIENCE: the publication and its places sit here
-            on the left — Topics first, then Gear · Shop — and Tools (the
+            on the left — Explore first, then Gear · Shop — and Tools (the
             members' home) sits on the right with the account. Home is omitted
-            (the logo is the home affordance). */}
+            (the logo is the home affordance). Plain links, no menus: the topics
+            row directly under this bar is the subject nav (see NAV_LINKS). */}
         <nav aria-label="Site navigation" className="hidden md:flex items-center gap-1">
-          {/* Topics mega-menu — first, because readers navigate by subject.
-              `placement="masthead"`: the panel anchors to the header container
-              (the `relative h-16` div), not the trigger, so it opens on the same
-              line as the Account and Activity menus — 8px under the orange rule,
-              flush with the right gutter — and its full width never runs off
-              screen at md. Two columns, ONE kind of thing per column, equal
-              heading weight: Topics · From Boss Daddy. */}
-          <Menu
-            placement="masthead"
-            width="mega"
-            label={LABELS.topics.short}
-            trigger={({ open, ...props }) => (
-              <button type="button" {...props} className={`${NAV_ITEM} ${open ? 'text-prose' : navTone(isBrowseActive)}`}>
-                {LABELS.topics.short}
-                <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} strokeWidth={2} />
-              </button>
-            )}
-          >
-            <div className="grid grid-cols-[1.6fr_1fr] gap-4 p-3">
-              <div>
-                <MenuLabel>{LABELS.topics.short}</MenuLabel>
-                <div className="grid grid-cols-2 gap-x-1">
-                  {CATEGORIES.map((cat) => (
-                    <MenuItem
-                      key={cat.slug}
-                      href={`/category/${cat.slug}`}
-                      current={pathname === `/category/${cat.slug}`}
-                      iconTone="accent"
-                      icon={<CategoryIcon slug={cat.slug} />}
-                    >
-                      <span className="truncate">{cat.label}</span>
-                    </MenuItem>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-l border-soft pl-4">
-                <MenuLabel>From Boss Daddy</MenuLabel>
-                {BOSS_LINKS.map((b) => (
-                  <MenuItem key={b.href} href={b.href} current={isActive(pathname, b.href)} iconTone="accent" icon={<BrowseIcon icon={b.icon} />}>
-                    <BrowseLabel label={b.label} blurb={b.blurb} />
-                  </MenuItem>
-                ))}
-              </div>
-            </div>
-            <MenuDivider />
-            <MenuFooterLink href="/explore">{LABELS.topics.all} →</MenuFooterLink>
-          </Menu>
-
           {NAV_LINKS.map(({ href, label }) => (
             <Link key={href} href={href} aria-current={isActive(pathname, href) ? 'page' : undefined} className={`${NAV_ITEM} ${navTone(isActive(pathname, href))}`}>
               {label}
@@ -273,7 +240,10 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
           ))}
 
           {/* Gifts — an INTENT, so it earns a slot, but only in season (1 Oct –
-              26 Dec; Phase I-6). The rest of the year it lives inside Gear. */}
+              26 Dec; Phase I-6) AND only once a seasonal guide is live (I-7;
+              the layout decides both). The rest of the time it lives inside
+              Gear. The word is "Gifts" — the mockup's — not "Gift Guides":
+              "Guides" is a format word, and it was the widest link in the bar. */}
           {giftSeason && (
             <Link href="/gifts" aria-current={isActive(pathname, '/gifts') ? 'page' : undefined} className={`${NAV_ITEM} ${navTone(isActive(pathname, '/gifts'))}`}>
               {LABELS.gifts.short}
@@ -456,9 +426,11 @@ export default function Header({ giftSeason = false }: { giftSeason?: boolean })
             </nav>
           )}
 
-          {/* Browse — the same two groups as the desktop mega-menu, same
-              heading style. Topics stays collapsible (10 rows); the other is
-              short enough to show open. */}
+          {/* Browse — two groups, ONE kind of thing per group, equal heading
+              weight: Topics (the phone's version of the topics row, since the
+              row is a scroller here) and From Boss Daddy (the gear pipeline +
+              the store). Topics stays collapsible (10 rows); the other is short
+              enough to show open. */}
           <div className={`px-3 pb-2 ${giftSeason ? 'pt-3 border-t border-soft mt-3' : 'pt-2'}`}>
             <button
               type="button"

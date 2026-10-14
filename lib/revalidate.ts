@@ -1,5 +1,6 @@
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { GIFT_GUIDES_TAG } from '@/lib/collections/seasonal-gifts'
 
 /**
  * Boss Daddy v2 — public-surface revalidation.
@@ -98,6 +99,19 @@ export function revalidateProductPaths() {
   revalidatePath('/(public)/picks/[slug]', 'page')
   revalidatePath('/(public)/stacks/[slug]', 'page')
   revalidatePath('/(public)/gifts/[occasion]', 'page')
+}
+
+/**
+ * Purge the gift-guide index AND the masthead's seasonal Gifts gate. The tag
+ * feeds `hasLiveSeasonalGifts()` in the public layout, which every public
+ * route consumes — so the publish that creates the first live seasonal guide
+ * lights the nav on the next request, not the next deploy. Every collection
+ * write path calls this (create, edit, delete, scheduled publish); the callers
+ * still purge the occasion detail page themselves, since they know the slug.
+ */
+export function revalidateGiftGuidePaths() {
+  revalidatePath('/gifts')
+  revalidateTag(GIFT_GUIDES_TAG, 'max')
 }
 
 /**

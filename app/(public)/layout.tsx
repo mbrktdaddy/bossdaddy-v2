@@ -8,6 +8,7 @@ import AskBossFab from '@/components/AskBossFab'
 import PublicMain from '@/components/PublicMain'
 import HideOnImmersive from '@/components/HideOnImmersive'
 import { isGiftSeason } from '@/lib/gift-occasions'
+import { hasLiveSeasonalGifts } from '@/lib/collections/seasonal-gifts'
 
 const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
 
@@ -15,7 +16,18 @@ const WelcomeToast = dynamic(() => import('@/components/WelcomeToast'))
 // layout forced the ENTIRE public surface to render dynamically (audit H3). The
 // Header now resolves auth on the client (flash-free via the local session), so
 // every public page can be statically prerendered / ISR.
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+//
+// The ONE read this layout does make is cookie-free and cached (an anon client
+// behind `unstable_cache`), so it keeps every page static/ISR — see the note on
+// `hasLiveSeasonalGifts`.
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  // Gift season = the calendar window (1 Oct – 26 Dec, `isGiftSeason()`) AND a
+  // live seasonal guide to send people to. Decided here on the server, once,
+  // and handed to the client Header and the Footer as a prop so no two
+  // surfaces (or the two sides of hydration) can disagree. The date half runs
+  // first so the read is skipped nine months of the year.
+  const giftSeason = isGiftSeason() && (await hasLiveSeasonalGifts())
+
   return (
     <div className="min-h-screen bg-background text-prose flex flex-col">
       <a
@@ -24,13 +36,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       >
         Skip to content
       </a>
-      {/* Gift season (1 Oct – 26 Dec) is decided here on the server — one
-          helper, one answer — and handed to the client Header as a prop. */}
-      <Header giftSeason={isGiftSeason()} />
-      {/* Topics row (every width since Hard Goods) — scrolls away with the page while the masthead sticks. */}
+      <Header giftSeason={giftSeason} />
+      {/* Topics row (every width since Hard Goods) — scrolls away with the page
+          while the masthead sticks. Since 2026-10-14 this row IS the topics
+          nav; the masthead carries the places (Explore · Gear · Shop | Tools). */}
       <HideOnImmersive><CategoryBar /></HideOnImmersive>
       <PublicMain>{children}</PublicMain>
-      <HideOnImmersive><Footer /></HideOnImmersive>
+      <HideOnImmersive><Footer giftSeason={giftSeason} /></HideOnImmersive>
       <MobileBottomNav />
       <InstallPrompt />
       <AskBossFab />

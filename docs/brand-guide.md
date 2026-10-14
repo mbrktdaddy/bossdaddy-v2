@@ -498,8 +498,8 @@ Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; the 2026-10-08 edi
 Editorial sections sit on the white canvas and separate by whitespace + a hairline (`border-b border-soft`) — never by alternating grey tints (tested and dropped early as amateurish). The loud moments are **solid blocks** in the utility lane (§2 "Blocks"): the Tools panels, the orange newsletter block, the bench box, the About band. A block is a *different kind* of treatment, not the same tint turned up.
 
 ### Masthead + brand band (Hard Goods A2, the folded masthead — 2026-10-14)
-- **Masthead** (`Header`): solid near-black at every scroll position, white uppercase wordmark, a **4px orange rule** beneath — the stripe. On a phone the tagline sits under the wordmark as a 9px orange signature line; on lg+ that line hides.
-- **Topics row** (`CategoryBar`): white, 44px, uppercase Montserrat labels, directly under the masthead at every width. A scroller on a phone, a divided strip on lg+. Active topic = 3px orange underline. Scrolls away with the page (the masthead sticks).
+- **Masthead** (`Header`): solid near-black at every scroll position, white uppercase wordmark, a **4px orange rule** beneath — the stripe. On a phone the tagline sits under the wordmark as a 9px orange signature line; on lg+ that line hides. Desktop nav = **Explore · Gear · Shop** left, **Tools** right beside the account, plus **Gifts** in season once a seasonal guide is live (nav-ia-plan I-7). Plain links, no menus — the masthead carries the places, the row beneath it carries the topics. Every surface that names a pillar uses the same word (`LABELS.*.short`).
+- **Topics row** (`CategoryBar`): white, 44px, uppercase Montserrat labels, directly under the masthead at every width. A scroller on a phone, a divided strip on lg+. Active topic = 3px orange underline. Scrolls away with the page (the masthead sticks). **This row is the topics nav** — the masthead's Topics ▾ mega-menu was retired 2026-10-14 as a second topics nav stacked on it (and ~85px of a bar that was over capacity below ~1150px).
 - **Brand band** (`HomeHero`, homepage, **lg+ only**): a solid orange block, 72px — the tagline in uppercase Montserrat black on the left, the in-motion ticker on the right, chrome-black ink. No photo, no subhead, no link; the cover story is the first screen.
 - **No band on a phone.** The black masthead + an orange stripe stacked read as "two header nav bands" (his one objection at the Step 2 read); the fold is the fix. Don't reintroduce a mobile band. The hero photographs stay in `public/images` for `/about`.
 
@@ -661,7 +661,7 @@ must not be tinted.
 - Desktop topic row under the masthead (`CategoryBar`, scrolls away), slim near-black brand band + ticker (§5), then the **featured review** package (cover story + the Latest list) on the first screen.
 - Then, in order: **Boss Approved gear** (the product board — rated 8+, "Paid $X", score), **Guides** (topic chips, the newest guide, ONE spotlight module on the deepest category), gift season (in window), **Tools** (three tiles), the newsletter, **On the bench**, the **About band** (portrait + the Creed + Meet the Boss / How I test — the closing dark moment), the shop strip.
 - Plain section labels: Featured review · Top picks · Guides · Tools · On the bench · About. No "Cover Story / Library / Creed" vocabulary on the page.
-- Column footer: Brand · Topics · Browse · Trust & Legal.
+- Column footer: Brand · Browse (Explore · Gear · Shop · Tools, + Gifts in season) · Topics · Trust & Legal.
 
 ### Listing pages (`/reviews`, `/guides`, `/bench`, `/gear`, category + tag pages)
 - `PageHeader`: black label block (the role) → uppercase Montserrat black H1 → optional deck → 3px chrome rule. No hero gradient, no count line (no vanity metrics).

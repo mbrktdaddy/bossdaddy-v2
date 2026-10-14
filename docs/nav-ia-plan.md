@@ -451,6 +451,33 @@ Profile tab, because `/tools` IS the signed-in home (invariant 8).
   `/gear` into `components/collections/OccasionTiles` + `lib/collections/seasonal-gifts`
   so hub and band can't disagree. Flag is evaluated at render: ISR pages pick a flip up
   on next revalidate, fully static ones on next deploy — fine for twice a year.
+- **I-7 Masthead trim — SHIPPED 2026-10-14** (operator walkthrough after continuity
+  session 4: "the header nav is crowded in desktop view"; the phone strip "deviates
+  from the desktop nav and seems to be causing confusion"; gift guides "has very
+  limited content"). Measured from the font files, the bar was over capacity below
+  ~1150px: Topics ▾ (~85px) stacked on the topics row 44px beneath it — a second
+  topics nav — and "Gift Guides" (81px of text, the widest link) pointing at one
+  published guide (June's) and 29 "Coming soon" tiles. Three changes:
+  1. **Topics ▾ is gone.** The masthead is `Explore · Gear · Shop | Tools`; the topics
+     row (`CategoryBar`) is the subject nav (masthead = places, strip = topics — the
+     Wirecutter / Men's Health shape the Hard Goods mockup cites). Radar and the Bench,
+     the menu's second column, live on `/gear` and in the drawer. No "All →" cell on
+     the row — the Explore link is the door (operator: "the link alone is enough").
+  2. **One word per place.** `/explore` was "Topics" in the masthead and footer and
+     "Explore" on the strip — the same destination under two names was the confusion.
+     Now `LABELS.explore.short` everywhere; the strip's slot set (Home · Explore · Ask ·
+     Gear · Tools) is unchanged and matches the masthead's words minus Shop, plus the
+     phone-only Home (the logo's job on desktop) and Ask (the FAB).
+  3. **Gifts is content-gated, not calendar-gated.** The slot shows when `isGiftSeason()`
+     AND `hasLiveSeasonalGifts()` (lib/collections/seasonal-gifts.ts — a cached, tagged
+     anon read; the layout decides once and passes `giftSeason` to Header AND Footer).
+     `revalidateGiftGuidePaths()` purges the tag from every collection write path so a
+     publish lights the nav on the next request, not the next deploy. The word is
+     "Gifts" (`LABELS.gifts.short`; the mockup's word, the intent not the format). `/gifts`
+     leads with the live guides (`OccasionTiles`, "Ready now") and collapses the 30-cell
+     grid into a grouped text directory; every occasion URL stays linked.
+  Still owed: a holiday gift guide before Black Friday — the slot stays dark until one is
+  live, by design.
 
 **Invariant 10 (new):** a content FORMAT never gets a nav slot; a TOPIC or an INTENT
 (gifts, deals, shop) does. If a format's count would show `0` anywhere in chrome, the

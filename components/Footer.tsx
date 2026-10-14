@@ -6,25 +6,27 @@ import { CATEGORIES } from '@/lib/categories'
 import { BRAND } from '@/lib/brand'
 import { DownloadIcon } from '@/components/icons'
 import { buttonVariants } from '@/components/ui/Button'
-import { isGiftSeason } from '@/lib/gift-occasions'
 
 interface BrowseLink { href: string; label: string; hint?: string }
 
-// The pillars only, in the order the desktop bar renders them — Topics · Gear ·
-// Shop · Tools (see the note on NAV_LINKS in Header.tsx; nav-ia-plan Phase I-5).
-// This column used to carry eleven links, six of them collection formats; a
-// format never gets a nav slot (invariant 10). Topics links the /explore index,
-// whose first section is the topic grid. Radar, Bench and the gift guides are
-// reached inside Gear; comparisons and best-of inside Topics/Explore.
+// The pillars only, in the order the desktop bar renders them — Explore · Gear ·
+// Shop · Tools (see the note on NAV_LINKS in Header.tsx; nav-ia-plan Phase I-5,
+// I-7). This column used to carry eleven links, six of them collection formats;
+// a format never gets a nav slot (invariant 10). ONE word per place: /explore is
+// "Explore" here, in the masthead and on the phone strip — it was "Topics" in
+// two of the three until 2026-10-14, and the split read as two destinations.
+// Radar, Bench and the gift guides are reached inside Gear; comparisons and
+// best-of inside Explore.
 const BROWSE: BrowseLink[] = [
-  { href: '/explore', label: LABELS.topics.short, hint: LABELS.explore.tagline },
+  { href: '/explore', label: LABELS.explore.short, hint: LABELS.explore.tagline },
   { href: '/gear',    label: LABELS.gear.short },
   { href: '/shop',    label: LABELS.shop.short,  hint: LABELS.shop.tagline },
   { href: '/tools',   label: LABELS.tools.short, hint: LABELS.tools.hub.metaDescription },
 ]
 
-// Appended in gift season only (1 Oct – 26 Dec, `isGiftSeason()`), matching
-// the desktop bar's seasonal slot. Off-season, gifts are reached inside Gear.
+// Appended in gift season only — the window AND a live seasonal guide, decided
+// once in the public layout and passed down, matching the desktop bar's slot.
+// Off-season (or with nothing live), gifts are reached inside Gear.
 const GIFTS_LINK: BrowseLink = { href: '/gifts', label: LABELS.gifts.short }
 
 const TRUST: BrowseLink[] = [
@@ -98,9 +100,9 @@ function SocialIcon({ icon }: { icon: SocialDef }) {
   )
 }
 
-export default function Footer() {
+export default function Footer({ giftSeason = false }: { giftSeason?: boolean }) {
   const year = new Date().getUTCFullYear()
-  const browse = isGiftSeason() ? [...BROWSE, GIFTS_LINK] : BROWSE
+  const browse = giftSeason ? [...BROWSE, GIFTS_LINK] : BROWSE
 
   return (
     <footer data-theme="dark" className="bg-chrome border-t-4 border-accent text-prose-muted">

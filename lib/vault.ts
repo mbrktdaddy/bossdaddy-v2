@@ -58,7 +58,7 @@ export const VAULT_TABS: VaultTab[] = [
     types: ['stack'], cardCta: 'Build the stack', parent: GEAR_PARENT,
   },
   {
-    id: 'gifts', href: '/gifts', label: LABELS.gifts.short, title: LABELS.gifts.short,
+    id: 'gifts', href: '/gifts', label: LABELS.gifts.short, title: LABELS.gifts.full,
     eyebrow: 'By occasion',
     deck: 'Real-tested gift guides for every holiday, milestone, and budget. No corporate gift-list filler.',
     types: ['gift_guide'], cardCta: 'See the gifts', parent: GEAR_PARENT,

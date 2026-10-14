@@ -133,9 +133,8 @@ export default function AccountMenu({ withBell = true }: { withBell?: boolean } 
         // logged-out sees no jarring text pop.
         <div className={`${vis} w-11 h-11 rounded-md bg-surface-raised animate-pulse`} aria-hidden />
       ) : username ? (
-        // `placement="masthead"`: the panel opens on the same line as Topics and
-        // Activity — 8px under the header's orange rule, flush with the right
-        // gutter. Menu drops its own `relative` for that, so there must be none
+        // `placement="masthead"`: the panel opens on the same line as Activity
+        // — 8px under the header's orange rule, flush with the right gutter. Menu drops its own `relative` for that, so there must be none
         // between this trigger and the header's `relative h-16` container either.
         <Menu
           placement="masthead"

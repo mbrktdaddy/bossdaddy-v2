@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import * as Sentry from '@sentry/nextjs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { prewarmOgForPaths } from '@/lib/og/prewarm'
-import { revalidateGuidePaths, revalidateReviewPaths } from '@/lib/revalidate'
+import { revalidateGuidePaths, revalidateReviewPaths, revalidateGiftGuidePaths } from '@/lib/revalidate'
 import { isDisclosureBlocked } from '@/lib/reviews'
 import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { ModerationResultEmail } from '@/emails/ModerationResultEmail'
@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
     revalidatePath('/picks')
     revalidatePath('/comparisons')
     revalidatePath('/stacks')
-    revalidatePath('/gifts')
+    revalidateGiftGuidePaths()
     // Route each newly-live collection to its type-specific detail URL.
     const { OCCASIONS } = await import('@/lib/gift-occasions')
     for (const c of (dueCollections ?? [])) {
