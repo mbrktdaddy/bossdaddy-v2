@@ -28,7 +28,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
   const [checkingOut, setCheckingOut] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [lineError, setLineError] = useState<{ id: string; message: string } | null>(null)
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
 
   // The checkout success path never resets `checkingOut` (we're navigating to
   // Stripe). If the dad taps Back, the browser can restore this page from the
@@ -88,7 +88,7 @@ export default function CartItems({ initialItems, initialSubtotal }: Props) {
   }
 
   async function emptyCart() {
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: 'Empty your cart?',
       body: 'This removes every item from your cart.',
       confirmLabel: 'Empty cart',

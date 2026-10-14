@@ -26,7 +26,7 @@ export default function AskBossFab() {
       <Link
         href="/tools/the-boss"
         aria-label="Ask the Boss — the AI concierge"
-        className="w-14 h-14 rounded-md bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors"
+        className="w-14 h-14 rounded-md bg-accent hover:brightness-90 text-white flex items-center justify-center transition-colors"
       >
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />

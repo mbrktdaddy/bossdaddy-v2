@@ -206,7 +206,7 @@ export default function NotesFeedClient({
             maxLength={MAX_NOTE_LENGTH}
             defaultValue={postState.draft ?? ''}
             placeholder={shared ? L.notesPlaceholderShared : L.notesPlaceholderSolo}
-            className="w-full rounded-xl bg-surface-sunken border border-soft p-3 text-sm text-prose placeholder:text-prose-faint focus:border-strong focus:outline-none"
+            className="w-full rounded-xl bg-surface-sunken border border-soft p-3 text-base text-prose placeholder:text-prose-faint focus:border-strong focus:outline-none"
           />
 
           {postState.error && (
@@ -286,7 +286,7 @@ function NoteItem({
           rows={3}
           maxLength={MAX_NOTE_LENGTH}
           defaultValue={editState.draft ?? note.body}
-          className="w-full rounded-lg bg-surface border border-soft p-2.5 text-sm text-prose focus:border-strong focus:outline-none"
+          className="w-full rounded-lg bg-surface border border-soft p-2.5 text-base text-prose focus:border-strong focus:outline-none"
         />
         {editState.error && <p className="mt-2 text-sm text-danger-ink">{editState.error}</p>}
         <div className="mt-2 flex gap-2">

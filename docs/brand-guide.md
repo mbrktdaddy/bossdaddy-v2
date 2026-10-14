@@ -294,7 +294,7 @@ The site runs a **light editorial canvas**: no `data-theme` on `<html>` (`lib/ca
 
 Why light: every comparable publication (Wirecutter, Strategist, Gear Patrol, Fatherly, Uncrate) runs light; the dark-first build (2026-06 → 2026-10) read as software, not as a magazine. Why loud: five days on the quiet light page the utility surfaces (tools, bench, author) "felt plain" — grey panels, muted eyebrows and hairline chips vanish on white. Full rationale and rollout: `docs/light-editorial-plan.md`; the commit, lock list and moratorium: §10.1.
 
-> **Elevation = whitespace, rules, and blocks.** Content cards are **borderless** (image + type + one hairline above the footer). The utility lane is **boxed or solid**: 2px chrome-black boxes (the bench, the author card), black panels (Tools), orange blocks (the newsletter, the desktop brand band). Forms, menus and dashboard panels keep `border-soft` + the raised tier. No drop-shadows on content — `check:shadow` still bans `shadow-black/*` as a design rule; overlays may use bare `shadow-*`.
+> **Elevation = whitespace, rules, and blocks.** Content cards are **borderless** (image + type + one hairline above the footer). The utility lane is **boxed or solid**: 2px chrome-black boxes (the bench, the author card), black panels (Tools), orange blocks (the newsletter, the desktop brand band). Forms and dashboard panels keep `border-soft` + the raised tier; floating panels (Modal, Menu, search) use the overlay recipe — `border-2 border-prose` (`components/ui/overlay.ts`). No drop-shadows on content — `check:shadow` still bans `shadow-black/*` as a design rule; overlays may use bare `shadow-*`.
 
 ### Tokens — `app/globals.css` (`:root` = light page · `[data-theme="dark"]` = zones)
 
@@ -307,7 +307,7 @@ Why light: every comparable publication (Wirecutter, Strategist, Gear Patrol, Fa
 | `--bd-surface-hover` | `#f4f4f5` | `#3f3f46` | Interactive hover lift |
 | `--bd-surface-sunken` | `#f4f4f5` | `#09090b` | Wells, code blocks, search / modal panels |
 | `--bd-border` / `--color-soft` | `#e4e4e7` | `#27272a` | Hairlines, row dividers |
-| `--bd-border-strong` / `--color-strong` | `#d4d4d8` | `#3f3f46` | Outline buttons, chips, menu edges |
+| `--bd-border-strong` / `--color-strong` | `#d4d4d8` | `#3f3f46` | Outline buttons, chips, form-field edges |
 | `--bd-text` / `--foreground` | `#18181b` | `#f4f4f5` | Headlines + body — near-black, never grey |
 | `--bd-text-muted` | `#52525b` | `#d4d4d8` | Decks, captions, **eyebrows** |
 | `--bd-text-faint` | `#71717a` | `#a1a1aa` | Timestamps, decorative (AA on both) |
@@ -469,7 +469,7 @@ The Tailwind radius scale is **overridden globally** in `app/globals.css` `@them
 | `rounded-sm` | 2px | square tags, status chips, thumbnails |
 | `rounded-md` / `-lg` / `-xl` / `-2xl` | 4px | inputs, buttons, cards, images, panels, boxes (one radius) |
 | `rounded-3xl` | 6px | hero / cover packages |
-| `rounded-full` | pill | avatars in chrome, dots, the live-testing dot — **not** filter chips (square since 2026-10-14) and **not** badges over photos |
+| `rounded-full` | pill | avatars in chrome, dots, the live-testing dot, the `Switch` track (the one sanctioned pill control: no text, no padding) — **not** filter chips (square since 2026-10-14) and **not** badges over photos |
 
 Tailwind's defaults (12 / 16 / 24px) are the SaaS silhouette; the 2026-10-08 editorial pass ran 8px; the approved Hard Goods mockup ran 4px on every image, tile, panel and button, and the scale follows it **sitewide** (left flexible at the commit — the utility-only alternative is a seven-line revert in `globals.css`). Tune in one place, never per component.
 
@@ -618,6 +618,16 @@ One primitive: `EmptyState` (`components/ui/EmptyState.tsx`). `variant="subtle"`
 
 ---
 
+## 6a. Continuity primitives (2026-10-14 — `docs/continuity-fix-plan.md`)
+The post-Hard-Goods sweep moved every stateful / member / overlay / transactional surface onto shared primitives. Pick one; never rebuild it by hand (`npm run check:hard-goods` — part of `prebuild` and the pre-commit hook, baseline empty — fails the build on the dark-era constructions it replaced).
+- **`Menu` + `useDisclosure` + `MenuTabs`** (`components/ui/Menu.tsx`, `lib/hooks/useDisclosure.ts`) — every dropdown/drawer; panel = the overlay recipe. Items close the menu on select, so a confirm dialog must live outside it.
+- **`IconButton` + `CountBadge`** — 44px icon controls and the orange count dot. **`Avatar`** — round member avatar with initial fallback (author portraits stay square).
+- **`Field`** (`fieldClass`) — every input/textarea/select: 16px (no iPhone zoom), 44px, label + error wiring. **`Switch`** — the on/off control; its track is the one sanctioned pill.
+- **`useConfirm`** — Modal-based `confirm`/typed `prompt`; destructure as `askConfirm`/`askPrompt` (the guard's R5 flags any call spelled `confirm(`). Never native `confirm()`/`prompt()`/`alert()`.
+- **`Notice`** (banner / toast / inline), **`RouteError`** (every `error.tsx`), **`ProgressBar`**, **`Segmented`**, **`QtyStepper`**, **`PageHeader size="compact"`** (LabelBlock + uppercase H1 + 3px rule in the caller's column), **`NewsletterSignup`** (all signup variants; core in `lib/newsletter/subscribe.ts`), **`ToolCard`** (tool tiles + result panels).
+- **Overlay recipe** — `OVERLAY_PANEL` in `components/ui/overlay.ts`: `bg-surface border-2 border-prose rounded-xl`, no shadow. Modal, Menu and search all use it.
+- **Ink rule (blocks vs chips):** a *block* (panel/band) on orange carries chrome-black ink; *chips* — score, status, count badge, avatar initial, zone primary button — are small bold and carry white ink. Only body text on orange is a defect (guard R1).
+
 ## 7. Iconography
 
 - **Categories**: inline stroke SVGs (24×24, `currentColor`, `strokeWidth={2}`) via `components/CategoryIcon.tsx`, keyed by category slug. **No emoji as interface iconography.** (The `icon` emoji field in `lib/categories.ts` is vestigial — not rendered.)
@@ -682,6 +692,9 @@ must not be tinted.
 
 ---
 
+### App-page anatomy (account · tools · commerce — 2026-10-14)
+Authenticated and transactional pages share one skeleton: `PageHeader size="compact"` (with `back` to the parent) → container `max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12` (tools/commerce widen the column, never the anatomy) → sections as `Card tone="surface" p-6` led by an `Eyebrow` → `Field` inputs, `buttonVariants` actions (primary save, outline cancel, danger destroy), `EmptyState` for nothing-yet → the danger zone is the last card. Messaging bubbles follow the `BossChat` recipe (own = chrome black, theirs = surface + hairline). The dashboard/workspace/admin are an out-of-scope dark zone and inherit primitive changes only. Reference pages: `account/connections`, `account/settings`.
+
 ## 9. File Reference
 
 ### Source of truth files
@@ -712,6 +725,9 @@ must not be tinted.
 | `ContentRow` | `components/ContentRow.tsx` | The compact directory row, site-wide: text left, thumbnail right. **The editorial lane.** `/gear` keeps its own image-left rows on purpose — don't convert it. |
 | `TopicBlock` | `components/TopicBlock.tsx` | A category as `LeadCard` + `ContentRow`s. Behind the homepage Library, `/guides`, and `/reviews` — one pattern, three surfaces. Blocks alternate handedness by `index` (serpentine); rows mirror with them. Settled 2026-08-03 — see `home-manifesto-spec.md`. |
 | `WishlistCard` | `components/wishlist/WishlistCard.tsx` | `/wishlist` |
+| Continuity primitives (§6a) | `components/ui/{Menu,IconButton,CountBadge,Field,useConfirm,QtyStepper,Avatar,Segmented,RouteError,Notice,Switch,ProgressBar,overlay}`, `components/newsletter/NewsletterSignup.tsx`, `components/dad-tools/ToolCard.tsx` | Every menu, form, dialog, signup, tool tile |
+| Emails | `emails/_components/EmailLayout.tsx` (`EMAIL_COLORS`, `EmailButton`) | Light shell: black masthead + 4px orange rule |
+| Hard Goods guard | `scripts/check-hard-goods.mjs` (+ `hard-goods-baseline.json`, empty = strict) | `prebuild` + pre-commit |
 
 ---
 
@@ -796,7 +812,8 @@ Borders          border-soft #e4e4e7 · border-strong #d4d4d8
 Content cards    borderless · image rounded-xl overflow-hidden · copy flush · one hairline footer
 Cards hover      group-hover:text-accent on the title + hover:-translate-y-0.5
 Utility boxes    border-2 border-chrome rounded-xl (bench, author) · black panel = data-theme="dark" bg-chrome border-t-4 border-accent (Tools)
-Forms / menus    bg-surface rounded-xl border border-soft (components/ui/Card)
+Forms            bg-surface rounded-xl border border-soft (components/ui/Card)
+Overlays         bg-surface rounded-xl border-2 border-prose (components/ui/overlay.ts)
 Label block      LabelBlock — bg-chrome text-white 11px black caps (tone="accent" in dark bands) · names the ROLE
 Score chip       RatingScore variant="chip" — square bg-accent text-white · status chips bg-accent (testing) / bg-chrome (queued)
 Image marks      one at most — Approved badge, or rounded-sm bg-chrome text-white tag

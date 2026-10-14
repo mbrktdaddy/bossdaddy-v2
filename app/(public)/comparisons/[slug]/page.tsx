@@ -548,7 +548,7 @@ export default async function ComparisonDetailPage({ params }: Props) {
                           {((review.pros?.length ?? 0) > 0 || (review.cons?.length ?? 0) > 0) && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                               {(review.pros?.length ?? 0) > 0 && (
-                                <div className="rounded-xl border border-green-300 bg-green-50 p-3">
+                                <div className="rounded-xl border border-success-line bg-success-bg p-3">
                                   <p className="text-[10px] font-bold uppercase tracking-widest text-forest mb-2">What works</p>
                                   <ul className="space-y-1.5">
                                     {review.pros!.slice(0, 4).map((p, i) => (
@@ -561,12 +561,12 @@ export default async function ComparisonDetailPage({ params }: Props) {
                                 </div>
                               )}
                               {(review.cons?.length ?? 0) > 0 && (
-                                <div className="rounded-xl border border-red-300 bg-red-50 p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 mb-2">Watch outs</p>
+                                <div className="rounded-xl border border-danger-line bg-danger-bg p-3">
+                                  <p className="text-[10px] font-bold uppercase tracking-widest text-danger-ink mb-2">Watch outs</p>
                                   <ul className="space-y-1.5">
                                     {review.cons!.slice(0, 4).map((c, i) => (
                                       <li key={i} className="text-xs text-prose-muted flex items-start gap-1.5 leading-snug">
-                                        <XIcon className="w-3 h-3 mt-0.5 shrink-0 text-red-700" strokeWidth={2.5} />
+                                        <XIcon className="w-3 h-3 mt-0.5 shrink-0 text-danger-ink" strokeWidth={2.5} />
                                         <span>{c}</span>
                                       </li>
                                     ))}

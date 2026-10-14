@@ -19,7 +19,7 @@ export type PastChat = { id: string; title: string | null; updated_at: string }
 // checkboxes + "Delete (n)" — for several at once.
 export default function PastChats({ chats, activeId }: { chats: PastChat[]; activeId: string | null }) {
   const router = useRouter()
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
   const [open, setOpen] = useState(false)
   const [selecting, setSelecting] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -46,7 +46,7 @@ export default function PastChats({ chats, activeId }: { chats: PastChat[]; acti
 
   async function remove(ids: string[]) {
     if (ids.length === 0) return
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: ids.length === 1 ? 'Delete this chat?' : `Delete ${ids.length} chats?`,
       body: 'This can’t be undone.',
       confirmLabel: 'Delete',

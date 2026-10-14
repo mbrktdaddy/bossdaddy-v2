@@ -53,7 +53,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   const [memberHits, setMemberHits] = useState<MemberHit[]>([])
   const [invitingId, setInvitingId] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<string | null>(null)
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   function onMemberSearch(value: string) {
@@ -98,7 +98,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
   }
 
   async function onRevoke(id: string) {
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: 'Revoke this invite?',
       body: 'Anyone who has the link will no longer be able to join.',
       confirmLabel: 'Revoke',

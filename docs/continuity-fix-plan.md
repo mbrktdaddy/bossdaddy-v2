@@ -372,7 +372,15 @@ masthead, the "Unsubscribe" link appears in Gmail's header.
      **Walkthrough flags:** back-link parent for /goals + /today = Tools; hub 6-col calculator grid at
      tablet; Dad Math verdict Badge dropped; savings delete-goal still uses a typed `prompt`; family
      avatar only from sm up; cart qty "−" stops at 1 (Remove is the only delete).
-  4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs.
+  4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs. **Built
+     2026-10-14** (Ph 8 `f4d9fc4`, Ph 9 `e6be9fe`; Ph 10 + the last 20 baseline offenders uncommitted).
+     Baseline is now `{}` — `check:hard-goods` is strict. Judgment calls to confirm on the phone:
+     thread delete = confirm modal; `/account/blocked` has no back link; account-deletion card uses
+     `!` danger overrides (Eyebrow/Card have no danger tone); emails dropped the welcome 🔥 and
+     moderation 🎉 subject emoji, status emails use green/red/amber/blue ink; OG v6→v7.
+     **Owed by him:** render/test-send the 14 emails (no preview route exists), `/api/og` check,
+     re-scrape shared links. Leftovers (not guard-visible): `CatchUpPanel`, `MyDestinationPanel`,
+     `NotificationsPanel`, `ContributionButton/Log`, goals sub-routes, `/tools/email-unsubscribe` GET bug.
 - Rough size: ~180 files across all phases (Phase 7 is the largest, ~45).
 
 ---

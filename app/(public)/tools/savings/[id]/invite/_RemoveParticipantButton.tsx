@@ -16,10 +16,10 @@ export default function RemoveParticipantButton({ goalId, userId, name }: Props)
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
 
   async function onRemove() {
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: `Remove ${name} from this goal?`,
       body: 'Their contribution history stays in the log. They can be re-invited later.',
       confirmLabel: 'Remove',

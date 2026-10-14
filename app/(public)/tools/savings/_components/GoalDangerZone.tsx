@@ -27,7 +27,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const { prompt, dialog } = useConfirm()
+  const { prompt: askPrompt, dialog } = useConfirm()
 
   function onArchive() {
     setError(null)
@@ -51,7 +51,7 @@ export default function GoalDangerZone({ goalId, status, goalName }: Props) {
     // Two-step confirmation: the prompt forces the user to type the goal name
     // to confirm. Stronger than a generic Yes/No since the action is
     // permanent + cascades all entries.
-    const typed = await prompt({
+    const typed = await askPrompt({
       title: `Delete "${goalName}" forever?`,
       body: 'This removes the goal and EVERY contribution, withdrawal, and adjustment tied to it. This cannot be undone.',
       label: 'Type the goal name to confirm',

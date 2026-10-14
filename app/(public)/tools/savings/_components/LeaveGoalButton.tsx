@@ -21,10 +21,10 @@ export default function LeaveGoalButton({ goalId, userId, goalName }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
 
   async function onLeave() {
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: `Leave "${goalName}"?`,
       body: "Your past contributions stay in the goal's history. You'll lose access to view it. If you change your mind, the owner can re-invite you.",
       confirmLabel: 'Leave goal',

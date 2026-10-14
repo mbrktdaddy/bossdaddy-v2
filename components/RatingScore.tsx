@@ -12,8 +12,8 @@ interface Props {
 function scoreColor(r: number) {
   if (r >= 8) return 'text-forest'
   if (r >= 7) return 'text-accent-text-soft'
-  if (r >= 5) return 'text-amber-700'
-  return 'text-red-700'
+  if (r >= 5) return 'text-warn-ink'
+  return 'text-danger-ink'
 }
 
 function fmt(r: number) {

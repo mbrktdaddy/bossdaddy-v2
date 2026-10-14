@@ -60,7 +60,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
               aria-label="Zoom image"
             >
               <Image src={main} alt={alt} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority />
-              <span className="absolute bottom-3 right-3 bg-black/60 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="absolute bottom-3 right-3 bg-black/60 text-white rounded-sm p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.2-5.2m2.2-5.3a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0zM10.5 7.5v6m3-3h-6" />
                 </svg>
@@ -84,7 +84,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
                 >
                   <Chevron dir="right" />
                 </IconButton>
-                <span className="absolute bottom-3 left-3 z-10 bg-black/50 text-white text-xs rounded-full px-2.5 py-1">
+                <span className="absolute bottom-3 left-3 z-10 bg-black/50 text-white text-xs rounded-sm px-2.5 py-1">
                   {selected + 1} / {images.length}
                 </span>
               </>
@@ -145,7 +145,7 @@ export function MerchImageGallery({ images, alt, comingSoon = false, selectedInd
                 >
                   <Chevron dir="right" />
                 </IconButton>
-              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-sm rounded-full px-3 py-1">
+              <span className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 text-white text-sm rounded-sm px-3 py-1">
                 {selected + 1} / {images.length}
               </span>
             </>

@@ -148,6 +148,8 @@ Tailwind v4 — no `tailwind.config.ts`. All tokens defined in `app/globals.css`
 
 > **Mechanics.** `buttonVariants('primary')` uses the `cta` tokens (black on light, hot orange inside dark zones). `--color-eyebrow` is muted grey by default; opt into orange per element with `text-accent-text` (dark bands only). `.prose` follows the role tokens in both directions, so `prose-invert` is a no-op on public pages (the old guard is retired). The radius scale is overridden globally in `@theme inline` (4px sitewide since 2026-10-14) — don't add per-component radius overrides. The homepage poster hero is retired: `HomeHero` is the desktop-only orange brand band (Hard Goods A2); on a phone the tagline folds into the masthead, the topics row takes the slot, and the cover story is the first screen. Palette, rationale, phases: `docs/light-editorial-plan.md`.
 
+> **App-page anatomy + guard (2026-10-14).** Account/tools/commerce pages share one skeleton (compact `PageHeader` → `max-w-2xl` container → `Card tone="surface"` sections → `Field` + `buttonVariants`); use the continuity primitives in `components/ui/` (brand-guide §6a, §8), never hand-built menus/fields/pills/native `confirm()`. `npm run check:hard-goods` (prebuild + pre-commit, baseline empty = strict) fails the build on dark-era constructions — fix the code, never re-baseline.
+
 ### Color Palette (accent)
 | Token | Light page | Dark zones | Use |
 |---|---|---|---|

@@ -159,6 +159,7 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 ## 6. Where Things Stand (roadmap snapshot — update as it moves)
 
 **Shipped / working:**
+- **Continuity sweep (2026-10-14).** After Hard Goods, every menu, signup, cart/shop, tool, account/messaging page, share card and email moved onto shared primitives and the light shell; `check:hard-goods` now guards it strictly.
 - **Light editorial canvas (2026-10-08).** The dark-first site re-skinned as a white editorial publication with near-black chrome zones: borderless cards, one heavy Montserrat heading voice, quiet eyebrows, black CTAs, 8px corners, and the homepage poster hero replaced by a slim brand band so the cover story is the first screen. Next: a top-picks product board, plain section labels, and a dedicated pass on the brand band.
 - Dark-first brand redesign (2026-06, superseded above), homepage, navigation + PWA install.
 - Reviews + Guides editorial pipeline with AI drafting, content blocks, tags, categories.

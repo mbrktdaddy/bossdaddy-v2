@@ -22,7 +22,7 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const { confirm, dialog } = useConfirm()
+  const { confirm: askConfirm, dialog } = useConfirm()
 
   const isArchived = status === 'archived'
   const isPaused = status === 'paused'
@@ -46,7 +46,7 @@ export default function GoalCardMenu({ goalId, goalName, status }: Props) {
   }
 
   async function onDelete() {
-    const ok = await confirm({
+    const ok = await askConfirm({
       title: `Delete "${goalName}" forever?`,
       body: 'This removes the goal and EVERY contribution, withdrawal, and adjustment tied to it. This cannot be undone.',
       confirmLabel: 'Delete permanently',
