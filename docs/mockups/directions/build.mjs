@@ -177,10 +177,12 @@ function head(title, css) {
 }
 
 function masthead(dir) {
-  const wm = dir === 'b'
+  // 'b' and 'a2' fold the tagline under the logo; the Hard Goods family keeps
+  // the orange Sign-in button, the others use the account icon.
+  const wm = dir === 'b' || dir === 'a2'
     ? `<span class="wm"><b>Boss Daddy</b><small>${esc(D.tagline)}</small></span>`
     : `<b>Boss Daddy</b>`
-  const account = dir === 'a'
+  const account = dir.startsWith('a')
     ? `<a class="btn" href="#">Sign in</a>`
     : `<a class="icon-btn" href="#" aria-label="Account">${I.user}</a>`
   return `<header class="mast"><div class="wrap in">
@@ -359,16 +361,62 @@ const A_CSS = `
 footer{border-top:4px solid var(--orange-hot)}
 `
 
-function renderA() {
+// Step 4 refinements (2026-10-14). His Step 2 read: Hard Goods wins on colour and
+// contrast, but on the phone the black masthead + orange stripe read as two nav
+// bands. He liked Newsstand's masthead handling (tagline under the logo, topics
+// row beneath). Both refinements keep the orange band + ticker on DESKTOP (he
+// said it works there) and replace it on the phone:
+//   a2 — "folded masthead": B's tagline-under-logo signature + a topics row.
+//   a3 — "masthead as band": a tagline row fused into the black masthead (orange
+//        type on black, the 4px orange rule under it) + the same topics row.
+const CATROW_CSS = `
+.catrow{border-bottom:1px solid var(--soft)}
+.catrow .in{display:flex;height:44px;align-items:stretch;overflow-x:auto;scrollbar-width:none}
+.catrow .in::-webkit-scrollbar{display:none}
+.catrow a{font-family:Montserrat,system-ui,sans-serif;font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.12em;display:flex;align-items:center;padding:0 12px;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px}
+.catrow a:first-child{padding-left:0}
+.catrow a.on{border-bottom-color:var(--orange)}
+.band{display:none}
+@media(min-width:1024px){.band{display:block}.catrow{display:none}}
+`
+const A2_CSS = CATROW_CSS + `
+.logo .wm{display:flex;flex-direction:column;line-height:1}
+.logo .wm small{font-family:Montserrat,system-ui,sans-serif;font-weight:800;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange-hot);margin-top:4px}
+@media(min-width:1024px){.logo .wm small{display:none}}
+`
+const A3_CSS = CATROW_CSS + `
+.mast{border-bottom:0}
+.tagrow{background:var(--chrome);color:#fff;border-bottom:4px solid var(--orange-hot)}
+.tagrow .in{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-bottom:10px}
+.tagrow .tag{font-family:Montserrat,system-ui,sans-serif;font-weight:900;font-size:18px;text-transform:uppercase;letter-spacing:-.01em;color:var(--orange-hot);white-space:nowrap}
+.tagrow .pos{font-family:Montserrat,system-ui,sans-serif;font-weight:800;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#a1a1aa;white-space:nowrap;text-align:right}
+@media(min-width:1024px){.mast{border-bottom:4px solid var(--orange-hot)}.tagrow{display:none}}
+`
+
+function renderA(variant = 'a') {
   const f = D.featured
-  return head('Direction A — Hard Goods · Boss Daddy', A_CSS) + `
-<div class="dirnote"><b>DIRECTION A · HARD GOODS</b> — loud through blocks · STIHL / DeWalt · strongest on rugged</div>
-${masthead('a')}
+  const note = {
+    a: '<b>DIRECTION A · HARD GOODS</b> — loud through blocks · STIHL / DeWalt · strongest on rugged',
+    a2: '<b>A2 · HARD GOODS, FOLDED MASTHEAD</b> — tagline under the logo + topics row on the phone (from B) · orange band is desktop-only',
+    a3: '<b>A3 · HARD GOODS, MASTHEAD AS BAND</b> — tagline row fused into the black masthead + topics row on the phone · orange band is desktop-only',
+  }[variant]
+  const css = A_CSS + (variant === 'a2' ? A2_CSS : variant === 'a3' ? A3_CSS : '')
+  const tagrow = variant === 'a3'
+    ? `<div class="tagrow"><div class="wrap in"><span class="tag">${esc(D.tagline)}</span><span class="pos">${esc(D.positioning)}</span></div></div>`
+    : ''
+  const catrow = variant === 'a'
+    ? ''
+    : `<div class="catrow"><div class="wrap in">${D.allTopics.map((t, i) => `<a class="${i === 6 ? 'on' : ''}" href="#">${esc(t)}</a>`).join('')}</div></div>`
+  return head(`Direction ${variant.toUpperCase()} — Hard Goods · Boss Daddy`, css) + `
+<div class="dirnote">${note}</div>
+${masthead(variant)}
+${tagrow}
 <div class="band"><div class="wrap in">
   <span class="tag">${esc(D.tagline)}</span>
   <span class="pos">${esc(D.positioning)}</span>
   <ul class="tick">${D.motion.map((m) => `<li><b>${esc(m.label)}</b><span>${esc(m.title)}</span></li>`).join('')}</ul>
 </div></div>
+${catrow}
 <div class="catbar"><div class="wrap in">${D.allTopics.map((t) => `<a href="#">${esc(t)}</a>`).join('')}</div></div>
 
 <section class="sec"><div class="wrap">
@@ -879,6 +927,12 @@ body{padding:0 0 60px}
     <div class="card"><span class="kick">Direction B</span><h2>Newsstand</h2><p>Loud through <b>type and density</b>. Oversized black headlines, orange kickers, ranked lists, ruled modules. Men's Health and AppleInsider. Strongest on authority.</p><p><b>Mobile band:</b> none. The tagline folds into the masthead; a category row sits under it.</p><a class="btn" href="b-newsstand.html">Open B</a></div>
     <div class="card"><span class="kick">Direction C</span><h2>Showroom</h2><p>Loud through <b>scale</b>. Full-bleed cover on the phone, showroom product tiles, one black tools band, generous space. Brickell and STIHL product pages. Strongest on premium and clean.</p><p><b>Mobile band:</b> a hairline brand strip; the cover photo is the first screen.</p><a class="btn" href="c-showroom.html">Open C</a></div>
   </div>
+  <div class="brief"><h2>Step 4 refinements (2026-10-14)</h2>
+  <p style="font-size:14px;color:var(--muted);margin-bottom:14px">His Step 2 read: <b>Hard Goods wins</b> on colour and contrast, all three beat the current site, but on the phone A's black masthead plus orange stripe read as two nav bands. He liked Newsstand's masthead handling. Two ways to fix it, both keeping A's desktop orange band and ticker:</p>
+  <div class="grid" style="margin-top:0">
+    <div class="card"><span class="kick">A2</span><h2>Folded masthead</h2><p>The tagline sits under the logo as a small orange signature, and a topics row scrolls beneath the masthead. One band. Brand as a signature.</p><a class="btn" href="a2-hard-goods-folded.html">Open A2</a></div>
+    <div class="card"><span class="kick">A3</span><h2>Masthead as band</h2><p>A tagline row in orange type fuses into the black masthead with the 4px orange rule under it, then the topics row. Still one band, taller. Brand as a statement.</p><a class="btn" href="a3-hard-goods-fused.html">Open A3</a></div>
+  </div></div>
   <div class="brief"><h2>The locked brief</h2><table>
     <tr><td>Canvas</td><td>Light. White page, near-black text. Decided, not reopened.</td></tr>
     <tr><td>Volume</td><td>Louder than shipped. Solid black and orange moments on the white page, never a dark canvas.</td></tr>
@@ -894,7 +948,9 @@ body{padding:0 0 60px}
 }
 
 writeFileSync(join(OUT, 'index.html'), renderIndex())
-writeFileSync(join(OUT, 'a-hard-goods.html'), renderA())
+writeFileSync(join(OUT, 'a-hard-goods.html'), renderA('a'))
+writeFileSync(join(OUT, 'a2-hard-goods-folded.html'), renderA('a2'))
+writeFileSync(join(OUT, 'a3-hard-goods-fused.html'), renderA('a3'))
 writeFileSync(join(OUT, 'b-newsstand.html'), renderB())
 writeFileSync(join(OUT, 'c-showroom.html'), renderC())
 console.log('wrote index + A + B + C to', OUT)
