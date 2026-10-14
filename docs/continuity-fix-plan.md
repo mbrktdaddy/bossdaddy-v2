@@ -350,6 +350,17 @@ masthead, the "Unsubscribe" link appears in Gmail's header.
      `border-faint` (Phase 7); `CommentList` row now mixes the 44px like chip with small text links
      (Phase 8); `OffTheBench` card body (hover lift, tint stub) untouched; no `BellIcon`/`UserIcon`
      in `components/icons.tsx` (inline SVGs remain in the menus).
+     **Walkthrough flags (judgment calls to confirm on the phone):** cart icon now always shows
+     at md+ (badge only when >0) — if the 768px header crowds, `CartIcon.tsx` `max-md:hidden` →
+     `max-lg:hidden`; logged-out "Join free" stays 36px (`sm`) to keep md narrow; `app/error.tsx`
+     H1 is now "Something went wrong" (was "Unexpected error" — `title=` restores it); LikeButton
+     dropped the "Like"→"Liked" label flip and heart scale (state = fill + filled icon); gallery
+     swipe works anywhere on screen; `/account/notifications` kept its own H1 (no compact
+     PageHeader — the only honest eyebrow repeated "Account"); auth H1s "Welcome back, Boss" /
+     "Join the Crew" / "Reset your password" / "Set new password" (`LABELS.auth`); /gifts hub
+     card is now notify-intent ("Notify me", tag `notify:gifts:season`); shop launch tag is
+     `notify:shop:launch` (admin stat counts both); `Switch` has no `aria-describedby` and
+     `PageHeader` `deck` is string-only (helper text lives in the body).
   3. Phases 6–7 — commerce, tools.
   4. Phases 8–10 — account & messaging, share cards + emails, guard strict + docs.
 - Rough size: ~180 files across all phases (Phase 7 is the largest, ~45).
