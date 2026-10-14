@@ -120,7 +120,7 @@ export default function PushNotificationSetting() {
   if (!supported) return null
 
   return (
-    <Card className="p-6 mb-6">
+    <Card tone="surface" className="p-6 mb-6">
       <Eyebrow className="mb-4">Push Notifications</Eyebrow>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -140,7 +140,7 @@ export default function PushNotificationSetting() {
             size in both (Button guarantees it); min-w holds the width across
             "Enable" / "Turn off" / the busy "…" so the copy beside it can't reflow. */}
         <Button
-          variant={enabled ? 'secondary' : 'primary'}
+          variant={enabled ? 'outline' : 'primary'}
           disabled={busy || denied}
           onClick={enabled ? disable : enable}
           className="shrink-0 min-w-[8.5rem]"

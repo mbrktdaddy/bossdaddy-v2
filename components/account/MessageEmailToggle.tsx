@@ -37,7 +37,7 @@ export default function MessageEmailToggle({ initialEnabled }: { initialEnabled:
   }
 
   return (
-    <Card className="p-6 mb-6">
+    <Card tone="surface" className="p-6 mb-6">
       <Eyebrow className="mb-4">Email</Eyebrow>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">

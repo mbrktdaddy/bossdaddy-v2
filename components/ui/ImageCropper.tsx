@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 import type { Area, MediaSize } from 'react-easy-crop'
+import { buttonVariants } from '@/components/ui/Button'
 
 interface Props {
   file: File
@@ -125,7 +126,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
   if (!imageSrc) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black">
+    <div data-theme="dark" className="fixed inset-0 z-50 flex flex-col bg-black text-prose">
       {/* Crop area */}
       <div className="relative flex-1 min-h-0">
         <Cropper
@@ -142,7 +143,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
 
       {/* Ratio selector — free contexts only */}
       {allowRatioChange && !aspect && (
-        <div className="flex items-center gap-2 px-4 pt-3 bg-surface border-t border-strong shrink-0 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-2 px-4 pt-3 bg-chrome border-t border-strong shrink-0 overflow-x-auto scrollbar-hide">
           <span className="text-xs text-prose-faint shrink-0">Ratio</span>
           {RATIOS.map((r) => {
             const active = ratioChoice === r.value
@@ -151,11 +152,8 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
                 key={r.label}
                 type="button"
                 onClick={() => setRatioChoice(r.value)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors shrink-0 ${
-                  active
-                    ? 'bg-accent text-white border-accent'
-                    : 'bg-surface-raised text-prose-muted border-soft hover:border-strong'
-                }`}
+                aria-pressed={active}
+                className={buttonVariants({ variant: active ? 'primary' : 'outline', size: 'sm', className: 'shrink-0' })}
               >
                 {r.label}
               </button>
@@ -166,17 +164,17 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
 
       {/* Error banner — crop/encode failures used to fail silently */}
       {error && (
-        <div role="alert" className="px-4 py-2 bg-red-700 text-red-50 text-xs text-center shrink-0">
+        <div role="alert" className="px-4 py-2 bg-danger-bg border-t border-danger-line text-danger-ink text-xs text-center shrink-0">
           {error}
         </div>
       )}
 
       {/* Controls */}
-      <div className={`flex items-center gap-4 px-4 py-4 bg-surface ${allowRatioChange && !aspect ? '' : 'border-t border-strong'} shrink-0`}>
+      <div className={`flex items-center gap-4 px-4 py-4 bg-chrome ${allowRatioChange && !aspect ? '' : 'border-t border-strong'} shrink-0`}>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2.5 text-sm text-prose-muted hover:text-prose rounded-lg border border-soft hover:border-strong transition-colors"
+          className={buttonVariants({ variant: 'outline' })}
         >
           Cancel
         </button>
@@ -189,14 +187,14 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
             step={0.05}
             value={zoom}
             onChange={(e) => setZoom(Number(e.target.value))}
-            className="flex-1 accent-orange-600"
+            className="flex-1 accent-accent"
           />
         </div>
         {onSkip && (
           <button
             type="button"
             onClick={onSkip}
-            className="px-4 py-2.5 text-sm text-prose-muted hover:text-prose rounded-lg border border-soft hover:border-strong transition-colors whitespace-nowrap"
+            className={buttonVariants({ variant: 'outline', className: 'whitespace-nowrap' })}
           >
             Use full image
           </button>
@@ -205,7 +203,7 @@ export default function ImageCropper({ file, aspect, onCrop, onCancel, onSkip, a
           type="button"
           onClick={handleConfirm}
           disabled={busy}
-          className="px-4 py-2.5 text-sm bg-accent hover:bg-accent-hover disabled:opacity-40 text-white font-semibold rounded-lg transition-colors"
+          className={buttonVariants()}
         >
           {busy ? 'Cropping…' : 'Use Photo'}
         </button>

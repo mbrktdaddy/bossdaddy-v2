@@ -1,10 +1,9 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCategoryBySlug } from '@/lib/categories'
-import CategoryIcon from '@/components/CategoryIcon'
-import RatingScore from '@/components/RatingScore'
+import ContentRow from '@/components/ContentRow'
+import { LabelBlock } from '@/components/ui/LabelBlock'
 import BenchStrip from '@/components/BenchStrip'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
@@ -90,7 +89,7 @@ export default async function AuthorPage({ params }: Props) {
  const [{ data: reviews }, { data: articles }] = await Promise.all([
  supabase
  .from('reviews')
- .select('id, slug, title, product_name, category, rating, excerpt, published_at')
+ .select('id, slug, title, product_name, category, rating, excerpt, image_url, published_at')
  .eq('author_id', profile.id)
  .eq('status', 'approved')
  .eq('is_visible', true)
@@ -98,7 +97,7 @@ export default async function AuthorPage({ params }: Props) {
  .limit(100),
  supabase
  .from('guides')
- .select('id, slug, title, category, excerpt, published_at, reading_time_minutes')
+ .select('id, slug, title, category, excerpt, image_url, published_at, reading_time_minutes')
  .eq('author_id', profile.id)
  .eq('status', 'approved')
  .eq('is_visible', true)
@@ -106,36 +105,42 @@ export default async function AuthorPage({ params }: Props) {
  .limit(100),
  ])
 
+ const fmt = (d: string | null) =>
+ d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null
+
  const totalReviews = reviews?.length ?? 0
  const totalGuides = articles?.length ?? 0
 
  return (
  <div className="max-w-4xl mx-auto px-6 py-12">
 
- {/* Profile header */}
- <div className="mb-12 pb-10">
+ {/* Profile header — the PageHeader lockup (label block, uppercase H1, 3px rule)
+     with the portrait and byline beside it. Portrait is SQUARE on purpose
+     (author portraits are; member avatars are round). */}
+ <header className="mb-12 pb-8 border-b-[3px] border-chrome">
  <div className="flex items-start gap-5">
  {profile.avatar_url ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
  src={profile.avatar_url}
  alt={profile.display_name ?? username}
- className="w-16 h-16 rounded-xl object-cover shrink-0"
+ className="w-16 h-16 rounded-sm object-cover shrink-0"
  />
  ) : (
- <div className="w-16 h-16 rounded-xl bg-chrome flex items-center justify-center text-2xl font-black text-white shrink-0">
+ <div className="w-16 h-16 rounded-sm bg-chrome flex items-center justify-center text-2xl font-display font-black text-white shrink-0">
  {(profile.display_name ?? username)[0].toUpperCase()}
  </div>
  )}
- <div>
- <h1 className="text-3xl font-black mb-1">{profile.display_name ?? `@${username}`}</h1>
- <p className="text-sm text-prose-faint">
+ <div className="min-w-0">
+ <LabelBlock>{profile.role === 'admin' ? 'Editor' : 'Contributor'}</LabelBlock>
+ <h1 className="font-black text-prose uppercase text-2xl sm:text-3xl leading-[1.05] tracking-[-0.01em] mt-3">
+ {profile.display_name ?? `@${username}`}
+ </h1>
+ <p className="text-sm text-prose-faint mt-1.5">
  <span className="text-accent-text">@{username}</span>
- <span className="mx-2 text-prose-faint">·</span>
- {profile.role === 'admin' ? 'Editor' : 'Contributor'}
  </p>
  {profile.tagline && (
- <p className="text-xs text-eyebrow/80 uppercase tracking-widest font-semibold mt-2">
+ <p className="text-xs text-eyebrow uppercase tracking-widest font-semibold mt-2">
  {profile.tagline}
  </p>
  )}
@@ -151,36 +156,27 @@ export default async function AuthorPage({ params }: Props) {
  {profile.bio && (
  <p className="mt-6 text-prose-muted text-sm leading-relaxed max-w-2xl">{profile.bio}</p>
  )}
- </div>
+ </header>
 
  {/* Reviews */}
  {totalReviews > 0 && (
  <div className="mb-12">
  <EditorialHeader eyebrow="By this author" title="Reviews" />
- <div className="divide-y divide-soft border-y border-soft">
- {reviews!.map((r) => {
- const cat = getCategoryBySlug(r.category)
- return (
- <Link
+ <div className="border-y border-soft">
+ {reviews!.map((r, i) => (
+ <ContentRow
  key={r.id}
  href={`/reviews/${r.slug}`}
- className="flex items-center justify-between py-4 transition-colors group"
- >
- <div className="min-w-0">
- <div className="flex items-center gap-2 mb-1 flex-wrap">
- {cat && <span className="flex items-center gap-1.5 text-[10px] sm:text-xs text-eyebrow uppercase tracking-widest font-semibold"><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text shrink-0" /> {cat.label}</span>}
- </div>
- <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors truncate">{r.title}</p>
- {r.published_at && (
- <p className="text-xs text-prose-faint mt-0.5">
- {new Date(r.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
- </p>
- )}
- </div>
- <RatingScore rating={r.rating ?? 0} />
- </Link>
- )
- })}
+ eyebrow={getCategoryBySlug(r.category)?.label ?? r.category}
+ headline={r.title}
+ sub={r.product_name}
+ excerpt={r.excerpt}
+ meta={fmt(r.published_at)}
+ rating={r.rating ?? 0}
+ imageUrl={r.image_url}
+ isLast={i === reviews!.length - 1}
+ />
+ ))}
  </div>
  </div>
  )}
@@ -189,32 +185,19 @@ export default async function AuthorPage({ params }: Props) {
  {totalGuides > 0 && (
  <div>
  <EditorialHeader eyebrow="By this author" title="Guides" />
- <div className="divide-y divide-soft border-y border-soft">
- {articles!.map((a) => {
- const cat = getCategoryBySlug(a.category)
- return (
- <Link
+ <div className="border-y border-soft">
+ {articles!.map((a, i) => (
+ <ContentRow
  key={a.id}
  href={`/guides/${a.slug}`}
- className="flex items-center justify-between py-4 transition-colors group"
- >
- <div className="min-w-0">
- <div className="flex items-center gap-2 mb-1">
- {cat && <span className={`flex items-center gap-1 text-xs ${cat.accent}`}><CategoryIcon slug={cat.slug} className="w-3.5 h-3.5 text-accent-text" /> {cat.label}</span>}
- </div>
- <p className="text-sm font-extrabold text-prose group-hover:text-accent transition-colors truncate">{a.title}</p>
- {a.published_at && (
- <p className="text-xs text-prose-faint mt-0.5">
- {new Date(a.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
- </p>
- )}
- </div>
- {a.reading_time_minutes && (
- <span className="text-xs text-prose-faint ml-4 shrink-0">{a.reading_time_minutes} min</span>
- )}
- </Link>
- )
- })}
+ eyebrow={getCategoryBySlug(a.category)?.label ?? a.category}
+ headline={a.title}
+ excerpt={a.excerpt}
+ meta={[fmt(a.published_at), a.reading_time_minutes ? `${a.reading_time_minutes} min read` : null].filter(Boolean).join(' · ') || null}
+ imageUrl={a.image_url}
+ isLast={i === articles!.length - 1}
+ />
+ ))}
  </div>
  </div>
  )}

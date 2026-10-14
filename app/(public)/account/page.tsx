@@ -38,6 +38,8 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
 import { Card } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
+import PageHeader from '@/components/PageHeader'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { ChevronRightIcon } from '@/components/icons'
 
@@ -61,6 +63,13 @@ function followStageLabel(status: string): string {
 function followHref(item: { slug: string; status: string }): string {
   return item.status === 'radar' ? `/gear/radar#${radarAnchorId(item.slug)}` : `/bench/${item.slug}`
 }
+
+const DESTINATIONS = [
+  { href: '/account/settings',      label: LABELS.settings.short },
+  { href: '/account/connections',   label: LABELS.contacts.short },
+  { href: '/account/messages',      label: LABELS.messages.short },
+  { href: '/account/notifications', label: LABELS.notifications.short },
+]
 
 export default async function AccountHomePage() {
   const supabase = await createClient()
@@ -116,18 +125,34 @@ export default async function AccountHomePage() {
 
   return (
     <div className="bg-background text-prose min-h-[calc(100vh-4rem)]">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
         {/* "Account", not "Your Stuff" — and both strings now come from
             lib/labels.ts, which is where a nav link and a page H1 are supposed to read
             from (CLAUDE.md, Naming Doctrine). The old label was hardcoded in four
             places; see the block in labels.ts for why the word changed. */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-black">{LABELS.account.h1}</h1>
-          <p className="text-prose-faint text-sm mt-1">
-            {LABELS.account.tagline}
-          </p>
-        </div>
+        <PageHeader
+          size="compact"
+          eyebrow={LABELS.account.short}
+          title={LABELS.account.h1}
+          deck={LABELS.account.tagline}
+          className="mb-6"
+        />
+
+        {/* The four places an account leads — Settings used to be a text link at
+            the bottom of the page, which is where nobody looked for it. */}
+        <Card tone="surface" as="section" className="mb-6 divide-y divide-soft overflow-hidden" aria-label="Account destinations">
+          {DESTINATIONS.map((d) => (
+            <Link
+              key={d.href}
+              href={d.href}
+              className="group flex min-h-14 items-center justify-between gap-3 px-6 py-3 transition-colors hover:bg-surface-hover"
+            >
+              <span className="text-sm font-semibold text-prose group-hover:text-accent">{d.label}</span>
+              <ChevronRightIcon className="w-4 h-4 shrink-0 text-prose-muted group-hover:text-accent" strokeWidth={2} />
+            </Link>
+          ))}
+        </Card>
 
         {/* ── MANAGEMENT LIVES HERE; STATE AND WORK LIVE ON /tools ─────────────
             One rule, and it decides every section on both pages: this page is where
@@ -142,9 +167,9 @@ export default async function AccountHomePage() {
 
             Order is concentric rather than most-urgent-first — the people he's
             responsible for, then the people he can call on. */}
-        <div className="mb-6">
+        <Card tone="surface" className="p-6 mb-6">
           <MyKidsSection />
-        </div>
+        </Card>
 
         {/* Contacts then Messages: who you CAN reach, then who is waiting on a
             reply. Same order as the concentric logic above — the relationship
@@ -162,7 +187,7 @@ export default async function AccountHomePage() {
             What's left below is what a member HAS: the things he saved, then the two
             counts. Activity moved under them — it's the least useful thing on the page
             and it was sitting above the content it counts. */}
-        <Card className="p-6 mb-6">
+        <Card tone="surface" className="p-6 mb-6">
           <Eyebrow className="mb-4">Liked Content</Eyebrow>
           {!hasLikedContent ? (
             <p className="text-sm text-prose-faint text-center py-4">
@@ -172,18 +197,18 @@ export default async function AccountHomePage() {
             <div className="space-y-1.5">
               {orderedLikedReviews.slice(0, 5).map((r) => r && (
                 <Link key={r.id} href={`/reviews/${r.slug}`}
-                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
-                  <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent-tint text-accent-text-soft border border-accent-border/60 shrink-0 font-medium">Review</span>
+                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-strong rounded-lg transition-colors group min-h-[44px]">
+                  <Badge tone="muted" size="sm">Review</Badge>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{r.title}</p>
-                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
                 </Link>
               ))}
               {orderedLikedArticles.slice(0, 5).map((a) => a && (
                 <Link key={a.id} href={`/guides/${a.slug}`}
-                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-lg transition-colors group min-h-[44px]">
-                  <span className="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-info-bg text-info-ink border border-info-line shrink-0 font-medium">Guide</span>
+                  className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-strong rounded-lg transition-colors group min-h-[44px]">
+                  <Badge tone="info" size="sm">Guide</Badge>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0 flex-1">{a.title}</p>
-                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
                 </Link>
               ))}
               {(orderedLikedReviews.length > 5 || orderedLikedArticles.length > 5) && (
@@ -195,7 +220,7 @@ export default async function AccountHomePage() {
           )}
         </Card>
 
-        <Card className="p-6 mb-6">
+        <Card tone="surface" className="p-6 mb-6">
           <Eyebrow className="mb-4">Gear You&apos;re Following</Eyebrow>
           {subscribedItems.length === 0 ? (
             <p className="text-sm text-prose-faint text-center py-4">
@@ -209,12 +234,10 @@ export default async function AccountHomePage() {
             <div className="space-y-1">
               {subscribedItems.map((item) => (
                 <Link key={item.id} href={followHref(item)}
-                  className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl transition-colors group">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-surface-raised text-prose-muted border border-strong shrink-0">
-                    {followStageLabel(item.status)}
-                  </span>
+                  className="flex items-center gap-3 p-3 bg-surface-sunken border border-soft hover:border-strong rounded-xl transition-colors group">
+                  <Badge tone="muted" size="sm">{followStageLabel(item.status)}</Badge>
                   <p className="text-sm text-prose-muted group-hover:text-prose transition-colors truncate min-w-0">{item.title}</p>
-                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 ml-auto transition-colors" strokeWidth={2} />
+                  <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 ml-auto transition-colors" strokeWidth={2} />
                 </Link>
               ))}
             </div>
@@ -224,7 +247,7 @@ export default async function AccountHomePage() {
         {/* Two counts of your own doing, below the content they count. Kept rather
             than cut — it's your own record, not a scale metric on a public page — but
             it's the first thing to go if this page needs the room. */}
-        <Card className="p-6 mb-6">
+        <Card tone="surface" className="p-6 mb-6">
           <Eyebrow className="mb-4">Activity</Eyebrow>
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
@@ -237,15 +260,6 @@ export default async function AccountHomePage() {
             </div>
           </div>
         </Card>
-
-        <div className="border-t border-soft pt-6">
-          <Link
-            href="/account/settings"
-            className="inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
-          >
-            {LABELS.account.settingsCta} →
-          </Link>
-        </div>
 
       </div>
     </div>

@@ -51,7 +51,7 @@ async function BackingLink() {
   return (
     <Link
       href="/goals#corner"
-      className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-soft bg-surface-sunken px-4 py-3 text-xs transition-colors hover:border-strong"
+      className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-soft bg-surface-sunken px-4 py-3 text-xs transition-colors hover:border-strong"
     >
       <span className="text-prose">
         {LABELS.goals.sharedHeading}
@@ -170,7 +170,7 @@ export default async function YourCornerSection() {
 
       <div className="space-y-3">
         {people.map((person) => (
-          <div key={person.label} className="rounded-lg border border-soft bg-surface-sunken p-4">
+          <Card key={person.label} tone="sunken" className="p-4">
             <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
             <div className="mt-2 space-y-1">
               {person.entries.map((e) => (
@@ -184,7 +184,7 @@ export default async function YourCornerSection() {
                 </Link>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
       <BackingLink />

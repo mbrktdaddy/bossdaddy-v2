@@ -6,7 +6,7 @@ import ConversationList from './_components/ConversationList'
 import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
-import { BackLink } from '@/components/ui/BackLink'
+import PageHeader from '@/components/PageHeader'
 import { LABELS } from '@/lib/labels'
 
 export const metadata: Metadata = {
@@ -24,17 +24,22 @@ export default async function MessagesPage() {
   const conversations = await listConversationsFor(supabase, user.id)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
-      <h1 className="text-2xl font-black text-prose mb-4">Messages</h1>
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <PageHeader
+        size="compact"
+        back={{ href: '/account', label: LABELS.account.short }}
+        eyebrow="Inbox"
+        title="Messages"
+        className="mb-6"
+      />
 
       {/* Compose — the obvious "start a conversation" entry point. */}
-      <Card className="p-4 sm:p-5">
+      <Card tone="surface" className="p-6">
         <Eyebrow className="mb-3">New message</Eyebrow>
         <MemberSearch />
       </Card>
 
-      <div className="mt-6 divide-y divide-soft border border-soft rounded-xl overflow-hidden">
+      <div className="mt-6">
         <ConversationList initial={conversations} userId={user.id} />
       </div>
     </div>

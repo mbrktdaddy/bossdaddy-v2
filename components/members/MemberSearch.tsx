@@ -21,9 +21,9 @@
 // is decided by connection state, not by which page is hosting it.
 
 import { useState, useRef } from 'react'
-import Image from 'next/image'
 import { getOrCreateDm } from '@/lib/messaging'
 import { buttonVariants } from '@/components/ui/Button'
+import { Avatar } from '@/components/ui/Avatar'
 
 type ConnectionState = 'none' | 'pending_in' | 'pending_out' | 'accepted' | 'declined' | 'blocked'
 
@@ -75,7 +75,7 @@ export default function MemberSearch() {
         value={q}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search by name or @username…"
-        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+        className="w-full px-4 py-2.5 bg-surface border border-strong rounded-xl text-base text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
       />
       <p className="mt-1.5 text-xs text-prose-faint">Type a name or username — the @ is optional. An email address has to be exact.</p>
       {error && <p className="text-xs text-danger-ink mt-1.5">{error}</p>}
@@ -84,13 +84,7 @@ export default function MemberSearch() {
         <div className="mt-2 border border-soft rounded-xl overflow-hidden divide-y divide-soft">
           {results.map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-4 py-2.5">
-              <span className="w-9 h-9 rounded-full overflow-hidden bg-accent/15 flex items-center justify-center shrink-0">
-                {m.avatarUrl ? (
-                  <Image src={m.avatarUrl} alt="" width={36} height={36} className="object-cover w-full h-full" unoptimized />
-                ) : (
-                  <span className="text-sm font-black text-accent">{(m.displayName || m.username || '?')[0]?.toUpperCase()}</span>
-                )}
-              </span>
+              <Avatar src={m.avatarUrl} name={m.displayName || m.username} size={32} />
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-semibold text-prose truncate">{m.displayName || m.username}</span>
                 <span className="block text-xs text-prose-faint truncate">@{m.username}</span>
@@ -142,7 +136,7 @@ function ConnectForm({ userId, op, label }: { userId: string; op: string; label:
       <input type="hidden" name="userId" value={userId} />
       <button
         type="submit"
-        className="min-h-11 rounded-lg border border-strong bg-surface px-4 py-2.5 text-xs font-bold text-accent-text hover:bg-surface-hover transition-colors"
+        className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
         {label}
       </button>

@@ -15,6 +15,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Switch } from '@/components/ui/Switch'
 
 type Props = {
   initialRequestsFrom: 'everyone' | 'nobody'
@@ -47,7 +48,7 @@ export default function ConnectionPrefs({
   }
 
   return (
-    <Card className="p-6 mb-6">
+    <Card tone="surface" className="p-6 mb-6">
       <Eyebrow className="mb-4">Who can reach you</Eyebrow>
 
       <Row
@@ -91,19 +92,7 @@ function Row({
         <p className="text-sm font-semibold text-prose">{label}</p>
         <p className="text-xs text-prose-faint mt-0.5 leading-snug">{hint}</p>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={label}
-        disabled={disabled}
-        onClick={onToggle}
-        className="relative shrink-0 flex items-center min-h-[44px] disabled:opacity-50"
-      >
-        <span className={`relative w-11 h-6 rounded-full transition-colors ${checked ? 'bg-accent' : 'bg-surface-raised border border-strong'}`}>
-          <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : ''}`} />
-        </span>
-      </button>
+      <Switch checked={checked} onChange={() => onToggle()} label={label} disabled={disabled} />
     </div>
   )
 }

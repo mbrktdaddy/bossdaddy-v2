@@ -14,7 +14,11 @@
 import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { listConversationsFor, badgeUnreadCount } from '@/lib/messaging-queries'
+import { LABELS } from '@/lib/labels'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Card } from '@/components/ui/Card'
+import { CountBadge } from '@/components/ui/CountBadge'
+import { ChevronRightIcon } from '@/components/icons'
 
 export default async function MessagesCard() {
   const supabase = await createClient()
@@ -29,11 +33,12 @@ export default async function MessagesCard() {
   return (
     <Link
       href="/account/messages"
-      className="block bg-surface border border-soft rounded-xl p-6 mb-6 hover:border-strong transition-colors"
+      className="group block mb-6"
     >
+      <Card tone="surface" className="p-6 group-hover:border-strong transition-colors">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <Eyebrow>Messages</Eyebrow>
+          <Eyebrow>{LABELS.messages.short}</Eyebrow>
           {/* A LITERAL SPACE, not just a margin — same reason as ContactsCard: the
               margin vanishes from copied text and some screen readers announce
               adjacent inline elements with no separator ("3conversations"). */}
@@ -53,13 +58,12 @@ export default async function MessagesCard() {
         {/* Unread is the only thing here worth a colour — it's the one state that
             needs something from him. Mirrors ContactsCard's waiting pill exactly. */}
         {waiting > 0 ? (
-          <span className="shrink-0 inline-flex min-w-8 items-center justify-center rounded-full bg-accent px-2.5 py-1 text-sm font-black text-white">
-            {waiting}
-          </span>
+          <CountBadge count={waiting} className="shrink-0" />
         ) : (
-          <span className="shrink-0 text-prose-muted" aria-hidden="true">→</span>
+          <ChevronRightIcon className="w-4 h-4 shrink-0 text-prose-muted" strokeWidth={2} />
         )}
       </div>
+      </Card>
     </Link>
   )
 }

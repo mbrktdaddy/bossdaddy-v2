@@ -22,12 +22,12 @@ export default async function NotificationsPage() {
     .limit(50)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Plain H1 for now, not PageHeader compact: that lockup needs an eyebrow, and
           under a "‹ Account" up-link the only honest one is "Account" again. The
           app-pages phase gives every /account page the lockup at once. */}
       <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
-      <h1 className="text-2xl font-black text-prose mb-6">{LABELS.notifications.short}</h1>
+      <h1 className="text-2xl sm:text-3xl font-black text-prose mb-6">{LABELS.notifications.short}</h1>
       <NotificationFeed initial={data ?? []} />
     </div>
   )

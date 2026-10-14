@@ -2,10 +2,10 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { compressImage } from '@/lib/compress-image'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { buttonVariants } from '@/components/ui/Button'
+import { Avatar } from '@/components/ui/Avatar'
 
 interface Props {
   initialAvatarUrl: string | null
@@ -89,25 +89,21 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) pickForCrop(f) }}
         title="Click or drop a JPG, PNG, or WebP"
-        className="group relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-orange-700 to-orange-950 flex items-center justify-center text-4xl font-black text-white shrink-0 hover:ring-orange-700 transition-all disabled:opacity-50 disabled:cursor-wait"
+        className="group relative rounded-full shrink-0 disabled:opacity-50 disabled:cursor-wait focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         aria-label={avatarUrl ? 'Change avatar' : 'Upload avatar'}
       >
-        {avatarUrl ? (
-          <Image src={avatarUrl} alt="Avatar" fill priority sizes="96px" className="object-cover" unoptimized />
-        ) : (
-          <span>{initial}</span>
-        )}
-        <span className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
+        <Avatar src={avatarUrl} name={initial} size={96} alt="Avatar" />
+        <span className="absolute inset-0 rounded-full bg-chrome/60 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold uppercase tracking-widest">
           {busy ? '...' : 'Change'}
         </span>
       </button>
 
-      <div className="flex gap-2 sm:self-center">
+      <div className="flex flex-wrap justify-center gap-2 sm:self-center">
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+          className={buttonVariants({ variant: 'outline' })}
         >
           {busy ? 'Uploading…' : avatarUrl ? 'Replace' : 'Upload'}
         </button>
@@ -116,15 +112,15 @@ export default function AvatarUploader({ initialAvatarUrl, initial }: Props) {
             type="button"
             onClick={handleRemove}
             disabled={busy}
-            className="px-3 py-1.5 bg-transparent hover:bg-danger-bg border border-soft hover:border-danger-line disabled:opacity-50 text-xs font-semibold text-prose-muted hover:text-danger-ink rounded-lg transition-colors"
+            className={buttonVariants({ variant: 'danger' })}
           >
             Remove
           </button>
         )}
       </div>
-      {error && <p className="text-xs text-danger-ink w-full text-center sm:text-left">{error}</p>}
+      {error && <p className="text-sm font-medium text-danger-ink w-full text-center sm:text-left">{error}</p>}
       {saved && !error && (
-        <p className="text-xs text-green-600 font-semibold w-full text-center sm:text-left">Photo updated ✓</p>
+        <p className="text-sm text-success-ink font-semibold w-full text-center sm:text-left">Photo updated ✓</p>
       )}
 
       <input

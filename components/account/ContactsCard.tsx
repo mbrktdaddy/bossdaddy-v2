@@ -18,6 +18,9 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { listConnections, listIncoming } from '@/lib/connections'
 import { LABELS } from '@/lib/labels'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { Card } from '@/components/ui/Card'
+import { CountBadge } from '@/components/ui/CountBadge'
+import { ChevronRightIcon } from '@/components/icons'
 
 export default async function ContactsCard() {
   const supabase = await createClient()
@@ -32,8 +35,9 @@ export default async function ContactsCard() {
   return (
     <Link
       href="/account/connections"
-      className="block bg-surface border border-soft rounded-xl p-6 mb-6 hover:border-strong transition-colors"
+      className="group block mb-6"
     >
+      <Card tone="surface" className="p-6 group-hover:border-strong transition-colors">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
           <Eyebrow>
@@ -59,13 +63,12 @@ export default async function ContactsCard() {
         {/* The waiting count is the only thing here worth a colour — it's the one
             state that needs something from him. */}
         {incoming.length > 0 ? (
-          <span className="shrink-0 inline-flex min-w-8 items-center justify-center rounded-full bg-accent px-2.5 py-1 text-sm font-black text-white">
-            {incoming.length}
-          </span>
+          <CountBadge count={incoming.length} className="shrink-0" />
         ) : (
-          <span className="shrink-0 text-prose-muted" aria-hidden="true">→</span>
+          <ChevronRightIcon className="w-4 h-4 shrink-0 text-prose-muted" strokeWidth={2} />
         )}
       </div>
+      </Card>
     </Link>
   )
 }

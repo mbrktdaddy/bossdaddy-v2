@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCurrentUserId } from '@/lib/use-current-user-id'
+import { useConfirm } from '@/components/ui/useConfirm'
 
 interface Props {
   commentId: string
@@ -18,11 +19,19 @@ export default function CommentDeleteButton({ commentId, authorId }: Props) {
   const router = useRouter()
   const userId = useCurrentUserId()
   const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { confirm: askConfirm, dialog } = useConfirm()
 
   if (userId !== authorId) return null
 
   async function handleDelete() {
-    if (!window.confirm('Delete your comment? This can’t be undone.')) return
+    if (!(await askConfirm({
+      title: 'Delete your comment?',
+      body: 'This can’t be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+    }))) return
+    setError(null)
     setDeleting(true)
     const res = await fetch(`/api/comments/${commentId}`, { method: 'DELETE' })
     if (res.ok) {
@@ -30,16 +39,21 @@ export default function CommentDeleteButton({ commentId, authorId }: Props) {
       return
     }
     setDeleting(false)
-    window.alert('Could not delete your comment. Please try again.')
+    setError('Could not delete your comment. Please try again.')
   }
 
   return (
-    <button
-      onClick={handleDelete}
-      disabled={deleting}
-      className="text-xs text-prose-faint hover:text-danger-ink transition-colors disabled:opacity-50"
-    >
-      {deleting ? 'Deleting…' : 'Delete'}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={deleting}
+        className="inline-flex min-h-11 items-center px-2 text-xs text-prose-faint hover:text-danger-ink transition-colors disabled:opacity-50"
+      >
+        {deleting ? 'Deleting…' : 'Delete'}
+      </button>
+      {error && <span role="alert" className="text-xs font-medium text-danger-ink">{error}</span>}
+      {dialog}
+    </>
   )
 }

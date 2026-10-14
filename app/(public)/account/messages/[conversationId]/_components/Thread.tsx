@@ -5,8 +5,6 @@
 // (RLS + the actions in lib/messaging.ts); this UI reflects and toggles state.
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { compressImage } from '@/lib/compress-image'
 import { REACTION_KINDS, REACTIONS, reactionEmoji, type ReactionKind } from '@/lib/messaging-reactions'
@@ -16,8 +14,15 @@ import {
   sendMessage, markConversationRead, blockUser, unblockUser, reportContent,
   deleteConversation, setConversationMuted, toggleReaction,
 } from '@/lib/messaging'
-import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { Avatar } from '@/components/ui/Avatar'
+import { BackLink } from '@/components/ui/BackLink'
+import { IconButton, iconButtonClass } from '@/components/ui/IconButton'
+import { Menu, MenuItem, MenuDivider } from '@/components/ui/Menu'
+import { Modal } from '@/components/ui/Modal'
+import { Notice } from '@/components/ui/Notice'
+import { Field } from '@/components/ui/Field'
+import { useConfirm } from '@/components/ui/useConfirm'
 import { ChevronLeftIcon, ChevronRightIcon, DownloadIcon, PhotoIcon, XIcon } from '@/components/icons'
 
 interface Message {
@@ -118,29 +123,8 @@ function snippetOf(m: ParentMessage | Message): string {
   return m.body.trim() || (m.attachment_path ? 'Photo' : '')
 }
 
-function PeerAvatar({ peer, size = 28 }: { peer: Peer | null; size?: number }) {
-  const name = peer?.displayName || peer?.username || 'Member'
-  if (peer?.avatarUrl) {
-    return (
-      <Image
-        src={peer.avatarUrl}
-        alt={name}
-        width={size}
-        height={size}
-        className="rounded-full object-cover shrink-0 bg-surface-raised"
-        style={{ width: size, height: size }}
-      />
-    )
-  }
-  return (
-    <span
-      className="rounded-full bg-surface-raised text-prose-muted font-bold flex items-center justify-center shrink-0 uppercase"
-      style={{ width: size, height: size, fontSize: size * 0.42 }}
-      aria-hidden
-    >
-      {name.charAt(0)}
-    </span>
-  )
+function PeerAvatar({ peer, size = 32 }: { peer: Peer | null; size?: 24 | 32 | 44 | 96 }) {
+  return <Avatar src={peer?.avatarUrl} name={peer?.displayName || peer?.username || 'Member'} size={size} />
 }
 
 /** Bell-with-a-slash. An SVG, not 🔇 — this one is chrome (brand-guide §7.1). */
@@ -180,10 +164,9 @@ export default function Thread({
   const [error, setError] = useState<string | null>(null)
   const [blocked, setBlocked] = useState(initiallyBlocked)
   const [muted, setMuted] = useState(initiallyMuted)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [reportOpen, setReportOpen] = useState(false)
   const [reported, setReported] = useState(false)
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const { confirm: askConfirm, dialog: confirmDialog } = useConfirm()
   const [peerLastReadAt, setPeerLastReadAt] = useState<string | null>(initialPeerLastReadAt)
   // Which message has its action row open (react / reply). One at a time.
   const [actionsFor, setActionsFor] = useState<string | null>(null)
@@ -650,14 +633,12 @@ export default function Thread({
   }
 
   async function toggleBlock() {
-    setMenuOpen(false)
     if (!peer) return
     if (blocked) { await unblockUser(peer.id); setBlocked(false) }
     else { await blockUser(peer.id); setBlocked(true) }
   }
 
   async function toggleMute() {
-    setMenuOpen(false)
     const next = !muted
     setMuted(next)
     const res = await setConversationMuted(conversationId, next)
@@ -670,11 +651,17 @@ export default function Thread({
     setReportOpen(false); setReported(true)
   }
 
-  // Two-tap confirm (no native dialog). Delete-for-me: removes the thread from
+  // Confirmed in a Modal (useConfirm — the menu closes on select, so the old
+  // two-tap-in-the-menu can't survive). Delete-for-me: removes the thread from
   // my list; the other person keeps theirs. Hard-nav back to the list.
   async function removeConversation() {
-    if (!confirmDelete) { setConfirmDelete(true); return }
-    setMenuOpen(false)
+    const ok = await askConfirm({
+      title: 'Delete this conversation?',
+      body: `It leaves your list. ${peerName} keeps their copy.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
     const res = await deleteConversation(conversationId)
     if (res.ok) window.location.assign('/account/messages')
   }
@@ -713,10 +700,11 @@ export default function Thread({
       className="max-w-2xl mx-auto px-4 pt-4 sm:pt-6 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:pb-6 flex flex-col h-[calc(100dvh-4rem)] md:h-[calc(100dvh-8rem)]"
     >
       {/* Header */}
+      <h1 className="sr-only">Conversation with {peerName}</h1>
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-soft">
         <div className="flex items-center gap-2 min-w-0">
-          <Link href="/account/messages" className="text-prose-faint hover:text-prose text-sm">←</Link>
-          <PeerAvatar peer={peer} size={28} />
+          <BackLink href="/account/messages" label="Messages" className="shrink-0" />
+          <PeerAvatar peer={peer} size={32} />
           {/* PLAIN TEXT, NOT A LINK TO /author/<username>. It was one, and for most
               peers that link went to a page about a "Contributor" with nothing
               published — /author now 404s for anyone who isn't an author, so
@@ -735,31 +723,28 @@ export default function Thread({
           )}
         </div>
         {peer && (
-          <div className="relative">
-            <button type="button" onClick={() => { setMenuOpen((o) => !o); setConfirmDelete(false) }} aria-label="Conversation options"
-              className="p-1.5 text-prose-faint hover:text-prose rounded-lg hover:bg-surface-raised">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 mt-1 w-52 bg-surface border border-soft rounded-xl shadow-xl z-20 overflow-hidden">
-                {/* Mute sits ABOVE block, and reads as the softer option it is:
-                    block severs the connection (and cascades away goal
-                    participation); this just stops the pinging. */}
-                <button type="button" onClick={toggleMute} className="block w-full text-left px-4 py-2.5 text-sm text-prose hover:bg-surface-raised">
-                  {muted ? 'Unmute notifications' : 'Mute notifications'}
-                </button>
-                <button type="button" onClick={toggleBlock} className="block w-full text-left px-4 py-2.5 text-sm text-prose hover:bg-surface-raised border-t border-soft">
-                  {blocked ? 'Unblock' : 'Block'} {peerName}
-                </button>
-                <button type="button" onClick={() => { setMenuOpen(false); setReportOpen(true) }} className="block w-full text-left px-4 py-2.5 text-sm text-danger-ink hover:bg-danger-bg">
-                  Report
-                </button>
-                <button type="button" onClick={removeConversation} className="block w-full text-left px-4 py-2.5 text-sm text-danger-ink hover:bg-danger-bg border-t border-soft">
-                  {confirmDelete ? 'Tap again to delete' : 'Delete conversation'}
-                </button>
-              </div>
+          <Menu
+            align="end"
+            label="Conversation options"
+            trigger={(p) => (
+              <IconButton {...p} label="Conversation options">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+              </IconButton>
             )}
-          </div>
+          >
+            {/* Mute sits ABOVE block, and reads as the softer option it is:
+                block severs the connection (and cascades away goal
+                participation); this just stops the pinging. */}
+            <MenuItem onSelect={toggleMute}>
+              {muted ? 'Unmute notifications' : 'Mute notifications'}
+            </MenuItem>
+            <MenuItem onSelect={toggleBlock}>
+              {blocked ? 'Unblock' : 'Block'} {peerName}
+            </MenuItem>
+            <MenuDivider />
+            <MenuItem onSelect={() => setReportOpen(true)} danger>Report</MenuItem>
+            <MenuItem onSelect={removeConversation} danger>Delete conversation</MenuItem>
+          </Menu>
         )}
       </div>
 
@@ -783,7 +768,7 @@ export default function Thread({
           // tell you where you are, not just sit blank with two words in it.
           <div className="m-auto px-6 py-8 text-center">
             <div className="flex justify-center mb-3">
-              <PeerAvatar peer={peer} size={56} />
+              <PeerAvatar peer={peer} size={96} />
             </div>
             <p className="text-sm font-semibold text-prose">
               This is the start of your conversation with {peerName}.
@@ -810,7 +795,7 @@ export default function Thread({
               <div key={m.id} data-mid={m.id}>
                 {showDay && (
                   <div className="flex justify-center my-3">
-                    <span className="text-[11px] font-semibold text-prose-faint bg-surface-raised rounded-full px-3 py-1">
+                    <span className="text-[11px] font-semibold text-prose-muted bg-surface-raised rounded-md px-3 py-1">
                       {dayLabel(m.created_at)}
                     </span>
                   </div>
@@ -818,7 +803,7 @@ export default function Thread({
                 <div className={`group/msg flex items-end gap-1.5 ${fromMe ? 'justify-end' : 'justify-start'}`}>
                   {!fromMe && (
                     showAvatar
-                      ? <PeerAvatar peer={peer} size={28} />
+                      ? <PeerAvatar peer={peer} size={32} />
                       : <span className="w-7 shrink-0" aria-hidden />
                   )}
 
@@ -829,9 +814,11 @@ export default function Thread({
                     <ActionTrigger open={actionsFor === m.id} onClick={() => setActionsFor((a) => a === m.id ? null : m.id)} />
                   )}
 
-                  <div className={`max-w-[75%] rounded-2xl text-sm break-words overflow-hidden ${
-                    fromMe ? 'bg-accent text-white rounded-br-sm' : 'bg-surface-raised text-prose rounded-bl-sm'
-                  } ${hasImage ? 'p-1' : 'px-3.5 py-2'}`}>
+                  {/* The BossChat recipe: mine = solid chrome + white ink, theirs =
+                      surface + hairline; the tail corner is the only asymmetry. */}
+                  <div className={`max-w-[75%] rounded-xl text-sm break-words overflow-hidden ${
+                    fromMe ? 'bg-chrome text-white rounded-br-sm' : 'bg-surface text-prose border border-soft rounded-bl-sm'
+                  } ${hasImage ? 'p-1' : 'px-4 py-2.5'}`}>
                     {/* Quoted parent. Tapping it jumps to the original when it's in
                         the loaded window. A null parent means the message was
                         deleted (reply_to_id is ON DELETE SET NULL) — say so rather
@@ -880,7 +867,7 @@ export default function Thread({
                       <LinkPreviewCard preview={previews[m.id]!} fromMe={fromMe} inset={hasImage} />
                     )}
                     {mounted && (
-                      <span className={`block text-[10px] mt-0.5 tabular-nums ${hasImage ? 'px-2.5 pb-1' : ''} ${fromMe ? 'text-white/60' : 'text-prose-faint'}`}>
+                      <span className={`block text-[10px] mt-0.5 tabular-nums ${hasImage ? 'px-2.5 pb-1' : ''} ${fromMe ? 'text-white/70' : 'text-prose-muted'}`}>
                         {formatTime(m.created_at)}
                       </span>
                     )}
@@ -903,8 +890,8 @@ export default function Thread({
                         type="button"
                         onClick={() => react(m.id, g.kind as ReactionKind)}
                         aria-label={`${REACTIONS[g.kind as ReactionKind].label}${g.mine ? ' (yours)' : ''}`}
-                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs leading-none transition-colors ${
-                          g.mine ? 'border-accent bg-accent/15' : 'border-soft bg-surface-raised hover:bg-surface-hover'
+                        className={`inline-flex items-center justify-center gap-1 min-w-11 min-h-11 rounded-md border-2 px-2 text-sm leading-none transition-colors ${
+                          g.mine ? 'border-prose bg-surface-hover' : 'border-soft bg-surface hover:bg-surface-hover'
                         }`}
                       >
                         <span aria-hidden>{reactionEmoji(g.kind)}</span>
@@ -929,7 +916,7 @@ export default function Thread({
                         type="button"
                         onClick={() => { react(m.id, k); setActionsFor(null) }}
                         aria-label={REACTIONS[k].label}
-                        className="min-w-9 min-h-9 inline-flex items-center justify-center rounded-full text-base hover:bg-surface-hover transition-colors"
+                        className="min-w-11 min-h-11 inline-flex items-center justify-center rounded-md text-base hover:bg-surface-hover transition-colors"
                       >
                         <span aria-hidden>{REACTIONS[k].emoji}</span>
                       </button>
@@ -937,7 +924,7 @@ export default function Thread({
                     <button
                       type="button"
                       onClick={() => { setReplyToId(m.id); setActionsFor(null) }}
-                      className="min-h-9 px-3 inline-flex items-center rounded-full text-xs font-semibold text-prose-muted hover:text-prose hover:bg-surface-hover transition-colors"
+                      className="min-h-11 px-3 inline-flex items-center rounded-md text-xs font-semibold text-prose-muted hover:text-prose hover:bg-surface-hover transition-colors"
                     >
                       Reply
                     </button>
@@ -945,7 +932,7 @@ export default function Thread({
                 )}
 
                 {fromMe && i === lastMineIdx && peerHasSeenLast && (
-                  <p className="text-right text-[10px] text-prose-faint mt-0.5 pr-1">Seen</p>
+                  <p className="text-right text-[10px] text-prose-muted mt-0.5 pr-1">Seen</p>
                 )}
               </div>
             )
@@ -956,7 +943,7 @@ export default function Thread({
               looks the way it will look when this finishes, immediately. */}
           {uploads.map((u) => (
             <div key={u.key} className="flex items-end justify-end gap-1.5">
-              <div className={`relative max-w-[75%] rounded-2xl rounded-br-sm overflow-hidden p-1 ${u.error ? 'bg-surface-raised border border-strong' : 'bg-accent'}`}>
+              <div className={`relative max-w-[75%] rounded-xl rounded-br-sm overflow-hidden p-1 ${u.error ? 'bg-surface-raised border border-strong' : 'bg-chrome'}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={u.previewUrl}
@@ -1029,7 +1016,7 @@ export default function Thread({
                 type="button"
                 onClick={() => setReplyToId(null)}
                 aria-label="Cancel reply"
-                className="p-1.5 text-prose-faint hover:text-prose rounded-lg hover:bg-surface-raised shrink-0"
+                className="inline-flex items-center justify-center w-11 h-11 -my-2 text-prose-muted hover:text-prose rounded-md hover:bg-surface-raised shrink-0"
               >
                 <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
               </button>
@@ -1050,9 +1037,11 @@ export default function Thread({
                       type="button"
                       onClick={() => removeStaged(s.key)}
                       aria-label="Remove photo"
-                      className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-surface border border-soft text-prose-muted hover:text-prose rounded-full flex items-center justify-center shadow"
+                      className="absolute -top-2 -right-2 w-11 h-11 flex items-center justify-center text-prose-muted hover:text-prose"
                     >
-                      <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
+                      <span className="w-6 h-6 bg-surface border border-soft rounded-md flex items-center justify-center">
+                        <XIcon className="w-3.5 h-3.5" strokeWidth={2} />
+                      </span>
                     </button>
                   </div>
                 ))}
@@ -1080,7 +1069,7 @@ export default function Thread({
               onClick={() => fileInputRef.current?.click()}
               disabled={staged.length >= MAX_BATCH}
               aria-label="Attach photos"
-              className="p-2.5 text-prose-faint hover:text-accent disabled:opacity-40 rounded-xl hover:bg-surface-raised transition-colors shrink-0"
+              className="inline-flex items-center justify-center w-11 h-11 text-prose-muted hover:text-accent-text disabled:opacity-40 rounded-md hover:bg-surface-raised transition-colors shrink-0"
             >
               <PhotoIcon className="w-5 h-5" strokeWidth={1.5} />
             </button>
@@ -1088,15 +1077,19 @@ export default function Thread({
                 focused input's font is under 16px, and there is no zooming back
                 out of a fixed-height chat shell. Desktop takes sm at the md
                 breakpoint, where no such zoom exists. */}
-            <textarea
+            <Field
+              as="textarea"
               ref={textareaRef}
+              label="Message"
+              hideLabel
+              className="flex-1 min-w-0"
+              controlClassName="resize-none overflow-y-auto max-h-32"
               value={draft}
               onChange={(e) => updateDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
               onPaste={onPaste}
               rows={1}
               placeholder={staged.length > 0 ? 'Add a caption…' : 'Write a message…'}
-              className="flex-1 min-w-0 resize-none overflow-y-auto px-4 py-2.5 bg-surface border border-strong rounded-xl text-base md:text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover max-h-32"
             />
             {/* Not disabled while photos upload: they're already in the thread as
                 bubbles carrying their own progress, so the composer is free again
@@ -1118,7 +1111,7 @@ export default function Thread({
         const hasNext = at >= 0 && at < ids.length - 1
         return (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/90 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-chrome/90 backdrop-blur-sm"
             onClick={() => setLightboxId(null)}
             role="dialog"
             aria-modal="true"
@@ -1144,7 +1137,7 @@ export default function Thread({
               <a
                 href={`/api/dm/attachment/${lightboxId}?download=1`}
                 aria-label="Save photo"
-                className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+                className={iconButtonClass({ tone: 'overlay' })}
               >
                 <DownloadIcon className="w-5 h-5" strokeWidth={2} />
               </a>
@@ -1152,7 +1145,7 @@ export default function Thread({
                 type="button"
                 onClick={() => setLightboxId(null)}
                 aria-label="Close image"
-                className="w-9 h-9 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+                className={iconButtonClass({ tone: 'overlay' })}
               >
                 <XIcon className="w-5 h-5" strokeWidth={2} />
               </button>
@@ -1165,7 +1158,7 @@ export default function Thread({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setLightboxId(ids[at - 1]) }}
                 aria-label="Previous photo"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+                className={iconButtonClass({ tone: 'overlay', className: '!absolute left-2 top-1/2 -translate-y-1/2' })}
               >
                 <ChevronLeftIcon className="w-5 h-5" strokeWidth={2} />
               </button>
@@ -1175,7 +1168,7 @@ export default function Thread({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setLightboxId(ids[at + 1]) }}
                 aria-label="Next photo"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-zinc-900/60 hover:bg-zinc-900/80 text-white rounded-full flex items-center justify-center transition-colors"
+                className={iconButtonClass({ tone: 'overlay', className: '!absolute right-2 top-1/2 -translate-y-1/2' })}
               >
                 <ChevronRightIcon className="w-5 h-5" strokeWidth={2} />
               </button>
@@ -1191,26 +1184,27 @@ export default function Thread({
 
       {/* Report modal */}
       {reportOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/70" onClick={() => setReportOpen(false)}>
-          <Card className="w-full max-w-sm p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
-            <p className="text-base font-black text-prose">Report {peerName}</p>
-            <p className="text-xs text-prose-muted">Pick a reason. Our team reviews every report.</p>
-            <div className="space-y-1.5">
-              {REPORT_REASONS.map((r) => (
-                <button key={r} type="button" onClick={() => submitReport(r)}
-                  className="block w-full text-left px-3 py-2 text-sm text-prose bg-surface-raised hover:bg-surface rounded-lg transition-colors">
-                  {r}
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => setReportOpen(false)} className="text-xs text-prose-faint hover:text-prose">Cancel</button>
-          </Card>
-        </div>
+        <Modal onClose={() => setReportOpen(false)} labelledBy="report-title" size="sm" className="p-6 space-y-4">
+          <div>
+            <h2 id="report-title" className="font-display font-black uppercase text-lg leading-tight text-prose">Report {peerName}</h2>
+            <p className="mt-2 text-sm text-prose-muted">Pick a reason. Our team reviews every report.</p>
+          </div>
+          <div className="space-y-2">
+            {REPORT_REASONS.map((r) => (
+              <button key={r} type="button" onClick={() => submitReport(r)}
+                className={buttonVariants({ variant: 'secondary', className: 'w-full !justify-start' })}>
+                {r}
+              </button>
+            ))}
+          </div>
+          <button type="button" onClick={() => setReportOpen(false)} className={buttonVariants({ variant: 'outline', className: 'w-full' })}>Cancel</button>
+        </Modal>
       )}
+      {confirmDialog}
       {reported && (
-        <p className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-prose text-surface text-xs px-4 py-2 rounded-full shadow-lg">
+        <Notice variant="toast" onDismiss={() => setReported(false)}>
           Report submitted — thank you.
-        </p>
+        </Notice>
       )}
     </div>
   )
@@ -1374,7 +1368,7 @@ function ActionTrigger({ open, onClick }: { open: boolean; onClick: () => void }
       onClick={onClick}
       aria-label="React or reply"
       aria-expanded={open}
-      className={`shrink-0 min-w-9 min-h-9 inline-flex items-center justify-center rounded-full text-prose-faint hover:text-prose hover:bg-surface-raised transition-all ${
+      className={`shrink-0 min-w-11 min-h-11 inline-flex items-center justify-center rounded-md text-prose-muted hover:text-prose hover:bg-surface-raised transition-all ${
         open ? 'opacity-100 text-prose' : 'opacity-60 sm:opacity-0 sm:group-hover/msg:opacity-100 focus-visible:opacity-100'
       }`}
     >

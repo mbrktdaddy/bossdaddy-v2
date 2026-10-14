@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
+import { Card } from '@/components/ui/Card'
 
 type Step = 'idle' | 'editing' | 'verifying' | 'sent'
 
@@ -40,13 +42,13 @@ export default function EditEmailForm({ current }: { current: string }) {
 
   if (step === 'sent') {
     return (
-      <div className="bg-green-50 border border-green-300 rounded-xl p-4">
-        <p className="text-forest text-sm font-semibold mb-1">Confirmation sent</p>
+      <div role="status" className="bg-success-bg border border-success-line rounded-xl p-4">
+        <p className="text-success-ink text-sm font-semibold mb-1">Confirmation sent</p>
         <p className="text-prose-muted text-sm">
           Check <span className="text-prose">{email.trim()}</span>{' '}for a confirmation link.
           Your email won&apos;t change until you click it.
         </p>
-        <button onClick={reset} className="text-xs text-prose-faint hover:text-prose mt-3 transition-colors">Done</button>
+        <button onClick={reset} className={buttonVariants({ variant: 'outline', className: 'mt-3' })}>Done</button>
       </div>
     )
   }
@@ -54,25 +56,26 @@ export default function EditEmailForm({ current }: { current: string }) {
   if (step === 'verifying') {
     return (
       <form onSubmit={handleOtpSubmit} className="space-y-3">
-        <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-4">
-          <p className="text-accent-text-soft text-sm font-semibold mb-1">Check your current email</p>
+        <Card tone="sunken" className="p-4">
+          <p className="text-prose text-sm font-semibold mb-1">Check your current email</p>
           <p className="text-prose-muted text-xs">
             We sent a 6-digit verification code to <span className="text-prose">{current}</span>. Enter it below to confirm the change.
           </p>
-        </div>
-        <input
+        </Card>
+        <Field
+          label="Verification code"
           type="text" inputMode="numeric" maxLength={6} value={otp}
           onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setError(null) }}
-          placeholder="000000" required
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors placeholder:text-prose-faint tracking-widest text-center text-lg font-bold"
+          placeholder="000000" required autoComplete="one-time-code"
+          controlClassName="tracking-widest text-center font-bold"
+          error={error}
         />
-        {error && <p className="text-red-700 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button type="submit" disabled={busy || otp.length < 6}
             className={buttonVariants()}>
             {busy ? 'Verifying…' : 'Verify & Change Email'}
           </button>
-          <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-prose transition-colors">Cancel</button>
+          <button type="button" onClick={reset} className={buttonVariants({ variant: 'outline' })}>Cancel</button>
         </div>
       </form>
     )
@@ -81,19 +84,20 @@ export default function EditEmailForm({ current }: { current: string }) {
   if (step === 'editing') {
     return (
       <form onSubmit={handleEmailSubmit} className="space-y-3">
-        <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError(null) }}
+        <Field
+          label="New email address"
+          type="email" value={email} onChange={e => { setEmail(e.target.value); setError(null) }}
           autoComplete="email"
           placeholder="New email address" required
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors placeholder:text-prose-faint"
+          hint="We'll send a verification code to your current email to confirm it's you."
+          error={error}
         />
-        <p className="text-xs text-prose-faint">We&apos;ll send a verification code to your current email to confirm it&apos;s you.</p>
-        {error && <p className="text-red-700 text-xs">{error}</p>}
         <div className="flex items-center gap-3">
           <button type="submit" disabled={busy || !email.trim() || email.trim() === current}
             className={buttonVariants()}>
             {busy ? 'Sending code…' : 'Continue'}
           </button>
-          <button type="button" onClick={reset} className="text-xs text-prose-faint hover:text-prose transition-colors">Cancel</button>
+          <button type="button" onClick={reset} className={buttonVariants({ variant: 'outline' })}>Cancel</button>
         </div>
       </form>
     )
@@ -102,7 +106,7 @@ export default function EditEmailForm({ current }: { current: string }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <p className="text-sm text-prose-muted">{current}</p>
-      <button onClick={() => setStep('editing')} className="text-xs text-accent-text-soft hover:text-accent transition-colors shrink-0">Change</button>
+      <button onClick={() => setStep('editing')} className={buttonVariants({ variant: 'outline', className: 'shrink-0' })}>Change</button>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 
 interface Props {
   contentType: 'review' | 'guide' | 'product'
@@ -69,19 +70,19 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
   if (submitted === 'approved') {
     return (
       <div className="space-y-3">
-        <div className="bg-surface border border-green-300 rounded-xl p-5">
+        <div className="bg-surface border border-success-line rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-full bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
+            <div className="w-7 h-7 rounded-sm bg-accent flex items-center justify-center text-xs font-bold text-white shrink-0">
               ✓
             </div>
-            <span className="text-sm font-medium text-forest">Just posted</span>
+            <span className="text-sm font-medium text-success-ink">Just posted</span>
             <span className="text-xs text-prose-faint">moments ago</span>
           </div>
           <p className="text-prose-muted text-sm leading-relaxed whitespace-pre-line">{submittedBody}</p>
         </div>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-prose-faint hover:text-prose transition-colors"
+          className={buttonVariants({ variant: 'outline' })}
         >
           Leave another comment
         </button>
@@ -96,7 +97,7 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
         <p className="text-prose-muted text-sm">Your comment is pending approval and will appear once reviewed.</p>
         <button
           onClick={() => { setSubmitted(false); setSubmittedBody('') }}
-          className="text-xs text-prose-faint hover:text-prose mt-3 transition-colors"
+          className={buttonVariants({ variant: 'outline', className: 'mt-3' })}
         >
           Leave another comment
         </button>
@@ -106,8 +107,8 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
 
   if (needsAuth) {
     return (
-      <div className="bg-accent-tint border border-accent-border/40 rounded-xl p-5">
-        <p className="text-accent-text-soft font-semibold text-sm mb-1">Sign in to comment</p>
+      <Card tone="sunken" className="p-5">
+        <p className="text-prose font-semibold text-sm mb-1">Sign in to comment</p>
         <p className="text-prose-muted text-sm mb-4">You need to be signed in to leave a comment.</p>
         <div className="flex items-center gap-3">
           <Link
@@ -118,12 +119,12 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
           </Link>
           <button
             onClick={() => setNeedsAuth(false)}
-            className="text-xs text-prose-faint hover:text-prose transition-colors"
+            className={buttonVariants({ variant: 'outline' })}
           >
             Cancel
           </button>
         </div>
-      </div>
+      </Card>
     )
   }
 
@@ -133,17 +134,20 @@ export default function CommentForm({ contentType, contentId, prompt }: Props) {
       {prompt && (
         <p className="text-sm text-prose-muted italic">{prompt}</p>
       )}
-      <textarea
+      <Field
+        as="textarea"
+        label="Your comment"
+        hideLabel
         value={body}
         onChange={e => setBody(e.target.value)}
         placeholder={prompt ? 'Your answer...' : 'Share your thoughts... (sign in required)'}
         rows={4}
         maxLength={2000}
-        className="w-full px-4 py-3 bg-surface border border-strong focus:border-accent focus-visible:ring-2 focus-visible:ring-accent-hover/50 rounded-xl text-prose placeholder:text-prose-faint focus:outline-none resize-none text-base sm:text-sm transition-colors"
+        controlClassName="resize-none"
       />
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-prose-faint shrink-0">{body.length}/2000</span>
-        {error && <p className="text-red-700 text-xs flex-1">{error}</p>}
+        {error && <p role="alert" className="text-danger-ink text-sm font-medium flex-1">{error}</p>}
         <button
           type="submit"
           disabled={submitting || body.trim().length < 5}

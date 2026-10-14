@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfile } from '@/lib/profile-actions'
 import { buttonVariants } from '@/components/ui/Button'
+import { fieldClass } from '@/components/ui/Field'
 
 export default function EditUsernameForm({ current }: { current: string }) {
   const router = useRouter()
@@ -28,18 +29,20 @@ export default function EditUsernameForm({ current }: { current: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">
+        <label htmlFor="username-field" className="block mb-1.5 text-sm font-semibold text-prose">
           Username
         </label>
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-sm select-none">@</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-prose-faint text-base sm:text-sm select-none">@</span>
             <input
+              id="username-field"
+              aria-describedby="username-hint"
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setSuccess(false); setError(null) }}
               maxLength={20}
-              className="w-full pl-7 pr-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm focus:outline-none transition-colors"
+              className={fieldClass({ className: 'pl-7' })}
             />
           </div>
           <button
@@ -50,10 +53,10 @@ export default function EditUsernameForm({ current }: { current: string }) {
             {pending ? 'Saving…' : 'Save'}
           </button>
         </div>
-        <p className="text-xs text-prose-faint mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
+        <p id="username-hint" className="text-xs text-prose-muted mt-1.5">3–20 characters, letters, numbers, and underscores only.</p>
       </div>
-      {success && <p className="text-forest text-xs">Username updated successfully.</p>}
-      {error && <p className="text-red-700 text-xs">{error}</p>}
+      {success && <p role="status" className="text-success-ink text-sm">Username updated successfully.</p>}
+      {error && <p role="alert" className="text-danger-ink text-sm font-medium">{error}</p>}
     </form>
   )
 }

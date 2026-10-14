@@ -1,20 +1,4 @@
 {
-  "app/(public)/account/connections/page.tsx": {
-    "R8": 1
-  },
-  "app/(public)/account/messages/[conversationId]/_components/Thread.tsx": {
-    "R2": 4,
-    "R3": 1
-  },
-  "app/(public)/account/messages/_components/ConversationList.tsx": {
-    "R2": 1
-  },
-  "app/(public)/account/page.tsx": {
-    "R2": 3
-  },
-  "app/(public)/account/settings/page.tsx": {
-    "R2": 1
-  },
   "app/(public)/cart/_components/CartItems.tsx": {
     "R5": 1
   },
@@ -42,54 +26,13 @@
   "components/AskBossFab.tsx": {
     "R8": 1
   },
-  "components/CommentDeleteButton.tsx": {
-    "R5": 2
-  },
-  "components/CommentForm.tsx": {
-    "R6": 2
-  },
   "components/MerchImageGallery.tsx": {
     "R2": 2
   },
   "components/RatingScore.tsx": {
     "R6": 2
   },
-  "components/account/AccountDeletion.tsx": {
-    "R6": 18,
-    "R7": 2
-  },
-  "components/account/AvatarUploader.tsx": {
-    "R6": 4
-  },
-  "components/account/BioForm.tsx": {
-    "R7": 3
-  },
-  "components/account/ContactsCard.tsx": {
-    "R1": 1,
-    "R2": 1
-  },
-  "components/account/EditEmailForm.tsx": {
-    "R6": 4,
-    "R7": 2
-  },
-  "components/account/EditUsernameForm.tsx": {
-    "R6": 1,
-    "R7": 1
-  },
-  "components/account/MessagesCard.tsx": {
-    "R1": 1,
-    "R2": 1
-  },
   "components/goals/NotesFeedClient.tsx": {
     "R7": 2
-  },
-  "components/members/MemberSearch.tsx": {
-    "R3": 1,
-    "R7": 1
-  },
-  "components/ui/ImageCropper.tsx": {
-    "R1": 1,
-    "R6": 3,
-    "R8": 1
   }
 }

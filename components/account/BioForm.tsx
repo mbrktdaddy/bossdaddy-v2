@@ -8,6 +8,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfile } from '@/lib/profile-actions'
 import { buttonVariants } from '@/components/ui/Button'
+import { Field } from '@/components/ui/Field'
 
 interface Props {
   initialDisplayName: string | null
@@ -50,49 +51,42 @@ export default function BioForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Display name</label>
-        <input
-          type="text"
-          value={displayName}
-          maxLength={60}
-          onChange={(e) => { setDisplayName(e.target.value); setSuccess(false); setError(null) }}
-          placeholder="Boss Daddy"
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-        />
-        <p className="mt-1 text-xs text-prose-faint">How your name appears on guides + reviews.</p>
-      </div>
+      <Field
+        label="Display name"
+        type="text"
+        value={displayName}
+        maxLength={60}
+        onChange={(e) => { setDisplayName(e.target.value); setSuccess(false); setError(null) }}
+        placeholder="Boss Daddy"
+        hint="How your name appears on guides + reviews."
+      />
 
-      <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Tagline</label>
-        <input
-          type="text"
-          value={tagline}
-          maxLength={120}
-          onChange={(e) => { setTagline(e.target.value); setSuccess(false); setError(null) }}
-          placeholder="First-time dad. Honest gear reviews."
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors"
-        />
-        <p className="mt-1 text-xs text-prose-faint">Short one-liner shown under your name. {tagline.length}/120</p>
-      </div>
+      <Field
+        label="Tagline"
+        type="text"
+        value={tagline}
+        maxLength={120}
+        onChange={(e) => { setTagline(e.target.value); setSuccess(false); setError(null) }}
+        placeholder="First-time dad. Honest gear reviews."
+        hint={<>Short one-liner shown under your name. {tagline.length}/120</>}
+      />
 
-      <div>
-        <label className="block text-xs text-prose-faint uppercase tracking-widest mb-2">Bio</label>
-        <textarea
-          value={bio}
-          rows={4}
-          maxLength={800}
-          onChange={(e) => { setBio(e.target.value); setSuccess(false); setError(null) }}
-          placeholder="A few sentences about who you are, what you test, and why your perspective matters."
-          className="w-full px-3 py-2.5 bg-surface-sunken border border-strong focus:border-accent rounded-xl text-prose text-sm placeholder:text-prose-faint focus:outline-none transition-colors resize-none"
-        />
-        <p className="mt-1 text-xs text-prose-faint">Shown at the bottom of every guide + review you publish. {bio.length}/800</p>
-      </div>
+      <Field
+        as="textarea"
+        label="Bio"
+        value={bio}
+        rows={4}
+        maxLength={800}
+        onChange={(e) => { setBio(e.target.value); setSuccess(false); setError(null) }}
+        placeholder="A few sentences about who you are, what you test, and why your perspective matters."
+        controlClassName="resize-none"
+        hint={<>Shown at the bottom of every guide + review you publish. {bio.length}/800</>}
+      />
 
       <div className="flex items-center justify-between gap-3 pt-2">
         <div className="text-sm">
-          {error   && <p className="text-danger-ink">{error}</p>}
-          {success && <p className="text-forest">✓ Saved</p>}
+          {error   && <p role="alert" className="font-medium text-danger-ink">{error}</p>}
+          {success && <p className="text-success-ink">✓ Saved</p>}
         </div>
         <button
           type="submit"

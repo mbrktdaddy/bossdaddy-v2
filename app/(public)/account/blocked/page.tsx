@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AccountBlockedPage() {
   return (
-    <main className="max-w-xl mx-auto px-6 py-24 text-center">
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
       <Eyebrow className="mb-4">
         Account access restricted
       </Eyebrow>
@@ -30,11 +30,11 @@ export default function AccountBlockedPage() {
         </a>
         <Link
           href="/"
-          className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+          className={buttonVariants({ variant: 'outline', size: 'lg' })}
         >
           ← Home
         </Link>
       </div>
-    </main>
+    </div>
   )
 }

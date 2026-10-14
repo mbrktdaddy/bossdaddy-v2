@@ -18,18 +18,22 @@
 // forms, so the accept/connect/block paths stay JS-free even inside it.
 
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import MemberSearch from '@/components/members/MemberSearch'
 import type { Metadata } from 'next'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { LABELS } from '@/lib/labels'
-import { LoginLink } from '@/components/LoginLink'
 import {
   listConnections, listIncoming, listOutgoing, listBlocked,
   type ConnectionRow, type ConnectionPerson,
 } from '@/lib/connections'
 import { Eyebrow } from '@/components/ui/Eyebrow'
-import { buttonVariants } from '@/components/ui/Button'
-import { BackLink } from '@/components/ui/BackLink'
+import { buttonVariants, type ButtonVariant } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
+import { Avatar } from '@/components/ui/Avatar'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Notice } from '@/components/ui/Notice'
+import PageHeader from '@/components/PageHeader'
 
 export const metadata: Metadata = {
   title: LABELS.contacts.short,
@@ -43,16 +47,7 @@ export default async function ConnectionsPage({ searchParams }: Props) {
 
   const supabase = await createClient()
   const { user } = await getUserSafe(supabase)
-  if (!user) {
-    return (
-      <Wrap>
-        <h1 className="text-2xl font-black text-prose">Sign in to see your contacts.</h1>
-        <LoginLink className={buttonVariants({ className: 'mt-6' })}>
-          Sign in →
-        </LoginLink>
-      </Wrap>
-    )
-  }
+  if (!user) redirect('/login?next=/account/connections')
 
   const [connected, incoming, outgoing, blocked] = await Promise.all([
     listConnections(supabase, user.id),
@@ -63,41 +58,38 @@ export default async function ConnectionsPage({ searchParams }: Props) {
 
   return (
     <Wrap>
-      <BackLink href="/account" label={LABELS.account.short} className="mb-4" />
-      <header className="space-y-2">
-        <Eyebrow>
-          {LABELS.contacts.eyebrow}
-        </Eyebrow>
-        <h1 className="text-2xl sm:text-3xl font-black text-prose leading-tight tracking-tight">
-          {LABELS.contacts.h1}
-        </h1>
-        <p className="text-sm text-prose-muted leading-snug">{LABELS.contacts.tagline}</p>
-        {/* Points at the DERIVED set rather than pretending this is it. A contact
-            is who you can ask; your corner is who said yes, and that lives on
-            /account because it's computed from goal_participants. */}
-        <p className="text-xs text-prose-faint leading-snug">
-          Looking for who&apos;s keeping you honest?{' '}
-          <Link href="/account" className="text-accent-text hover:text-prose">
-            {LABELS.contacts.cornerLabel} →
-          </Link>
-        </p>
-      </header>
+      <PageHeader
+        size="compact"
+        back={{ href: '/account', label: LABELS.account.short }}
+        eyebrow={LABELS.contacts.eyebrow}
+        title={LABELS.contacts.h1}
+        deck={LABELS.contacts.tagline}
+      />
+      {/* Points at the DERIVED set rather than pretending this is it. A contact
+          is who you can ask; your corner is who said yes, and that lives on
+          /account because it's computed from goal_participants. */}
+      <p className="mt-3 text-xs text-prose-faint leading-snug">
+        Looking for who&apos;s keeping you honest?{' '}
+        <Link href="/account" className="text-accent-text hover:text-prose">
+          {LABELS.contacts.cornerLabel} →
+        </Link>
+      </p>
 
       {msg ? (
-        <p className="mt-6 rounded-lg border border-strong bg-surface-raised px-4 py-3 text-sm text-accent-text">
+        <Notice variant="inline" className="mt-6">
           {msg.slice(0, 220)}
-        </p>
+        </Notice>
       ) : null}
 
       {/* ── waiting on you ─────────────────────────────────────────────────── */}
       {incoming.length > 0 ? (
         <Section title="Waiting on you">
           {incoming.map((p) => (
-            <Card key={p.userId} person={p}>
+            <PersonCard key={p.userId} person={p}>
               <Act op="accept" userId={p.userId} label="Accept" primary />
               <Act op="decline" userId={p.userId} label="Not now" />
-              <Act op="block" userId={p.userId} label="Block" />
-            </Card>
+              <Act op="block" userId={p.userId} label="Block" danger />
+            </PersonCard>
           ))}
         </Section>
       ) : null}
@@ -123,16 +115,16 @@ export default async function ConnectionsPage({ searchParams }: Props) {
           smaller, derived set on /account. */}
       <Section title="Connected">
         {connected.length === 0 ? (
-          <Empty>Nobody yet. Search above and ask someone to connect.</Empty>
+          <EmptyState variant="panel" size="md" title="Nobody yet." body="Search above and ask someone to connect." />
         ) : connected.map((p) => (
-          <Card key={p.userId} person={p} sub={`Connected since ${p.since.slice(0, 10)}`}>
+          <PersonCard key={p.userId} person={p} sub={`Connected since ${p.since.slice(0, 10)}`}>
             {/* Message is the PRIMARY action here. Connecting is what unlocks
                 messaging, so this list is the one place where the door being open
                 should come with a handle — it shipped without one. */}
             <Act op="message" userId={p.userId} label="Message" primary />
             <Act op="remove" userId={p.userId} label="Disconnect" />
-            <Act op="block" userId={p.userId} label="Block" />
-          </Card>
+            <Act op="block" userId={p.userId} label="Block" danger />
+          </PersonCard>
         ))}
       </Section>
 
@@ -140,9 +132,9 @@ export default async function ConnectionsPage({ searchParams }: Props) {
       {outgoing.length > 0 ? (
         <Section title="You asked">
           {outgoing.map((p) => (
-            <Card key={p.userId} person={p} sub="Waiting on them">
+            <PersonCard key={p.userId} person={p} sub="Waiting on them">
               <Act op="withdraw" userId={p.userId} label="Pull it back" />
-            </Card>
+            </PersonCard>
           ))}
         </Section>
       ) : null}
@@ -150,11 +142,11 @@ export default async function ConnectionsPage({ searchParams }: Props) {
       {/* ── blocked ────────────────────────────────────────────────────────── */}
       <Section title="Blocked">
         {blocked.length === 0 ? (
-          <Empty>Nobody. Good.</Empty>
+          <EmptyState variant="panel" size="md" title="Nobody. Good." />
         ) : blocked.map((p) => (
-          <Card key={p.userId} person={p} sub="Can&rsquo;t reach you at all">
+          <PersonCard key={p.userId} person={p} sub="Can&rsquo;t reach you at all">
             <Act op="unblock" userId={p.userId} label="Unblock" />
-          </Card>
+          </PersonCard>
         ))}
       </Section>
     </Wrap>
@@ -164,44 +156,44 @@ export default async function ConnectionsPage({ searchParams }: Props) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-10 space-y-3">
-      <h2 className="text-sm font-bold text-prose uppercase tracking-wide">{title}</h2>
+      <Eyebrow as="h2">{title}</Eyebrow>
       {children}
     </section>
   )
 }
 
-function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-prose-faint">{children}</p>
-}
-
-function Card({
+function PersonCard({
   person, sub, children,
 }: { person: ConnectionRow | ConnectionPerson; sub?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-soft bg-surface p-5">
-      <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
-      {person.username ? (
-        <p className="mt-0.5 text-xs text-prose-faint truncate">@{person.username}</p>
-      ) : null}
-      {sub ? <p className="mt-1 text-xs text-prose-muted">{sub}</p> : null}
+    <Card tone="surface" className="p-5">
+      <div className="flex items-center gap-3">
+        <Avatar name={person.label} size={44} />
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
+          {person.username ? (
+            <p className="mt-0.5 text-xs text-prose-faint truncate">@{person.username}</p>
+          ) : null}
+          {sub ? <p className="mt-1 text-xs text-prose-muted">{sub}</p> : null}
+        </div>
+      </div>
       <div className="mt-4 flex flex-wrap gap-2">{children}</div>
-    </div>
+    </Card>
   )
 }
 
 /** One button, one form. Each is its own POST so nothing can submit the wrong op. */
 function Act({
-  op, userId, label, primary,
-}: { op: string; userId: string; label: string; primary?: boolean }) {
+  op, userId, label, primary, danger,
+}: { op: string; userId: string; label: string; primary?: boolean; danger?: boolean }) {
+  const variant: ButtonVariant = danger ? 'danger' : primary ? 'primary' : 'outline'
   return (
     <form action="/api/connections" method="post">
       <input type="hidden" name="op" value={op} />
       <input type="hidden" name="userId" value={userId} />
       <button
         type="submit"
-        className={primary
-          ? 'min-h-11 rounded-lg bg-accent px-5 py-3 text-xs font-bold text-white hover:bg-accent-hover transition-colors'
-          : 'min-h-11 rounded-lg border border-soft bg-surface px-5 py-3 text-xs font-semibold text-prose-muted hover:bg-surface-hover hover:text-prose transition-colors'}
+        className={buttonVariants({ variant, size: 'sm' })}
       >
         {label}
       </button>
