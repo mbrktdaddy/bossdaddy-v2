@@ -81,6 +81,10 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 | suggest-prompt | `0.7` | Ideation the operator re-clicks for fresh angles; identical output would be the bug. |
 | the Boss (concierge chat) | `0.7` | Conversation: warm and varied, but it answers questions, so not as loose as long-form voice. |
 | drafts, guides, repurpose | `0.8` | Brand-voice long-form. |
+| pipeline `outline` / `images` (Haiku 4.5, effort low) | `0.7` | Planning, not prose — cheap, fast, varied enough to re-plan. |
+| pipeline `section` (Sonnet, effort high, streamed) | `0.8` | The prose itself; same lane as the old single-call draft. |
+| pipeline `blocks` (Sonnet, effort low) | `0.5` | Summaries of finished prose — faithful first. |
+| pipeline `critic` (Sonnet, effort low) | `0` | An editor's findings must be reproducible to be trusted. |
 | merch sayings | `1.0` | Deliberately widest — short, punchy, high-variance output. |
 
 Anything left unset inherits the provider default (~1.0), which is why the deterministic lanes above are now explicit.
@@ -142,6 +146,10 @@ Gateway auth resolves in order: `AI_GATEWAY_API_KEY` (static, for CI/local) → 
 - `aiGenerateText({ bucket, tag, system?, prompt|messages, maxOutputTokens, ... })` — one-shot plain text.
 
 Both auto-apply: Gateway failover to Claude, a `surface:<tag>` cost tag, and an Anthropic ephemeral cache breakpoint on the system block.
+
+- `aiGenerateObjectWithMeta` / `aiGenerateTextWithMeta` — the same calls returning `{ object|text, meta }` where `meta: CallMeta` = `{ model, usage, finishReason, latencyMs, costUsd }`. `costUsd` is the list-price estimate from `lib/ai/pricing.ts` (the Gateway does not expose per-call cost in `providerMetadata` on `ai@6`; its dashboard stays the billing truth). `failedCallMeta()` gives a throw the same shape so failures log like successes.
+- The content routes persist every call to the `generations` table (mig 164) via `lib/content/generations.ts` — model, `PROMPT_VERSION`, tokens, cost, latency, input, output, accepted — the audit trail behind the cost chip and the prompt-version → reader-metrics join. Awaited, never fire-and-forget (serverless reclaims the function after the response flushes).
+- **Telemetry.** Every wrapped call sets `experimental_telemetry` (`functionId` = the surface tag, `metadata.bucket`, `metadata.promptVersion`; inputs/outputs OFF). `sentry.server.config.ts` registers `Sentry.vercelAIIntegration({ recordInputs: false, recordOutputs: false })`, so AI spans show up under the normal 10% trace sample. The spans are for latency/failure traces; `generations` is the complete record.
 
 ## Migration phases
 

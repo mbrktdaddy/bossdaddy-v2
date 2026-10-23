@@ -365,6 +365,24 @@ for horizontal scroll strips (§5) — and for hit-area clawback on a lone contr
 ### Reading surface (reviews / guides)
 Long-form body sits on **bare canvas at every breakpoint** (reversed 2026-09-23 — phone/tablet used to get an elevated panel, which washed out nested `bg-surface` elements against its same-color fill). Single source of truth: `ARTICLE_SURFACE_CLASS` in `lib/article-surface.ts`. Body is **sans**; the *body* editorial serif (Source Serif 4) is reserved for blockquotes/pull-quotes only. The *display* serif (Fraunces via `.font-editorial-display`) is used for the Creed only (§3, "One voice"). Article images get a subtle frame (`border` + rounded) so white-bg product shots don't glare.
 
+### Images — where AI is allowed and what it may show (content pipeline Phase 3, 2026-10-23)
+
+Owned photography first (📷 Take Photo), then a brand kit, then an AI **scene**. AI never replicates the product; brands, logos and packaging are pinned off in every lane (`lib/images/safety.ts`). What else is allowed depends on **where the image is used**:
+
+| Surface | AI allowed? | Text in image | People | House style |
+|---|---|---|---|---|
+| Review hero | A category scene only — never the product | Never | **Anonymous** by default (hands, a figure from behind, face out of frame); knob: None / Anonymous / Faces OK | Yes, stored at 16:10 |
+| Guide hero | Yes | Never | Anonymous default, same knob | Yes, 16:10 |
+| Body figures + galleries (reviews, guides, collections) | Yes | Never | Anonymous default; Faces OK is an explicit per-piece choice | Yes, 3:2 |
+| Media library, X Studio, social | Yes | Allowed (knob) | Allowed (knob) | Off |
+| OG / share cards | Rendered from the hero by code | Text set by code, never by the model | — | — |
+
+Two rules hold in every lane: **no identifiable children, ever**, and no brands. Why anonymous: an AI *face* is the uncanny-valley tell and reads as a fake testimonial next to a first-person "I tested this" voice; a figure from behind keeps the warmth. Rendered text is the other tell, and the site composes text in code. Every editorial-lane result is checked by vision QA (`lib/images/qa.ts`) against the same rules — text, a logo or a face under None/Anonymous regenerates once automatically; a refusal is surfaced to the author, never swapped for a stock scene.
+
+**One photographer shot the whole site:** the language models describe the *subject* only; lighting, lens and palette come from the single house-style suffix in `lib/images/style.ts`. **Publication quality is the default** (gpt-image-1.5 · high); the draft tier is for roughing out a composition.
+
+**Credit line, not a badge.** A figure's provenance renders in the figcaption — "AI-generated scene" or "Photo: Boss Daddy" (`lib/images/credit.ts`) — and a hero gets the same line under it. Never a badge over the photo: one mark per image at most, and the hero may already carry Boss Approved. Imported images (web / Amazon) get no credit; naming a source we did not shoot would be a rights claim. **Detail-page heroes are `aspect-[16/10]`**, matching the upload cropper; body figures render through `next/image` with their stored size (`media_assets.width/height`, mig 166) and the sitewide 4px radius.
+
 ### Status colors (chips / pipeline indicators)
 | Status | Color | Use |
 |---|---|---|

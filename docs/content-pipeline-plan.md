@@ -1,0 +1,136 @@
+# Content Generation Pipeline — evaluation, decisions, rollout
+
+> **Status:** PLANNED 2026-10-23. Phase 0 BUILT (mig 164 applied). Phase 1 BUILT (mig 165 applied, `db:types` run). **Phase 2 BUILT 2026-10-23** (uncommitted; 805 tests + check + prebuild green). No new migration in Phase 2. Walkthroughs in §9.
+>
+> **What Phase 2 changed.** The refine panel has a scope: one section (default once a piece has headings) goes to `POST /api/content/refine-section`, which sees that section with its product tokens in place plus the neighbours read-only, and returns prose only — the workspace splices it back with `replaceSectionProse` (heading tag verbatim, figures/embeds carried), previews just that section, and warns if a product-link count changed. "Whole piece" is the old route, now shown every block it may overwrite, with those block diffs listed in the preview and figures *and* embeds/cross-link cards carried across (`preserveBlocksAcrossRefine`). Accepting any refine marks the next save `revision_label: 'pre-ai-refine'` (merged at save time, not in the payload memo — the React Compiler lint forbids ref reads in render), and version history shows it. `refine-selection` sizes its budget to the selection and refuses a cut-off rewrite instead of applying it.
+>
+> **What Phase 1 changed, in one paragraph.** Both wizards hand their brief to `PipelineRunner`, which creates a `content_runs` row and drives `app/api/content/runs/[id]/{outline,section,blocks,critic,images}`. The outline (Haiku) is the author's decision point — title, parts with per-part facts and word targets, which blocks, how many images, "already on the site" links. Parts stream one at a time (`aiStreamText`, Sonnet, each written ONLY from its assigned facts; product tokens are assigned in code per part, not by the model). Blocks are derived from the finished prose; the critic runs the deterministic rules (`critic/rules.ts`: family names, banlists, token counts, hedges, rhythm, length) plus a temperature-0 editor pass; images are planned from the final prose. A dead tab resumes from the run (`GET /api/content/runs?type=`). Exemplars: `voice_exemplars` + the picker on `/dashboard/profile/voice`, injected after the phrase palette. The old `/api/claude/{draft,guide-draft}` routes are no longer called by the wizards; delete them after three pipeline pieces publish cleanly. Owner of the voice rules stays `docs/brand-guide.md` §1; owner of the AI layer stays `docs/ai-provider-layer.md`. This doc owns the *pipeline* — how a review or guide goes from idea to published, and how images ride along.
+> **Supersedes:** the single-call draft design in `app/api/claude/{draft,guide-draft}` and the whole-document refine in `app/api/claude/{review-refine,guide-refine}`. Those routes stay until their phase replaces them.
+> **Folds in:** `project_premeditated_followup_scheduling` (freshness, Phase 4), Grok audit item 5 "AI-assistance label" (Phase 3), the guide editorial-mode toggle (already shipped as `pieceType`).
+
+## 1. What the review found (2026-10-23)
+
+The infrastructure is strong — Gateway with failover, cost tags, cache-ordered system blocks, model registry with drift CI, per-lane temperatures, rate limits. Keep all of it.
+
+The generation design is the 2023 pattern: one mega-prompt produces the entire article + every structured block + image prompts + tags in one non-streamed call, voice by rules only, no critic. Editing regenerates the whole document. The image pipeline is strong on provenance/safety/storage and weak on publication delivery and consistency.
+
+### Defects that reach published pages (fix order inside the phases)
+
+| # | Defect | Where | Fixed in |
+|---|---|---|---|
+| 1 | Prompts *demand* firsthand scenarios even when no notes exist; invented experience is an FTC 16 CFR 255 problem | `draft/route.ts:195-199`, `guide-draft/route.ts:112,136` | Ph 1 (draft only from notes) |
+| 2 | Moderation sees `content.slice(0,4000)` of raw HTML, never the verdict/blocks/notes; guides always report "affiliate links: false" | `moderate/route.ts:43,70` | Ph 0 |
+| 3 | Refine overwrites pros/cons/TL;DR/FAQs the model never saw; preview shows body only | `AIRefinePanel.tsx:56-58`, both workspaces | Ph 2 |
+| 4 | Guide refine strips every affiliate link + embed; review refine keeps only the first slug | `guide-refine:73-77`, `review-refine:69` | Ph 2 |
+| 5 | `jsonSchema()` without `validate` = the SDK validates nothing; all length rules are prompt text | every content route | Ph 0 |
+| 6 | Refine budgets too small (`guide-refine` 3800 to re-emit a 12k piece; `refine-selection` 600 for 4000 chars, no truncation check); no `temperature` on any refine | three refine routes | Ph 2 |
+| 7 | Refine flattens the article to one paragraph before sending it | both refine routes | Ph 2 |
+| 8 | Verdict/conclusion "1–2 paragraphs" wrapped in a single `<p>`; intro gets no `<p>`; assembly duplicated in 4 files | both wizards, both workspaces | Ph 0 |
+| 9 | Stale "call the submit_review tool" / "Return valid JSON only" lines | all content prompts | Ph 0 |
+| 10 | Body images are raw `<img src alt>` — no dimensions, no lazy, no srcset; 1536×1024 q90 to every phone | `guides/[slug]/page.tsx:320`, reviews `:542` | Ph 3 |
+| 11 | The AI image prompt ships in the public HTML (`data-prompt` survives sanitize) | `lib/sanitize.ts:18` | Ph 0 |
+| 12 | Hero uses `EDITORIAL_STRICT`; inline images get `SOCIAL_FLEXIBLE` (people + text allowed) | `InlineMediaPanel.tsx` payloads | Ph 3 |
+| 13 | Content-policy rejection silently substitutes a generic tools-on-wood image | `lib/images/openai.ts:23` | Ph 3 |
+| 14 | Family member *names* are injected into every content call; publication rule is relationship-only | `lib/voiceProfile.ts:119` | Ph 0 |
+| 15 | `inquiryMode` not persisted → first refine sands an off-pillar inquiry piece back to reviewer voice | guides table | Ph 0 |
+
+## 2. Decisions (operator, 2026-10-23) — don't re-open
+
+- **Staged pipeline replaces the single call:** brief/outline (author edits) → draft per section (streamed, notes-only) → blocks derived from the finished prose → critic → image plan from the final prose. Every stage persisted server-side.
+- **Blocks and length are chosen per piece at the outline**, for reviews too. No forced eight blocks; no fixed 3–5 × 150–250. The schema still *allows* every block; the outline decides which are *required*.
+- **Editing is patch-based** (section/selection), whole-document refine kept as a fallback that shows block diffs.
+- **Voice:** rules + the phrase palette + 1–3 exemplars of approved pieces. **Family members by relationship only, never by name, in generated content.** The Boss concierge keeps names (private to the member) via an explicit knob.
+- **Images:** proper delivery (`next/image` with dimensions, lazy, sizes), one house style, strict preset for inline, fallback surfaced not silent, vision QA, AI-scene disclosure on the figure.
+- **Provenance + telemetry:** every generation logged (model, prompt version, tokens, cost, latency, accepted); AI SDK telemetry → Sentry; cost per piece shown in the workspace.
+- **Revision history:** exists (`content_revisions` + `VersionHistoryPanel`); add a labeled snapshot before any AI refine is applied.
+- **Reader metrics** (`review_metrics`/`guide_metrics` scroll depth) joined to `prompt_version`/`generation_method` as the outcome signal for the eval.
+- **Structured data for reviews:** reviewed and adjusted (Phase 4).
+- **Freshness sweep:** cron + author-set follow-up intent (Phase 4, folds the premeditated follow-up plan).
+- **Scraped product specs** are hardened before they enter a prompt.
+- **Phone authoring works today** — every UI change in this plan is mobile-first and must not regress it.
+- **Not doing:** block-based document storage (HTML string + sanitize works; readers never see it), provider swaps, a tool-loop agent for drafting (a plain chain is cheaper and more predictable), Vercel Workflow in v1 (stage-per-request with server persistence first; Workflow is the knob for background runs later).
+
+## 3. Phase 0 — Foundations & hygiene (no UX change)
+
+Goal: stop the leaks, log everything, consolidate the duplicated code the later phases build on.
+
+**Migration 164 `content_generation_provenance.sql`**
+- `generations` (Pattern B, owner-only): `id, user_id, content_type ('review'|'guide'), content_id uuid null, stage text, model text, prompt_version text, effort text null, temperature numeric null, input_tokens int, output_tokens int, reasoning_tokens int, latency_ms int, cost_usd numeric(8,5) null, finish_reason text, status ('done'|'failed'|'truncated'), input jsonb, output jsonb, accepted boolean null, created_at`. Index `(user_id, created_at desc)`, `(content_id)`.
+- `reviews` + `guides`: `generation_id uuid null`, `prompt_version text null`, `generation_method text null check in ('ai-drafted','ai-assisted','human')`.
+- `guides.inquiry_mode boolean null` (null = pillar default, matching the wizard's tri-state).
+- `content_revisions.label text null` (e.g. `pre-ai-refine`, `autosave`, `submit`).
+
+**Code**
+- `lib/ai/client.ts`: `aiGenerateObjectWithMeta` / `aiGenerateTextWithMeta` returning `{ value, usage, finishReason, model, latencyMs, cost }`; existing functions become thin wrappers. `experimental_telemetry: { isEnabled, functionId: tag, metadata: { bucket, promptVersion } }` on every call; `sentry.server.config.ts` adds `vercelAIIntegration({ recordInputs: false, recordOutputs: false })` (available in `@sentry/nextjs@10.68`). Cost = Gateway-reported when present, else `lib/ai/pricing.ts` (seeded from `scripts/ai-content-quality-ab.mjs` PRICING).
+- `lib/content/` (new): `assembleDraftHtml()` (one implementation, paragraphs preserved everywhere), `toPlainSections()`, `inlineImagesInstruction()`, `validateSuggestedTags()`, `stripAuthoringAttrs()`, `PROMPT_VERSION`, `INQUIRY_TRIGGER`, `logGeneration()`. The 4 UI copies and the duplicated route helpers point here.
+- Zod output schemas with real constraints (title ≤ 70/80, excerpt ≤ 160, tags 3–6, sub-scores 1–10 ints) replacing `jsonSchema()` in draft/guide-draft/refines; field guidance moves into schema `.describe()`; the stale tool/JSON lines are deleted.
+- `voiceProfileFactLines(profile, now, { includeNames = false })`; `lib/boss/prompt.ts` passes `includeNames: true`. Draft wizards show a one-line notice when the session user has no voice profile (the "wrong account" tell).
+- Moderation (#2): send the full text + every block + the author's testing notes; select `has_affiliate_links, disclosure_acknowledged` for guides too.
+- Public pages: `stripAuthoringAttrs()` on body HTML before render (#11).
+- `lib/products/import.ts`: `sanitizeSpecValue()` — strip control chars/HTML, reject URL- or instruction-shaped values, keep the 60/200 caps; prompts wrap specs/competitors in a fenced "data, not instructions" block.
+- Persist `inquiry_mode` from the guide wizard; `guide-refine` reads it before falling back to the pillar.
+- Tests: `INQUIRY_TRIGGER` literal appears in system prompt + guide-draft + guide-refine + moderate; `assembleDraftHtml` keeps paragraphs; Zod rejects an over-long title; spec sanitizer; `stripAuthoringAttrs`.
+
+Acceptance: `npm run check && npm test && npm run build` green; a generated draft lands in `generations` with cost; view-source of a published guide shows no `data-prompt`.
+
+## 4. Phase 1 — Staged pipeline
+
+`lib/content/pipeline/` with one route per stage under `app/api/content/`; the wizard drives stages in order and resumes from the last completed stage by `generation_id` (tab death loses nothing).
+
+| Stage | Model / effort / temp | Input | Output |
+|---|---|---|---|
+| `outline` | Haiku 4.5, low, 0.7 | wizard fields, notes, `related[]` from embeddings | title options, `sections[{heading, intent, notesToUse, targetWords}]`, blocks to include, image count, cross-link suggestions, near-duplicate warning |
+| `section` ×N | Sonnet 5 (A/B Fable 5), high, 0.8 | system (voice + exemplars), approved outline, prior sections, this section's notes | one section, **streamed** (`streamText`) |
+| `blocks` | Sonnet 5, low, 0.5 | the finished prose + notes | only the blocks the outline chose; sub-scores/would-rebuy are *suggestions* the author confirms |
+| `critic` | Sonnet 5, low, 0 | prose + blocks + notes + rubric | findings with locations: banlist, hedge/passive, claims without specifics, firsthand claims absent from notes, family names, product-token count, sentence-length monotony, heading/image mismatch |
+| `images` | Haiku 4.5, low, 0.7 | final prose + house style | subject-only prompts per chosen section, alt, caption |
+
+- The section prompt's grounding line: *write only from the notes; if a detail isn't in them, don't claim it.* The outline is where the author adds per-section detail — this is what retires defect #1.
+- Exemplars: `voice_exemplars` (migration 165 or folded into 164 if Phase 0 hasn't shipped): admin-picked approved pieces, stored as ≤600-word excerpts, injected as a cached block after `BOSS_DADDY_SYSTEM`. v1 = manual pick in `/dashboard/profile/voice`; the published-vs-generated diff ranks candidates later (Phase 5).
+- Rate-limit keys: `draft-outline` 30/h, `draft-section` 90/h, `critic` 30/h, `draft-images` 30/h; the old `draft` key retires with the old routes.
+- Cost per piece: `sum(generations.cost_usd) where content_id` → chip in the wizard summary and the workspace header.
+- Reviews gain the same per-piece choices guides have: blocks + length at the outline. `pieceType` stays for guides.
+- The old `/api/claude/draft` + `guide-draft` are deleted when the new flow has produced three published pieces without a fallback.
+
+Acceptance: a review generated end-to-end on the phone; critic findings visible before save; `generations` holds one row per stage with cost; truncation impossible by construction (section budgets).
+
+## 5. Phase 2 — Patch-based editing
+
+- `POST /api/content/refine-section`: instruction + section index + that section + neighbours as read-only context → replacement section (small Zod schema, ≤ 2000 tokens, temp 0.5). The workspace applies it as a diff; `snapshotRevision(..., label: 'pre-ai-refine')` before apply.
+- Whole-document refine stays as the fallback: it now receives every block it may overwrite, the preview modal shows block diffs, budgets are sized to the input, `temperature` set, and product tokens / collection / content-link markers are preserved the way images already are (`preserveImagesAcrossRefine` generalised to `preserveMarkersAcrossRefine`).
+- `refine-selection`: budget scales with input; `finishReason === 'length'` is an error, never applied, never logged to `voice_edits`.
+
+## 6. Phase 3 — Images — BUILT 2026-10-23 (uncommitted; mig 166 + backfill owed)
+
+**Deploy order:** apply `supabase/migrations/166_media_assets_dimensions.sql` (width/height on `media_assets`) BEFORE this code — the upload + generate routes insert the new columns — then `npm run db:types`, then `node scripts/backfill-media-dimensions.mjs` once so older figures get a size (public pages fall back to a lazy `<img>` until they do).
+
+An audit of §6 before building (memory `project_content_pipeline`) corrected the scope; what shipped:
+
+- **Allowance model per surface** (brand-guide §2 "Images"): `lib/images/safety.ts` replaced the `noPeople` boolean with `people: 'none' | 'anonymous' | 'allowed'`; `EDITORIAL` (hero + body figures: no text, people anonymous, brands pinned) and `SOCIAL_FLEXIBLE` (library / X Studio: text + people allowed). No identifiable children in any lane. The pipeline `images` stage and the legacy draft prompt now ask for anonymous people, not none.
+- **House style keyed by lane, not bucket** — inline figures go to the `media` bucket, so a bucket-keyed suffix would have styled the hero and skipped the body. `generateImage({ lane })` applies `lib/images/style.ts` once (idempotent marker) for `editorial`.
+- **Generator** (`lib/images/openai.ts`, `generateImage`): native WebP from the API (`output_format`), vision QA (`lib/images/qa.ts`, Haiku temp 0, one call = report + alt text from the pixels) → one automatic retry on a hard fail with the reasons as avoidances → the second result is stored WITH its report (never substituted; the stock-scene fallback is gone — a refusal throws `ImageContentPolicyError` → 422 `code: 'content_policy'`). Heroes centre-crop to 16:10 at generation. Returns `{ url, width, height, model, quality, attempts, qa, costUsd }`; image cost (`estimateImageCostUsd`, gpt-image-1 priced, 1.5 null until verified) lands in `generations` as stage `'image'` when the panel passes the piece (`source_type`/`source_id`).
+- **Publication quality by default** — both panels start on the premium tier (gpt-image-1.5 · high); "Draft" is the knob. People knob (None / Anonymous / Faces OK) + "allow text" on both panels; QA warnings and refusals show on the slot (`SlotNoteLine`) and under the hero; bulk fill skips-and-continues.
+- **One public body renderer** — `components/content/ArticleBody.tsx` (guides, reviews, AND the collections intro, which rendered raw HTML and leaked `data-prompt`): strips authoring attrs + stray placeholders, splits segments (`lib/inline-content.ts` gained the `figure` segment; galleries stay HTML), looks up `media_assets` by URL in ONE query for figures missing size/origin, renders `BodyFigure` = `next/image` with `width/height`, `sizes`, lazy, and the credit line in the figcaption (`lib/images/credit.ts`: "AI-generated scene" / "Photo: Boss Daddy"; web/amazon none). Lightbox passes `optimized` and reads `data-full` so a next/image figure isn't proxied twice.
+- **Fill-time facts** — `buildFilledFigure`/`fillSlot` write `width`/`height` on the `<img>` and `data-origin` on the `<figure>` (sanitize allow-list gained `data-origin`; `revertSlot` drops it). `/api/media` stores the size `normalizeImage` already computed. `lib/inlineImages.ts` finally has tests (`tests/unit/inline-images.test.ts`).
+- **Heroes are `aspect-[16/10]`** on both detail pages (were fixed-height, ~2.4:1 on desktop) with the credit line under them; article CSS radius is the token (was 12px).
+- **Disclosure** — `AiAssistanceNote` in both bylines from `generation_method` ("AI-assisted draft, human-edited" → `/editorial-standards`).
+- **Publish gate** — `lib/content/publish-gate.ts`: submit (both) and approve (both) refuse a body with a `bd-image-placeholder`; the renderer strips one that slipped through.
+- Fixed on the way: the review wizard's fallback hero prompt asked for a product photo of the product (contradicted the never-replicate rule).
+
+Not done: the media library shows an origin badge but has no origin FILTER yet; the gpt-image-1.5 per-token price is unverified, so a premium-tier picture logs `cost_usd = null` (never a guess) until a row is added to `lib/ai/pricing.ts`.
+
+## 7. Phase 4 — Evals, metrics, freshness, structured data
+
+- `tests/eval/content-eval.ts` (`npm run content:eval`, hand-run like `boss:eval`): 6 golden briefs (3 reviews, 3 guides incl. one inquiry) → pipeline → judge with the critic rubric + voice checklist → thresholds. Run before any prompt-version or model change. Seeded from `scripts/ai-content-quality-ab.mjs`.
+- Metrics join: a `content_performance` view (`review_metrics`/`guide_metrics` × `prompt_version`, `generation_method`) → one dashboard card: scroll-75 rate by prompt version.
+- Freshness (migration 165): `followup_intent_at`, `last_verified_at` on reviews + guides; intent presets at publish (30d/60d/6mo/1yr/none), the 30-day gate relaxed to a nudge; weekly `/api/cron/freshness-sweep` flags past-intent reviews, products no longer available, guides untouched 12+ months → `FollowupsDueCard` reads it (dashboard only, no email — decided 2026-07-20). Sentry on the cron.
+- Structured data (reviews): drop the self-referential `aggregateRating` (ratingCount 1); add `dateModified`, `publisher`, `author.url` → `/author/[handle]`, `positiveNotes`/`negativeNotes` from pros/cons; keep `reviewRating`, `isPartOf`, FAQ; validate in Google's Rich Results test by hand.
+- Docs: `ai-provider-layer.md` gains the per-stage lane table and the telemetry section.
+
+## 8. Phase 5 — later
+
+Vercel Workflow for true background runs + notification; voice flywheel (published-vs-generated diff → phrase proposals + exemplar ranking); Fable 5 as the drafting model if the A/B holds.
+
+## 9. Manual walkthroughs (he tests on the phone; no Playwright unprompted)
+
+Each phase ends with a written walkthrough: Phase 0 — generate one review, confirm cost chip + `generations` row + clean view-source. Phase 1 — on the phone: `/dashboard/reviews/new` → fill the brief (give it real testing notes) → Generate → the plan appears (check the facts landed on sensible parts, toggle a block off, change a word target) → Start writing → watch parts stream → the editor's read → Continue to preview → Save. Then: kill the tab mid-stream on a second run and reopen the wizard — the resume banner must offer it; a `content_runs` row holds every stage; `generations` has one row per stage with `run_id`; the saved review has `generation_method = 'ai-drafted'` and the cost line in the workspace. Pick one exemplar on `/dashboard/profile/voice` and confirm the next run's outline prompt is unchanged but the section voice shifts. Phase 2 — open a saved review, pick a section in the refine panel's scope select, give an instruction ("tighten this", "cut the joke"), confirm the preview shows ONLY that section and the heading survives, accept, wait for the autosave, then open version history: the snapshot before the refine is marked "before AI refine" — revert to it and confirm the section comes back. Then a whole-piece refine with "add a con about the latches": the preview must list the Cons block diff and keep every figure/embed in place. Phase 3 — on the phone, open a saved guide: in Inline images the knobs read Publication · People: Anonymous · text off. Fill one slot with a prompt that names a brand ("a Yeti cooler on a tailgate") — expect either a refusal note on the slot (red, "edit the prompt") or a QA note saying a logo was found and it regenerated once; the image that lands must show no logo. Fill a second slot with a normal subject — no note, alt text reads like what is in the picture (not the prompt). Switch People to Faces OK, regenerate — a face is allowed, no warning. Generate the hero — it lands at 16:10, no text, and the prompt field shows the subject only (no lighting words). Save, view the public page: body figures load lazily with no layout jump, the figcaption ends in "· AI-generated scene", the hero has the credit line under it, tapping a figure opens the lightbox once (not a nested proxy), the byline says "AI-assisted draft, human-edited", and view-source has no `data-prompt`. Insert an empty slot and Submit — the 422 names the Inline images panel. Open `/picks/<slug>` with an inline figure in its intro — same figure treatment. In the workspace header the cost chip moved after the images (an `image` row per picture in `generations`). Phase 4 — run `content:eval`, read the dashboard card, trigger the sweep.
