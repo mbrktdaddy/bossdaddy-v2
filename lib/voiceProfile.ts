@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { SystemModelMessage } from 'ai'
 import { BOSS_DADDY_SYSTEM } from '@/lib/claude/client'
 import { getApprovedPhrases, formatVoiceLexiconForPrompt } from '@/lib/voiceLexicon'
+import { getVoiceExemplars, formatVoiceExemplarsForPrompt } from '@/lib/voiceExemplars'
 
 export interface VoiceFact {
   id: string
@@ -99,7 +100,18 @@ export function formatVoiceProfileForPrompt(
     `About the author — use these facts as ground truth; never invent personal details that contradict or extend them. Dates are as of ${asOf}.`,
     ...lines,
     `If a claim would require a personal detail not listed above, write around it or omit it. Do not fabricate family members, hobbies, jobs, locations, or testing scenarios that the author has not confirmed.`,
+    `Refer to family members by relationship only ("my wife", "my daughter") — never by name, even if a name appears in the author's notes. Family stays unnamed in anything published.`,
   ].join('\n')
+}
+
+export interface FactLineOptions {
+  /**
+   * Include family members' names. OFF by default: published content refers to
+   * family by relationship only (operator rule, 2026-10-23). The Boss concierge
+   * turns it on — that conversation is private to the member and knowing his
+   * kids' names is the point.
+   */
+  includeNames?: boolean
 }
 
 /**
@@ -107,7 +119,11 @@ export function formatVoiceProfileForPrompt(
  * background, faith, region, extra facts), with no framing — callers wrap them
  * for their context (the author for drafts, the member for the Boss chat).
  */
-export function voiceProfileFactLines(profile: VoiceProfile | null, now: Date = new Date()): string[] {
+export function voiceProfileFactLines(
+  profile: VoiceProfile | null,
+  now: Date = new Date(),
+  opts: FactLineOptions = {},
+): string[] {
   if (!profile) return []
 
   const lines: string[] = []
@@ -115,7 +131,7 @@ export function voiceProfileFactLines(profile: VoiceProfile | null, now: Date = 
   for (const m of profile.family_members ?? []) {
     const relationship = m.relationship?.trim()
     if (!relationship) continue
-    const name = m.name?.trim()
+    const name = opts.includeNames ? m.name?.trim() : ''
     const namePart = name ? ` (${name})` : ''
     const ageLabel = personAgeLabel(m.dob, now)
     if (ageLabel) {
@@ -162,23 +178,40 @@ type SystemBlock =
 async function buildVoiceSystemParts(
   supabase: SupabaseClient,
   userId: string,
-): Promise<Array<{ text: string; cache: boolean }>> {
+): Promise<{ parts: Array<{ text: string; cache: boolean }>; info: VoiceInfo }> {
   const parts: Array<{ text: string; cache: boolean }> = [
     { text: BOSS_DADDY_SYSTEM, cache: true },
   ]
 
-  const [profile, phrases] = await Promise.all([
+  const [profile, phrases, exemplars] = await Promise.all([
     getVoiceProfile(supabase, userId),
     getApprovedPhrases(supabase, userId),
+    getVoiceExemplars(supabase, userId),
   ])
 
   const voiceCard = formatVoiceLexiconForPrompt(phrases)
   if (voiceCard) parts.push({ text: voiceCard, cache: true })
 
+  // Exemplars after the palette: they change rarely (an admin pick), so they
+  // sit on the cached side of the prefix; the profile block below stays last.
+  const exemplarBlock = formatVoiceExemplarsForPrompt(exemplars)
+  if (exemplarBlock) parts.push({ text: exemplarBlock, cache: true })
+
   const voiceBlock = formatVoiceProfileForPrompt(profile)
   if (voiceBlock) parts.push({ text: voiceBlock, cache: false })
 
-  return parts
+  return { parts, info: { hasProfile: !!voiceBlock, phraseCount: phrases.length, exemplarCount: exemplars.length } }
+}
+
+/**
+ * What the voice system actually found for this user. The wizards show a notice
+ * when `hasProfile` is false — the usual cause is drafting while signed in as
+ * the wrong account (the author profile lives on boss@, not the test gmail).
+ */
+export interface VoiceInfo {
+  hasProfile: boolean
+  phraseCount: number
+  exemplarCount: number
 }
 
 /** Anthropic-SDK `system` array (used by not-yet-migrated `lib/claude` callers). */
@@ -186,7 +219,7 @@ export async function buildBossDaddySystemBlocks(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<SystemBlock[]> {
-  const parts = await buildVoiceSystemParts(supabase, userId)
+  const { parts } = await buildVoiceSystemParts(supabase, userId)
   return parts.map((p) =>
     p.cache
       ? { type: 'text', text: p.text, cache_control: { type: 'ephemeral' } }
@@ -204,8 +237,16 @@ export async function buildBossDaddySystemMessages(
   supabase: SupabaseClient,
   userId: string,
 ): Promise<SystemModelMessage[]> {
-  const parts = await buildVoiceSystemParts(supabase, userId)
-  return parts.map((p) =>
+  return (await buildBossDaddySystemMessagesWithInfo(supabase, userId)).messages
+}
+
+/** Same messages, plus what was found — for the wizards' wrong-account notice. */
+export async function buildBossDaddySystemMessagesWithInfo(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ messages: SystemModelMessage[]; info: VoiceInfo }> {
+  const { parts, info } = await buildVoiceSystemParts(supabase, userId)
+  const messages: SystemModelMessage[] = parts.map((p) =>
     p.cache
       ? {
           role: 'system',
@@ -214,4 +255,5 @@ export async function buildBossDaddySystemMessages(
         }
       : { role: 'system', content: p.text },
   )
+  return { messages, info }
 }

@@ -10,5 +10,11 @@ if (SENTRY_DSN) {
     dsn: SENTRY_DSN,
     tracesSampleRate: 0.1,
     environment: process.env.VERCEL_ENV ?? 'development',
+    // AI SDK spans (model, tokens, latency, keyed by the `surface:` tag as
+    // functionId). Calls opt in via experimental_telemetry in lib/ai/client.ts.
+    // Inputs/outputs are never recorded: drafts carry the author's family facts
+    // and members' Boss conversations. The complete per-call record lives in
+    // the `generations` table (mig 164); Sentry is for traces and failures.
+    integrations: [Sentry.vercelAIIntegration({ recordInputs: false, recordOutputs: false })],
   })
 }

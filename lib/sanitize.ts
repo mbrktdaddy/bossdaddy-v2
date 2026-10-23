@@ -14,8 +14,10 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   img:    ['src', 'alt', 'width', 'height', 'class', 'id', 'data-slot-id'],
   // data-slot-id / data-prompt / data-alt / data-caption carry the metadata
   // that Claude attaches to inline-image placeholder stubs in generated drafts,
-  // and that the InlineMediaPanel uses to manage every inline image.
-  figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption'],
+  // and that the InlineMediaPanel uses to manage every inline image. The
+  // authoring three are stripped before public render (lib/content/html.ts);
+  // data-origin stays — it drives the credit line under the public figure.
+  figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption', 'data-origin'],
   div:    ['class', 'id', 'data-slot-id', 'data-collection-slug', 'data-content-type', 'data-content-slug'],
   '*':    ['class', 'id'],
 }

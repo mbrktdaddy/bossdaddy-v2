@@ -16,6 +16,11 @@ export interface InlineSlot {
   caption: string
   filled: boolean
   imageUrl?: string
+  /** Intrinsic size written on the <img> at fill time (mig 166 era); absent on older figures. */
+  width?: number
+  height?: number
+  /** The asset's origin (lib/media/origin.ts) written as data-origin at fill time. */
+  origin?: string
   start: number   // index into source content where the figure starts
   end: number     // index into source content where the figure ends (exclusive)
   raw: string     // exact substring of the figure block
@@ -60,18 +65,44 @@ export function createSlotId(): string {
   return SLOT_ID_PREFIX + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4)
 }
 
-interface BuildFilledArgs {
+/** Facts about the stored file, written onto the markup so the public page can render it well. */
+export interface FigureImageMeta {
+  width?: number | null
+  height?: number | null
+  /** 'own' | 'web' | 'amazon' | 'ai' — drives the credit line (lib/images/credit.ts). */
+  origin?: string | null
+}
+
+interface BuildFilledArgs extends FigureImageMeta {
   imageUrl: string
   alt: string
   caption?: string
   prompt?: string
   slotId?: string
 }
+
+function positiveInt(v: number | null | undefined): number | null {
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : null
+}
+
+/** `<img src alt [width height]>` — dimensions only when both are known. */
+function imgTag(src: string, alt: string, meta?: FigureImageMeta): string {
+  const w = positiveInt(meta?.width)
+  const h = positiveInt(meta?.height)
+  const dims = w && h ? ` width="${w}" height="${h}"` : ''
+  return `<img src="${escAttr(src)}" alt="${escAttr(alt)}"${dims} />`
+}
+
+function originAttr(meta?: FigureImageMeta): string {
+  const o = meta?.origin?.trim()
+  return o ? ` data-origin="${escAttr(o)}"` : ''
+}
+
 export function buildFilledFigure(args: BuildFilledArgs): string {
   const slotId  = args.slotId ?? createSlotId()
   const caption = args.caption ?? ''
   const figcap  = caption.trim() ? `<figcaption>${escAttr(caption)}</figcaption>` : ''
-  return `<figure class="bd-image-filled" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt)}" data-caption="${escAttr(caption)}"><img src="${escAttr(args.imageUrl)}" alt="${escAttr(args.alt)}" />${figcap}</figure>`
+  return `<figure class="bd-image-filled" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt)}" data-caption="${escAttr(caption)}"${originAttr(args)}>${imgTag(args.imageUrl, args.alt, args)}${figcap}</figure>`
 }
 
 interface BuildPlaceholderArgs {
@@ -99,7 +130,11 @@ export function extractSlots(content: string): InlineSlot[] {
     const raw = m[0]
     const slotId = m[1]
     const filled = /class="[^"]*\bbd-image-filled\b/.test(raw)
-    const imgSrc = raw.match(/<img[^>]*\bsrc="([^"]*)"/)?.[1]
+    const imgTagRaw = raw.match(/<img\b[^>]*>/)?.[0] ?? ''
+    const imgSrc = imgTagRaw.match(/\bsrc="([^"]*)"/)?.[1]
+    const w = Number(imgTagRaw.match(/\bwidth="(\d+)"/)?.[1])
+    const h = Number(imgTagRaw.match(/\bheight="(\d+)"/)?.[1])
+    const origin = raw.match(/^<figure\b[^>]*\bdata-origin="([^"]*)"/)?.[1]
     out.push({
       slotId,
       prompt:   decodeAttr(raw.match(/data-prompt="([^"]*)"/)?.[1] ?? ''),
@@ -107,6 +142,8 @@ export function extractSlots(content: string): InlineSlot[] {
       caption:  decodeAttr(raw.match(/data-caption="([^"]*)"/)?.[1] ?? ''),
       filled,
       imageUrl: imgSrc ? decodeAttr(imgSrc) : undefined,
+      ...(w > 0 && h > 0 ? { width: w, height: h } : {}),
+      ...(origin ? { origin: decodeAttr(origin) } : {}),
       start: m.index,
       end:   m.index + raw.length,
       raw,
@@ -214,7 +251,13 @@ export function updateSlotMeta(
   })
 }
 
-export function fillSlot(content: string, slotId: string, imageUrl: string, alt?: string): string {
+export function fillSlot(
+  content: string,
+  slotId: string,
+  imageUrl: string,
+  alt?: string,
+  meta?: FigureImageMeta,
+): string {
   return content.replace(figureBlockRegex(slotId), (_full, openTag, _body, closeTag) => {
     const open = openTag as string
     const close = closeTag as string
@@ -223,13 +266,17 @@ export function fillSlot(content: string, slotId: string, imageUrl: string, alt?
     const finalAlt    = (alt ?? dataAlt) || ''
 
     // Replace class with bd-image-filled
-    const newOpenTag = open.replace(/\bclass="[^"]*"/, 'class="bd-image-filled"')
+    let newOpenTag = open.replace(/\bclass="[^"]*"/, 'class="bd-image-filled"')
     // Update data-alt if a new alt was supplied
-    const finalOpenTag = alt !== undefined ? setAttr(newOpenTag, 'data-alt', escAttr(alt)) : newOpenTag
+    if (alt !== undefined) newOpenTag = setAttr(newOpenTag, 'data-alt', escAttr(alt))
+    // A new image means a new origin: write it when known, else drop the stale one.
+    newOpenTag = newOpenTag.replace(/\s+data-origin="[^"]*"/, '')
+    const origin = meta?.origin?.trim()
+    if (origin) newOpenTag = setAttr(newOpenTag, 'data-origin', escAttr(origin))
 
-    const img    = `<img src="${escAttr(imageUrl)}" alt="${escAttr(finalAlt)}" />`
+    const img    = imgTag(imageUrl, finalAlt, meta)
     const figcap = captionText.trim() ? `<figcaption>${escAttr(captionText)}</figcaption>` : ''
-    return finalOpenTag + img + figcap + close
+    return newOpenTag + img + figcap + close
   })
 }
 
@@ -238,7 +285,9 @@ export function revertSlot(content: string, slotId: string): string {
     const open = openTag as string
     const close = closeTag as string
     const captionText = decodeAttr(open.match(/data-caption="([^"]*)"/)?.[1] ?? '')
-    const newOpen = open.replace(/\bclass="[^"]*"/, 'class="bd-image-placeholder"')
+    const newOpen = open
+      .replace(/\bclass="[^"]*"/, 'class="bd-image-placeholder"')
+      .replace(/\s+data-origin="[^"]*"/, '') // no image, no origin
     const figcap  = `<figcaption>${escAttr(captionText || 'Image slot')}</figcaption>`
     return newOpen + figcap + close
   })

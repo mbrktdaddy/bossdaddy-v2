@@ -22,6 +22,7 @@
 import { z } from 'zod'
 import { guardedFetch, resolveRedirects } from '@/lib/link-preview/fetch'
 import { decodeEntities, metaContent, parseMetadata } from '@/lib/link-preview/parse'
+import { sanitizeSpecValue } from '@/lib/content/specs'
 import { extractAsin, buildAmazonAffiliateUrl } from '@/lib/amazon-tag'
 import { aiResearch } from '@/lib/ai/research'
 import { dedupeSizeVariants } from '@/lib/images/candidates'
@@ -192,7 +193,9 @@ function quantity(v: Json | undefined): string | null {
 function pushSpec(specs: ProductSpec[], label: string, value: string | null) {
   if (!value) return
   const l = label.trim().slice(0, 60)
-  const val = value.trim().slice(0, 200)
+  // Scraped text is untrusted and ends up inside a model prompt — strip markup,
+  // drop URLs and instruction-shaped values (lib/content/specs.ts).
+  const val = sanitizeSpecValue(value)
   if (!l || !val) return
   if (specs.some((s) => s.label.toLowerCase() === l.toLowerCase())) return
   if (specs.length < MAX_SPECS) specs.push({ label: l, value: val })

@@ -46,6 +46,11 @@ export const CreateReviewSchema = z.object({
   score_daily_use:  z.number().int().min(1).max(10).optional().nullable(),
   would_rebuy:      z.boolean().optional().nullable(),
   suggested_tags: z.array(z.string().max(80)).max(10).default([]),
+  // Provenance (mig 164): the generation that seeded this draft, if any.
+  generation_id:  z.string().uuid().optional().nullable(),
+  prompt_version: z.string().max(40).optional().nullable(),
+  // Staged pipeline run (mig 165) that produced this draft, if any.
+  run_id:         z.string().uuid().optional().nullable(),
 })
 
 // PUT /api/reviews/[id] — partial author/admin update.
@@ -93,6 +98,9 @@ export const ReviewUpdateSchema = z.object({
   }).optional().nullable(),
   would_rebuy:              z.boolean().optional().nullable(),
   verdict_change:           z.enum(['improved', 'unchanged', 'declined', 'complete_reversal']).optional().nullable(),
+  // Marks the revision snapshot this save produces (content_revisions.label):
+  // the workspace sends 'pre-ai-refine' on the first save after accepting one.
+  revision_label:           z.enum(['pre-ai-refine', 'manual']).optional(),
 })
 
 // PUT /api/reviews/[id] — admin moderation action (alternative body shape).

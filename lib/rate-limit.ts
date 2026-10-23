@@ -26,6 +26,16 @@ function getLimiter(type: string): Ratelimit | null {
     draft:             new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10,  '1 h'),  prefix: 'bd_draft' }),
     submit:            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5,   '1 h'),  prefix: 'bd_submit' }),
     refine:            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20,  '1 h'),  prefix: 'bd_refine' }),
+    // Staged content pipeline (docs/content-pipeline-plan.md §4) — one key per
+    // stage so a multi-call run isn't throttled by the single-call `draft` cap.
+    // Sections are the hot one: ~6–10 per piece, re-runnable one at a time.
+    'draft-outline':   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_draft_outline' }),
+    'draft-section':   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(90,  '1 h'),  prefix: 'bd_draft_section' }),
+    'draft-blocks':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_draft_blocks' }),
+    'critic':          new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_critic' }),
+    'draft-images':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_draft_images' }),
+    // One section at a time — cheaper than `refine`, used more often.
+    'refine-section':  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60,  '1 h'),  prefix: 'bd_refine_section' }),
     newsletter:        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
     view:              new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(120, '1 m'),  prefix: 'bd_view' }),
     // Affiliate click redirect — protects associate account from bot click patterns.
@@ -122,7 +132,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
+  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)

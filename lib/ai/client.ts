@@ -4,16 +4,20 @@
 //   • Gateway failover to Claude if the chosen provider errors / hits budget
 //   • cost-attribution tags (per-surface) for the Gateway dashboard
 //   • an Anthropic prompt-cache breakpoint on the system block
+//   • AI SDK telemetry spans (Sentry `vercelAIIntegration`), inputs/outputs OFF
+//   • usage / finish reason / latency / estimated cost back to the caller, so
+//     the content routes can log a `generations` row (mig 164)
 //
 // Auth: calls route through the Vercel AI Gateway, authenticated via
 // VERCEL_OIDC_TOKEN (auto on Vercel; `vercel env pull` locally) or a static
 // AI_GATEWAY_API_KEY. No provider API keys are handled here.
 //
 // Streaming (the Boss concierge) and the web_search research surfaces are NOT
-// covered by these one-shot helpers — they migrate in later phases.
+// covered by these one-shot helpers.
 
-import { gateway, generateObject, generateText, type FlexibleSchema, type ModelMessage, type SystemModelMessage } from 'ai'
+import { gateway, generateObject, generateText, streamText, type FlexibleSchema, type LanguageModelUsage, type ModelMessage, type SystemModelMessage, type TelemetrySettings } from 'ai'
 import { resolveModel, type AiBucket } from '../flags'
+import { estimateCostUsd } from './pricing'
 
 // A call's system prompt: either a single string (wrapped with one Anthropic
 // cache breakpoint) or pre-built SystemModelMessages (multi-block voice system,
@@ -46,6 +50,23 @@ interface CallBase {
   maxOutputTokens: number
   temperature?: number
   maxRetries?: number
+  /** lib/content PROMPT_VERSION, attached to the telemetry span when present. */
+  promptVersion?: string
+}
+
+/** What a call cost and how it ended — the content routes persist this. */
+export interface CallMeta {
+  /** The resolved Gateway slug that was asked for (the failover chain may have served it). */
+  model: string
+  usage: LanguageModelUsage | undefined
+  finishReason: string
+  latencyMs: number
+  /**
+   * List-price estimate from lib/ai/pricing.ts (null for an unpriced slug).
+   * The Gateway does not expose per-call cost in `providerMetadata` on ai@6;
+   * its dashboard remains the billing truth, this is the operator's chip.
+   */
+  costUsd: number | null
 }
 
 // System block with an Anthropic ephemeral cache breakpoint. Providers that
@@ -82,23 +103,49 @@ function callProviderOptions(tag: string, fallback: string[], effort?: CallBase[
   }
 }
 
+// One span per call, named by the surface tag so Sentry groups latency and
+// failures the same way the Gateway groups cost. Inputs/outputs are never
+// recorded — drafts carry the author's family facts, Boss turns are private.
+function telemetry(opts: CallBase): TelemetrySettings {
+  return {
+    isEnabled: true,
+    recordInputs: false,
+    recordOutputs: false,
+    functionId: opts.tag,
+    metadata: {
+      bucket: opts.bucket,
+      ...(opts.promptVersion ? { promptVersion: opts.promptVersion } : {}),
+    },
+  }
+}
+
+function meta(model: string, usage: LanguageModelUsage | undefined, finishReason: string, startedAt: number): CallMeta {
+  return {
+    model,
+    usage,
+    finishReason,
+    latencyMs: Date.now() - startedAt,
+    costUsd: estimateCostUsd(model, usage),
+  }
+}
+
 /**
- * One-shot structured generation. Replaces the old tool-forcing `createStructured`
- * — the AI SDK enforces the schema and validates the object, so callers get a
- * typed, validated result with no manual JSON parsing or fence-stripping.
+ * One-shot structured generation with call metadata. The AI SDK validates the
+ * object against the schema — pass a Zod schema (lib/content/schemas.ts) so
+ * that validation actually runs; a bare `jsonSchema()` without `validate`
+ * validates nothing.
  */
-export async function aiGenerateObject<T>(
+export async function aiGenerateObjectWithMeta<T>(
   opts: CallBase & {
     system?: SystemArg
-    // Zod schema OR a reused JSON schema via `jsonSchema()` — the SDK validates
-    // the model output against it and returns a typed, parsed object.
     schema: FlexibleSchema<T>
     prompt?: string
     messages?: ModelMessage[]
   },
-): Promise<T> {
+): Promise<{ object: T; meta: CallMeta }> {
   const { model, fallback } = resolveModel(opts.bucket, { model: opts.model })
-  const { object } = await generateObject({
+  const startedAt = Date.now()
+  const result = await generateObject({
     model: gateway(model),
     schema: opts.schema,
     ...resolveSystem(opts.system),
@@ -107,20 +154,29 @@ export async function aiGenerateObject<T>(
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
     ...(opts.maxRetries != null ? { maxRetries: opts.maxRetries } : {}),
     providerOptions: callProviderOptions(opts.tag, fallback, opts.effort),
+    experimental_telemetry: telemetry(opts),
   })
-  return object
+  return { object: result.object, meta: meta(model, result.usage, result.finishReason, startedAt) }
 }
 
-/** One-shot plain-text generation (moderation prose, vision alt-text, refines). */
-export async function aiGenerateText(
+/** One-shot structured generation (object only). */
+export async function aiGenerateObject<T>(
+  opts: Parameters<typeof aiGenerateObjectWithMeta<T>>[0],
+): Promise<T> {
+  return (await aiGenerateObjectWithMeta<T>(opts)).object
+}
+
+/** One-shot plain-text generation with call metadata. */
+export async function aiGenerateTextWithMeta(
   opts: CallBase & {
     system?: SystemArg
     prompt?: string
     messages?: ModelMessage[]
   },
-): Promise<string> {
+): Promise<{ text: string; meta: CallMeta }> {
   const { model, fallback } = resolveModel(opts.bucket, { model: opts.model })
-  const { text } = await generateText({
+  const startedAt = Date.now()
+  const result = await generateText({
     model: gateway(model),
     ...resolveSystem(opts.system),
     ...(opts.messages ? { messages: opts.messages } : { prompt: opts.prompt ?? '' }),
@@ -128,6 +184,59 @@ export async function aiGenerateText(
     ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
     ...(opts.maxRetries != null ? { maxRetries: opts.maxRetries } : {}),
     providerOptions: callProviderOptions(opts.tag, fallback, opts.effort),
+    experimental_telemetry: telemetry(opts),
   })
-  return text
+  return { text: result.text, meta: meta(model, result.usage, result.finishReason, startedAt) }
+}
+
+/** One-shot plain-text generation (moderation prose, vision alt-text, refines). */
+export async function aiGenerateText(
+  opts: Parameters<typeof aiGenerateTextWithMeta>[0],
+): Promise<string> {
+  return (await aiGenerateTextWithMeta(opts)).text
+}
+
+/**
+ * Streamed plain-text generation (the staged draft's sections). Returns the
+ * AI SDK stream result — call `.toTextStreamResponse()` in the route. The
+ * caller's `onFinish` receives the full text + CallMeta once the stream ends
+ * and is awaited by the SDK before the stream closes, so a DB write inside it
+ * completes before the function is reclaimed.
+ */
+export function aiStreamText(
+  opts: CallBase & {
+    system?: SystemArg
+    prompt?: string
+    messages?: ModelMessage[]
+    onFinish?: (result: { text: string; meta: CallMeta }) => Promise<void> | void
+    onError?: (error: unknown) => void
+  },
+) {
+  const { model, fallback } = resolveModel(opts.bucket, { model: opts.model })
+  const startedAt = Date.now()
+  return streamText({
+    model: gateway(model),
+    ...resolveSystem(opts.system),
+    ...(opts.messages ? { messages: opts.messages } : { prompt: opts.prompt ?? '' }),
+    maxOutputTokens: opts.maxOutputTokens,
+    ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
+    ...(opts.maxRetries != null ? { maxRetries: opts.maxRetries } : {}),
+    providerOptions: callProviderOptions(opts.tag, fallback, opts.effort),
+    experimental_telemetry: telemetry(opts),
+    onFinish: async (event) => {
+      await opts.onFinish?.({ text: event.text, meta: meta(model, event.totalUsage, event.finishReason, startedAt) })
+    },
+    onError: (event) => opts.onError?.(event.error),
+  })
+}
+
+/** The metadata shape for a call that threw, so failures log like successes. */
+export function failedCallMeta(bucket: AiBucket, startedAt: number, finishReason: string, model?: string): CallMeta {
+  return {
+    model: resolveModel(bucket, { model }).model,
+    usage: undefined,
+    finishReason,
+    latencyMs: Date.now() - startedAt,
+    costUsd: null,
+  }
 }

@@ -73,7 +73,9 @@ export async function buildBossConciergeSystemBlocks(
   ]
   if (!userId) return blocks
 
-  const facts = voiceProfileFactLines(await getVoiceProfile(supabase, userId))
+  // Names ON here: this is the member's own private conversation, and the Boss
+  // knowing his kids' names is the point. Content generation leaves them off.
+  const facts = voiceProfileFactLines(await getVoiceProfile(supabase, userId), new Date(), { includeNames: true })
   if (facts.length) {
     blocks.push({
       role: 'system',

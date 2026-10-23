@@ -14,6 +14,8 @@ export async function snapshotRevision(
   contentId: string,
   snapshot: Record<string, unknown>,
   createdBy: string | null,
+  /** Why this snapshot exists ('pre-ai-refine' | 'submit' | 'manual'); null = routine save. */
+  label: string | null = null,
 ): Promise<void> {
   const admin = createAdminClient()
 
@@ -38,6 +40,7 @@ export async function snapshotRevision(
       version_number: nextVersion,
       snapshot:       snapshot as unknown as Json,
       created_by:     createdBy,
+      label,
     })
 
   if (insertError) {
