@@ -669,6 +669,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          label: string | null
           snapshot: Json
           version_number: number
         }
@@ -678,6 +679,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          label?: string | null
           snapshot: Json
           version_number: number
         }
@@ -687,6 +689,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          label?: string | null
           snapshot?: Json
           version_number?: number
         }
@@ -699,6 +702,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      content_runs: {
+        Row: {
+          blocks: Json | null
+          brief: Json
+          content_id: string | null
+          content_type: string
+          cost_usd: number
+          created_at: string
+          critic: Json | null
+          error: string | null
+          id: string
+          images: Json | null
+          outline: Json | null
+          prompt_version: string
+          sections: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocks?: Json | null
+          brief: Json
+          content_id?: string | null
+          content_type: string
+          cost_usd?: number
+          created_at?: string
+          critic?: Json | null
+          error?: string | null
+          id?: string
+          images?: Json | null
+          outline?: Json | null
+          prompt_version: string
+          sections?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocks?: Json | null
+          brief?: Json
+          content_id?: string | null
+          content_type?: string
+          cost_usd?: number
+          created_at?: string
+          critic?: Json | null
+          error?: string | null
+          id?: string
+          images?: Json | null
+          outline?: Json | null
+          prompt_version?: string
+          sections?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       conversation_participants: {
         Row: {
@@ -874,6 +934,89 @@ export type Database = {
             columns: ["adopted_product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generations: {
+        Row: {
+          accepted: boolean | null
+          cached_input_tokens: number
+          content_id: string | null
+          content_type: string
+          cost_usd: number | null
+          created_at: string
+          effort: string | null
+          finish_reason: string | null
+          id: string
+          input: Json
+          input_tokens: number
+          latency_ms: number
+          model: string
+          output: Json | null
+          output_tokens: number
+          prompt_version: string
+          reasoning_tokens: number
+          run_id: string | null
+          stage: string
+          status: string
+          temperature: number | null
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          cached_input_tokens?: number
+          content_id?: string | null
+          content_type: string
+          cost_usd?: number | null
+          created_at?: string
+          effort?: string | null
+          finish_reason?: string | null
+          id?: string
+          input?: Json
+          input_tokens?: number
+          latency_ms?: number
+          model: string
+          output?: Json | null
+          output_tokens?: number
+          prompt_version: string
+          reasoning_tokens?: number
+          run_id?: string | null
+          stage: string
+          status: string
+          temperature?: number | null
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean | null
+          cached_input_tokens?: number
+          content_id?: string | null
+          content_type?: string
+          cost_usd?: number | null
+          created_at?: string
+          effort?: string | null
+          finish_reason?: string | null
+          id?: string
+          input?: Json
+          input_tokens?: number
+          latency_ms?: number
+          model?: string
+          output?: Json | null
+          output_tokens?: number
+          prompt_version?: string
+          reasoning_tokens?: number
+          run_id?: string | null
+          stage?: string
+          status?: string
+          temperature?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generations_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "content_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -1666,9 +1809,12 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          generation_id: string | null
+          generation_method: string | null
           has_affiliate_links: boolean
           id: string
           image_url: string | null
+          inquiry_mode: boolean | null
           is_visible: boolean
           key_takeaways: Json
           legacy_slugs: string[]
@@ -1676,6 +1822,7 @@ export type Database = {
           meta_title: string | null
           moderation_flags: Json | null
           moderation_score: number | null
+          prompt_version: string | null
           published_at: string | null
           reading_time_minutes: number | null
           rejection_reason: string | null
@@ -1698,9 +1845,12 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          generation_id?: string | null
+          generation_method?: string | null
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
+          inquiry_mode?: boolean | null
           is_visible?: boolean
           key_takeaways?: Json
           legacy_slugs?: string[]
@@ -1708,6 +1858,7 @@ export type Database = {
           meta_title?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
+          prompt_version?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
           rejection_reason?: string | null
@@ -1730,9 +1881,12 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          generation_id?: string | null
+          generation_method?: string | null
           has_affiliate_links?: boolean
           id?: string
           image_url?: string | null
+          inquiry_mode?: boolean | null
           is_visible?: boolean
           key_takeaways?: Json
           legacy_slugs?: string[]
@@ -1740,6 +1894,7 @@ export type Database = {
           meta_title?: string | null
           moderation_flags?: Json | null
           moderation_score?: number | null
+          prompt_version?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
           rejection_reason?: string | null
@@ -1765,6 +1920,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "guides_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1990,6 +2152,7 @@ export type Database = {
           created_at: string
           file_size: number | null
           filename: string
+          height: number | null
           id: string
           is_primary: boolean
           label: string | null
@@ -2003,6 +2166,7 @@ export type Database = {
           tags: string[]
           uploaded_by: string | null
           url: string
+          width: number | null
         }
         Insert: {
           alt_text?: string | null
@@ -2011,6 +2175,7 @@ export type Database = {
           created_at?: string
           file_size?: number | null
           filename: string
+          height?: number | null
           id?: string
           is_primary?: boolean
           label?: string | null
@@ -2024,6 +2189,7 @@ export type Database = {
           tags?: string[]
           uploaded_by?: string | null
           url: string
+          width?: number | null
         }
         Update: {
           alt_text?: string | null
@@ -2032,6 +2198,7 @@ export type Database = {
           created_at?: string
           file_size?: number | null
           filename?: string
+          height?: number | null
           id?: string
           is_primary?: boolean
           label?: string | null
@@ -2045,6 +2212,7 @@ export type Database = {
           tags?: string[]
           uploaded_by?: string | null
           url?: string
+          width?: number | null
         }
         Relationships: [
           {
@@ -3063,6 +3231,8 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          generation_id: string | null
+          generation_method: string | null
           has_affiliate_links: boolean | null
           how_you_used_it: string | null
           id: string
@@ -3083,6 +3253,7 @@ export type Database = {
           price_paid_cents: number | null
           product_name: string
           product_slug: string | null
+          prompt_version: string | null
           pros: Json | null
           published_at: string | null
           rating: number | null
@@ -3122,6 +3293,8 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          generation_id?: string | null
+          generation_method?: string | null
           has_affiliate_links?: boolean | null
           how_you_used_it?: string | null
           id?: string
@@ -3142,6 +3315,7 @@ export type Database = {
           price_paid_cents?: number | null
           product_name: string
           product_slug?: string | null
+          prompt_version?: string | null
           pros?: Json | null
           published_at?: string | null
           rating?: number | null
@@ -3181,6 +3355,8 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          generation_id?: string | null
+          generation_method?: string | null
           has_affiliate_links?: boolean | null
           how_you_used_it?: string | null
           id?: string
@@ -3201,6 +3377,7 @@ export type Database = {
           price_paid_cents?: number | null
           product_name?: string
           product_slug?: string | null
+          prompt_version?: string | null
           pros?: Json | null
           published_at?: string | null
           rating?: number | null
@@ -3241,6 +3418,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "reviews_generation_id_fkey"
+            columns: ["generation_id"]
+            isOneToOne: false
+            referencedRelation: "generations"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "reviews_parent_review_id_fkey"
@@ -4141,6 +4325,39 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_exemplars: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string
+          excerpt: string
+          id: string
+          position: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string
+          excerpt: string
+          id?: string
+          position?: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string
+          excerpt?: string
+          id?: string
+          position?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       voice_phrases: {
         Row: {
           contexts_avoid: string[]
@@ -4387,9 +4604,12 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          generation_id: string | null
+          generation_method: string | null
           has_affiliate_links: boolean
           id: string
           image_url: string | null
+          inquiry_mode: boolean | null
           is_visible: boolean
           key_takeaways: Json
           legacy_slugs: string[]
@@ -4397,6 +4617,7 @@ export type Database = {
           meta_title: string | null
           moderation_flags: Json | null
           moderation_score: number | null
+          prompt_version: string | null
           published_at: string | null
           reading_time_minutes: number | null
           rejection_reason: string | null
@@ -4438,6 +4659,8 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          generation_id: string | null
+          generation_method: string | null
           has_affiliate_links: boolean | null
           how_you_used_it: string | null
           id: string
@@ -4458,6 +4681,7 @@ export type Database = {
           price_paid_cents: number | null
           product_name: string
           product_slug: string | null
+          prompt_version: string | null
           pros: Json | null
           published_at: string | null
           rating: number | null
@@ -4555,6 +4779,10 @@ export type Database = {
       is_savings_goal_participant: {
         Args: { _goal_id: string }
         Returns: boolean
+      }
+      rebuild_product_gallery: {
+        Args: { p_product_id: string }
+        Returns: undefined
       }
       record_email_suppression: {
         Args: {
