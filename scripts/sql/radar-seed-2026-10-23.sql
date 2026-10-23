@@ -5,7 +5,8 @@
 -- the brotherly register, written from the research on each gear_candidates
 -- row, not from hands-on use. Nothing here claims ownership or testing.
 --
--- What it does (one transaction):
+-- What it does (each statement runs on its own; every step is idempotent, so
+-- a partial run can simply be re-run):
 --   1. Adopts three researched candidates into the products spine the same way
 --      POST /api/gear-candidates/[id]/adopt does (source = adopted_from_research,
 --      description = the research note, research_sources = the citations), but
@@ -29,7 +30,6 @@
 -- Idempotent: an existing product slug is skipped, an already-adopted candidate
 -- is left alone.
 
-begin;
 
 -- 1 · Ugly Stik GX2 Spinning Combo — outdoors, budget ($30–55)
 insert into products
@@ -115,4 +115,3 @@ select slug, status, category, spotted_at, char_length(radar_take) as take_chars
  where slug in ('ugly-stik-gx2-spinning-combo', 'weber-original-kettle-premium-22', 'weber-spirit-e-210-gas-grill')
  order by spotted_at;
 
-commit;
