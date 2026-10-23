@@ -52,7 +52,15 @@ export function blocksText(run: { blocks: Blocks | null }): string | null {
 export const CRITIC_SYSTEM =
   'You are a meticulous, fair editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. You return findings only, never rewrites. You never flag religious, moral or metaphysical positions as misleading claims — stating them is the genre on discussion pieces.'
 
-export function criticPrompt(run: RunState, blocksText: string | null): string {
+/**
+ * @param profileFacts The author's standing profile as "- label: value" lines
+ *   (`voiceProfileFactLines`, relationships only — names never reach the
+ *   critic). The writer sees these in its system prompt, so a fiancée, a
+ *   region or a trade is on record even when the brief's notes never mention
+ *   it; without this block the editor flagged every such line as invented
+ *   (eval baseline 2026-10-23: "my fiancé's 2014 Odyssey").
+ */
+export function criticPrompt(run: RunState, blocksText: string | null, profileFacts: string[] = []): string {
   const brief = run.brief
   const inquiry = brief.contentType === 'guide' && brief.inquiryMode
   const facts = briefFacts(brief)
@@ -65,7 +73,10 @@ ${brief.contentType === 'review' ? `Author's target rating: ${brief.ratingHint}/
 
 AUTHOR NOTES (${facts.length ? 'the only firsthand experience on record — any usage claim, duration, test result, family reaction, friend or anecdote NOT traceable to these is unsupported-firsthand or invented-anecdote' : 'NONE — any firsthand claim at all is unsupported'}):
 ${facts.length ? facts.map((f) => `- ${f}`).join('\n') : '(none)'}
-
+${profileFacts.length ? `
+ALSO ON RECORD — the author's standing profile (family by relationship, background, region). Mentioning one of these is NOT invented. What IS still unsupported: any specific event, quote, reaction or detail about them that the notes above don't give.
+${profileFacts.join('\n')}
+` : ''}
 PARTS (1-based, for the "part" field):
 ${parts.map((p, i) => `${i + 1}. ${p.kind === 'intro' ? '[intro]' : p.heading}`).join('\n')}
 

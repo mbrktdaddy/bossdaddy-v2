@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { aiGenerateObjectWithMeta, failedCallMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
-import { getVoiceProfile } from '@/lib/voiceProfile'
+import { getVoiceProfile, voiceProfileFactLines } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
 import { runRules } from '@/lib/content/pipeline/critic/rules'
@@ -42,7 +42,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   const findings: CriticFinding[] = runRules({ brief: run.brief, parts, texts, familyNames })
   let summary = ''
 
-  const prompt = criticPrompt(run, blocksText(run))
+  // Relationships only (names off by default) — the critic must know a fiancée
+  // or a region is on record, never a name.
+  const prompt = criticPrompt(run, blocksText(run), voiceProfileFactLines(profile))
   const startedAt = Date.now()
   let cost = 0
   try {

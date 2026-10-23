@@ -2,7 +2,7 @@ import { afterAll, describe, it, expect } from 'vitest'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { aiGenerateObjectWithMeta, aiGenerateTextWithMeta } from '@/lib/ai/client'
 import { MODELS } from '@/lib/ai/models'
-import { buildBossDaddySystemMessages, getVoiceProfile } from '@/lib/voiceProfile'
+import { buildBossDaddySystemMessages, getVoiceProfile, voiceProfileFactLines } from '@/lib/voiceProfile'
 import { fetchTagVocabulary } from '@/lib/claude/tag-vocab'
 import { PROMPT_VERSION, validateSuggestedTags } from '@/lib/content/prompts'
 import { BriefInput, normalizeBrief } from '@/lib/content/pipeline/briefs'
@@ -200,7 +200,7 @@ async function generate(brief: Brief, ctx: { supabase: SupabaseClient; userId: s
   const findings: CriticFinding[] = runRules({ brief, parts: run.outline.parts, texts, familyNames })
   const critic = await aiGenerateObjectWithMeta<CriticModelOutput>({
     bucket: 'content', tag: 'eval-critic', schema: CriticOutput, system: CRITIC_SYSTEM,
-    messages: [{ role: 'user', content: criticPrompt(run, blocksText(run)) }],
+    messages: [{ role: 'user', content: criticPrompt(run, blocksText(run), voiceProfileFactLines(profile)) }],
     maxOutputTokens: 2000, effort: 'low', temperature: 0, maxRetries: 2, promptVersion: PROMPT_VERSION,
   })
   costUsd += critic.meta.costUsd ?? 0
