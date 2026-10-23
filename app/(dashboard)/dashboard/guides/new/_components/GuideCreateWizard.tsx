@@ -6,10 +6,15 @@ import Link from 'next/link'
 import { CATEGORIES, isInquiryCategory } from '@/lib/categories'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { DraftProvenanceNote } from '@/components/workspace/DraftProvenanceNote'
+import { PipelineRunner } from '@/components/workspace/PipelineRunner'
+import { CriticFindings } from '@/components/workspace/CriticFindings'
+import { runToDraftHtml } from '@/lib/content/pipeline/section'
+import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
 const STORAGE_KEY = 'bd:guide-wizard-draft'
 
-type Step = 'idea' | 'generating' | 'preview' | 'saving'
+type Step = 'idea' | 'pipeline' | 'generating' | 'preview' | 'saving'
 type PieceType = 'essay' | 'howto' | 'guide'
 
 const PIECE_TYPES: { v: PieceType; label: string; hint: string }[] = [
@@ -85,10 +90,20 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
   // Holds generated draft between the preview step and the save step. The
   // structured blocks travel too — for how-tos/deep guides they persist; essays
   // leave them empty so the public page renders nothing extra.
+  // The staged pipeline's input; the run itself lives server-side.
+  const [brief, setBrief] = useState<Record<string, unknown> | null>(null)
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string; imagePrompt: string
     tldr: string; keyTakeaways: string[]; faqs: { question: string; answer: string }[]
     suggestedTags: string[]
+    // Provenance from the generation (mig 164) — travels to the save.
+    generationId: string | null
+    promptVersion: string | null
+    costUsd: number | null
+    voice: { hasProfile: boolean; phraseCount: number } | null
+    runId: string | null
+    critic: Critic | null
+    partLabels: string[]
   } | null>(null)
 
   // Products for multi-select picker (roundups, gift guides, etc.)
@@ -141,84 +156,49 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
     setSuggestions([])
   }
 
-  async function handleGenerate() {
+  function handleGenerate() {
     if (!topic.trim()) { setError('Enter a topic first (or use Suggest above)'); return }
     if (!category) { setError('Select a category before generating'); return }
-    setStep('generating'); setError(null)
+    setError(null)
 
-    try {
-      // 1. Generate content via Claude
-      const genRes = await fetch('/api/claude/guide-draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          category,
-          pieceType,
-          inquiryMode,
-          keyPoints: keyPoints.split('\n').map(p => p.trim()).filter(Boolean),
-          ...(context.trim() ? { context: context.trim() } : {}),
-          imageSlots,
-          // Inquiry pieces carry no affiliate links — the register forbids them.
-          ...(!inquiryMode && selectedSlugs.length ? { productSlugs: selectedSlugs } : {}),
-        }),
-      })
-      const genJson = await genRes.json()
-      if (!genRes.ok) {
-        const { fieldErrors, formErrors } = genJson.details ?? {}
-        const parts = [
-          ...(formErrors ?? []),
-          ...Object.entries(fieldErrors ?? {}).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`),
-        ]
-        throw new Error(parts.length ? `${genJson.error} — ${parts.join('; ')}` : (genJson.error ?? 'Generation failed'))
-      }
+    // The brief is everything the staged pipeline (docs/content-pipeline-plan.md
+    // §4) needs. The run lives server-side, so a dead tab loses nothing.
+    setBrief({
+      contentType: 'guide',
+      topic: topic.trim(),
+      category,
+      pieceType,
+      keyPoints: keyPoints.split('\n').map((p) => p.trim()).filter(Boolean),
+      ...(context.trim() ? { context: context.trim() } : {}),
+      imageSlots,
+      inquiryMode,
+      // Inquiry pieces carry no affiliate links — the register forbids them.
+      productSlugs: !inquiryMode ? selectedSlugs : [],
+    })
+    setStep('pipeline')
+  }
 
-      const draft = genJson.draft as {
-        title: string; excerpt: string; introduction: string
-        sections: { heading: string; body: string }[]
-        conclusion: string
-        tldr?: string
-        keyTakeaways?: string[]
-        faqs?: { question: string; answer: string }[]
-        inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
-      }
-
-      const slots = (draft.inlineImages ?? []).map((img, i) => ({ ...img, slotId: `slot-${i + 1}` }))
-
-      function escAttr(s: string): string {
-        return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      }
-      function placeholderFor(slot: typeof slots[number]): string {
-        return `<figure class="bd-image-placeholder" data-slot-id="${slot.slotId}" data-prompt="${escAttr(slot.prompt)}" data-alt="${escAttr(slot.altText)}" data-caption="${escAttr(slot.caption)}"><figcaption>🖼 Suggested: ${escAttr(slot.caption || slot.altText)}</figcaption></figure>`
-      }
-
-      const content = [
-        draft.introduction,
-        ...(draft.sections ?? []).map((s) => {
-          const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-          const matched = slots.filter((sl) => sl.afterHeading.trim().toLowerCase() === s.heading.trim().toLowerCase())
-          const imgs = matched.map(placeholderFor).join('\n')
-          return `<h2>${s.heading}</h2>\n${bodyHtml}${imgs ? `\n${imgs}` : ''}`
-        }),
-        draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
-      ].filter(Boolean).join('\n\n')
-
-      // 2. Show preview before committing to DB
-      setPreviewDraft({
-        title: draft.title,
-        excerpt: draft.excerpt,
-        content,
-        imagePrompt: genJson.imagePrompt ?? '',
-        tldr: draft.tldr ?? '',
-        keyTakeaways: draft.keyTakeaways ?? [],
-        faqs: draft.faqs ?? [],
-        suggestedTags: Array.isArray(genJson.suggestedTags) ? genJson.suggestedTags : [],
-      })
-      setStep('preview')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Generation failed')
-      setStep('idea')
-    }
+  // The finished run → the preview shape the save step already understands.
+  function handleRunComplete(run: RunState) {
+    const b = run.blocks
+    setPreviewDraft({
+      title: run.outline?.title ?? topic,
+      excerpt: run.outline?.excerpt ?? '',
+      content: runToDraftHtml(run),
+      imagePrompt: run.images?.heroPrompt ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`,
+      tldr: b?.tldr ?? '',
+      keyTakeaways: b?.keyTakeaways ?? [],
+      faqs: b?.faqs ?? [],
+      suggestedTags: b?.suggestedTags ?? [],
+      generationId: null,
+      promptVersion: run.promptVersion,
+      costUsd: run.costUsd,
+      voice: null,
+      runId: run.id,
+      critic: run.critic,
+      partLabels: (run.outline?.parts ?? []).map((p) => (p.kind === 'intro' ? 'Introduction' : p.heading)),
+    })
+    setStep('preview')
   }
 
   async function handleSaveDraft() {
@@ -241,6 +221,12 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
           // Auto-attach the validated AI tag suggestions (mirrors the review
           // wizard); the author curates them in the workspace TagPicker.
           suggested_tags: previewDraft.suggestedTags,
+          // The inquiry tri-state is persisted (mig 164) so a later refine
+          // doesn't have to guess it from the pillar.
+          inquiry_mode:    inquiryOverride,
+          generation_id:   previewDraft.generationId,
+          prompt_version:  previewDraft.promptVersion,
+          run_id:          previewDraft.runId,
         }),
       })
       const saveJson = await saveRes.json()
@@ -281,6 +267,17 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
     }
   }
 
+  if (step === 'pipeline') {
+    return (
+      <PipelineRunner
+        contentType="guide"
+        brief={brief}
+        onComplete={handleRunComplete}
+        onCancel={() => setStep('idea')}
+      />
+    )
+  }
+
   if (step === 'generating' || step === 'saving') {
     const label = step === 'generating'
       ? (inquiryMode ? '✍️ Thinking through the discussion piece…' : '✍️ Writing full guide with Claude…')
@@ -301,6 +298,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       <div className="space-y-5">
         <div className="bg-surface border border-strong rounded-xl p-5 space-y-3">
           <Eyebrow>Draft preview</Eyebrow>
+          <DraftProvenanceNote costUsd={previewDraft.costUsd} voice={previewDraft.voice} />
+          {previewDraft.critic && <CriticFindings critic={previewDraft.critic} partLabels={previewDraft.partLabels} />}
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
             <p className="text-sm text-prose-muted italic">{previewDraft.excerpt}</p>
@@ -320,7 +319,7 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
           </button>
           <button
             type="button"
-            onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
+            onClick={() => { setPreviewDraft(null); handleGenerate() }}
             className={buttonVariants({ variant: 'secondary' })}
           >
             ↺ Regenerate

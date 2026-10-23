@@ -8,8 +8,12 @@ interface Revision {
   id: string
   version_number: number
   created_at: string
+  /** content_revisions.label — 'pre-ai-refine' marks the state right before an AI refine was applied. */
+  label?: string | null
   profiles?: { username: string } | { username: string }[] | null
 }
+
+const LABEL_TEXT: Record<string, string> = { 'pre-ai-refine': 'before AI refine', manual: 'manual' }
 
 interface Props {
   contentType: 'guide' | 'review' | 'collection'
@@ -98,7 +102,12 @@ export function VersionHistoryPanel({ contentType, contentId }: Props) {
               return (
                 <div key={r.id} className="px-4 py-2 flex items-center justify-between gap-3 hover:bg-surface-sunken/40 transition-colors">
                   <div className="min-w-0">
-                    <p className="text-sm font-mono text-prose-muted">v{r.version_number}</p>
+                    <p className="text-sm font-mono text-prose-muted">
+                      v{r.version_number}
+                      {r.label && LABEL_TEXT[r.label] && (
+                        <span className="ml-2 font-sans text-xs text-accent-text-soft">{LABEL_TEXT[r.label]}</span>
+                      )}
+                    </p>
                     <p className="text-xs text-prose-faint">{timeAgo(r.created_at)} · @{username}</p>
                   </div>
                   <button

@@ -11,10 +11,11 @@ import { getCategoryBySlug } from '@/lib/categories'
 import { ARTICLE_SURFACE_CLASS } from '@/lib/article-surface'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
-import ProductCtaCard from '@/components/ProductCtaCard'
-import CollectionEmbed from '@/components/CollectionEmbed'
-import ContentLinkCard from '@/components/ContentLinkCard'
-import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
+import { extractProductSlugs } from '@/lib/inline-content'
+import ArticleBody from '@/components/content/ArticleBody'
+import { AiAssistanceNote } from '@/components/content/AiAssistanceNote'
+import { lookupImageAssets } from '@/lib/images/assets'
+import { imageCredit } from '@/lib/images/credit'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import RatingScore from '@/components/RatingScore'
 import ShareButtons from '@/components/ShareButtons'
@@ -22,7 +23,6 @@ import ViewTracker from '@/components/ViewTracker'
 import LikeButton from '@/components/LikeButton'
 import CommentForm from '@/components/CommentForm'
 import CommentList from '@/components/CommentList'
-import ImageLightbox from '@/components/ImageLightbox'
 import { MerchCallout } from '@/components/MerchCallout'
 import { LightboxImage } from '@/components/LightboxImage'
 import { NewsletterCard } from '@/components/NewsletterCard'
@@ -63,7 +63,7 @@ const getGuide = cache(async (slug: string) => {
   const supabase = createAnonClient()
   const { data } = await supabase
     .from('guides')
-    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, updated_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, profiles(username)')
+    .select('id, title, slug, category, content, excerpt, image_url, has_affiliate_links, published_at, updated_at, reading_time_minutes, meta_title, meta_description, tldr, key_takeaways, faqs, generation_method, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -152,6 +152,9 @@ export default async function GuidePage({ params }: Props) {
     : (guide.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
   const category = getCategoryBySlug(guide.category ?? '')
+  // The hero's credit line (AI-generated scene / Photo: Boss Daddy) from the asset's origin.
+  const heroFacts = guide.image_url ? await lookupImageAssets([guide.image_url]) : null
+  const heroCredit = guide.image_url ? imageCredit(heroFacts?.get(guide.image_url)?.origin) : null
 
   const faqJsonLd = guideFaqs.length > 0 ? {
     '@context': 'https://schema.org',
@@ -240,23 +243,28 @@ export default async function GuidePage({ params }: Props) {
             {guide.reading_time_minutes && (
               <span>{guide.reading_time_minutes} min read</span>
             )}
+            <AiAssistanceNote method={guide.generation_method} />
           </div>
         </div>
 
-        {/* Hero image */}
+        {/* Hero image — 16:10 like the cropper locks and the cards expect; a
+            fixed height cropped a third of the author's framing on desktop. */}
         {guide.image_url && (
-          <LightboxImage src={guide.image_url} alt={guide.title}>
-            <div className="relative w-full h-64 md:h-80 rounded-xl overflow-hidden mb-10 bg-surface">
-              <Image
-                src={guide.image_url}
-                alt={guide.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
-                priority
-              />
-            </div>
-          </LightboxImage>
+          <div className="mb-10">
+            <LightboxImage src={guide.image_url} alt={guide.title}>
+              <div className="relative w-full aspect-[16/10] rounded-xl overflow-hidden bg-surface">
+                <Image
+                  src={guide.image_url}
+                  alt={guide.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
+                  priority
+                />
+              </div>
+            </LightboxImage>
+            {heroCredit && <p className="mt-2 text-xs tracking-wide text-prose-faint">{heroCredit}</p>}
+          </div>
         )}
 
         {/* Quick Take — the tldr summary, same accent-tint treatment as
@@ -288,40 +296,19 @@ export default async function GuidePage({ params }: Props) {
 
             {/* Guide body — ProductCtaCards injected inline at [[BUY:slug]] positions */}
             <div className="overflow-x-auto min-w-0 w-full">
-              <ImageLightbox className="bd-content">
-                {splitContentForInlineCards(guide.content, mentionedProducts ?? []).map((segment, i) => {
-                  if (segment.type === 'product') {
-                    return (
-                      <ProductCtaCard
-                        key={`card-${i}`}
-                        product={segment.product}
-                        variant="prominent"
-                      />
-                    )
-                  }
-                  if (segment.type === 'collection') {
-                    return <CollectionEmbed key={`embed-${i}`} slug={segment.slug} />
-                  }
-                  if (segment.type === 'contentlink') {
-                    return <ContentLinkCard key={`link-${i}`} contentType={segment.contentType} slug={segment.slug} />
-                  }
-                  return segment.content ? (
-                    <div
-                      key={`html-${i}`}
-                      className="bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
-                        prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
-                        prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
-                        prose-h3:mt-10 prose-h3:mb-3
-                        [&>*:first-child]:mt-0
-                        prose-p:text-prose-muted prose-p:leading-[1.85]
-                        prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
-                        prose-strong:text-prose
-                        prose-li:text-prose-muted prose-li:leading-[1.85]"
-                      dangerouslySetInnerHTML={{ __html: segment.content }}
-                    />
-                  ) : null
-                })}
-              </ImageLightbox>
+              <ArticleBody
+                html={guide.content}
+                products={mentionedProducts ?? []}
+                proseClassName="bd-editorial prose prose-lg prose-orange mx-auto max-w-[68ch]
+                  prose-headings:font-black prose-headings:tracking-tight prose-headings:font-sans prose-headings:leading-[1.15]
+                  prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5
+                  prose-h3:mt-10 prose-h3:mb-3
+                  [&>*:first-child]:mt-0
+                  prose-p:text-prose-muted prose-p:leading-[1.85]
+                  prose-a:text-accent-text-soft prose-a:no-underline hover:prose-a:text-accent
+                  prose-strong:text-prose
+                  prose-li:text-prose-muted prose-li:leading-[1.85]"
+              />
             </div>
 
             {/* ── The article's close: FAQs → Ask ── */}

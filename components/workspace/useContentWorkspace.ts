@@ -13,6 +13,15 @@ interface UseContentWorkspaceOptions {
   isPublished: boolean
   canPublish?: boolean
   publishBlockedReason?: string | null
+  /** Fires after every successful content save (autosave or manual). */
+  onSaved?: () => void
+  /**
+   * Merged into the PUT body at save time (not into `payload`), for values
+   * that must ride on the next save without themselves triggering one — the
+   * `revision_label` set when an AI refine is accepted. Read inside the save,
+   * so a ref is fine here where it isn't in a render-time memo.
+   */
+  extraPayload?: () => Record<string, unknown>
 }
 
 // Shared CRUD + keyboard logic for ReviewWorkspace and GuideWorkspace.
@@ -26,6 +35,8 @@ export function useContentWorkspace({
   isPublished,
   canPublish = true,
   publishBlockedReason = null,
+  onSaved,
+  extraPayload,
 }: UseContentWorkspaceOptions) {
   const router = useRouter()
   const [busy, setBusy]         = useState(false)
@@ -68,7 +79,7 @@ export function useContentWorkspace({
 
   const save = async (p: Record<string, unknown>) => {
     const [contentRes, tagsRes] = await Promise.all([
-      putJson(`/api/${route}/${id}`, p),
+      putJson(`/api/${route}/${id}`, { ...p, ...(extraPayload?.() ?? {}) }),
       putJson(`/api/${route}/${id}/tags`, { tags }),
     ])
     if (!contentRes.ok) {
@@ -76,6 +87,7 @@ export function useContentWorkspace({
       throw new Error(json.error ?? 'Save failed')
     }
     if (!tagsRes.ok) console.warn('Tag save failed — will retry on next save')
+    onSaved?.()
   }
 
   const autoSave = useAutoSave({ data: payload, saveFn: save, delay: 20000 })

@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
-import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
+import { assembleDraftHtml } from '@/lib/content/html'
+import { preserveBlocksAcrossRefine } from '@/lib/content/markers'
+import { replaceSectionProse, splitSections } from '@/lib/content/sections'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
@@ -32,6 +34,8 @@ const InlineMediaPanel = dynamic(
 interface FAQ { question: string; answer: string }
 
 interface GuideData {
+  /** Inquiry register tri-state (mig 164); null = pillar default. */
+  inquiry_mode?: boolean | null
   id: string
   title: string
   category: string
@@ -59,9 +63,11 @@ interface GuideData {
 
 interface Props {
   guide: GuideData
+  /** Sum of the generations behind this piece, for the header (null = none logged). */
+  generationCostUsd?: number | null
 }
 
-export function GuideWorkspace({ guide: article }: Props) {
+export function GuideWorkspace({ guide: article, generationCostUsd = null }: Props) {
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
   const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
@@ -90,7 +96,17 @@ export function GuideWorkspace({ guide: article }: Props) {
     content: string
     title?: string; excerpt?: string
     tldr?: string; keyTakeaways?: string[]; faqs?: FAQ[]
+    // Preview framing: a section refine shows just that section; whole-piece
+    // refines list the blocks they would overwrite.
+    before?: string; after?: string; heading?: string; warnings?: string[]
+    blockChanges?: { label: string; before: string; after: string }[]
   } | null>(null)
+
+  // Set when a refine is accepted; rides on the next save as `revision_label`
+  // so the snapshot of the pre-refine state is marked in version history, then
+  // clears once that save lands. A ref, not state: the payload memo already
+  // recomputes on the content change, and clearing must not trigger a save.
+  const revisionLabelRef = useRef<'pre-ai-refine' | null>(null)
 
   const [refineInstruction, setRefineInstruction] = useState('')
 
@@ -121,10 +137,15 @@ export function GuideWorkspace({ guide: article }: Props) {
   }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, tldr, keyTakeaways, faqs, disclosureAck])
 
   const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
-    useContentWorkspace({ id: article.id, contentType: 'guide', payload, tags, isPublished })
+    useContentWorkspace({
+      id: article.id, contentType: 'guide', payload, tags, isPublished,
+      extraPayload: () => (revisionLabelRef.current ? { revision_label: revisionLabelRef.current } : {}),
+      onSaved: () => { revisionLabelRef.current = null },
+    })
 
   function applyPendingRefine() {
     if (!pendingRefine) return
+    revisionLabelRef.current = 'pre-ai-refine'
     setContent(pendingRefine.content)
     if (pendingRefine.title)        setTitle(pendingRefine.title)
     if (pendingRefine.excerpt)      setExcerpt(pendingRefine.excerpt)
@@ -154,7 +175,7 @@ export function GuideWorkspace({ guide: article }: Props) {
       backHref="/dashboard/guides"
       backLabel="All guides"
       title={title}
-      subtitle={`Created ${createdAt}${article.reading_time_minutes ? ` · ${article.reading_time_minutes} min read` : ''}`}
+      subtitle={`Created ${createdAt}${article.reading_time_minutes ? ` · ${article.reading_time_minutes} min read` : ''}${generationCostUsd != null ? ` · $${generationCostUsd.toFixed(2)} to draft` : ''}`}
       status={status}
       autoSave={autoSave}
       rejectionReason={article.rejection_reason}
@@ -178,8 +199,11 @@ export function GuideWorkspace({ guide: article }: Props) {
       modals={
         pendingRefine && (
           <RefinePreviewModal
-            before={content}
-            after={pendingRefine.content}
+            before={pendingRefine.before ?? content}
+            after={pendingRefine.after ?? pendingRefine.content}
+            heading={pendingRefine.heading}
+            warnings={pendingRefine.warnings}
+            blockChanges={pendingRefine.blockChanges}
             onAccept={applyPendingRefine}
             onDiscard={() => setPendingRefine(null)}
           />
@@ -237,19 +261,43 @@ export function GuideWorkspace({ guide: article }: Props) {
         contentType="guide"
         externalInstruction={refineInstruction}
         onExternalInstructionUsed={() => setRefineInstruction('')}
+        contentId={article.id}
+        inquiryMode={article.inquiry_mode}
+        blocks={{ tldr, keyTakeaways, faqs }}
+        onRefinedSection={({ index, text, warnings }) => {
+          // One section rewritten in place; everything else is byte-identical.
+          const next = replaceSectionProse(content, index, text)
+          const was = splitSections(content)[index]
+          setPendingRefine({
+            content: next,
+            before: was?.html ?? content,
+            after: splitSections(next)[index]?.html ?? next,
+            heading: `Section: ${was?.heading ?? 'Introduction'}`,
+            warnings,
+          })
+        }}
         onRefined={(draft) => {
           const d = draft as Record<string, unknown>
-          const refinedContent = [
-            draft.introduction,
-            ...(draft.sections ?? []).map((s) => {
-              const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-              return `<h2>${s.heading}</h2>\n${bodyHtml}`
-            }),
-            draft.conclusion ? `<h2>Wrapping Up</h2>\n<p>${draft.conclusion}</p>` : '',
-          ].filter(Boolean).join('\n\n')
-          const { content: merged } = preserveImagesAcrossRefine(content, refinedContent)
+          const refinedContent = assembleDraftHtml({
+            introduction: draft.introduction,
+            sections: draft.sections,
+            closing: draft.conclusion ? { heading: 'Wrapping Up', body: draft.conclusion } : null,
+          })
+          // Figures, galleries, embeds and cross-link cards survive the rewrite.
+          const { content: merged } = preserveBlocksAcrossRefine(content, refinedContent)
+
+          // Every block the refine would overwrite, shown in the preview.
+          const faqText = (f: FAQ[]) => f.map((x) => `Q: ${x.question}\nA: ${x.answer}`).join('\n\n')
+          const changes: { label: string; before: string; after: string }[] = []
+          if (draft.title && draft.title !== title) changes.push({ label: 'Title', before: title, after: draft.title })
+          if (draft.excerpt && draft.excerpt !== excerpt) changes.push({ label: 'Excerpt', before: excerpt, after: draft.excerpt })
+          if (typeof d.tldr === 'string' && d.tldr !== tldr) changes.push({ label: 'TL;DR', before: tldr, after: d.tldr })
+          if (Array.isArray(d.keyTakeaways) && JSON.stringify(d.keyTakeaways) !== JSON.stringify(keyTakeaways)) changes.push({ label: 'Key takeaways', before: keyTakeaways.join('\n'), after: (d.keyTakeaways as string[]).join('\n') })
+          if (Array.isArray(d.faqs) && JSON.stringify(d.faqs) !== JSON.stringify(faqs)) changes.push({ label: 'FAQs', before: faqText(faqs), after: faqText(d.faqs as FAQ[]) })
+
           setPendingRefine({
             content: merged,
+            blockChanges: changes,
             title:        draft.title,
             excerpt:      draft.excerpt,
             tldr:         d.tldr as string | undefined,
@@ -378,6 +426,8 @@ export function GuideWorkspace({ guide: article }: Props) {
               content={content}
               onChangeContent={setContent}
               category={category}
+              contentType="guide"
+              contentId={article.id}
             />
           </Card>
         </div>

@@ -5,7 +5,15 @@ import dynamic from 'next/dynamic'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
 import { buttonVariants } from '@/components/ui/Button'
+import { Segmented } from '@/components/ui/Segmented'
 import { XIcon } from '@/components/icons'
+import type { PeoplePolicy } from '@/lib/images/safety'
+
+const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
+  { value: 'none',      label: 'No people' },
+  { value: 'anonymous', label: 'Anonymous' },
+  { value: 'allowed',   label: 'Faces OK' },
+]
 const MediaPicker   = dynamic(() => import('@/components/media/MediaPicker'), { ssr: false })
 const ImageCropper  = dynamic(() => import('@/components/ui/ImageCropper'),   { ssr: false })
 
@@ -39,7 +47,13 @@ export function HeroImagePanel({
   }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [premium, setPremium] = useState(false)
+  // Publication quality by default (gpt-image-1.5 · high); the draft tier is
+  // for roughing out a composition before the real one.
+  const [premium, setPremium] = useState(true)
+  // Lane knob (lib/images/safety.ts EDITORIAL): no text always; people anonymous.
+  const [people, setPeople] = useState<PeoplePolicy>('anonymous')
+  // What vision QA said about the last generated hero (warn/fail + reasons).
+  const [qaNote, setQaNote] = useState<{ verdict: 'warn' | 'fail'; reasons: string[]; attempts: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   // True only while the crop in flight came from the camera — a reframe of an
@@ -108,6 +122,7 @@ export function HeroImagePanel({
     if (!title && !productName) { setError('Need a title first to generate an image.'); return }
     setGenerating(true)
     setError(null)
+    setQaNote(null)
     try {
       const res = await fetch('/api/images/hero', {
         method: 'POST',
@@ -120,11 +135,22 @@ export function HeroImagePanel({
           product_name: productName ?? null,
           custom_prompt: imagePrompt.trim() || null,
           premium,
+          people,
+          no_text: true,
           source_id: sourceId ?? null,
         }),
       })
-      const json = await readJsonResponse<{ imageUrl?: string; promptUsed?: string }>(res, 'Image generation failed')
+      // A 422 `content_policy` is a refusal, surfaced as the error text —
+      // never a silent stock scene. The prompt stays in the field to edit.
+      const json = await readJsonResponse<{
+        imageUrl?: string
+        promptUsed?: string
+        qa?: { judgement?: { verdict: 'pass' | 'warn' | 'fail'; reasons: string[] } } | null
+        attempts?: number
+      }>(res, 'Image generation failed')
       if (json.imageUrl) onChange(json.imageUrl)
+      const j = json.qa?.judgement
+      if (j && j.verdict !== 'pass') setQaNote({ verdict: j.verdict, reasons: j.reasons, attempts: json.attempts ?? 1 })
       // Populate the prompt field with the auto-generated prompt so the user can
       // inspect and tweak it before regenerating. Only overwrite if they hadn't
       // typed a custom prompt themselves (i.e. the field was empty when they hit Generate).
@@ -224,30 +250,50 @@ export function HeroImagePanel({
         </button>
       </div>
 
-      <div className="flex items-center gap-1 text-[11px]">
-        <span className="text-prose-faint mr-1">Model</span>
-        <button
-          type="button"
-          onClick={() => setPremium(false)}
-          className={`px-2.5 py-1 rounded-md transition-colors ${
-            !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
-          }`}
-        >
-          Standard
-        </button>
-        <button
-          type="button"
-          onClick={() => setPremium(true)}
-          className={`px-2.5 py-1 rounded-md transition-colors ${
-            premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
-          }`}
-        >
-          Premium
-        </button>
-        <span className="text-prose-faint ml-2">
-          {premium ? 'gpt-image-1.5 · high quality' : 'gpt-image-1 · medium quality'}
-        </span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]">
+        <div className="flex items-center gap-1">
+          <span className="text-prose-faint mr-1">Quality</span>
+          <button
+            type="button"
+            onClick={() => setPremium(true)}
+            className={`px-2.5 py-1 rounded-md transition-colors ${
+              premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
+            }`}
+            title="gpt-image-1.5 · high — the publication tier"
+          >
+            Publication
+          </button>
+          <button
+            type="button"
+            onClick={() => setPremium(false)}
+            className={`px-2.5 py-1 rounded-md transition-colors ${
+              !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
+            }`}
+            title="gpt-image-1 · medium — cheaper, for roughing out a composition"
+          >
+            Draft
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-prose-faint">People</span>
+          <Segmented value={people} options={PEOPLE_OPTIONS} onChange={setPeople} label="People in the generated hero" />
+        </div>
       </div>
+      <p className="text-[11px] text-prose-faint">
+        AI heroes are a scene from the category, never the product — shoot the product with 📷 Take Photo. House style, no text, no brands and no identifiable children are always on; stored at 16:10.
+      </p>
+
+      {qaNote && (
+        <p
+          role="status"
+          className={`text-xs rounded-lg border px-3 py-2 leading-snug ${
+            qaNote.verdict === 'fail' ? 'bg-danger-bg text-danger-ink border-danger-line' : 'bg-warn-bg text-warn-ink border-warn-line'
+          }`}
+        >
+          {qaNote.verdict === 'fail' ? 'Check this image' : 'Heads up'}: {qaNote.reasons.join('; ')}.
+          {qaNote.attempts > 1 ? ' Regenerated once automatically; this is the second try — edit the prompt or regenerate again.' : ''}
+        </p>
+      )}
 
       {error && (
         <p className="text-xs text-red-700 bg-red-50 border border-red-300 rounded-lg px-3 py-2">

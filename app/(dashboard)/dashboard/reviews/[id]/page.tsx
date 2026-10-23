@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ReviewWorkspace } from './_components/ReviewWorkspace'
 import { ChevronLeftIcon } from '@/components/icons'
+import { costForContent } from '@/lib/content/generations'
 
 export default async function ReviewWorkspacePage({
   params,
@@ -75,8 +76,12 @@ export default async function ReviewWorkspacePage({
     )
   }
 
+  // Everything spent generating this piece (generations rows linked on save).
+  const generationCostUsd = await costForContent(admin, id)
+
   return (
     <ReviewWorkspace
+      generationCostUsd={generationCostUsd}
       review={{
         ...review,
         moderation_flags: (review.moderation_flags ?? []) as string[],

@@ -16,6 +16,12 @@ interface Props {
  * Gallery-aware: clicking an image inside a `.bd-image-grid` opens the WHOLE
  * gallery, so you can swipe / arrow / keyboard through it (with an "n / total"
  * counter) without closing. A standalone image opens on its own.
+ *
+ * The viewer runs `optimized` (same-origin /_next/image, AVIF/WebP, CSP-safe)
+ * — so it needs the ORIGINAL storage URL, not the `currentSrc` of a figure
+ * that next/image already rendered (that is itself a /_next/image URL and
+ * would be proxied twice). React-rendered figures put the original on
+ * `data-full`; legacy raw-HTML figures fall back to the img's own src.
  */
 export default function ImageLightbox({ children, className }: Props) {
   const [items, setItems] = useState<GalleryItem[] | null>(null)
@@ -24,7 +30,8 @@ export default function ImageLightbox({ children, className }: Props) {
   function imgToItem(img: HTMLImageElement): GalleryItem {
     const figure = img.closest('figure')
     const caption = figure?.querySelector('figcaption')?.textContent ?? ''
-    return { src: img.currentSrc || img.src, alt: img.alt, caption }
+    const full = figure?.getAttribute('data-full')
+    return { src: full || img.getAttribute('src') || img.currentSrc || img.src, alt: img.alt, caption }
   }
 
   function handleClick(e: MouseEvent<HTMLDivElement>) {
@@ -56,6 +63,7 @@ export default function ImageLightbox({ children, className }: Props) {
           index={index}
           onIndexChange={setIndex}
           onClose={() => setItems(null)}
+          optimized
         />
       )}
     </>

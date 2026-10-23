@@ -25,6 +25,7 @@ import { buttonVariants } from '@/components/ui/Button'
 import { upgradeReviewedProducts } from '@/lib/collections/product-items'
 import { ProductClaimLine } from '@/components/products/ProductClaimLine'
 import { productIdentifiersJsonLd } from '@/lib/products/identifiers'
+import ArticleBody from '@/components/content/ArticleBody'
 
 export const revalidate = 60
 
@@ -319,9 +320,12 @@ export default async function PickDetailPage({ params }: Props) {
             {pick.intro_html && (
               <section id="overview" className="mb-10">
                 <EditorialHeader eyebrow="Why These" title="Behind the picks" />
-                <div
-                  className="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
-                  dangerouslySetInnerHTML={{ __html: pick.intro_html }}
+                {/* Same renderer as guides/reviews: strips authoring attrs, renders
+                    inline figures through next/image with their credit line. */}
+                <ArticleBody
+                  html={pick.intro_html}
+                  proseClassName="prose prose-zinc prose-orange max-w-none prose-p:text-prose-muted prose-p:leading-relaxed prose-strong:text-prose prose-a:text-accent-text-soft hover:prose-a:text-accent prose-a:no-underline"
+                  figureSizes="(max-width: 768px) 100vw, 768px"
                 />
               </section>
             )}

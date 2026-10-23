@@ -4,10 +4,16 @@ import { buttonVariants } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 
 interface Props {
-  before: string   // current content HTML
+  before: string   // current content HTML (or just the section, for a section refine)
   after: string    // proposed content HTML
   onAccept: () => void
   onDiscard: () => void
+  /** e.g. "Section: Build quality" — defaults to the whole-piece wording. */
+  heading?: string
+  /** Server-side cautions (a product-link count changed, …). */
+  warnings?: string[]
+  /** Structured blocks the refine would overwrite, shown so nothing changes unseen. */
+  blockChanges?: { label: string; before: string; after: string }[]
 }
 
 // prose-invert is load-bearing: without it --tw-prose-headings is zinc-900,
@@ -22,15 +28,15 @@ const proseClasses = `
   prose-strong:text-prose prose-li:text-xs prose-li:text-prose-muted
 `.trim()
 
-export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props) {
+export function RefinePreviewModal({ before, after, onAccept, onDiscard, heading, warnings = [], blockChanges = [] }: Props) {
   return (
     <Modal onClose={onDiscard} label="Review AI changes" size="xl" closeOnBackdrop={false} className="flex flex-col h-[calc(100dvh-2rem)] overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-soft shrink-0">
           <div>
-            <p className="text-sm font-bold text-prose">Review AI changes before applying</p>
-            <p className="text-xs text-prose-faint mt-0.5">Left = current content · Right = proposed changes</p>
+            <p className="text-sm font-bold text-prose">{heading ?? 'Review AI changes before applying'}</p>
+            <p className="text-xs text-prose-faint mt-0.5">Left = current · Right = proposed{blockChanges.length ? ` · ${blockChanges.length} block${blockChanges.length === 1 ? '' : 's'} also change (below)` : ''}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -80,6 +86,26 @@ export function RefinePreviewModal({ before, after, onAccept, onDiscard }: Props
           </div>
 
         </div>
+
+        {(warnings.length > 0 || blockChanges.length > 0) && (
+          <div className="border-t border-soft shrink-0 max-h-48 overflow-y-auto px-5 py-3 space-y-3">
+            {warnings.map((w, i) => (
+              <p key={`w${i}`} className="text-xs text-warn-ink">{w}</p>
+            ))}
+            {blockChanges.map((b, i) => (
+              <div key={`b${i}`} className="grid grid-cols-2 gap-3 text-xs">
+                <div className="min-w-0">
+                  <p className="font-semibold text-prose-muted uppercase tracking-widest mb-1">{b.label} · before</p>
+                  <p className="text-prose-faint whitespace-pre-wrap">{b.before || '—'}</p>
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-accent-text-soft uppercase tracking-widest mb-1">{b.label} · after</p>
+                  <p className="text-prose-muted whitespace-pre-wrap">{b.after || '—'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Footer shortcut hint */}
         <div className="px-5 py-2.5 border-t border-soft shrink-0 flex items-center gap-4">

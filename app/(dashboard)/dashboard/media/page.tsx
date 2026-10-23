@@ -7,7 +7,12 @@ import { downloadImage } from '@/lib/images/download'
 import ImageCropper from '@/components/ui/ImageCropper'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 import { PhotoIcon } from '@/components/icons'
+
+// Where an asset came from (lib/media/origin.ts) — so picking owned photos
+// first, the stated hierarchy, is one glance. 'ai' drives the public credit line.
+const ORIGIN_LABEL: Record<string, string> = { own: 'Own photo', web: 'Web', amazon: 'Amazon', ai: 'AI scene' }
 
 interface MediaAsset {
   id: string
@@ -21,6 +26,7 @@ interface MediaAsset {
   product_id: string | null
   label: string | null
   is_primary: boolean
+  origin?: string | null
   profiles: { username: string } | null
 }
 
@@ -212,6 +218,11 @@ function AssetCard({
         {/* Footer row */}
         <div className="flex items-center justify-between mt-auto pt-1">
           <div className="flex flex-col gap-0.5">
+            {asset.origin && ORIGIN_LABEL[asset.origin] && (
+              <Badge size="sm" tone={asset.origin === 'own' ? 'success' : 'neutral'} className="self-start">
+                {ORIGIN_LABEL[asset.origin]}
+              </Badge>
+            )}
             {asset.profiles?.username && (
               <span className="text-xs text-prose-faint">@{asset.profiles.username}</span>
             )}

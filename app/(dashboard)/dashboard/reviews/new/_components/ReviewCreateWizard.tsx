@@ -8,10 +8,15 @@ import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import type { ProductSpec } from '@/lib/products'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
+import { DraftProvenanceNote } from '@/components/workspace/DraftProvenanceNote'
+import { PipelineRunner } from '@/components/workspace/PipelineRunner'
+import { CriticFindings } from '@/components/workspace/CriticFindings'
+import { runToDraftHtml } from '@/lib/content/pipeline/section'
+import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
 const STORAGE_KEY = 'bd:review-wizard-draft'
 
-type Step = 'idea' | 'generating' | 'preview' | 'saving'
+type Step = 'idea' | 'pipeline' | 'generating' | 'preview' | 'saving'
 
 interface ProductOption {
   id: string
@@ -83,6 +88,8 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
     } catch { /* ignore */ }
   }, [restore, description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid])
 
+  // The staged pipeline's input; the run itself lives server-side.
+  const [brief, setBrief] = useState<Record<string, unknown> | null>(null)
   const [previewDraft, setPreviewDraft] = useState<{
     title: string; excerpt: string; content: string
     rating: number; pros: string[]; cons: string[]; imagePrompt: string
@@ -91,6 +98,14 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
     suggestedTags: string[]
     subScores: { quality: number | null; value: number | null; ease: number | null; dailyUse: number | null }
     wouldRebuy: boolean | null
+    // Provenance from the generation (mig 164) — travels to the save.
+    generationId: string | null
+    promptVersion: string | null
+    costUsd: number | null
+    voice: { hasProfile: boolean; phraseCount: number } | null
+    runId: string | null
+    critic: Critic | null
+    partLabels: string[]
   } | null>(null)
 
   const [products, setProducts]         = useState<ProductOption[]>([])
@@ -174,115 +189,79 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
     setSuggestions([])
   }
 
-  async function handleGenerate() {
+  function handleGenerate() {
     if (!productName.trim()) { setError('Enter a product name first'); return }
     if (!category) { setError('Select a category before generating'); return }
     if (inputRating === null) { setError('Rate the product before generating — this drives the draft tone'); return }
-    setStep('generating'); setError(null)
+    setError(null)
 
     const parsedPricePaid = pricePaid.trim() ? parseInt(pricePaid.trim(), 10) : null
 
-    try {
-      // If a catalog product is linked, pull its brand + specs to ground the
-      // draft. Inside try so a malformed specs value can't strand the spinner.
-      const linked = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
-      const rawSpecs = linked?.specs
-      const linkedSpecs = (Array.isArray(rawSpecs) ? rawSpecs : []).filter((s) => s.label?.trim() && s.value?.trim())
+    // If a catalog product is linked, pull its brand + specs to ground the draft.
+    const linked = productSlug.trim() ? products.find((p) => p.slug === productSlug.trim()) : undefined
+    const rawSpecs = linked?.specs
+    const linkedSpecs = (Array.isArray(rawSpecs) ? rawSpecs : []).filter((s) => s.label?.trim() && s.value?.trim())
 
-      // Selected competitors → name/brand/specs for honest head-to-head prose.
-      const competitorPayload = selectedCompetitors.map((c) => ({
-        name: c.name,
-        ...(c.brand?.trim() ? { brand: c.brand.trim() } : {}),
-        specs: (Array.isArray(c.specs) ? c.specs : []).filter((s) => s.label?.trim() && s.value?.trim()),
-      }))
+    // Selected competitors → name/brand/specs for honest head-to-head prose.
+    const competitors = selectedCompetitors.map((c) => ({
+      name: c.name,
+      ...(c.brand?.trim() ? { brand: c.brand.trim() } : {}),
+      specs: (Array.isArray(c.specs) ? c.specs : []).filter((s) => s.label?.trim() && s.value?.trim()),
+    }))
 
-      const genRes = await fetch('/api/claude/draft', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productName,
-          category,
-          keyFeatures: keyFeatures.split('\n').map(f => f.trim()).filter(Boolean),
-          imageSlots,
-          ratingHint: inputRating,
-          ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
-          ...(linked?.brand?.trim() ? { brand: linked.brand.trim() } : {}),
-          ...(linkedSpecs.length ? { specs: linkedSpecs } : {}),
-          ...(competitorPayload.length ? { competitors: competitorPayload } : {}),
-          ...(testingDuration ? { testingDuration } : {}),
-          ...(testingDuration === 'custom' && testingSince ? { testingSince } : {}),
-          ...(testingDuration === 'custom' && testingNote.trim() ? { testingNote: testingNote.trim() } : {}),
-          ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
-          ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
-          ...(!isNaN(parsedPricePaid!) && parsedPricePaid !== null ? { pricePaid: parsedPricePaid } : {}),
-        }),
-      })
-      const genJson = await genRes.json()
-      if (!genRes.ok) {
-        const { fieldErrors, formErrors } = genJson.details ?? {}
-        const parts = [
-          ...(formErrors ?? []),
-          ...Object.entries(fieldErrors ?? {}).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`),
-        ]
-        throw new Error(parts.length ? `${genJson.error} — ${parts.join('; ')}` : (genJson.error ?? 'Generation failed'))
-      }
+    // The brief is everything the staged pipeline (docs/content-pipeline-plan.md
+    // §4) needs. The run lives server-side, so a dead tab loses nothing.
+    setBrief({
+      contentType: 'review',
+      productName: productName.trim(),
+      category,
+      keyFeatures: keyFeatures.split('\n').map((f) => f.trim()).filter(Boolean),
+      imageSlots,
+      ratingHint: inputRating,
+      specs: linkedSpecs,
+      competitors,
+      ...(productSlug.trim() ? { productSlug: productSlug.trim() } : {}),
+      ...(linked?.brand?.trim() ? { brand: linked.brand.trim() } : {}),
+      ...(testingDuration ? { testingDuration } : {}),
+      ...(testingDuration === 'custom' && testingSince ? { testingSince } : {}),
+      ...(testingDuration === 'custom' && testingNote.trim() ? { testingNote: testingNote.trim() } : {}),
+      ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
+      ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
+      ...(parsedPricePaid !== null && !isNaN(parsedPricePaid) ? { pricePaid: parsedPricePaid } : {}),
+    })
+    setStep('pipeline')
+  }
 
-      const draft = genJson.draft as {
-        title: string; excerpt: string; introduction: string
-        sections: { heading: string; body: string }[]
-        verdict: string; pros: string[]; cons: string[]
-        inlineImages?: { afterHeading: string; prompt: string; altText: string; caption: string }[]
-      }
-
-      const slots = (draft.inlineImages ?? []).map((img, i) => ({ ...img, slotId: `slot-${i + 1}` }))
-
-      function escAttr(s: string): string {
-        return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      }
-      function placeholderFor(slot: typeof slots[number]): string {
-        return `<figure class="bd-image-placeholder" data-slot-id="${slot.slotId}" data-prompt="${escAttr(slot.prompt)}" data-alt="${escAttr(slot.altText)}" data-caption="${escAttr(slot.caption)}"><figcaption>🖼 Suggested: ${escAttr(slot.caption || slot.altText)}</figcaption></figure>`
-      }
-
-      const content = [
-        draft.introduction,
-        ...(draft.sections ?? []).map((s) => {
-          const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-          const matched = slots.filter((sl) => sl.afterHeading.trim().toLowerCase() === s.heading.trim().toLowerCase())
-          const imgs = matched.map(placeholderFor).join('\n')
-          return `<h2>${s.heading}</h2>\n${bodyHtml}${imgs ? `\n${imgs}` : ''}`
-        }),
-        draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
-      ].filter(Boolean).join('\n\n')
-
-      const d = draft as Record<string, unknown>
-      const sub = (d.subScores ?? {}) as Record<string, unknown>
-      const subScores = {
-        quality:  typeof sub.quality  === 'number' ? sub.quality  : null,
-        value:    typeof sub.value    === 'number' ? sub.value    : null,
-        ease:     typeof sub.ease     === 'number' ? sub.ease     : null,
-        dailyUse: typeof sub.dailyUse === 'number' ? sub.dailyUse : null,
-      }
-      const wouldRebuy = typeof d.wouldRebuy === 'boolean' ? d.wouldRebuy : null
-
-      setPreviewDraft({
-        title: draft.title, excerpt: draft.excerpt, content,
-        rating: inputRating!,  // use our input — Claude's rating is ignored
-        pros: draft.pros ?? [], cons: draft.cons ?? [],
-        imagePrompt: genJson.imagePrompt ?? '',
-        tldr: d.tldr as string ?? '',
-        keyTakeaways: d.keyTakeaways as string[] ?? [],
-        bestFor: d.bestFor as string[] ?? [],
-        notFor: d.notFor as string[] ?? [],
-        faqs: d.faqs as { question: string; answer: string }[] ?? [],
-        suggestedTags: Array.isArray(genJson.suggestedTags) ? genJson.suggestedTags : [],
-        subScores,
-        wouldRebuy,
-      })
-      setStep('preview')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Generation failed')
-      setStep('idea')
-    }
+  // The finished run → the preview shape the save step already understands.
+  function handleRunComplete(run: RunState) {
+    const b = run.blocks
+    const sub = b?.subScores
+    setPreviewDraft({
+      title: run.outline?.title ?? productName,
+      excerpt: run.outline?.excerpt ?? '',
+      content: runToDraftHtml(run),
+      rating: inputRating!,  // the author's input drives the rating; sub-scores are confirmed in the workspace
+      pros: b?.pros ?? [], cons: b?.cons ?? [],
+      // Never the product itself (AI never replicates a product — safety rules
+      // would fight the prompt): a category scene the product belongs to.
+      imagePrompt: run.images?.heroPrompt ?? `A candid real-world scene where a ${category || 'dad'} product like this gets used — the setting and the objects around it, the product itself out of frame`,
+      tldr: b?.tldr ?? '',
+      keyTakeaways: b?.keyTakeaways ?? [],
+      bestFor: b?.bestFor ?? [],
+      notFor: b?.notFor ?? [],
+      faqs: b?.faqs ?? [],
+      suggestedTags: b?.suggestedTags ?? [],
+      subScores: { quality: sub?.quality ?? null, value: sub?.value ?? null, ease: sub?.ease ?? null, dailyUse: sub?.dailyUse ?? null },
+      wouldRebuy: b?.wouldRebuy ?? null,
+      generationId: null,
+      promptVersion: run.promptVersion,
+      costUsd: run.costUsd,
+      voice: null,
+      runId: run.id,
+      critic: run.critic,
+      partLabels: (run.outline?.parts ?? []).map((p) => (p.kind === 'intro' ? 'Introduction' : p.heading)),
+    })
+    setStep('preview')
   }
 
   async function handleSaveDraft() {
@@ -321,6 +300,9 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
           score_daily_use: previewDraft.subScores.dailyUse,
           would_rebuy:     previewDraft.wouldRebuy,
           suggested_tags: previewDraft.suggestedTags,
+          generation_id:   previewDraft.generationId,
+          prompt_version:  previewDraft.promptVersion,
+          run_id:          previewDraft.runId,
         }),
       })
       const saveJson = await saveRes.json()
@@ -378,6 +360,17 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
     }
   }
 
+  if (step === 'pipeline') {
+    return (
+      <PipelineRunner
+        contentType="review"
+        brief={brief}
+        onComplete={handleRunComplete}
+        onCancel={() => setStep('idea')}
+      />
+    )
+  }
+
   if (step === 'generating' || step === 'saving') {
     const label = step === 'generating' ? '✍️ Writing full review with Claude…' : '💾 Saving draft…'
     return (
@@ -399,6 +392,8 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
             <Eyebrow className="flex-1">Draft preview</Eyebrow>
             <span className="text-sm font-bold text-warn-ink">{previewDraft.rating}/10</span>
           </div>
+          <DraftProvenanceNote costUsd={previewDraft.costUsd} voice={previewDraft.voice} />
+          {previewDraft.critic && <CriticFindings critic={previewDraft.critic} partLabels={previewDraft.partLabels} />}
           <h2 className="text-lg font-black text-prose leading-snug">{previewDraft.title}</h2>
           {previewDraft.excerpt && (
             <p className="text-sm text-prose-muted italic">{previewDraft.excerpt}</p>
@@ -452,7 +447,7 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
           </button>
           <button
             type="button"
-            onClick={() => { setPreviewDraft(null); setStep('generating'); handleGenerate() }}
+            onClick={() => { setPreviewDraft(null); handleGenerate() }}
             className={buttonVariants({ variant: 'secondary' })}
           >
             ↺ Regenerate

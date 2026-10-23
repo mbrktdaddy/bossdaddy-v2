@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { CATEGORIES } from '@/lib/categories'
 import { TESTING_DURATION_OPTIONS } from '@/lib/products'
 import { detectAffiliateLinks } from '@/lib/affiliate'
-import { preserveImagesAcrossRefine } from '@/lib/inlineImages'
+import { assembleDraftHtml } from '@/lib/content/html'
+import { preserveBlocksAcrossRefine } from '@/lib/content/markers'
+import { replaceSectionProse, splitSections } from '@/lib/content/sections'
 import { TiptapEditor } from '@/components/workspace/TiptapEditor'
 import { HeroImagePanel } from '@/components/workspace/HeroImagePanel'
 import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
@@ -113,9 +115,11 @@ interface WorkspaceProps {
   // Computed server-side: days between parent.published_at and now. Stale by
   // the time the page hydrates, but the API revalidates on POST.
   parentAgeDays?: number | null
+  /** Sum of the generations behind this piece, for the header (null = none logged). */
+  generationCostUsd?: number | null
 }
 
-export function ReviewWorkspace({ review, parent = null, followupCount = 0, parentAgeDays = null }: WorkspaceProps) {
+export function ReviewWorkspace({ review, parent = null, followupCount = 0, parentAgeDays = null, generationCostUsd = null }: WorkspaceProps) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -190,7 +194,17 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     pros?: string[]; cons?: string[]
     tldr?: string; keyTakeaways?: string[]; bestFor?: string[]; notFor?: string[]
     faqs?: FAQ[]
+    // Preview framing: a section refine shows just that section; whole-piece
+    // refines list the blocks they would overwrite.
+    before?: string; after?: string; heading?: string; warnings?: string[]
+    blockChanges?: { label: string; before: string; after: string }[]
   } | null>(null)
+
+  // Set when a refine is accepted; rides on the next save as `revision_label`
+  // so the snapshot of the pre-refine state is marked in version history, then
+  // clears once that save lands. A ref, not state: the payload memo already
+  // recomputes on the content change, and clearing must not trigger a save.
+  const revisionLabelRef = useRef<'pre-ai-refine' | null>(null)
 
   useEffect(() => {
     const key = `bd:hero-prompt:${review.id}`
@@ -260,10 +274,15 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     : null
 
   const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
-    useContentWorkspace({ id: review.id, contentType: 'review', payload, tags, isPublished, canPublish, publishBlockedReason })
+    useContentWorkspace({
+      id: review.id, contentType: 'review', payload, tags, isPublished, canPublish, publishBlockedReason,
+      extraPayload: () => (revisionLabelRef.current ? { revision_label: revisionLabelRef.current } : {}),
+      onSaved: () => { revisionLabelRef.current = null },
+    })
 
   function applyPendingRefine() {
     if (!pendingRefine) return
+    revisionLabelRef.current = 'pre-ai-refine'
     setContent(pendingRefine.content)
     if (pendingRefine.title) setTitle(pendingRefine.title)
     if (pendingRefine.excerpt) setExcerpt(pendingRefine.excerpt)
@@ -328,7 +347,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
       backHref="/dashboard/reviews"
       backLabel="All reviews"
       title={title}
-      subtitle={`${productName || '—'} · ${computedRating != null ? `${computedRating.toFixed(1)}/10` : '—/10'} · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}`}
+      subtitle={`${productName || '—'} · ${computedRating != null ? `${computedRating.toFixed(1)}/10` : '—/10'} · Created ${createdAt}${review.reading_time_minutes ? ` · ${review.reading_time_minutes} min read` : ''}${generationCostUsd != null ? ` · $${generationCostUsd.toFixed(2)} to draft` : ''}`}
       status={status}
       autoSave={autoSave}
       rejectionReason={review.rejection_reason}
@@ -385,8 +404,11 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
         <>
           {pendingRefine && (
             <RefinePreviewModal
-              before={content}
-              after={pendingRefine.content}
+              before={pendingRefine.before ?? content}
+              after={pendingRefine.after ?? pendingRefine.content}
+              heading={pendingRefine.heading}
+              warnings={pendingRefine.warnings}
+              blockChanges={pendingRefine.blockChanges}
               onAccept={applyPendingRefine}
               onDiscard={() => setPendingRefine(null)}
             />
@@ -697,20 +719,50 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           contentType="review"
           externalInstruction={refineInstruction}
           onExternalInstructionUsed={() => setRefineInstruction('')}
+          contentId={review.id}
+          blocks={{ pros, cons, tldr, keyTakeaways, bestFor, notFor, faqs }}
+          onRefinedSection={({ index, text, warnings }) => {
+            // One section rewritten in place; everything else is byte-identical.
+            const next = replaceSectionProse(content, index, text)
+            const was = splitSections(content)[index]
+            setPendingRefine({
+              content: next,
+              before: was?.html ?? content,
+              after: splitSections(next)[index]?.html ?? next,
+              heading: `Section: ${was?.heading ?? 'Introduction'}`,
+              warnings,
+            })
+          }}
           onRefined={(draft) => {
             const d = draft as Record<string, unknown>
-            const refinedContent = [
-              draft.introduction,
-              ...(draft.sections ?? []).map((s) => {
-                const bodyHtml = s.body.split(/\n\n+/).map((p) => `<p>${p.trim()}</p>`).join('\n')
-                return `<h2>${s.heading}</h2>\n${bodyHtml}`
-              }),
-              draft.verdict ? `<h2>The Verdict</h2>\n<p>${draft.verdict}</p>` : '',
-            ].filter(Boolean).join('\n\n')
-            const { content: merged } = preserveImagesAcrossRefine(content, refinedContent)
+            const refinedContent = assembleDraftHtml({
+              introduction: draft.introduction,
+              sections: draft.sections,
+              closing: draft.verdict ? { heading: 'The Verdict', body: draft.verdict } : null,
+            })
+            // Figures, galleries, embeds and cross-link cards survive the rewrite.
+            const { content: merged } = preserveBlocksAcrossRefine(content, refinedContent)
+
+            // Every block the refine would overwrite, shown in the preview.
+            const faqText = (f: FAQ[]) => f.map((x) => `Q: ${x.question}\nA: ${x.answer}`).join('\n\n')
+            const changes: { label: string; before: string; after: string }[] = []
+            const diffList = (label: string, cur: string[], nxt: unknown) => {
+              if (Array.isArray(nxt) && JSON.stringify(nxt) !== JSON.stringify(cur)) changes.push({ label, before: cur.join('\n'), after: (nxt as string[]).join('\n') })
+            }
+            if (draft.title && draft.title !== title) changes.push({ label: 'Title', before: title, after: draft.title })
+            if (draft.excerpt && draft.excerpt !== excerpt) changes.push({ label: 'Excerpt', before: excerpt, after: draft.excerpt })
+            if (typeof d.tldr === 'string' && d.tldr !== tldr) changes.push({ label: 'TL;DR', before: tldr, after: d.tldr })
+            diffList('Key takeaways', keyTakeaways, d.keyTakeaways)
+            diffList('Best for', bestFor, d.bestFor)
+            diffList('Not for', notFor, d.notFor)
+            diffList('Pros', pros, draft.pros?.length ? draft.pros : undefined)
+            diffList('Cons', cons, draft.cons?.length ? draft.cons : undefined)
+            if (Array.isArray(d.faqs) && JSON.stringify(d.faqs) !== JSON.stringify(faqs)) changes.push({ label: 'FAQs', before: faqText(faqs), after: faqText(d.faqs as FAQ[]) })
+
             // Stage for review — don't apply until user accepts
             setPendingRefine({
               content: merged,
+              blockChanges: changes,
               title:   draft.title,
               excerpt: draft.excerpt,
               subScores: d.subScores as { quality?: number; value?: number; ease?: number; dailyUse?: number } | undefined,
@@ -866,6 +918,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                 onChangeContent={setContent}
                 category={category}
                 productId={review.product_id ?? undefined}
+                contentType="review"
+                contentId={review.id}
               />
             </Card>
           </div>

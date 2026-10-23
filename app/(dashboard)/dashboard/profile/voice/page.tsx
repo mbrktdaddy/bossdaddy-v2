@@ -3,8 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAuthor } from '@/lib/auth-cache'
 import { getVoiceProfile, emptyVoiceProfile } from '@/lib/voiceProfile'
 import { getAllPhrases } from '@/lib/voiceLexicon'
+import { getVoiceExemplars, listExemplarCandidates } from '@/lib/voiceExemplars'
 import { VoiceProfileForm } from './_components/VoiceProfileForm'
 import { SignaturePhrasesManager } from './_components/SignaturePhrasesManager'
+import { VoiceExemplarsManager } from './_components/VoiceExemplarsManager'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +14,11 @@ export default async function VoiceProfilePage() {
   const me = await requireAuthor()
   const supabase = await createClient()
 
-  const [profile, phrases] = await Promise.all([
+  const [profile, phrases, exemplars, candidates] = await Promise.all([
     getVoiceProfile(supabase, me.id),
     getAllPhrases(supabase, me.id),
+    getVoiceExemplars(supabase, me.id),
+    listExemplarCandidates(supabase, me.id),
   ])
   const initial = profile ?? { user_id: me.id, ...emptyVoiceProfile() }
 
@@ -51,6 +55,10 @@ export default async function VoiceProfilePage() {
 
       <div className="mt-12 pt-8 border-t border-soft">
         <SignaturePhrasesManager initial={phrases} />
+      </div>
+
+      <div className="mt-12 pt-8 border-t border-soft">
+        <VoiceExemplarsManager initialPicks={exemplars} candidates={candidates} />
       </div>
     </div>
   )

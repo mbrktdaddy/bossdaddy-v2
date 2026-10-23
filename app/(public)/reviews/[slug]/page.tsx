@@ -25,11 +25,14 @@ import ImageLightbox from '@/components/ImageLightbox'
 import { LightboxImage } from '@/components/LightboxImage'
 import { MerchCallout } from '@/components/MerchCallout'
 import CollectionsForReview from '@/components/CollectionsForReview'
-import CollectionEmbed from '@/components/CollectionEmbed'
 import FAQAccordion from '@/components/collections/FAQAccordion'
-import ContentLinkCard from '@/components/ContentLinkCard'
 import ProductCtaCard from '@/components/ProductCtaCard'
-import { extractProductSlugs, splitContentForInlineCards } from '@/lib/inline-content'
+import { extractProductSlugs } from '@/lib/inline-content'
+import { stripAuthoringAttrs } from '@/lib/content/html'
+import ArticleBody from '@/components/content/ArticleBody'
+import { AiAssistanceNote } from '@/components/content/AiAssistanceNote'
+import { lookupImageAssets } from '@/lib/images/assets'
+import { imageCredit } from '@/lib/images/credit'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { NewsletterCard } from '@/components/NewsletterCard'
@@ -90,7 +93,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = createAnonClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, generation_method, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -244,13 +247,17 @@ export default async function ReviewPage({ params }: Props) {
   // as <details open> blocks (skim-readers can collapse; SEO still sees the h2).
   // Top-level reviews keep the existing plain-prose treatment.
   const bodyTransform = isFollowup ? transformFollowupContent(review.content) : null
-  const renderedBodyHtml = bodyTransform ? bodyTransform.html : review.content
+  // Authoring metadata (the AI image prompt etc.) never reaches the public page.
+  const renderedBodyHtml = stripAuthoringAttrs(bodyTransform ? bodyTransform.html : review.content)
   const followupToc = bodyTransform?.toc ?? []
 
   const profileData = Array.isArray(review.profiles)
     ? review.profiles[0]
     : (review.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
+  // The hero's credit line (AI-generated scene / Photo: Boss Daddy) from the asset's origin.
+  const heroFacts = review.image_url ? await lookupImageAssets([review.image_url]) : null
+  const heroCredit = review.image_url ? imageCredit(heroFacts?.get(review.image_url)?.origin) : null
   const category = getCategoryBySlug(review.category ?? '')
 
   const tldr          = review.tldr as string | null
@@ -439,6 +446,7 @@ export default async function ReviewPage({ params }: Props) {
             {review.reading_time_minutes && (
               <span>{review.reading_time_minutes} min read</span>
             )}
+            <AiAssistanceNote method={review.generation_method} />
           </div>
 
           {/* Trust receipt — what I paid + how long I tested. Sits right under the
@@ -461,8 +469,10 @@ export default async function ReviewPage({ params }: Props) {
             used on every other surface: HeroCarousel, FeaturedReviewCard, etc.) */}
         {review.image_url && (
           <div className="relative mb-8">
+            {/* 16:10 like the cropper locks and the cards expect; a fixed
+                height cropped a third of the author's framing on desktop. */}
             <LightboxImage src={review.image_url} alt={review.product_name}>
-              <Card tone="raised" className="relative w-full h-64 md:h-80 overflow-hidden">
+              <Card tone="raised" className="relative w-full aspect-[16/10] overflow-hidden">
                 <Image
                   src={review.image_url}
                   alt={review.product_name}
@@ -473,6 +483,7 @@ export default async function ReviewPage({ params }: Props) {
                 />
               </Card>
             </LightboxImage>
+            {heroCredit && <p className="mt-2 text-xs tracking-wide text-prose-faint">{heroCredit}</p>}
             {(review.rating ?? 0) >= 8 && (
               <div className="absolute top-3 right-3 pointer-events-none">
                 <BossApprovedBadge size="sm" variant="card" />
@@ -524,26 +535,13 @@ export default async function ReviewPage({ params }: Props) {
             <details> blocks, which the inline splitter would tear apart.
             Primary CTA lives in the VerdictCard above; final CTA below. */}
         <div className="min-w-0 w-full">
-          <ImageLightbox className="bd-content">
-            {isFollowup ? (
+          {isFollowup ? (
+            <ImageLightbox className="bd-content">
               <div className={REVIEW_PROSE_CLASS} dangerouslySetInnerHTML={{ __html: renderedBodyHtml }} />
-            ) : (
-              splitContentForInlineCards(renderedBodyHtml, mentionedProducts ?? []).map((segment, i) => {
-                if (segment.type === 'product') {
-                  return <ProductCtaCard key={`card-${i}`} product={segment.product} variant="prominent" />
-                }
-                if (segment.type === 'collection') {
-                  return <CollectionEmbed key={`embed-${i}`} slug={segment.slug} />
-                }
-                if (segment.type === 'contentlink') {
-                  return <ContentLinkCard key={`link-${i}`} contentType={segment.contentType} slug={segment.slug} />
-                }
-                return segment.content ? (
-                  <div key={`html-${i}`} className={REVIEW_PROSE_CLASS} dangerouslySetInnerHTML={{ __html: segment.content }} />
-                ) : null
-              })
-            )}
-          </ImageLightbox>
+            </ImageLightbox>
+          ) : (
+            <ArticleBody html={review.content} products={mentionedProducts ?? []} proseClassName={REVIEW_PROSE_CLASS} />
+          )}
         </div>
 
         {/* Specs grade — how the measurable specs rank vs comparable models.

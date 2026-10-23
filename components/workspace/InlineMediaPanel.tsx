@@ -29,18 +29,45 @@ import {
   updateSlotMeta,
 } from '@/lib/inlineImages'
 import { buttonVariants } from '@/components/ui/Button'
+import { Segmented } from '@/components/ui/Segmented'
 import { TrashIcon } from '@/components/icons'
+import type { PeoplePolicy } from '@/lib/images/safety'
+import type { FigureImageMeta } from '@/lib/inlineImages'
 
 interface Props {
   content: string
   onChangeContent: (next: string) => void
   category?: string
   productId?: string
+  /** The piece these figures belong to — links generated assets + puts their cost on the piece's chip. */
+  contentType?: 'review' | 'guide'
+  contentId?: string
 }
 
 type AddMode = 'generate' | 'library' | 'upload' | 'placeholder' | 'gallery'
 
-export function InlineMediaPanel({ content, onChangeContent, category, productId }: Props) {
+/** What the generator reported about a slot's last image (vision QA / refusal). */
+export type SlotNote = { tone: 'warn' | 'fail' | 'policy' | 'error'; text: string }
+
+type GenerateResponse = {
+  asset?: { url?: string; alt_text?: string | null; width?: number | null; height?: number | null; origin?: string | null }
+  qa?: { judgement?: { verdict: 'pass' | 'warn' | 'fail'; reasons: string[] } } | null
+  attempts?: number
+  error?: string
+  code?: string
+}
+
+class GenerateError extends Error {
+  constructor(message: string, readonly code?: string) { super(message) }
+}
+
+const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
+  { value: 'none',      label: 'No people' },
+  { value: 'anonymous', label: 'Anonymous' },
+  { value: 'allowed',   label: 'Faces OK' },
+]
+
+export function InlineMediaPanel({ content, onChangeContent, category, productId, contentType, contentId }: Props) {
 
   // ── Auto-promote untagged <figure> elements ONCE per mount ──────────────
   const promotedRef = useRef(false)
@@ -83,9 +110,74 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [uploadingForNew, setUploadingForNew] = useState(false)
   const [busySlotId, setBusySlotId]           = useState<string | null>(null)
   const [bulkBusy, setBulkBusy]               = useState<{ done: number; total: number } | null>(null)
-  const [premium, setPremium]                 = useState(false)
+  // Publication quality by default (gpt-image-1.5 · high); drop to the draft
+  // tier to rough out a composition, then regenerate for the page.
+  const [premium, setPremium]                 = useState(true)
+  // Lane knobs (lib/images/safety.ts EDITORIAL): people anonymous, no text.
+  const [people, setPeople]                   = useState<PeoplePolicy>('anonymous')
+  const [allowText, setAllowText]             = useState(false)
+  // Per-slot notes from the generator: QA warnings, a refusal, an error.
+  const [slotNotes, setSlotNotes]             = useState<Record<string, SlotNote>>({})
   const [error, setError]                     = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // ── Generation plumbing ──────────────────────────────────────────────────
+
+  async function callGenerate(prompt: string, subject: string): Promise<GenerateResponse> {
+    const res = await fetch('/api/images/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        size: '1536x1024',
+        alt_text: subject.slice(0, 200),
+        subject: subject.slice(0, 400),
+        premium,
+        lane: 'editorial',
+        people,
+        no_text: !allowText,
+        source_type: contentType ?? null,
+        source_id: contentId ?? null,
+      }),
+    })
+    const json = (await res.json().catch(() => ({}))) as GenerateResponse
+    if (!res.ok) throw new GenerateError(json.error ?? 'Image generation failed', json.code)
+    if (!json.asset?.url) throw new GenerateError('Generator returned no URL')
+    return json
+  }
+
+  function noteFor(json: GenerateResponse): SlotNote | null {
+    const j = json.qa?.judgement
+    if (!j || j.verdict === 'pass') return null
+    const retried = (json.attempts ?? 1) > 1 ? ' Regenerated once automatically; this is the second try.' : ''
+    return {
+      tone: j.verdict,
+      text: `${j.verdict === 'fail' ? 'Check this image' : 'Heads up'}: ${j.reasons.join('; ')}.${retried}`,
+    }
+  }
+
+  function noteForError(err: unknown): SlotNote {
+    if (err instanceof GenerateError && err.code === 'content_policy') return { tone: 'policy', text: err.message }
+    return { tone: 'error', text: err instanceof Error ? err.message : 'Image generation failed' }
+  }
+
+  function setNote(slotId: string, note: SlotNote | null) {
+    setSlotNotes((prev) => {
+      const next = { ...prev }
+      if (note) next[slotId] = note
+      else delete next[slotId]
+      return next
+    })
+  }
+
+  function metaOf(json: GenerateResponse): FigureImageMeta {
+    return { width: json.asset?.width ?? null, height: json.asset?.height ?? null, origin: json.asset?.origin ?? 'ai' }
+  }
+
+  /** Upload responses carry the same facts (mig 166); origin is whatever the route recorded. */
+  function uploadMeta(asset: { width?: number | null; height?: number | null; origin?: string | null } | undefined): FigureImageMeta {
+    return { width: asset?.width ?? null, height: asset?.height ?? null, origin: asset?.origin ?? null }
+  }
 
   function resolveAddPosition(): InsertPosition {
     if (addPosKey === 'start') return { kind: 'start' }
@@ -146,33 +238,25 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (targets.length === 0) return
     setError(null); setBulkBusy({ done: 0, total: targets.length })
 
+    // Skip-and-continue: one refused or failed slot must not strand the rest.
     let working = content
+    const failures: string[] = []
     for (let i = 0; i < targets.length; i++) {
       const slot = targets[i]
       try {
-        const res = await fetch('/api/images/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: slot.prompt,
-            size: '1536x1024',
-            alt_text: slot.alt || slot.caption || slot.prompt.slice(0, 120),
-            premium,
-          }),
-        })
-        const json = await res.json()
-        if (!res.ok) throw new Error(json.error ?? 'Image generation failed')
-        const url = json.asset?.url as string | undefined
-        if (!url) throw new Error('Generator returned no URL')
-        working = fillSlot(working, slot.slotId, url, slot.alt || json.asset?.alt_text || '')
+        const json = await callGenerate(slot.prompt, slot.alt || slot.caption || slot.prompt.slice(0, 120))
+        // The alt from the pixels (QA) beats the pre-generation guess.
+        working = fillSlot(working, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json))
         onChangeContent(working)
+        setNote(slot.slotId, noteFor(json))
       } catch (err) {
-        setError(`Slot ${i + 1}: ${err instanceof Error ? err.message : 'Image generation failed'}`)
-        break
+        setNote(slot.slotId, noteForError(err))
+        failures.push(`slot ${i + 1}`)
       }
       setBulkBusy({ done: i + 1, total: targets.length })
     }
     setBulkBusy(null)
+    if (failures.length) setError(`${failures.length} of ${targets.length} slots did not fill (${failures.join(', ')}) — see the notes on each.`)
   }
 
   // ── Per-slot AI/upload operations ────────────────────────────────────────
@@ -182,22 +266,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (!prompt) { setError('Add an image prompt first, then click Regenerate.'); return }
     setBusySlotId(slot.slotId); setError(null)
     try {
-      const res = await fetch('/api/images/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          size: '1536x1024',
-          alt_text: slot.alt || slot.caption || prompt.slice(0, 120),
-          premium,
-        }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Image generation failed')
-      const url = json.asset?.url as string | undefined
-      if (!url) throw new Error('Generator returned no URL')
-      onChangeContent(fillSlot(content, slot.slotId, url, slot.alt || json.asset?.alt_text || ''))
+      const json = await callGenerate(prompt, slot.alt || slot.caption || prompt.slice(0, 120))
+      onChangeContent(fillSlot(content, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json)))
+      setNote(slot.slotId, noteFor(json))
     } catch (err) {
+      setNote(slot.slotId, noteForError(err))
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }
     setBusySlotId(null)
@@ -233,7 +306,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Crop save failed')
-      onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || ''))
+      onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || '', uploadMeta(json.asset)))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Crop save failed')
     } finally {
@@ -252,7 +325,8 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       const res = await fetch('/api/media', { method: 'POST', body: fd })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Upload failed')
-      onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || ''))
+      onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || '', uploadMeta(json.asset)))
+      setNote(slot.slotId, null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     }
@@ -323,26 +397,20 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (!addPrompt.trim()) { setError('Enter a prompt for the AI to generate the image.'); return }
     setAddBusy(true)
     try {
-      const res = await fetch('/api/images/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: addPrompt.trim(),
-          size: '1536x1024',
-          alt_text: addAlt || addCaption || addPrompt.slice(0, 120),
-          premium,
-        }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Image generation failed')
-      const url = json.asset?.url as string | undefined
-      if (!url) throw new Error('Generator returned no URL')
-      onChangeContent(insertAtPosition(content, buildFilledFigure({
-        imageUrl: url,
-        alt: addAlt || json.asset?.alt_text || addPrompt.slice(0, 120),
+      const json = await callGenerate(addPrompt.trim(), addAlt || addCaption || addPrompt.slice(0, 120))
+      const markup = buildFilledFigure({
+        imageUrl: json.asset!.url!,
+        alt: json.asset?.alt_text || addAlt || addPrompt.slice(0, 120),
         caption: addCaption,
         prompt: addPrompt,
-      }), position))
+        ...metaOf(json),
+      })
+      onChangeContent(insertAtPosition(content, markup, position))
+      const note = noteFor(json)
+      if (note) {
+        const slotId = markup.match(/data-slot-id="([^"]+)"/)?.[1]
+        if (slotId) setNote(slotId, note)
+      }
       resetAddForm()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Image generation failed')
@@ -367,6 +435,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
         alt: addAlt || json.asset.alt_text || 'Inline image',
         caption: addCaption,
         prompt: addPrompt,
+        ...uploadMeta(json.asset),
       }), resolveAddPosition()))
       resetAddForm()
     } catch (err) {
@@ -440,31 +509,43 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
       <div className="px-4 pb-4 space-y-3">
 
-        {/* ── Model tier toggle (applies to all generation actions) ───── */}
-        <div className="flex items-center gap-1 text-[11px]">
-          <span className="text-prose-faint mr-1">Model</span>
-          <button
-            type="button"
-            onClick={() => setPremium(false)}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
-              !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
-            }`}
-          >
-            Standard
-          </button>
-          <button
-            type="button"
-            onClick={() => setPremium(true)}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
-              premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
-            }`}
-          >
-            Premium
-          </button>
-          <span className="text-prose-faint ml-2">
-            {premium ? 'gpt-image-1.5 · high' : 'gpt-image-1 · medium'}
-          </span>
+        {/* ── Generation knobs (apply to every generate action) ───────── */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]">
+          <div className="flex items-center gap-1">
+            <span className="text-prose-faint mr-1">Quality</span>
+            <button
+              type="button"
+              onClick={() => setPremium(true)}
+              className={`px-2.5 py-1 rounded-md transition-colors ${
+                premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
+              }`}
+              title="gpt-image-1.5 · high — the publication tier"
+            >
+              Publication
+            </button>
+            <button
+              type="button"
+              onClick={() => setPremium(false)}
+              className={`px-2.5 py-1 rounded-md transition-colors ${
+                !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
+              }`}
+              title="gpt-image-1 · medium — cheaper, for roughing out a composition"
+            >
+              Draft
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-prose-faint">People</span>
+            <Segmented value={people} options={PEOPLE_OPTIONS} onChange={setPeople} label="People in generated images" />
+          </div>
+          <label className="flex items-center gap-1.5 text-prose-muted cursor-pointer">
+            <input type="checkbox" checked={allowText} onChange={(e) => setAllowText(e.target.checked)} className="accent-[var(--bd-orange)]" />
+            Allow text in image
+          </label>
         </div>
+        <p className="text-[11px] text-prose-faint -mt-1">
+          House style, no brands and no identifiable children are always on. Anonymous = hands, from behind, face out of frame. Every result is checked by vision QA; a problem shows on the slot.
+        </p>
 
         {/* ── Bulk fill ───────────────────────────────────────────────── */}
         {!showAdd && fillableSlots.length > 0 && (
@@ -608,6 +689,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               total={items.length}
               headings={headings}
               busy={busySlotId === item.slot.slotId}
+              note={slotNotes[item.slot.slotId] ?? null}
               onMove={(toPos) => handleMoveItem(item.slot.slotId, toPos)}
               onMoveToSection={(pos) => handleMoveToSection(item.slot.slotId, pos)}
               onRemove={() => handleRemoveItem(item.slot.slotId)}
@@ -625,6 +707,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               position={idx + 1}
               total={items.length}
               busySlotId={busySlotId}
+              notes={slotNotes}
               onMoveGallery={(toPos) => handleMoveItem(item.slotId, toPos)}
               onRemoveGallery={() => handleRemoveItem(item.slotId)}
               onMoveChild={(childSlotId, dir) => handleMoveChild(item.slotId, childSlotId, dir)}
@@ -720,6 +803,7 @@ interface GalleryCardProps {
   position: number
   total: number
   busySlotId: string | null
+  notes: Record<string, SlotNote>
   onMoveGallery: (toPos: number) => void
   onRemoveGallery: () => void
   onMoveChild: (childSlotId: string, direction: 'up' | 'down') => void
@@ -859,6 +943,8 @@ function GalleryCard(p: GalleryCardProps) {
                 </div>
               </div>
 
+              <SlotNoteLine note={p.notes[child.slotId] ?? null} />
+
               {/* Child actions */}
               <div className="flex flex-wrap gap-1.5 pt-1 border-t border-soft">
                 <button
@@ -920,6 +1006,8 @@ interface SlotCardProps {
   total: number
   headings: H2Heading[]
   busy: boolean
+  /** The generator's last word on this slot (QA warning, refusal, error). */
+  note: SlotNote | null
   onMove: (toPos: number) => void
   onMoveToSection: (pos: InsertPosition) => void
   onRemove: () => void
@@ -929,6 +1017,23 @@ interface SlotCardProps {
   onPickReplace: () => void
   onUpload: () => void
   onCrop: () => void
+}
+
+/** One line under a slot: what vision QA or the model said about the last image. */
+function SlotNoteLine({ note }: { note: SlotNote | null }) {
+  if (!note) return null
+  const tone =
+    note.tone === 'warn' ? 'bg-warn-bg text-warn-ink border-warn-line'
+    : 'bg-danger-bg text-danger-ink border-danger-line'
+  const lead =
+    note.tone === 'policy' ? 'Refused — edit the prompt and regenerate. '
+    : note.tone === 'error' ? 'Failed. '
+    : ''
+  return (
+    <p className={`text-xs rounded-lg border px-2.5 py-1.5 leading-snug ${tone}`} role="status">
+      {lead}{note.text}
+    </p>
+  )
 }
 
 function SlotCard(p: SlotCardProps) {
@@ -1022,6 +1127,8 @@ function SlotCard(p: SlotCardProps) {
           <EditableField label="AI prompt" value={slot.prompt} placeholder="Describe the image — used by Regenerate" onCommit={(v) => p.onFieldChange('prompt', v)} disabled={busy} multiline />
         </div>
       </div>
+
+      <SlotNoteLine note={p.note} />
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2 pt-1 border-t border-soft">
