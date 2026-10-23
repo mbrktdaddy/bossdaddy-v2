@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient()
   const { data: revisions } = await admin
     .from('content_revisions')
-    .select('id, version_number, created_at, created_by, snapshot, profiles:created_by(username)')
+    .select('id, version_number, created_at, created_by, label, snapshot, profiles:created_by(username)')
     .eq('content_type', parsed.data.content_type)
     .eq('content_id',   parsed.data.content_id)
     .order('version_number', { ascending: false })

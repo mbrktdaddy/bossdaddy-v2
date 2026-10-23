@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { snapshotRevision } from '@/lib/revisions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { hasUnfilledImageSlots, UNFILLED_SLOTS_MESSAGE } from '@/lib/content/publish-gate'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
@@ -40,6 +41,10 @@ const UpdateSchema = z.object({
   key_takeaways:        z.array(z.string()).optional(),
   faqs:                 z.array(FAQItemSchema).optional(),
   disclosure_acknowledged: z.boolean().optional(),
+  // Inquiry register tri-state (mig 164): null = pillar default.
+  inquiry_mode:         z.boolean().optional().nullable(),
+  // Marks the revision snapshot this save produces (content_revisions.label).
+  revision_label:       z.enum(['pre-ai-refine', 'manual']).optional(),
 })
 
 // GET /api/guides/[id]
@@ -108,7 +113,7 @@ export async function PUT(
     if (modParsed.data.action === 'approve') {
       const { data: current } = await admin
         .from('guides')
-        .select('has_affiliate_links, disclosure_acknowledged')
+        .select('has_affiliate_links, disclosure_acknowledged, content')
         .eq('id', id)
         .single()
 
@@ -117,6 +122,10 @@ export async function PUT(
           { error: 'This guide contains affiliate links. The disclosure must be acknowledged before it can be approved.' },
           { status: 422 }
         )
+      }
+      // Approval is when the body goes public — an empty image slot must not.
+      if (current && hasUnfilledImageSlots(current.content)) {
+        return NextResponse.json({ error: UNFILLED_SLOTS_MESSAGE }, { status: 422 })
       }
     }
 
@@ -205,6 +214,7 @@ export async function PUT(
   if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs
   if (parsed.data.disclosure_acknowledged !== undefined) updates.disclosure_acknowledged = parsed.data.disclosure_acknowledged
+  if (parsed.data.inquiry_mode !== undefined) updates.inquiry_mode = parsed.data.inquiry_mode
   if (parsed.data.content) {
     let resolved = await resolveProductTokens(parsed.data.content, supabase)
     resolved = await resolveCollectionTokens(resolved, supabase)
@@ -219,6 +229,12 @@ export async function PUT(
   const admin = createAdminClient()
   const { data: current } = await admin.from('guides').select('*').eq('id', id).single()
   if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+  // A body edit on an AI draft makes it 'ai-assisted' (mig 164). Title/meta
+  // tweaks don't count; the question is whether the prose is still the model's.
+  if (updates.content && updates.content !== current.content && current.generation_method === 'ai-drafted') {
+    updates.generation_method = 'ai-assisted'
+  }
 
   // Admin can edit any guide at any status; authors only their own drafts/rejected
   const { data: profileForUpdate } = await supabase.from('profiles').select('role').eq('id', user.id).single()
@@ -242,7 +258,7 @@ export async function PUT(
   }
 
   // Snapshot the PREVIOUS state for version history (fire-and-forget; don't block response)
-  snapshotRevision('guide', id, current as Record<string, unknown>, user.id).catch((err) =>
+  snapshotRevision('guide', id, current as Record<string, unknown>, user.id, parsed.data.revision_label ?? null).catch((err) =>
     console.error('Guide revision snapshot failed:', err)
   )
 

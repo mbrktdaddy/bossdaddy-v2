@@ -132,9 +132,13 @@ export async function POST(request: NextRequest) {
   const rawBuffer = Buffer.from(await file.arrayBuffer())
 
   let buffer: Buffer
+  let width: number
+  let height: number
   try {
     const result = await normalizeImage(rawBuffer)
     buffer = result.buffer
+    width = result.width
+    height = result.height
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Could not process image — file may be corrupt'
     const status = (err as { status?: number }).status ?? 400
@@ -172,8 +176,11 @@ export async function POST(request: NextRequest) {
       tags,
       origin: mediaOrigin.origin,
       origin_url: mediaOrigin.origin_url,
+      // Intrinsic size (mig 166) — body figures render through next/image with it.
+      width,
+      height,
     })
-    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, origin, origin_url')
+    .select('id, url, filename, alt_text, uploaded_by, file_size, mime_type, created_at, product_id, label, is_primary, position, category, tags, origin, origin_url, width, height')
     .single()
 
   if (dbError) {

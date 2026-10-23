@@ -4,6 +4,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { safeAfter } from '@/lib/server/safeAfter'
+import { hasUnfilledImageSlots, UNFILLED_SLOTS_MESSAGE } from '@/lib/content/publish-gate'
 
 // POST /api/reviews/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
@@ -24,7 +25,7 @@ export async function POST(
   const admin = createAdminClient()
   const { data: review } = await admin
     .from('reviews')
-    .select('id, author_id, has_affiliate_links, disclosure_acknowledged, status')
+    .select('id, author_id, has_affiliate_links, disclosure_acknowledged, status, content')
     .eq('id', id)
     .single()
 
@@ -35,6 +36,10 @@ export async function POST(
   }
   if (review.has_affiliate_links && !review.disclosure_acknowledged) {
     return NextResponse.json({ error: 'Affiliate disclosure must be acknowledged before submitting' }, { status: 422 })
+  }
+  // An empty image slot would render as a dashed "Image slot" box on the public page.
+  if (hasUnfilledImageSlots(review.content)) {
+    return NextResponse.json({ error: UNFILLED_SLOTS_MESSAGE }, { status: 422 })
   }
 
   const { error: updateError } = await admin

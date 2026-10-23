@@ -1,40 +1,22 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { jsonSchema } from 'ai'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
-import { aiGenerateObject } from '@/lib/ai/client'
+import { aiGenerateObjectWithMeta, failedCallMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
+import { GuideRefineOutput, type GuideRefine } from '@/lib/content/schemas'
+import { htmlToStructuredText } from '@/lib/content/html'
+import { INQUIRY_TRIGGER, PROMPT_VERSION } from '@/lib/content/prompts'
+import { logGeneration } from '@/lib/content/generations'
+import { extractProductSlugs } from '@/lib/inline-content'
 import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-export const maxDuration = 90
+// A comprehensive guide re-emitted in full runs to ~9k tokens on the 5
+// generation (the draft budget is 12k with thinking); 3800 truncated it.
+export const maxDuration = 180
 
-// The model output is validated against this schema (reused from the old
-// submit_guide_refinement tool's input_schema) — the SDK enforces it instead
-// of us regex-parsing JSON from text.
-const GUIDE_REFINE_SCHEMA = jsonSchema<Record<string, unknown>>({
-  type: 'object',
-  properties: {
-      title:        { type: 'string' },
-      excerpt:      { type: 'string' },
-      tldr:         { type: 'string' },
-      keyTakeaways: { type: 'array', items: { type: 'string' } },
-      faqs:         { type: 'array', items: {
-        type: 'object',
-        properties: { question: { type: 'string' }, answer: { type: 'string' } },
-        required: ['question', 'answer'],
-      } },
-      introduction: { type: 'string' },
-      sections:     { type: 'array', items: {
-        type: 'object',
-        properties: { heading: { type: 'string' }, body: { type: 'string' } },
-        required: ['heading', 'body'],
-      } },
-      conclusion:   { type: 'string' },
-    },
-    required: ['title', 'excerpt', 'introduction', 'sections', 'conclusion'],
-})
+const TEMPERATURE = 0.5
 
 const FAQSchema = z.object({ question: z.string(), answer: z.string() })
 
@@ -47,9 +29,10 @@ const RefineInput = z.object({
   keyTakeaways:  z.array(z.string()).optional(),
   faqs:          z.array(FAQSchema).optional(),
   // Keeps a refine pass from sanding the student-first inquiry voice back into
-  // confident reviewer voice. Omitted means "infer from the category" — the only
-  // signal the workspace has, since inquiry mode isn't persisted on the article.
-  inquiryMode:   z.boolean().optional(),
+  // confident reviewer voice. The workspace passes the persisted value
+  // (guides.inquiry_mode, mig 164); omitted = infer from the pillar.
+  inquiryMode:   z.boolean().optional().nullable(),
+  contentId:     z.string().uuid().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -66,15 +49,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { title, category, content, instruction, tldr, keyTakeaways, faqs, inquiryMode } = parsed.data
+  const { title, category, content, instruction, tldr, keyTakeaways, faqs, inquiryMode, contentId } = parsed.data
   const inquiry = inquiryMode ?? isInquiryCategory(category)
 
-  // Strip HTML tags so Claude receives clean readable text — avoids nested-quote JSON breakage
-  const plainText = content
-    .replace(/<figure[\s\S]*?<\/figure>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
+  // Guides carry one token per linked product; list them so the refine keeps
+  // them (the old route listed none, so every refine stripped every link).
+  // Inquiry pieces never carry product links.
+  const slugs = inquiry ? [] : extractProductSlugs(content)
+  const slugLine = slugs.length ? `\nProduct slugs: ${slugs.join(', ')}` : ''
+
+  const structured = htmlToStructuredText(content)
 
   const contentBlocksContext = [
     tldr ? `Current TL;DR: ${tldr}` : null,
@@ -82,45 +66,54 @@ export async function POST(request: NextRequest) {
     faqs?.length ? `Current FAQs:\n${faqs.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')}` : null,
   ].filter(Boolean).join('\n\n')
 
-  // The literal "INQUIRY MODE: ON" line is the trigger the INQUIRY REGISTER
-  // block in BOSS_DADDY_SYSTEM keys off — don't reword it.
   const inquiryHeader = inquiry
-    ? `INQUIRY MODE: ON
+    ? `${INQUIRY_TRIGGER}
 
 This piece runs in the inquiry register (see your system prompt): humble in posture, decisive in substance. Keep the visible reasoning and the honest treatment of opposing views — but also keep it committed to an answer. Don't flatten it into a hedge, and don't flatten it into a verdict handed down without reasoning. Do not add practical takeaways, action items or product recommendations.
 
 `
     : ''
 
-  const prompt = `${inquiryHeader}You are editing an existing Boss Daddy guide. Apply ONLY the requested changes — preserve everything else.
+  const prompt = `${inquiryHeader}You are editing an existing Boss Daddy guide. Apply ONLY the requested changes — preserve everything else, including section headings and order, unless the instruction says otherwise.
 
 Title: ${title}
-Category: ${category}
+Category: ${category}${slugLine}
 
-Current article text:
-${plainText}
+Current article text ("## " marks a section heading):
+${structured}
 ${contentBlocksContext ? `\n${contentBlocksContext}\n` : ''}
 Refinement instructions: ${instruction}
 
-Return your result by calling the submit_guide_refinement tool. Field guidance: title is the updated title if the instructions require it, otherwise the original; excerpt is the updated card sentence if needed, otherwise the original (max 160 chars); tldr is the updated TL;DR if required, otherwise the original; keyTakeaways are the updated takeaways if required, otherwise the originals; faqs are question/answer pairs; introduction is the opening paragraph(s); each section has a heading and body; conclusion is the closing.
+Return the full updated guide. Fields you were not asked to change must come back unchanged. OMIT tldr, keyTakeaways and faqs entirely unless the instruction explicitly asks you to change them — the author's current blocks are kept when you leave them out. Keep the first-person dad voice throughout.`
 
-Important: Only change what the instructions specify. Keep the first-person dad voice throughout.`
-
+  const startedAt = Date.now()
   try {
     const systemMessages = await buildBossDaddySystemMessages(supabase, user.id)
-    const draft = await aiGenerateObject<Record<string, unknown>>({
+    const { object, meta } = await aiGenerateObjectWithMeta<GuideRefine>({
       bucket: 'content',
       tag: 'guide-refine',
-      schema: GUIDE_REFINE_SCHEMA,
+      schema: GuideRefineOutput,
       system: systemMessages,
       messages: [{ role: 'user', content: prompt }],
-      maxOutputTokens: 3800,
+      maxOutputTokens: 9000,
+      temperature: TEMPERATURE,
       maxRetries: 4,
+      promptVersion: PROMPT_VERSION,
     })
-    return NextResponse.json({ draft })
+    await logGeneration(supabase, {
+      userId: user.id, contentType: 'guide', contentId: contentId ?? null, stage: 'refine', status: 'done',
+      meta, temperature: TEMPERATURE, input: { title, category, instruction, inquiry, slugs }, output: object,
+    })
+    return NextResponse.json({ draft: object, costUsd: meta.costUsd })
   } catch (err) {
     const c = classifyClaudeError(err)
     console.error('guide-refine error:', c.kind, '-', c.detail)
+    await logGeneration(supabase, {
+      userId: user.id, contentType: 'guide', contentId: contentId ?? null, stage: 'refine',
+      status: c.kind === 'truncated' ? 'truncated' : 'failed',
+      meta: failedCallMeta('content', startedAt, c.kind), temperature: TEMPERATURE,
+      input: { title, category, instruction, inquiry, slugs },
+    })
     // Truncated output is incomplete and unsafe to apply — say so plainly.
     if (c.kind === 'truncated') {
       return NextResponse.json({ error: 'The refinement ran long and got cut off. Try again with a narrower instruction.' }, { status: 502 })

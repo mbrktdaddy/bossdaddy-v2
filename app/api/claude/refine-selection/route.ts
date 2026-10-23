@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
-import { aiGenerateText } from '@/lib/ai/client'
+import { aiGenerateTextWithMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
@@ -33,19 +33,28 @@ export async function POST(request: NextRequest) {
 
   const { text, instruction } = parsed.data
 
+  // The budget used to be a flat 600 tokens for up to 4000 characters of input,
+  // and a cut-off rewrite replaced the selection silently. Size it to the
+  // selection (a rewrite is roughly the input's length, "expand" maybe double)
+  // and treat a length finish as a failure, never as a result.
+  const budget = Math.min(2400, Math.max(400, Math.ceil(text.length / 2)))
+
   let refined: string
   try {
-    const raw = await aiGenerateText({
+    const { text: raw, meta } = await aiGenerateTextWithMeta({
       bucket: 'utility',
       tag: 'refine-selection',
       system: 'You are an editor. The user provides an excerpt and an instruction. Return ONLY the revised text — no preamble, no explanation, no quotes. Preserve any HTML tags that were in the original.',
       prompt: `Instruction: ${instruction}\n\nExcerpt:\n${text}`,
-      maxOutputTokens: 600,
+      maxOutputTokens: budget,
       // Low but not zero: it is rewriting the operator's prose to a specific
       // instruction, so faithfulness beats invention — but flat-0 editing reads
       // mechanical. Warmer than the extraction lanes, cooler than drafting.
       temperature: 0.3,
     })
+    if (meta.finishReason === 'length') {
+      return NextResponse.json({ error: 'The rewrite ran long and was cut off — select less text or ask for something shorter.' }, { status: 502 })
+    }
     refined = raw.trim()
   } catch (err) {
     const c = classifyClaudeError(err)

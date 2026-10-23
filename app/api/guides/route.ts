@@ -6,6 +6,8 @@ import { resolveProductTokens } from '@/lib/products'
 import { resolveCollectionTokens } from '@/lib/collection-tokens'
 import { resolveContentTokens } from '@/lib/content-tokens'
 import { CATEGORY_SLUGS } from '@/lib/categories'
+import { attachGeneration } from '@/lib/content/generations'
+import { attachRun } from '@/lib/content/pipeline/run'
 import { z } from 'zod'
 
 const CategorySchema = z.enum(CATEGORY_SLUGS as [string, ...string[]])
@@ -30,6 +32,13 @@ const CreateGuideSchema = z.object({
   // at create; that is stricter than necessary and not mirrored here, because
   // it would block saving a draft.)
   disclosure_acknowledged: z.boolean().default(false),
+  // Inquiry register tri-state (mig 164): null = pillar default.
+  inquiry_mode:   z.boolean().optional().nullable(),
+  // Provenance (mig 164): the generation that seeded this draft, if any.
+  generation_id:  z.string().uuid().optional().nullable(),
+  prompt_version: z.string().max(40).optional().nullable(),
+  // Staged pipeline run (mig 165) that produced this draft, if any.
+  run_id:         z.string().uuid().optional().nullable(),
 })
 
 export async function POST(request: NextRequest) {
@@ -50,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, category, content_type, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags, disclosure_acknowledged } = parsed.data
+    const { title, category, content_type, excerpt, content, image_url, tldr, key_takeaways, faqs, suggested_tags, disclosure_acknowledged, inquiry_mode, generation_id, prompt_version, run_id } = parsed.data
 
     let sanitizedContent: string
     try {
@@ -86,6 +95,12 @@ export async function POST(request: NextRequest) {
         reading_time_minutes: computeReadingTime(sanitizedContent),
         has_affiliate_links:  detectAffiliateLinks(sanitizedContent),
         disclosure_acknowledged,
+        inquiry_mode:         inquiry_mode ?? null,
+        // Provenance (mig 164). A draft saved straight from a generation is
+        // 'ai-drafted'; the first body edit flips it to 'ai-assisted'.
+        generation_id:        generation_id ?? null,
+        prompt_version:       prompt_version ?? null,
+        generation_method:    (generation_id || run_id) ? 'ai-drafted' : 'human',
         status:               'draft',
       })
       .select()
@@ -101,6 +116,10 @@ export async function POST(request: NextRequest) {
         hint: error.hint,
       }, { status: 500 })
     }
+    // Link the generation to the row it became (awaited — it's the audit trail).
+    if (data && generation_id) await attachGeneration(supabase, generation_id, data.id)
+    if (data && run_id) await attachRun(supabase, run_id, data.id)
+
     // Auto-apply AI-suggested tags — fire-and-forget, don't block response
     if (data && suggested_tags.length > 0) {
       const tagRows = suggested_tags.map((slug) => ({ guide_id: data.id, tag_slug: slug }))

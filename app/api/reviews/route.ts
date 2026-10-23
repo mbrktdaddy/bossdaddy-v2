@@ -6,6 +6,8 @@ import { resolveCollectionTokens } from '@/lib/collection-tokens'
 import { resolveContentTokens } from '@/lib/content-tokens'
 import { computeReadingTime } from '@/lib/reading-time'
 import { CreateReviewSchema } from '@/lib/reviews/schema'
+import { attachGeneration } from '@/lib/content/generations'
+import { attachRun } from '@/lib/content/pipeline/run'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, comparison_product_slugs, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, testing_since, testing_note, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags } = parsed.data
+    const { title, product_name, category, excerpt, content, pros, cons, disclosure_acknowledged, image_url, product_slug, comparison_product_slugs, tldr, key_takeaways, best_for, not_for, faqs, testing_duration, testing_since, testing_note, how_you_used_it, standout_moment, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, would_rebuy, suggested_tags, generation_id, prompt_version, run_id } = parsed.data
 
     // Don't let a product compare against itself; keep slugs distinct.
     const comparisonSlugs = [...new Set(comparison_product_slugs.filter((s) => s && s !== product_slug))]
@@ -89,6 +91,11 @@ export async function POST(request: NextRequest) {
         score_ease:       score_ease      ?? null,
         score_daily_use:  score_daily_use ?? null,
         would_rebuy:      would_rebuy     ?? null,
+        // Provenance (mig 164). A draft saved straight from a generation is
+        // 'ai-drafted'; the first body edit flips it to 'ai-assisted'.
+        generation_id:     generation_id ?? null,
+        prompt_version:    prompt_version ?? null,
+        generation_method: (generation_id || run_id) ? 'ai-drafted' : 'human',
         status: 'draft',
       })
       .select()
@@ -109,6 +116,10 @@ export async function POST(request: NextRequest) {
         hint: error.hint,
       }, { status: 500 })
     }
+
+    // Link the generation to the row it became (awaited — it's the audit trail).
+    if (data && generation_id) await attachGeneration(supabase, generation_id, data.id)
+    if (data && run_id) await attachRun(supabase, run_id, data.id)
 
     // Auto-apply AI-suggested tags — fire-and-forget, don't block response
     if (data && suggested_tags.length > 0) {

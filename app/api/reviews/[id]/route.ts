@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { snapshotRevision } from '@/lib/revisions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { hasUnfilledImageSlots, UNFILLED_SLOTS_MESSAGE } from '@/lib/content/publish-gate'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
@@ -90,7 +91,7 @@ export async function PUT(
     if (modParsed.data.action === 'approve') {
       const { data: current } = await admin
         .from('reviews')
-        .select('has_affiliate_links, disclosure_acknowledged')
+        .select('has_affiliate_links, disclosure_acknowledged, content')
         .eq('id', id)
         .single()
 
@@ -99,6 +100,10 @@ export async function PUT(
           { error: 'This review contains affiliate links. The disclosure must be acknowledged before it can be approved.' },
           { status: 422 }
         )
+      }
+      // Approval is when the body goes public — an empty image slot must not.
+      if (current && hasUnfilledImageSlots(current.content)) {
+        return NextResponse.json({ error: UNFILLED_SLOTS_MESSAGE }, { status: 422 })
       }
     }
 
@@ -270,6 +275,12 @@ export async function PUT(
   const { data: current } = await adminForUpdate.from('reviews').select('*').eq('id', id).single()
   if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+  // A body edit on an AI draft makes it 'ai-assisted' (mig 164). Title/meta
+  // tweaks don't count; the question is whether the prose is still the model's.
+  if (updates.content && updates.content !== current.content && current.generation_method === 'ai-drafted') {
+    updates.generation_method = 'ai-assisted'
+  }
+
   // Admin can edit any review at any status; authors only their own drafts/rejected
   const { data: profileForUpdate } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   const isAdminEditor = profileForUpdate?.role === 'admin'
@@ -294,7 +305,7 @@ export async function PUT(
   }
 
   // Snapshot the PREVIOUS state for version history (fire-and-forget)
-  snapshotRevision('review', id, current as Record<string, unknown>, user.id).catch((err) =>
+  snapshotRevision('review', id, current as Record<string, unknown>, user.id, parsed.data.revision_label ?? null).catch((err) =>
     console.error('Review revision snapshot failed:', err)
   )
 
