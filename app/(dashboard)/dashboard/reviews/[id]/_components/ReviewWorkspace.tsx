@@ -35,6 +35,7 @@ import { useContentWorkspace } from '@/components/workspace/useContentWorkspace'
 import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
 import { ScheduleFollowupModal } from '@/components/workspace/ScheduleFollowupModal'
+import { FollowupIntentPanel } from '@/components/workspace/FollowupIntentPanel'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
@@ -98,6 +99,9 @@ interface ReviewData {
   milestone_days: number | null
   previous_rating: number | null
   verdict_change: string | null
+  // Freshness (mig 167): the revisit plan + the last "still stands" check.
+  followup_intent_at: string | null
+  last_verified_at: string | null
 }
 
 interface ParentSummary {
@@ -132,6 +136,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   const [metaTitle, setMetaTitle]     = useState(review.meta_title ?? '')
   const [metaDesc, setMetaDesc]       = useState(review.meta_description ?? '')
   const [scheduledAt, setScheduled]   = useState<string | null>(review.scheduled_publish_at)
+  const [followupIntentAt, setFollowupIntentAt] = useState<string | null>(review.followup_intent_at)
+  const [lastVerifiedAt, setLastVerifiedAt]     = useState<string | null>(review.last_verified_at)
   const [productSlug, setProductSlug] = useState<string | null>(review.product_slug)
   const [comparisonSlugs, setComparisonSlugs] = useState<string[]>(review.comparison_product_slugs ?? [])
 
@@ -159,12 +165,15 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   // Follow-up scheduling — modal opens from the Distribution section button.
   const [scheduleOpen, setScheduleOpen] = useState(false)
   const isFollowup = review.parent_review_id !== null
+  // No minimum age (content pipeline plan Phase 4): the revisit plan replaced
+  // the hard 30-day lockout. Under MIN_PARENT_AGE_DAYS the button stays and a
+  // "this is recent" nudge appears — default-safe, the author keeps the knob.
   const canScheduleFollowup =
     !isFollowup &&
     review.status === 'approved' &&
     review.is_visible === true &&
-    parentAgeDays !== null &&
-    parentAgeDays >= MIN_PARENT_AGE_DAYS
+    parentAgeDays !== null
+  const followupIsEarly = parentAgeDays !== null && parentAgeDays < MIN_PARENT_AGE_DAYS
 
   // Computed overall — average of the four sub-scores. Null until all four are
   // populated. This is the source of truth; the DB stores the same generated value.
@@ -243,6 +252,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     meta_title:           metaTitle || null,
     meta_description:     metaDesc  || null,
     scheduled_publish_at: scheduledAt,
+    followup_intent_at:   followupIntentAt,
+    last_verified_at:     lastVerifiedAt,
     product_slug:         productSlug,
     comparison_product_slugs: comparisonSlugs,
     tldr:                 tldr || null,
@@ -266,7 +277,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
     specs_grade_data:     specsData,
     would_rebuy:          wouldRebuy,
     verdict_change:       isFollowup ? verdictChange : undefined,
-  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs, specsRationale, specsData, wouldRebuy, verdictChange, isFollowup])
+  }), [title, productName, category, excerpt, content, imageUrl, pros, cons, disclosureAck, metaTitle, metaDesc, scheduledAt, followupIntentAt, lastVerifiedAt, productSlug, comparisonSlugs, tldr, keyTakeaways, bestFor, notFor, faqs, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaidCents, scoreQuality, scoreValue, scoreEase, scoreDailyUse, scoreSpecs, specsRationale, specsData, wouldRebuy, verdictChange, isFollowup])
 
   const canPublish = !hasAffiliate || disclosureAck
   const publishBlockedReason = !canPublish
@@ -995,6 +1006,18 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
               <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
             )}
 
+            {/* Revisit plan — top-level reviews, any status (set it while the context is fresh) */}
+            {!isFollowup && (
+              <FollowupIntentPanel
+                contentType="review"
+                intentAt={followupIntentAt}
+                onChangeIntent={setFollowupIntentAt}
+                lastVerifiedAt={lastVerifiedAt}
+                onMarkVerified={() => setLastVerifiedAt(new Date().toISOString())}
+                disabled={busy}
+              />
+            )}
+
             {/* Schedule follow-up — top-level published reviews only */}
             {!isFollowup && isPublished && review.is_visible && (
               <Card tone="faint" className="p-4">
@@ -1010,18 +1033,23 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
                   A follow-up is a longform update — what changed, what you got wrong, would you buy it again.
                 </p>
                 {canScheduleFollowup ? (
-                  <button
-                    type="button"
-                    onClick={() => setScheduleOpen(true)}
-                    className={buttonVariants()}
-                  >
-                    + Schedule follow-up
-                  </button>
+                  <>
+                    {followupIsEarly && (
+                      <p className="text-xs text-prose-faint mb-3">
+                        Published {parentAgeDays} day{parentAgeDays === 1 ? '' : 's'}{' '}ago — early for a follow-up, but it&apos;s your call.
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setScheduleOpen(true)}
+                      className={buttonVariants()}
+                    >
+                      + Schedule follow-up
+                    </button>
+                  </>
                 ) : (
                   <p className="text-xs text-prose-faint italic">
-                    {parentAgeDays === null
-                      ? 'Available once this review is published.'
-                      : `Available in ${MIN_PARENT_AGE_DAYS - parentAgeDays} more day${MIN_PARENT_AGE_DAYS - parentAgeDays === 1 ? '' : 's'} (parent must be at least ${MIN_PARENT_AGE_DAYS} days old).`}
+                    Available once this review is published.
                   </p>
                 )}
               </Card>

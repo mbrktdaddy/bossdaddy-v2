@@ -93,7 +93,7 @@ const getReview = cache(async (slug: string) => {
   const supabase = createAnonClient()
   const { data } = await supabase
     .from('reviews')
-    .select('id, slug, title, product_name, category, content, rating, excerpt, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, generation_method, profiles(username)')
+    .select('id, slug, title, product_name, category, content, rating, excerpt, pros, cons, image_url, has_affiliate_links, product_slug, comparison_product_slugs, published_at, updated_at, meta_title, meta_description, tldr, key_takeaways, faqs, testing_duration, testing_since, testing_note, price_paid_cents, score_quality, score_value, score_ease, score_daily_use, score_specs, specs_grade_rationale, specs_grade_data, would_rebuy, parent_review_id, milestone_label, milestone_days, previous_rating, verdict_change, reading_time_minutes, generation_method, profiles(username)')
     .eq('slug', slug)
     .eq('status', 'approved')
     .eq('is_visible', true)
@@ -284,14 +284,35 @@ export default async function ReviewPage({ params }: Props) {
   const heroImage = aspectVariants(toAbsoluteUrl(review.image_url, siteUrl), siteUrl) ?? ogCard
   const productImage = aspectVariants(toAbsoluteUrl(product?.image_url, siteUrl), siteUrl) ?? heroImage
 
+  // Pros/cons as schema.org ItemLists (Google's review-snippet guidance); the
+  // self-referential aggregateRating (ratingCount 1 = this review) is gone —
+  // one opinion is a reviewRating, not an aggregate. dateModified is honest
+  // now that engagement counters live off the row (mig 131).
+  const asStrings = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string' && x.trim().length > 0) : []
+  const pros = asStrings(review.pros)
+  const cons = asStrings(review.cons)
+  const notesList = (items: string[]) => ({
+    '@type': 'ItemList',
+    itemListElement: items.map((name, i) => ({ '@type': 'ListItem', position: i + 1, name })),
+  })
+  const authorUrl = profileData?.username ? `${siteUrl}/author/${profileData.username}` : null
+
   const jsonLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Review',
     name: review.title,
+    url: `${siteUrl}/reviews/${slug}`,
     image: heroImage,
     reviewBody: review.content.replace(/<[^>]+>/g, '').slice(0, 500),
     reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 10, worstRating: 1 },
-    author: { '@type': 'Person', name: author },
+    author: { '@type': 'Person', name: author, ...(authorUrl ? { url: authorUrl } : {}) },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Boss Daddy Life',
+      url: siteUrl,
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/bd-logo-icon.png` },
+    },
     itemReviewed: {
       '@type': 'Product',
       name: review.product_name,
@@ -305,15 +326,11 @@ export default async function ReviewPage({ params }: Props) {
               .map((s) => ({ '@type': 'PropertyValue', name: s.label, value: s.value })),
           }
         : {}),
-      aggregateRating: {
-        '@type': 'AggregateRating',
-        ratingValue: review.rating,
-        bestRating: 10,
-        worstRating: 1,
-        ratingCount: 1,
-      },
     },
+    ...(pros.length ? { positiveNotes: notesList(pros) } : {}),
+    ...(cons.length ? { negativeNotes: notesList(cons) } : {}),
     datePublished: review.published_at,
+    dateModified: review.updated_at ?? review.published_at,
   }
 
   // Link follow-up reviews back to the parent for SEO clustering. Each follow-up

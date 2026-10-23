@@ -13,6 +13,7 @@ import { AIRefinePanel } from '@/components/workspace/AIRefinePanel'
 import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
+import { FollowupIntentPanel } from '@/components/workspace/FollowupIntentPanel'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
@@ -59,6 +60,9 @@ interface GuideData {
   key_takeaways: string[] | null
   faqs: FAQ[] | null
   tags?: string[]
+  // Freshness (mig 167): the refresh plan + the last "still current" check.
+  followup_intent_at: string | null
+  last_verified_at: string | null
 }
 
 interface Props {
@@ -76,6 +80,8 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
   const [metaTitle, setMetaTitle]   = useState(article.meta_title ?? '')
   const [metaDesc, setMetaDesc]     = useState(article.meta_description ?? '')
   const [scheduledAt, setScheduled] = useState<string | null>(article.scheduled_publish_at)
+  const [followupIntentAt, setFollowupIntentAt] = useState<string | null>(article.followup_intent_at)
+  const [lastVerifiedAt, setLastVerifiedAt]     = useState<string | null>(article.last_verified_at)
   const [disclosureAck, setDiscAck] = useState<boolean>(article.disclosure_acknowledged ?? false)
 
   const [tags, setTags]                 = useState<string[]>(article.tags ?? [])
@@ -130,11 +136,13 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
     meta_title:           metaTitle || null,
     meta_description:     metaDesc  || null,
     scheduled_publish_at: scheduledAt,
+    followup_intent_at:   followupIntentAt,
+    last_verified_at:     lastVerifiedAt,
     tldr:                 tldr || null,
     key_takeaways:        keyTakeaways,
     faqs,
     disclosure_acknowledged: disclosureAck,
-  }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, tldr, keyTakeaways, faqs, disclosureAck])
+  }), [title, category, excerpt, content, imageUrl, metaTitle, metaDesc, scheduledAt, followupIntentAt, lastVerifiedAt, tldr, keyTakeaways, faqs, disclosureAck])
 
   const { busy, actionErr, actionMsg, setMsg, deleting, autoSave, manualSave, publishOrUnpublish, handleDelete, handleDuplicate } =
     useContentWorkspace({
@@ -476,6 +484,15 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
           {!isPublished && (
             <SchedulePanel scheduledAt={scheduledAt} onChange={setScheduled} />
           )}
+          {/* Refresh plan — any status (set it while the context is fresh) */}
+          <FollowupIntentPanel
+            contentType="guide"
+            intentAt={followupIntentAt}
+            onChangeIntent={setFollowupIntentAt}
+            lastVerifiedAt={lastVerifiedAt}
+            onMarkVerified={() => setLastVerifiedAt(new Date().toISOString())}
+            disabled={busy}
+          />
           <InternalLinkPanel
             title={title}
             excerpt={excerpt}

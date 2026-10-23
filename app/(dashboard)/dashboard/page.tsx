@@ -5,6 +5,7 @@ import { AttentionFeed } from './_components/AttentionFeed'
 import { ExportButton } from './_components/ExportButton'
 import { TopPerformers } from './_components/TopPerformers'
 import { FollowupsDueCard } from '@/components/dashboard/FollowupsDueCard'
+import { PromptPerformanceCard } from '@/components/dashboard/PromptPerformanceCard'
 
 export default async function DashboardHome() {
   const admin = createAdminClient()
@@ -124,10 +125,16 @@ export default async function DashboardHome() {
         <QuickActions />
       </section>
 
-      {/* Follow-ups due — top-level reviews that haven't been updated in 5+ months.
-          Renders nothing when the list is empty. */}
+      {/* Needs a look — what the weekly freshness sweep flagged (passed revisit
+          plans, archived products, stale pieces). Renders nothing when empty. */}
       <section className="space-y-3">
         <FollowupsDueCard />
+      </section>
+
+      {/* Reader outcome by prompt version — the content eval's live signal.
+          Renders nothing until published pieces have views. */}
+      <section className="space-y-3">
+        <PromptPerformanceCard />
       </section>
 
       {/* Top performers */}
