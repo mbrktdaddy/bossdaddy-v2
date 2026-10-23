@@ -10,6 +10,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
 import { DraftProvenanceNote } from '@/components/workspace/DraftProvenanceNote'
 import { PipelineRunner } from '@/components/workspace/PipelineRunner'
+import { ResumeDraftNotice } from '@/components/workspace/ResumeDraftNotice'
 import { CriticFindings } from '@/components/workspace/CriticFindings'
 import { runToDraftHtml } from '@/lib/content/pipeline/section'
 import type { Critic, RunState } from '@/lib/content/pipeline/types'
@@ -466,6 +467,9 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
 
   return (
     <div className="space-y-6">
+
+      {/* An unfinished run resumes from here — no need to re-fill the brief. */}
+      <ResumeDraftNotice contentType="review" onContinue={() => { setBrief(null); setStep('pipeline') }} />
 
       <div className="bg-surface border border-accent-border/30 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">

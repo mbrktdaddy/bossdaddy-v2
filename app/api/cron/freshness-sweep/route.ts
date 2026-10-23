@@ -50,11 +50,16 @@ export async function GET(request: NextRequest) {
     const parents = allReviews.filter((r) => r.parent_review_id == null)
     const parentIds = new Set(parents.map((r) => r.id))
 
+    // Both lists can be empty (a fresh site, or no review linked to a product);
+    // never send `in.()` to PostgREST — skip the query instead.
+    const productSlugs = [...new Set(parents.map((r) => r.product_slug).filter((s): s is string => !!s))]
     const [followupsRes, productsRes] = await Promise.all([
       parentIds.size
         ? admin.from('reviews').select('parent_review_id, published_at, created_at').in('parent_review_id', [...parentIds])
         : Promise.resolve({ data: [], error: null }),
-      admin.from('products').select('slug, name, status').in('slug', [...new Set(parents.map((r) => r.product_slug).filter((s): s is string => !!s))]),
+      productSlugs.length
+        ? admin.from('products').select('slug, name, status').in('slug', productSlugs)
+        : Promise.resolve({ data: [], error: null }),
     ])
     if (followupsRes.error) throw new Error(`follow-ups: ${followupsRes.error.message}`)
     if (productsRes.error) throw new Error(`products: ${productsRes.error.message}`)

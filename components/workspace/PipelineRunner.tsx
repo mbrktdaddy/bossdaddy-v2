@@ -35,11 +35,11 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return json as T
 }
 
-const STAGE_LABEL: Record<RunState['status'], string> = {
+export const STAGE_LABEL: Record<RunState['status'], string> = {
   outline: 'planning', drafting: 'writing', blocks: 'summarising', critic: 'editor review', images: 'image plan', done: 'finished', failed: 'failed',
 }
 
-function relTime(iso: string): string {
+export function relTime(iso: string): string {
   const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000))
   if (mins < 60) return `${mins} min ago`
   const h = Math.round(mins / 60)

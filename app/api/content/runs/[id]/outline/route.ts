@@ -5,7 +5,7 @@ import { MODELS } from '@/lib/ai/models'
 import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
-import { OutlineEdit, OutlineOutput, buildOutline, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { OutlineEdit, OutlineOutput, assignProductTokens, buildOutline, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
 import { findRelated } from '@/lib/content/pipeline/related'
 import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
@@ -92,11 +92,20 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   // Any edit to the plan restarts the prose: sections are written against a
   // specific outline, and a changed heading or note invalidates what follows.
+  //
+  // Product tokens are re-assigned here, not trusted from the client: the
+  // EARLY / MID / VERDICT placement is positional, so removing the first body
+  // part or adding a section would otherwise drop a link silently (the critic
+  // only checks each part against its own expectation, so nothing would flag
+  // a review that shipped with no product link at all).
   const outline = {
     ...run.outline,
     title: parsed.data.title.trim(),
     excerpt: parsed.data.excerpt.trim(),
-    parts: parsed.data.parts.map((p) => ({ ...p, heading: p.kind === 'intro' ? '' : p.heading.trim() })),
+    parts: assignProductTokens(
+      parsed.data.parts.map((p) => ({ ...p, heading: p.kind === 'intro' ? '' : p.heading.trim() })),
+      run.brief,
+    ),
     blocks: parsed.data.blocks,
     imageCount: parsed.data.imageCount,
   }
