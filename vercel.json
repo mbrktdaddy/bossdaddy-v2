@@ -53,6 +53,10 @@
     {
       "path": "/api/cron/goals-sweep",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/freshness-sweep",
+      "schedule": "0 13 * * 1"
     }
   ]
 }

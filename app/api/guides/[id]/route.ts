@@ -37,6 +37,9 @@ const UpdateSchema = z.object({
   meta_title:           z.string().max(70).optional().nullable(),
   meta_description:     z.string().max(200).optional().nullable(),
   scheduled_publish_at: z.string().datetime().optional().nullable(),
+  // Freshness (mig 167): the author's refresh plan + the last "still current" check.
+  followup_intent_at:   z.string().datetime().optional().nullable(),
+  last_verified_at:     z.string().datetime().optional().nullable(),
   tldr:                 z.string().max(600).optional().nullable(),
   key_takeaways:        z.array(z.string()).optional(),
   faqs:                 z.array(FAQItemSchema).optional(),
@@ -210,6 +213,8 @@ export async function PUT(
   if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
+  if (parsed.data.followup_intent_at !== undefined) updates.followup_intent_at = parsed.data.followup_intent_at
+  if (parsed.data.last_verified_at !== undefined) updates.last_verified_at = parsed.data.last_verified_at
   if (parsed.data.tldr !== undefined) updates.tldr = parsed.data.tldr
   if (parsed.data.key_takeaways !== undefined) updates.key_takeaways = parsed.data.key_takeaways
   if (parsed.data.faqs !== undefined) updates.faqs = parsed.data.faqs

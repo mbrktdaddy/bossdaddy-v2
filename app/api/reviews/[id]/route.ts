@@ -235,6 +235,8 @@ export async function PUT(
   if (parsed.data.meta_title !== undefined) updates.meta_title = parsed.data.meta_title
   if (parsed.data.meta_description !== undefined) updates.meta_description = parsed.data.meta_description
   if (parsed.data.scheduled_publish_at !== undefined) updates.scheduled_publish_at = parsed.data.scheduled_publish_at
+  if (parsed.data.followup_intent_at !== undefined) updates.followup_intent_at = parsed.data.followup_intent_at
+  if (parsed.data.last_verified_at !== undefined) updates.last_verified_at = parsed.data.last_verified_at
   if (parsed.data.product_slug !== undefined) updates.product_slug = parsed.data.product_slug
   if (parsed.data.comparison_product_slugs !== undefined) {
     const self = parsed.data.product_slug ?? null

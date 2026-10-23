@@ -16,7 +16,6 @@ export const maxDuration = 90
 
 // Reviews must be at least this many days old before a follow-up can be scheduled.
 // Prevents the editor from queuing a "6-month update" on day 2.
-const MIN_PARENT_AGE_DAYS = 30
 
 const ScheduleSchema = z.object({
   milestone_label: z.string().trim().min(2).max(80),
@@ -112,7 +111,7 @@ Return the four sections as the "content" field: { "content": "<h2>What changed<
 
 // POST /api/reviews/[id]/schedule-followup — create a draft follow-up review
 // that points at [id] as its parent. The parent must be a top-level, approved,
-// visible review at least MIN_PARENT_AGE_DAYS old. The requester must be an
+// visible review (any age — see the note by milestoneDays). The requester must be an
 // admin or the parent's author. The follow-up inherits author_id, product, and
 // category from the parent; content is a Claude-generated scaffold; image_url
 // is intentionally null (a fresh in-use photo is required).
@@ -209,17 +208,13 @@ export async function POST(
       )
     }
 
+    // No minimum age any more (content pipeline plan Phase 4): the author sets a
+    // follow-up intent at publish, so a hard 30-day lockout was redundant. The
+    // workspace shows a "this is recent" nudge under MIN_PARENT_AGE_DAYS and
+    // keeps the button — default-safe, author keeps the knob.
     const publishedAt = new Date(parent.published_at)
     const ageMs = Date.now() - publishedAt.getTime()
-    const milestoneDays = Math.floor(ageMs / (1000 * 60 * 60 * 24))
-    if (milestoneDays < MIN_PARENT_AGE_DAYS) {
-      return NextResponse.json(
-        {
-          error: `Parent review must be at least ${MIN_PARENT_AGE_DAYS} days old. Currently ${milestoneDays} days.`,
-        },
-        { status: 400 }
-      )
-    }
+    const milestoneDays = Math.max(0, Math.floor(ageMs / (1000 * 60 * 60 * 24)))
 
     const previousRating = parent.rating != null ? Number(parent.rating) : null
 
