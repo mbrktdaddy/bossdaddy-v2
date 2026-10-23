@@ -3,7 +3,7 @@ import { normalizeImage } from '@/lib/images/normalize'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toStorageBody } from '@/lib/storage-body'
-import { parseUploadOrigin } from '@/lib/media/origin'
+import { MEDIA_ORIGINS, parseUploadOrigin, type MediaOrigin } from '@/lib/media/origin'
 import { revalidateProductPaths } from '@/lib/revalidate'
 
 const ALLOWED_TYPES  = ['image/jpeg', 'image/png', 'image/webp']
@@ -14,6 +14,8 @@ const MAX_SIZE_BYTES = 8 * 1024 * 1024 // 8 MB
 //   '__none__'        — unassigned only
 // ?category=<slug>    filter by editorial category (e.g. 'grilling')
 //   '__none__'        — uncategorized only
+// ?origin=<own|web|amazon|ai>  filter by provenance (lib/media/origin.ts)
+//   '__none__'        — origin unknown (plain uploads)
 // ?page=<n>            pagination
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -37,6 +39,13 @@ export async function GET(request: NextRequest) {
   // Filter to images belonging to a specific guide/review (see migration 114).
   const sourceType = searchParams.get('source_type') ?? null
   const sourceId   = searchParams.get('source_id')   ?? null
+  // Provenance filter — only the four known origins or '__none__'; anything
+  // else is ignored rather than passed to the query.
+  const originParam = searchParams.get('origin')
+  const origin: MediaOrigin | '__none__' | null =
+    originParam === '__none__' ? '__none__'
+    : (MEDIA_ORIGINS as readonly string[]).includes(originParam ?? '') ? (originParam as MediaOrigin)
+    : null
   const limit = 40
   const offset = (page - 1) * limit
 
@@ -65,6 +74,12 @@ export async function GET(request: NextRequest) {
 
   if (sourceType && sourceId) {
     query = query.eq('source_type', sourceType).eq('source_id', sourceId)
+  }
+
+  if (origin === '__none__') {
+    query = query.is('origin', null)
+  } else if (origin) {
+    query = query.eq('origin', origin)
   }
 
   const { data, error, count } = await query

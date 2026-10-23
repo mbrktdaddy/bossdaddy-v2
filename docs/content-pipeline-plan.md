@@ -117,7 +117,7 @@ An audit of §6 before building (memory `project_content_pipeline`) corrected th
 - **Publish gate** — `lib/content/publish-gate.ts`: submit (both) and approve (both) refuse a body with a `bd-image-placeholder`; the renderer strips one that slipped through.
 - Fixed on the way: the review wizard's fallback hero prompt asked for a product photo of the product (contradicted the never-replicate rule).
 
-Not done: the media library shows an origin badge but has no origin FILTER yet; the gpt-image-1.5 per-token price is unverified, so a premium-tier picture logs `cost_usd = null` (never a guess) until a row is added to `lib/ai/pricing.ts`.
+Leftovers closed 2026-10-23: the media library has an origin filter (`GET /api/media?origin=own|web|amazon|ai|__none__`, a second select beside the product filter), and `lib/ai/pricing.ts` carries the gpt-image-1.5 and gpt-image-1-mini rows (Standard list prices read from the OpenAI pricing page that day: 1.5 = $5 text in / $8 image in / $32 image out per 1M), so premium-tier pictures now log a real `cost_usd`. Cached-input rates are not modelled because the Images API `usage` reports no cached split.
 
 ## 7. Phase 4 — Evals, metrics, freshness, structured data — BUILT 2026-10-23 (migs 167 + 168 applied; uncommitted)
 

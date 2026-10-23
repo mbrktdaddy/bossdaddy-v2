@@ -15,12 +15,15 @@ const PRICING: Record<string, { in: number; out: number; cacheRead?: number; cac
 }
 
 // Image models bill per token too (OpenAI Images API `usage`): text input,
-// image input and image output at different rates per 1M. Only gpt-image-1 is
-// priced here — the per-token list prices for the newer tiers were not
-// verified when this shipped, and a guess on the cost chip is worse than a
-// blank. Add a row once the price page has been read, not before.
+// image input and image output at different rates per 1M. Rows are the
+// Standard (non-batch) list prices read from developers.openai.com/api/docs/pricing
+// on 2026-10-23. Cached-input rates exist (1.5: $2 image / $1.25 text) but the
+// Images API `usage` reports no cached split, so they are not modelled. An
+// unknown slug returns null, never a guess.
 const IMAGE_PRICING: Record<string, { textIn: number; imageIn: number; imageOut: number }> = {
-  'openai/gpt-image-1': { textIn: 5, imageIn: 10, imageOut: 40 },
+  'openai/gpt-image-1':      { textIn: 5, imageIn: 10,  imageOut: 40 },
+  'openai/gpt-image-1.5':    { textIn: 5, imageIn: 8,   imageOut: 32 },
+  'openai/gpt-image-1-mini': { textIn: 2, imageIn: 2.5, imageOut: 8 },
 }
 
 export interface ImageUsage {

@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { PhotoIcon } from '@/components/icons'
+import { MEDIA_ORIGINS } from '@/lib/media/origin'
 
 // Where an asset came from (lib/media/origin.ts) — so picking owned photos
 // first, the stated hierarchy, is one glance. 'ai' drives the public credit line.
@@ -296,6 +297,8 @@ export default function MediaLibraryPage() {
   // Product filter
   const [products, setProducts] = useState<Product[]>([])
   const [filterProductId, setFilterProductId] = useState<string>('')
+  // Origin (provenance) filter — '' = any, '__none__' = unknown, else a MediaOrigin
+  const [filterOrigin, setFilterOrigin] = useState<string>('')
 
   useEffect(() => {
     fetch('/api/products')
@@ -306,10 +309,11 @@ export default function MediaLibraryPage() {
 
   const productMap = Object.fromEntries(products.map((p) => [p.id, p.name]))
 
-  const fetchAssets = useCallback(async (p: number, productId: string) => {
+  const fetchAssets = useCallback(async (p: number, productId: string, origin: string) => {
     setLoading(true)
     const qs = new URLSearchParams({ page: String(p) })
     if (productId) qs.set('product_id', productId)
+    if (origin) qs.set('origin', origin)
     const res = await fetch(`/api/media?${qs}`)
     if (res.ok) {
       const json = await res.json()
@@ -320,10 +324,16 @@ export default function MediaLibraryPage() {
   }, [])
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { fetchAssets(page, filterProductId) }, [fetchAssets, page, filterProductId])
+  useEffect(() => { fetchAssets(page, filterProductId, filterOrigin) }, [fetchAssets, page, filterProductId, filterOrigin])
 
   function handleFilterChange(productId: string) {
     setFilterProductId(productId)
+    setPage(1)
+    setMultiSelected(new Set())
+  }
+
+  function handleOriginChange(origin: string) {
+    setFilterOrigin(origin)
     setPage(1)
     setMultiSelected(new Set())
   }
@@ -477,6 +487,19 @@ export default function MediaLibraryPage() {
               ))}
             </select>
           )}
+          {/* Origin filter — own photos first is the stated hierarchy */}
+          <select
+            value={filterOrigin}
+            onChange={(e) => handleOriginChange(e.target.value)}
+            aria-label="Filter by origin"
+            className="px-3 py-2 bg-surface-raised border border-strong text-sm text-prose-muted rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-hover"
+          >
+            <option value="">Any origin</option>
+            {MEDIA_ORIGINS.map((o) => (
+              <option key={o} value={o}>{ORIGIN_LABEL[o]}</option>
+            ))}
+            <option value="__none__">Origin unknown</option>
+          </select>
           <Link
             href="/dashboard/media/generate"
             className={buttonVariants({ variant: 'secondary' })}
@@ -575,9 +598,9 @@ export default function MediaLibraryPage() {
           >
             <PhotoIcon className="w-10 h-10" strokeWidth={1.5} />
             <p className="text-sm font-medium">
-              {filterProductId ? 'No images match this filter' : 'Drop images here or click to upload'}
+              {filterProductId || filterOrigin ? 'No images match this filter' : 'Drop images here or click to upload'}
             </p>
-            {!filterProductId && <p className="text-xs">JPEG, PNG, WebP, GIF · max 8 MB each</p>}
+            {!filterProductId && !filterOrigin && <p className="text-xs">JPEG, PNG, WebP, GIF · max 8 MB each</p>}
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
