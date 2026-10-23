@@ -662,6 +662,36 @@ export type Database = {
           },
         ]
       }
+      content_freshness_flags: {
+        Row: {
+          content_id: string
+          content_type: string
+          detail: string | null
+          flagged_at: string
+          id: string
+          last_seen_at: string
+          reason: string
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          detail?: string | null
+          flagged_at?: string
+          id?: string
+          last_seen_at?: string
+          reason: string
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          detail?: string | null
+          flagged_at?: string
+          id?: string
+          last_seen_at?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       content_revisions: {
         Row: {
           content_id: string
@@ -1809,6 +1839,7 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          followup_intent_at: string | null
           generation_id: string | null
           generation_method: string | null
           has_affiliate_links: boolean
@@ -1817,6 +1848,7 @@ export type Database = {
           inquiry_mode: boolean | null
           is_visible: boolean
           key_takeaways: Json
+          last_verified_at: string | null
           legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
@@ -1845,6 +1877,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          followup_intent_at?: string | null
           generation_id?: string | null
           generation_method?: string | null
           has_affiliate_links?: boolean
@@ -1853,6 +1886,7 @@ export type Database = {
           inquiry_mode?: boolean | null
           is_visible?: boolean
           key_takeaways?: Json
+          last_verified_at?: string | null
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
@@ -1881,6 +1915,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          followup_intent_at?: string | null
           generation_id?: string | null
           generation_method?: string | null
           has_affiliate_links?: boolean
@@ -1889,6 +1924,7 @@ export type Database = {
           inquiry_mode?: boolean | null
           is_visible?: boolean
           key_takeaways?: Json
+          last_verified_at?: string | null
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
@@ -3231,6 +3267,7 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          followup_intent_at: string | null
           generation_id: string | null
           generation_method: string | null
           has_affiliate_links: boolean | null
@@ -3240,6 +3277,7 @@ export type Database = {
           is_top_pick: boolean
           is_visible: boolean
           key_takeaways: Json
+          last_verified_at: string | null
           legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
@@ -3293,6 +3331,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          followup_intent_at?: string | null
           generation_id?: string | null
           generation_method?: string | null
           has_affiliate_links?: boolean | null
@@ -3302,6 +3341,7 @@ export type Database = {
           is_top_pick?: boolean
           is_visible?: boolean
           key_takeaways?: Json
+          last_verified_at?: string | null
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
@@ -3355,6 +3395,7 @@ export type Database = {
           excerpt?: string | null
           faqs?: Json
           featured?: boolean
+          followup_intent_at?: string | null
           generation_id?: string | null
           generation_method?: string | null
           has_affiliate_links?: boolean | null
@@ -3364,6 +3405,7 @@ export type Database = {
           is_top_pick?: boolean
           is_visible?: boolean
           key_takeaways?: Json
+          last_verified_at?: string | null
           legacy_slugs?: string[]
           meta_description?: string | null
           meta_title?: string | null
@@ -4532,6 +4574,23 @@ export type Database = {
       }
     }
     Views: {
+      content_performance: {
+        Row: {
+          content_id: string | null
+          content_type: string | null
+          generation_method: string | null
+          prompt_version: string | null
+          published_at: string | null
+          scroll_100_count: number | null
+          scroll_25_count: number | null
+          scroll_50_count: number | null
+          scroll_75_count: number | null
+          slug: string | null
+          title: string | null
+          view_count: number | null
+        }
+        Relationships: []
+      }
       goal_share_days: {
         Row: {
           day_state: string | null
@@ -4604,6 +4663,7 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          followup_intent_at: string | null
           generation_id: string | null
           generation_method: string | null
           has_affiliate_links: boolean
@@ -4612,6 +4672,7 @@ export type Database = {
           inquiry_mode: boolean | null
           is_visible: boolean
           key_takeaways: Json
+          last_verified_at: string | null
           legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null
@@ -4659,6 +4720,7 @@ export type Database = {
           excerpt: string | null
           faqs: Json
           featured: boolean
+          followup_intent_at: string | null
           generation_id: string | null
           generation_method: string | null
           has_affiliate_links: boolean | null
@@ -4668,6 +4730,7 @@ export type Database = {
           is_top_pick: boolean
           is_visible: boolean
           key_takeaways: Json
+          last_verified_at: string | null
           legacy_slugs: string[]
           meta_description: string | null
           meta_title: string | null

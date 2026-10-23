@@ -67,6 +67,9 @@ export const ReviewUpdateSchema = z.object({
   meta_title:               z.string().max(70).optional().nullable(),
   meta_description:         z.string().max(200).optional().nullable(),
   scheduled_publish_at:     z.string().datetime().optional().nullable(),
+  // Freshness (mig 167): the author's revisit plan + the last "still stands" check.
+  followup_intent_at:       z.string().datetime().optional().nullable(),
+  last_verified_at:         z.string().datetime().optional().nullable(),
   product_slug:             z.string().regex(/^[a-z0-9-]+$/).max(120).optional().nullable(),
   comparison_product_slugs: z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(4).optional(),
   tldr:                     z.string().max(600).optional().nullable(),

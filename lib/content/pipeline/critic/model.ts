@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { INQUIRY_TRIGGER } from '../../prompts'
 import { briefFacts, briefLabel } from '../briefs'
 import { runProse } from '../section'
-import type { RunState } from '../types'
+import type { Blocks, RunState } from '../types'
 
 // Stage 4b — the judgement half of the critic: the things a regex can't see.
 // Temperature 0, low effort, findings only. It is told what the author
@@ -31,6 +31,26 @@ export const CriticOutput = z.object({
   summary: z.string().max(500).describe('Two sentences: the piece\'s biggest strength and its biggest risk'),
 })
 export type CriticModelOutput = z.infer<typeof CriticOutput>
+
+/** The structured blocks as plain text for the editor (null when none were derived yet). */
+export function blocksText(run: { blocks: Blocks | null }): string | null {
+  const b = run.blocks
+  if (!b) return null
+  const lines: string[] = []
+  if (b.tldr) lines.push(`TL;DR: ${b.tldr}`)
+  if (b.keyTakeaways?.length) lines.push(`Key takeaways:\n${b.keyTakeaways.map((t) => `- ${t}`).join('\n')}`)
+  if (b.bestFor?.length) lines.push(`Best for:\n${b.bestFor.map((t) => `- ${t}`).join('\n')}`)
+  if (b.notFor?.length) lines.push(`Not for:\n${b.notFor.map((t) => `- ${t}`).join('\n')}`)
+  if (b.pros?.length) lines.push(`Pros:\n${b.pros.map((t) => `- ${t}`).join('\n')}`)
+  if (b.cons?.length) lines.push(`Cons:\n${b.cons.map((t) => `- ${t}`).join('\n')}`)
+  if (b.faqs?.length) lines.push(`FAQs:\n${b.faqs.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')}`)
+  if (b.subScores) lines.push(`Suggested sub-scores: quality ${b.subScores.quality}, value ${b.subScores.value}, ease ${b.subScores.ease}, daily use ${b.subScores.dailyUse}; would rebuy: ${b.wouldRebuy ? 'yes' : 'no'}`)
+  return lines.join('\n\n') || null
+}
+
+/** The critic's own system prompt — the editor, never the writer (no voice blocks on purpose). */
+export const CRITIC_SYSTEM =
+  'You are a meticulous, fair editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. You return findings only, never rewrites. You never flag religious, moral or metaphysical positions as misleading claims — stating them is the genre on discussion pieces.'
 
 export function criticPrompt(run: RunState, blocksText: string | null): string {
   const brief = run.brief
