@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { safeAfter } from '@/lib/server/safeAfter'
 import { isDisclosureBlocked } from '@/lib/reviews'
-import { hasUnfilledImageSlots, UNFILLED_SLOTS_MESSAGE } from '@/lib/content/publish-gate'
+import { publishBlocker } from '@/lib/content/publish-gate'
 
 // POST /api/guides/[id]/submit — transition draft → pending, trigger moderation
 export async function POST(
@@ -34,9 +34,10 @@ export async function POST(
   if (!['draft', 'rejected'].includes(article.status)) {
     return NextResponse.json({ error: 'Only drafts or rejected guides can be submitted' }, { status: 422 })
   }
-  // An empty image slot would render as a dashed "Image slot" box on the public page.
-  if (hasUnfilledImageSlots(article.content)) {
-    return NextResponse.json({ error: UNFILLED_SLOTS_MESSAGE }, { status: 422 })
+  // An unfinished body (empty image slot, empty video slot, empty element box) must not go public.
+  const blocker = publishBlocker(article.content)
+  if (blocker) {
+    return NextResponse.json({ error: blocker }, { status: 422 })
   }
   // FTC gate — mirrors api/reviews/[id]/submit. Guides gained the
   // acknowledgement column in migration 148; before that a guide could carry

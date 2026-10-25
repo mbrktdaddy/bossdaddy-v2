@@ -1,5 +1,5 @@
 import { buildPlaceholderFigure } from '@/lib/inlineImages'
-import type { ContentElement } from './elements'
+import { videoMarker, type ContentElement } from './elements'
 
 // The ONE place a generated draft becomes body HTML, and the one place body
 // HTML is turned back into model-readable text. Until 2026-10-23 both wizards
@@ -28,6 +28,8 @@ export interface AssembleDraftArgs {
   inlineImages?: DraftInlineImage[] | null
   /** Drafted body elements; each becomes a marker div after its part's prose ('' = after the intro). */
   elements?: ContentElement[] | null
+  /** Planned video slots (subject only) — an empty marker the author fills in the editor. */
+  videoSlots?: { afterHeading: string; subject: string }[] | null
 }
 
 function escAttr(s: string): string {
@@ -46,6 +48,13 @@ export function elementToHtml(el: ContentElement): string {
   if (el.type === 'facts') {
     const items = el.items.map((f) => `<li><strong>${inlineMarksToHtml(f.label.replace(/:\s*$/, ''))}:</strong> ${inlineMarksToHtml(f.value)}</li>`).join('\n')
     return `<div class="bd-facts" data-title="${escAttr(el.title)}">\n<ul>\n${items}\n</ul>\n</div>`
+  }
+  if (el.type === 'chart') {
+    // Same row shape as facts — the public page draws the SVG from these rows
+    // and keeps the list for screen readers; the editor edits the list.
+    const items = el.items.map((r) => `<li><strong>${inlineMarksToHtml(r.label.replace(/:\s*$/, ''))}:</strong> ${r.value}</li>`).join('\n')
+    const unit = el.unit ? ` data-unit="${escAttr(el.unit)}"` : ''
+    return `<div class="bd-chart" data-title="${escAttr(el.title)}"${unit}>\n<ul>\n${items}\n</ul>\n</div>`
   }
   if (el.type === 'timeline') {
     const items = el.items.map((e) => {
@@ -146,10 +155,14 @@ export function assembleDraftHtml(args: AssembleDraftArgs): string {
   const slots = (args.inlineImages ?? []).map((img, i) => ({ ...img, slotId: `slot-${i + 1}` }))
 
   const elementsAfter = (heading: string) =>
-    (args.elements ?? [])
-      .filter((el) => normHeading(el.afterHeading) === normHeading(heading))
-      .map(elementToHtml)
-      .join('\n')
+    [
+      ...(args.elements ?? [])
+        .filter((el) => normHeading(el.afterHeading) === normHeading(heading))
+        .map(elementToHtml),
+      ...(args.videoSlots ?? [])
+        .filter((v) => normHeading(v.afterHeading) === normHeading(heading))
+        .map((v) => videoMarker({ id: '', caption: '', subject: v.subject })),
+    ].join('\n')
 
   const parts: string[] = []
   const intro = paragraphsToHtml(args.introduction)

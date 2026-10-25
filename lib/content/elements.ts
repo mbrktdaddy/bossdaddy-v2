@@ -10,8 +10,13 @@ import { z } from 'zod'
 // Registry: add a type here (kind/schema/serialiser/parser), a Tiptap node, a
 // sanitizer class, and CSS. Nothing else knows the list.
 
-export const ELEMENT_TYPES = ['callout', 'steps', 'facts', 'timeline'] as const
+/** Types the blocks stage DRAFTS from the prose. */
+export const ELEMENT_TYPES = ['callout', 'steps', 'facts', 'timeline', 'chart'] as const
 export type ElementType = (typeof ELEMENT_TYPES)[number]
+
+/** Types the outline may PLAN. `video` is a slot only — the author supplies the URL. */
+export const PLAN_TYPES = [...ELEMENT_TYPES, 'video'] as const
+export type PlanType = (typeof PLAN_TYPES)[number]
 
 export const CALLOUT_KINDS = ['tip', 'warning', 'safety', 'faith', 'note'] as const
 export type CalloutKind = (typeof CALLOUT_KINDS)[number]
@@ -28,18 +33,21 @@ export const CALLOUT_LABEL: Record<CalloutKind, string> = {
 export const STEPS_DEFAULT_TITLE = 'Steps at a glance'
 export const FACTS_DEFAULT_TITLE = 'Key facts'
 export const TIMELINE_DEFAULT_TITLE = 'How it went'
+export const CHART_DEFAULT_TITLE = 'By the numbers'
 
 /** Display name per type (outline editor, kickers). */
-export const ELEMENT_LABEL: Record<ElementType, string> = {
+export const ELEMENT_LABEL: Record<PlanType, string> = {
   callout: 'Callout',
   steps: 'Steps box',
   facts: 'Key facts',
   timeline: 'Timeline',
+  chart: 'Chart',
+  video: 'Video slot',
 }
 
 /** The outline's recommendation: what, where, why. The author toggles each. */
 export interface ElementPlan {
-  type: ElementType
+  type: PlanType
   /** Exact H2 text of the part it follows; '' = after the introduction. */
   afterHeading: string
   reason: string
@@ -79,7 +87,17 @@ export interface TimelineElement {
   items: { when: string; title: string; body: string }[]
 }
 
-export type ContentElement = CalloutElement | StepsElement | FactsElement | TimelineElement
+export interface ChartElement {
+  type: 'chart'
+  afterHeading: string
+  title: string
+  /** One unit for every bar ("lb", "hours", "$"), or null. */
+  unit: string | null
+  /** 3–8 comparable numbers the prose states. */
+  items: { label: string; value: number }[]
+}
+
+export type ContentElement = CalloutElement | StepsElement | FactsElement | TimelineElement | ChartElement
 
 // ── Model output (blocks stage) ─────────────────────────────────────────────
 // One flat shape rather than a union: structured output is far more reliable
@@ -93,6 +111,7 @@ export const ElementDraftOutput = z.object({
   title:        z.string().max(60).describe('callout: a 1–4 word kicker ("Watch out", "Before you buy"); steps: a short box title'),
   body:         z.string().max(600).optional().describe('callout only: 1–3 sentences lifted from the prose — the one thing a skimmer must not miss'),
   time:         z.string().max(40).nullable().optional().describe('steps only: total time in plain words if the prose states it, else null'),
+  unit:         z.string().max(20).nullable().optional().describe('chart only: the one unit every bar shares ("lb", "hours", "$"), else null'),
   items:        z.array(z.object({
     title: z.string().min(1).max(80).describe('The action, imperative, 2–6 words'),
     body:  z.string().max(300).describe('One sentence of the how or the why, from the prose'),
@@ -123,6 +142,15 @@ export function normalizeElement(d: ElementDraftOutputT): ContentElement | null 
     if (items.length < 2) return null
     return { type: 'facts', afterHeading, title: d.title.trim() || FACTS_DEFAULT_TITLE, items }
   }
+  if (d.type === 'chart') {
+    // A chart is a facts list whose values are all numbers — the gate against
+    // decorative infographics: fewer than three real figures, no chart.
+    const items = (d.facts ?? [])
+      .map((f) => ({ label: f.label.trim(), value: parseNumber(f.value) }))
+      .filter((f): f is { label: string; value: number } => Boolean(f.label) && f.value != null)
+    if (items.length < 3) return null
+    return { type: 'chart', afterHeading, title: d.title.trim() || CHART_DEFAULT_TITLE, unit: d.unit?.trim() || null, items }
+  }
   if (d.type === 'timeline') {
     const items = (d.events ?? []).map((e) => ({ when: e.when.trim(), title: e.title.trim(), body: e.body.trim() })).filter((e) => e.when && e.title)
     if (items.length < 2) return null
@@ -135,7 +163,27 @@ export function normalizeElement(d: ElementDraftOutputT): ContentElement | null 
 
 // ── Stored HTML → facts ─────────────────────────────────────────────────────
 
-const ELEMENT_RE = /<div\b[^>]*\bclass="bd-(callout|steps|facts|timeline)"[^>]*>([\s\S]*?)<\/div>/gi
+const ELEMENT_RE = /<div\b[^>]*\bclass="bd-(callout|steps|facts|timeline|chart)"[^>]*>([\s\S]*?)<\/div>/gi
+
+/** "4.2 lb", "$189", "1,200" → number; null when there is no number in it. */
+export function parseNumber(s: string): number | null {
+  const m = s.replace(/,/g, '').match(/-?\d+(?:\.\d+)?/)
+  if (!m) return null
+  const n = Number(m[0])
+  return Number.isFinite(n) ? n : null
+}
+
+/** The rows of a chart / facts box as stored: `<li><strong>Label:</strong> value</li>`. */
+export function parseRows(inner: string): { label: string; value: string }[] {
+  const out: { label: string; value: string }[] = []
+  for (const li of inner.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)) {
+    const strong = li[1].match(/<strong\b[^>]*>([\s\S]*?)<\/strong>/i)
+    const label = strong ? textOf(strong[1]).replace(/:\s*$/, '') : ''
+    const value = textOf(strong ? li[1].replace(strong[0], '') : li[1])
+    if (label || value) out.push({ label, value })
+  }
+  return out
+}
 
 function attr(tag: string, name: string): string | null {
   const m = tag.match(new RegExp(`\\s${name}="([^"]*)"`, 'i'))
@@ -190,4 +238,48 @@ export function stripEmptyElements(html: string): string {
 }
 
 export const EMPTY_ELEMENTS_MESSAGE =
-  'This piece has an empty callout or steps box. Fill it in or delete it before it can go live.'
+  'This piece has an empty callout, steps, facts, timeline or chart box. Fill it in or delete it before it can go live.'
+
+// ── Video slots ─────────────────────────────────────────────────────────────
+// `<div class="bd-video" data-provider="youtube" data-id="…" data-caption="…" data-subject="…"></div>`
+// The outline plans the slot (subject only); the author pastes the URL in the
+// editor; the public page renders a click-to-load facade (components/content/VideoEmbed).
+
+const VIDEO_RE = /<div\b[^>]*\bclass="bd-video"[^>]*>\s*<\/div>/gi
+
+export interface VideoSlot {
+  /** '' until the author pastes a URL. */
+  id: string
+  caption: string
+  /** What the planner asked for — shown in the editor placeholder only. */
+  subject: string
+}
+
+function escAttr(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+export function videoMarker(v: VideoSlot): string {
+  return `<div class="bd-video" data-provider="youtube" data-id="${escAttr(v.id)}" data-caption="${escAttr(v.caption)}" data-subject="${escAttr(v.subject)}"></div>`
+}
+
+export function parseVideoMarker(tag: string): VideoSlot {
+  return { id: attr(tag, 'data-id') ?? '', caption: attr(tag, 'data-caption') ?? '', subject: attr(tag, 'data-subject') ?? '' }
+}
+
+/** True when a planned video slot still has no video. */
+export function hasUnfilledVideoSlots(html: string | null | undefined): boolean {
+  if (!html) return false
+  for (const m of html.matchAll(new RegExp(VIDEO_RE.source, VIDEO_RE.flags))) {
+    if (!parseVideoMarker(m[0]).id) return true
+  }
+  return false
+}
+
+/** Render-time safety net: drop empty video slots. */
+export function stripUnfilledVideoSlots(html: string): string {
+  return html.replace(new RegExp(VIDEO_RE.source, VIDEO_RE.flags), (m) => (parseVideoMarker(m).id ? m : ''))
+}
+
+export const UNFILLED_VIDEO_MESSAGE =
+  'This piece has an empty video slot. Paste a YouTube link into it or remove it before it can go live.'

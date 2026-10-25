@@ -16,6 +16,8 @@
  * inline cross-links, product cards and figures identically (components/content/ArticleBody.tsx).
  */
 
+import { parseNumber, parseRows, parseVideoMarker } from '@/lib/content/elements'
+
 export type InlineProduct = {
   slug: string
   name: string
@@ -39,12 +41,25 @@ export type FigureSegment = {
   origin: string | null
 }
 
+export type VideoSegment = { type: 'video'; id: string; caption: string }
+
+export type ChartSegment = {
+  type: 'chart'
+  title: string
+  unit: string | null
+  rows: { label: string; value: number }[]
+  /** The stored list markup — kept for screen readers beside the SVG. */
+  listHtml: string
+}
+
 export type ContentSegment =
   | { type: 'html'; content: string }
   | { type: 'product'; product: InlineProduct }
   | { type: 'collection'; slug: string }
   | { type: 'contentlink'; contentType: 'review' | 'guide'; slug: string }
   | FigureSegment
+  | VideoSegment
+  | ChartSegment
 
 /** All distinct product slugs referenced by inline [[BUY:slug]] anchors. */
 export function extractProductSlugs(html: string): string[] {
@@ -126,6 +141,35 @@ export function splitContentForInlineCards(html: string, products: InlineProduct
       index: m.index,
       length: m[0].length,
       segment: { type: 'contentlink', contentType: m[1] as 'review' | 'guide', slug: m[2] },
+    })
+  }
+
+  // Video slot (class may sit last — Tiptap writes it after the data-* attrs).
+  const videoRe = /<div\b[^>]*\bclass="bd-video"[^>]*>\s*<\/div>/g
+  while ((m = videoRe.exec(html)) !== null) {
+    const v = parseVideoMarker(m[0])
+    if (!v.id) continue // unfilled slot — stripped by the render safety net
+    matches.push({ index: m.index, length: m[0].length, segment: { type: 'video', id: v.id, caption: v.caption } })
+  }
+
+  // Chart box: rows become an SVG when every value parses as a number; otherwise
+  // the box stays HTML and reads as a facts list.
+  const chartRe = /<div\b[^>]*\bclass="bd-chart"[^>]*>([\s\S]*?)<\/div>/g
+  while ((m = chartRe.exec(html)) !== null) {
+    const open = m[0].slice(0, m[0].indexOf('>') + 1)
+    const parsed = parseRows(m[1]).map((r) => ({ label: r.label, value: parseNumber(r.value) }))
+    if (parsed.length < 2 || parsed.some((r) => r.value == null)) continue
+    const list = m[1].match(/<(ul|ol)\b[\s\S]*?<\/\1>/i)
+    matches.push({
+      index: m.index,
+      length: m[0].length,
+      segment: {
+        type: 'chart',
+        title: attr(open, 'data-title') ?? '',
+        unit: attr(open, 'data-unit'),
+        rows: parsed as { label: string; value: number }[],
+        listHtml: list ? list[0] : m[1],
+      },
     })
   }
 

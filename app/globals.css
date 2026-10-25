@@ -450,9 +450,48 @@ h1, h2, h3, h4 {
   font-size: 0.8rem;
   color: var(--bd-text-faint);
 }
+/* Chart boxes share the facts chrome; the public page swaps the list for an SVG
+   (components/content/BarChart) and keeps the list for screen readers. */
+.bd-chart {
+  margin: 1.75rem 0;
+  padding: 1rem 1.25rem 1.1rem;
+  border: 1px solid var(--bd-border);
+  border-left: 3px solid var(--bd-orange);
+  border-radius: 0 4px 4px 0;
+  background: var(--bd-surface);
+}
+.bd-chart::before {
+  content: attr(data-title);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bd-text);
+}
+.bd-chart:empty { display: none; }
+
+/* Video slot — the facade is a React component on the public page; in the
+   editor the node view draws the placeholder. */
+.bd-video { margin: 2rem 0; }
+.bd-video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--bd-border);
+  background: var(--bd-chrome, #09090b);
+}
+.bd-video-frame iframe,
+.bd-video-frame img { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.bd-video-frame img { object-fit: cover; }
+.bd-video .bd-video-caption { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--bd-text-faint); }
+
 /* Key facts — label / value rows, two columns from the small breakpoint. */
 .bd-facts ul,
-.bd-facts ol {
+.bd-facts ol,
+.bd-chart ul {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -464,10 +503,14 @@ h1, h2, h3, h4 {
   .bd-facts ul,
   .bd-facts ol { grid-template-columns: 1fr 1fr; }
 }
-.bd-facts li { margin: 0; padding: 0.35rem 0; border-bottom: 1px solid var(--bd-border); font-size: 0.95em; }
-.bd-facts li > p { margin: 0; }
-.bd-facts li strong { color: var(--bd-text-muted); font-weight: 600; margin-right: 0.35em; }
-.bd-facts li::marker { content: ''; }
+.bd-facts li,
+.bd-chart li { margin: 0; padding: 0.35rem 0; border-bottom: 1px solid var(--bd-border); font-size: 0.95em; }
+.bd-facts li > p,
+.bd-chart li > p { margin: 0; }
+.bd-facts li strong,
+.bd-chart li strong { color: var(--bd-text-muted); font-weight: 600; margin-right: 0.35em; }
+.bd-facts li::marker,
+.bd-chart li::marker { content: ''; }
 
 /* Timeline — a vertical rail; the bold "when" sits as a small label above each moment. */
 .bd-timeline ol {

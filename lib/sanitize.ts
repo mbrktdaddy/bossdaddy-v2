@@ -20,7 +20,8 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption', 'data-origin'],
   // data-kind / data-title / data-time belong to the bd-callout / bd-steps
   // body elements (lib/content/elements.ts); the CSS kicker reads data-title.
-  div:    ['class', 'id', 'data-slot-id', 'data-collection-slug', 'data-content-type', 'data-content-slug', 'data-kind', 'data-title', 'data-time'],
+  // data-unit = bd-chart; data-provider / data-id / data-caption / data-subject = bd-video (an ID, never an iframe).
+  div:    ['class', 'id', 'data-slot-id', 'data-collection-slug', 'data-content-type', 'data-content-slug', 'data-kind', 'data-title', 'data-time', 'data-unit', 'data-provider', 'data-id', 'data-caption', 'data-subject'],
   '*':    ['class', 'id'],
 }
 
@@ -29,7 +30,7 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
 // its content are kept. Other tags' classes (figure, etc.) are unrestricted.
 // Pinned in tests/unit/sanitize-html.test.ts.
 const ALLOWED_CLASSES: Record<string, string[]> = {
-  div: ['bd-image-grid', 'bd-collection-embed', 'bd-content-link', 'bd-callout', 'bd-steps', 'bd-facts', 'bd-timeline'],
+  div: ['bd-image-grid', 'bd-collection-embed', 'bd-content-link', 'bd-callout', 'bd-steps', 'bd-facts', 'bd-timeline', 'bd-chart', 'bd-video'],
 }
 
 /**

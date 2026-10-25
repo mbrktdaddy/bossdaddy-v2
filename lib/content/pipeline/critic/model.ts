@@ -50,6 +50,7 @@ export function blocksText(run: { blocks: Blocks | null }): string | null {
     if (el.type === 'callout') lines.push(`Callout (${el.kind}, ${where}) "${el.title}": ${el.body}`)
     else if (el.type === 'steps') lines.push(`Steps box (${where}) "${el.title}"${el.time ? `, ${el.time}` : ''}:\n${el.items.map((i, n) => `${n + 1}. ${i.title} — ${i.body}`).join('\n')}`)
     else if (el.type === 'facts') lines.push(`Key facts (${where}) "${el.title}":\n${el.items.map((f) => `- ${f.label}: ${f.value}`).join('\n')}`)
+    else if (el.type === 'chart') lines.push(`Chart (${where}) "${el.title}"${el.unit ? ` in ${el.unit}` : ''}:\n${el.items.map((r) => `- ${r.label}: ${r.value}`).join('\n')}`)
     else lines.push(`Timeline (${where}) "${el.title}":\n${el.items.map((e) => `- ${e.when}: ${e.title}${e.body ? ` — ${e.body}` : ''}`).join('\n')}`)
   }
   return lines.join('\n\n') || null

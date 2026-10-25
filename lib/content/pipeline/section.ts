@@ -129,6 +129,9 @@ export function runToDraftHtml(run: RunState): string {
     closing: closing >= 0 && run.sections[closing]?.text ? { heading: parts[closing].heading, body: run.sections[closing]!.text } : null,
     inlineImages: run.images?.inline ?? [],
     elements: run.blocks?.elements ?? [],
+    videoSlots: (run.outline?.elements ?? [])
+      .filter((e) => e.type === 'video')
+      .map((e) => ({ afterHeading: e.afterHeading, subject: e.reason })),
   })
 }
 

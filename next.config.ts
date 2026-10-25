@@ -42,6 +42,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'm.media-amazon.com' },
       { protocol: 'https', hostname: supabaseHostname },
       { protocol: 'https', hostname: 'files.cdn.printful.com' },
+      // YouTube poster frames for the click-to-load video facade.
+      { protocol: 'https', hostname: 'i.ytimg.com' },
     ],
   },
 
@@ -75,8 +77,10 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com", // unsafe-* required by Next.js; vercel-scripts for Analytics + Speed Insights
               "style-src 'self' 'unsafe-inline'",
-              `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname} https://files.cdn.printful.com`,
+              `img-src 'self' data: blob: https://images.unsplash.com https://m.media-amazon.com https://${supabaseHostname} https://files.cdn.printful.com https://i.ytimg.com`,
               "font-src 'self' data:",
+              // Body video embeds: YouTube through the privacy domain, loaded only after a tap (components/content/VideoEmbed).
+              'frame-src https://www.youtube-nocookie.com',
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.sentry.io https://*.ingest.sentry.io https://vitals.vercel-insights.com",
               "frame-ancestors 'none'",
             ].join('; '),

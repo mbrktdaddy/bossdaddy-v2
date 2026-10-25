@@ -23,7 +23,7 @@ const H2_RE = /<h2\b[^>]*>([\s\S]*?)<\/h2>/gi
 // Block-level things that are not prose and must survive a rewrite, in the
 // order they appear. Galleries first so their inner figures aren't matched twice.
 export const PRESERVED_BLOCK_RE =
-  /<div\b[^>]*\bclass="bd-image-grid"[^>]*>[\s\S]*?<\/div>|<figure\b[\s\S]*?<\/figure>|<div\b[^>]*\bclass="bd-collection-embed"[^>]*>\s*<\/div>|<div\b[^>]*\bclass="bd-content-link"[^>]*>\s*<\/div>|<div\b[^>]*\bclass="bd-(?:callout|steps|facts|timeline)"[^>]*>[\s\S]*?<\/div>/gi
+  /<div\b[^>]*\bclass="bd-image-grid"[^>]*>[\s\S]*?<\/div>|<figure\b[\s\S]*?<\/figure>|<div\b[^>]*\bclass="bd-collection-embed"[^>]*>\s*<\/div>|<div\b[^>]*\bclass="bd-content-link"[^>]*>\s*<\/div>|<div\b[^>]*\bclass="bd-(?:callout|steps|facts|timeline|chart)"[^>]*>[\s\S]*?<\/div>|<div\b[^>]*\bclass="bd-video"[^>]*>\s*<\/div>/gi
 
 export function splitSections(html: string): BodySection[] {
   const out: BodySection[] = []

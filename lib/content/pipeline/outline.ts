@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { INQUIRY_TRIGGER } from '../prompts'
 import { briefDataBlocks, briefFacts, briefHeaderLines, briefLabel, briefProductSlugs, hasFirsthand } from './briefs'
-import { ELEMENT_TYPES } from '../elements'
+import { PLAN_TYPES } from '../elements'
 import type { ElementPlan } from '../elements'
 import type { BlockChoices, Brief, Outline, OutlinePart, RelatedPiece } from './types'
 
@@ -33,7 +33,7 @@ export const OutlineOutput = z.object({
     prosCons:     z.boolean(),
   }).describe('Which structured blocks this particular piece earns — recommend, do not default to all'),
   elements: z.array(z.object({
-    type:         z.enum(ELEMENT_TYPES).describe('"callout" = a boxed aside (a warning, a safety note, a tip, a faith note) that would otherwise interrupt the paragraph; "steps" = a boxed numbered recap of a procedure the piece teaches; "facts" = a label/value box of the hard numbers the piece states; "timeline" = a dated sequence the piece narrates'),
+    type:         z.enum(PLAN_TYPES).describe('"callout" = a boxed aside (a warning, a safety note, a tip, a faith note) that would otherwise interrupt the paragraph; "steps" = a boxed numbered recap of a procedure the piece teaches; "facts" = a label/value box of the hard numbers the piece states; "timeline" = a dated sequence the piece narrates; "chart" = a bar chart of 3+ comparable numbers in ONE unit the piece states (weights, prices, hours); "video" = a slot for a short demo the AUTHOR will film or link — you only name the subject in "reason"'),
     afterHeading: z.string().max(200).describe('The exact heading of the part it follows, or "" for right after the introduction'),
     reason:       z.string().min(1).max(160).describe('One line: why a reader needs this here'),
   })).max(3).describe('Body elements this piece EARNS — most pieces earn 0–1; a how-to earns one steps box; an essay earns none'),
@@ -91,7 +91,7 @@ ${structureGuidance(brief)}
 - Headings are specific and useful, written the way a reader scans ("Battery life across a weekend", not "Performance").
 - "intent" is one plain sentence a writer could act on.
 - "format" is a recommendation the author sees: give a part "steps" or "list" only when a reader would genuinely scan it that way (a sequence they perform; 3+ parallel options or criteria; a checklist). Narrative, argument, verdicts and intros are "prose".
-- "elements" are boxed body elements the author sees and keeps or drops. Recommend a callout only where a warning, safety point, tip or faith note would otherwise break a paragraph; ONE steps box for a piece that teaches a procedure (it recaps the steps the prose explains — after the introduction or after the last step part); ONE facts box when the piece will state 3+ hard numbers worth scanning (price paid, weight, capacity, time tested) — reviews with author facts usually earn it; ONE timeline when the piece narrates a dated sequence (a testing period, a first year, a season). Essays earn none. Most pieces earn 0–1.
+- "elements" are boxed body elements the author sees and keeps or drops. Recommend a callout only where a warning, safety point, tip or faith note would otherwise break a paragraph; ONE steps box for a piece that teaches a procedure (it recaps the steps the prose explains — after the introduction or after the last step part); ONE facts box when the piece will state 3+ hard numbers worth scanning (price paid, weight, capacity, time tested) — reviews with author facts usually earn it; ONE timeline when the piece narrates a dated sequence (a testing period, a first year, a season); ONE chart only when 3+ numbers in the SAME unit will be compared (never for a lone figure, never invented); ONE video slot only for a how-to where a 30-second demo beats words — the author supplies the clip, so name the subject precisely in "reason". Essays earn none. Most pieces earn 0–1.
 - Target words per part should fit the content, not a template — a simple product gets a shorter piece.
 ${slugs.length ? `- Product links are placed by the system, not by you — do not mention them.\n` : ''}${fixedImages != null ? `- imageCount must be exactly ${fixedImages}.` : '- imageCount: 2–3 if images would genuinely help, 0–1 for a short or abstract piece.'}
 ${related.length ? `
@@ -221,7 +221,7 @@ export const OutlineEdit = z.object({
     format:       z.enum(['prose', 'steps', 'list']).optional(),
   })).min(3).max(12),
   elements: z.array(z.object({
-    type:         z.enum(ELEMENT_TYPES),
+    type:         z.enum(PLAN_TYPES),
     afterHeading: z.string().max(200),
     reason:       z.string().max(160),
   })).max(3).optional(),

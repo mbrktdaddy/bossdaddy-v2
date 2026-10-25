@@ -10,6 +10,8 @@ export const STATIC_IMAGE_HOSTS = [
   'images.unsplash.com',
   'm.media-amazon.com',
   'files.cdn.printful.com',
+  // YouTube poster frames for the body video facade (components/content/VideoEmbed).
+  'i.ytimg.com',
 ] as const
 
 /** Our Supabase Storage host, derived exactly as next.config.ts derives it. */

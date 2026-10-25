@@ -18,8 +18,10 @@ export function blocksOutput(choices: BlockChoices, contentType: 'review' | 'gui
   // max only: a strict count would fail validation (and burn the retries) when
   // the model judges one element unsupported by the prose — a missing box is
   // the right outcome, a failed blocks stage is not.
-  if (elements.length) shape.elements = z.array(ElementDraftOutput).max(elements.length)
-    .describe(`The ${elements.length} planned element(s) in the prompt, in order, each drafted from the prose; omit one only if the prose gives it nothing to say`)
+  // Video slots are planned, not drafted — the author supplies the clip.
+  const drafted = elements.filter((e) => e.type !== 'video')
+  if (drafted.length) shape.elements = z.array(ElementDraftOutput).max(drafted.length)
+    .describe(`The ${drafted.length} planned element(s) in the prompt, in order, each drafted from the prose; omit one only if the prose gives it nothing to say`)
   if (choices.tldr) shape.tldr = z.string().min(1).max(600).describe(contentType === 'review'
     ? '1–2 sentence verdict for skimmers; lead with the gut answer'
     : '2–3 plain-English sentences; lead with the main takeaway (inquiry: name the question and the answer you land on)')
@@ -72,7 +74,8 @@ Each field's description says its shape. Everything must be traceable to the pro
 }
 
 /** The planned body elements, drafted here FROM the prose (never new claims). */
-export function elementsInstruction(plans: ElementPlan[]): string {
+export function elementsInstruction(allPlans: ElementPlan[]): string {
+  const plans = allPlans.filter((p) => p.type !== 'video')
   if (!plans.length) return ''
   const lines = plans.map((p, i) => {
     const where = p.afterHeading ? `after "${p.afterHeading}"` : 'after the introduction'
@@ -85,7 +88,11 @@ export function elementsInstruction(plans: ElementPlan[]): string {
         return `${i + 1}. FACTS ${where} — ${p.reason}. A short "title" and 3–8 "facts" (label + value) that the prose or the author facts STATE — a number the piece never gives is not a fact here.`
       case 'timeline':
         return `${i + 1}. TIMELINE ${where} — ${p.reason}. A short "title" and 3–8 "events" in order (when + what happened + one sentence), each a moment the prose actually narrates.`
+      case 'chart':
+        return `${i + 1}. CHART ${where} — ${p.reason}. A short "title", one "unit", and 3–8 "facts" whose values are plain numbers in that unit (label = what is measured) — every number must appear in the prose or the author facts; if fewer than three do, omit this element.`
+      default:
+        return ''
     }
-  })
+  }).filter(Boolean)
   return `ELEMENTS (exactly these, in order, "afterHeading" copied verbatim):\n${lines.join('\n')}\n`
 }

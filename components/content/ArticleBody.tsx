@@ -5,7 +5,9 @@ import ContentLinkCard from '@/components/ContentLinkCard'
 import { splitContentForInlineCards, type InlineProduct } from '@/lib/inline-content'
 import { stripAuthoringAttrs } from '@/lib/content/html'
 import { stripPlaceholderFigures } from '@/lib/content/publish-gate'
-import { stripEmptyElements } from '@/lib/content/elements'
+import { stripEmptyElements, stripUnfilledVideoSlots } from '@/lib/content/elements'
+import VideoEmbed from './VideoEmbed'
+import BarChart from './BarChart'
 import { lookupImageAssets } from '@/lib/images/assets'
 import { BodyFigure, BODY_FIGURE_SIZES } from './BodyFigure'
 
@@ -42,7 +44,7 @@ export default async function ArticleBody({
   figureSizes = BODY_FIGURE_SIZES,
   className = 'bd-content',
 }: Props) {
-  const clean = stripEmptyElements(stripPlaceholderFigures(stripAuthoringAttrs(html)))
+  const clean = stripUnfilledVideoSlots(stripEmptyElements(stripPlaceholderFigures(stripAuthoringAttrs(html))))
   const segments = splitContentForInlineCards(clean, products)
 
   // Pages pass `[&>*:first-child]:mt-0` so the body's first block sits flush under
@@ -70,6 +72,20 @@ export default async function ArticleBody({
         }
         if (segment.type === 'contentlink') {
           return <ContentLinkCard key={`link-${i}`} contentType={segment.contentType} slug={segment.slug} />
+        }
+        if (segment.type === 'video') {
+          return (
+            <div key={`video-${i}`} className={proseFor(i)}>
+              <VideoEmbed id={segment.id} caption={segment.caption} />
+            </div>
+          )
+        }
+        if (segment.type === 'chart') {
+          return (
+            <div key={`chart-${i}`} className={proseFor(i)}>
+              <BarChart title={segment.title} unit={segment.unit} rows={segment.rows} listHtml={segment.listHtml} />
+            </div>
+          )
         }
         if (segment.type === 'figure') {
           return (

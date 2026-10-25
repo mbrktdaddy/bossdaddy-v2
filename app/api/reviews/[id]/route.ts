@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { snapshotRevision } from '@/lib/revisions'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { hasUnfilledImageSlots, UNFILLED_SLOTS_MESSAGE } from '@/lib/content/publish-gate'
+import { publishBlocker } from '@/lib/content/publish-gate'
 import { sanitizeHtml } from '@/lib/sanitize'
 import { detectAffiliateLinks } from '@/lib/affiliate'
 import { resolveProductTokens } from '@/lib/products'
@@ -101,9 +101,10 @@ export async function PUT(
           { status: 422 }
         )
       }
-      // Approval is when the body goes public — an empty image slot must not.
-      if (current && hasUnfilledImageSlots(current.content)) {
-        return NextResponse.json({ error: UNFILLED_SLOTS_MESSAGE }, { status: 422 })
+      // An unfinished body (empty image slot, empty video slot, empty element box) must not go public.
+      const blocker = current ? publishBlocker(current.content) : null
+      if (blocker) {
+        return NextResponse.json({ error: blocker }, { status: 422 })
       }
     }
 

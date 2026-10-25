@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react'
-import { CALLOUT_KINDS, CALLOUT_LABEL, FACTS_DEFAULT_TITLE, STEPS_DEFAULT_TITLE, TIMELINE_DEFAULT_TITLE, type CalloutKind } from '@/lib/content/elements'
+import { CALLOUT_KINDS, CALLOUT_LABEL, CHART_DEFAULT_TITLE, FACTS_DEFAULT_TITLE, STEPS_DEFAULT_TITLE, TIMELINE_DEFAULT_TITLE, type CalloutKind } from '@/lib/content/elements'
+import { parseYouTubeUrl, youtubePoster } from '@/lib/content/video'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
@@ -279,6 +280,129 @@ const TimelineNode = Node.create({
   },
   addNodeView() {
     return ReactNodeViewRenderer(TimelineView)
+  },
+})
+
+function ChartView(props: NodeViewProps) {
+  const unit = (props.node.attrs['data-unit'] as string | null) ?? ''
+  return (
+    <NodeViewWrapper as="div" className="bd-chart" data-title="">
+      <ElementKicker {...props} kinds={false} />
+      <div contentEditable={false} className="flex items-center gap-2 mb-2" style={{ userSelect: 'none' }}>
+        <label className="text-xs text-prose-faint" htmlFor={`unit-${props.node.attrs['data-title']}`}>Unit</label>
+        <input
+          id={`unit-${props.node.attrs['data-title']}`}
+          value={unit}
+          onChange={(e) => props.updateAttributes({ 'data-unit': e.target.value || null })}
+          placeholder="lb, hours, $"
+          className="min-h-[44px] w-28 bg-transparent text-xs text-prose outline-none border-b border-soft focus:border-strong"
+        />
+        <span className="text-xs text-prose-faint">Rows are &quot;Label: number&quot; — the page draws the bars.</span>
+      </div>
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+
+const ChartNode = Node.create({
+  name: 'chartBox',
+  group: 'block',
+  content: BOX_CONTENT,
+  defining: true,
+  addAttributes() {
+    return {
+      'data-title': { default: CHART_DEFAULT_TITLE },
+      'data-unit':  { default: null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-chart' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-chart' }), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ChartView)
+  },
+})
+
+// ── Video slot ──────────────────────────────────────────────────────────────
+// Atom. Empty until the author pastes a YouTube link; the public page renders
+// the click-to-load facade (components/content/VideoEmbed), never an iframe here.
+
+function VideoView({ node, updateAttributes, deleteNode }: NodeViewProps) {
+  const id = (node.attrs['data-id'] as string | null) ?? ''
+  const caption = (node.attrs['data-caption'] as string | null) ?? ''
+  const subject = (node.attrs['data-subject'] as string | null) ?? ''
+  const [url, setUrl] = useState('')
+  const [bad, setBad] = useState(false)
+
+  return (
+    <NodeViewWrapper as="div" className="bd-video" contentEditable={false} style={{ userSelect: 'none' }}>
+      <div className="border border-soft p-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-prose">Video</span>
+          <span className="flex-1" />
+          <button type="button" onClick={() => deleteNode()} className="min-h-[44px] px-2 text-xs text-danger-ink">Remove</button>
+        </div>
+        {id ? (
+          <div className="bd-video-frame">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={youtubePoster(id)} alt="" />
+          </div>
+        ) : (
+          <div className="bd-video-frame flex items-center justify-center">
+            <p className="text-xs text-prose-faint px-4 text-center">
+              {subject ? `Planned: ${subject}` : 'Empty slot'}{' '}— paste a YouTube link below. The piece can&apos;t go live with an empty slot.
+            </p>
+          </div>
+        )}
+        <input
+          value={url}
+          onChange={(e) => {
+            setUrl(e.target.value)
+            const parsed = parseYouTubeUrl(e.target.value)
+            setBad(Boolean(e.target.value.trim()) && !parsed)
+            if (parsed) { updateAttributes({ 'data-id': parsed }); setUrl('') }
+          }}
+          placeholder={id ? 'Paste a different YouTube link to replace' : 'Paste a YouTube link'}
+          className="min-h-[44px] w-full bg-transparent text-sm text-prose outline-none border-b border-soft focus:border-strong"
+          aria-label="YouTube link"
+        />
+        {bad && <p className="text-xs text-danger-ink">That doesn&apos;t look like a YouTube link.</p>}
+        <input
+          value={caption}
+          onChange={(e) => updateAttributes({ 'data-caption': e.target.value })}
+          placeholder="Caption (optional)"
+          className="min-h-[44px] w-full bg-transparent text-sm text-prose-muted outline-none border-b border-soft focus:border-strong"
+          aria-label="Video caption"
+        />
+      </div>
+    </NodeViewWrapper>
+  )
+}
+
+const VideoNode = Node.create({
+  name: 'videoSlot',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      'data-provider': { default: 'youtube' },
+      'data-id':       { default: '' },
+      'data-caption':  { default: '' },
+      'data-subject':  { default: '' },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-video' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-video' })]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(VideoView)
   },
 })
 
@@ -631,6 +755,8 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       StepsNode,
       FactsNode,
       TimelineNode,
+      ChartNode,
+      VideoNode,
     ],
     content: value,
     editorProps: {
@@ -898,6 +1024,29 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
           title="Insert a timeline (when + what happened)"
         >
           + Timeline
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            if (editor.isActive('chartBox')) return
+            editor.chain().focus().insertContent({ type: 'chartBox', attrs: { 'data-title': CHART_DEFAULT_TITLE, 'data-unit': null }, content: boxContent('bulletList', 'Label:', ' 0', 3) }).run()
+          }}
+          className={btn(editor.isActive('chartBox'))}
+          title="Insert a bar chart (3+ numbers in one unit)"
+        >
+          + Chart
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            editor.chain().focus().insertContent({ type: 'videoSlot', attrs: { 'data-provider': 'youtube', 'data-id': '', 'data-caption': '', 'data-subject': '' } }).run()
+          }}
+          className={btn(false)}
+          title="Insert a YouTube video (click-to-load on the page)"
+        >
+          + Video
         </button>
 
         <div className="flex-1" />
