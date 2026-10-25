@@ -263,7 +263,12 @@ export default async function HomePage() {
               {/* Borderless: the photo and the type carry the package. One mark on
                   the image — the Approved badge — and no "Editor's Pick" pill. */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-8">
-                <div className="relative min-h-[280px] lg:min-h-[440px] bg-surface-raised rounded-2xl overflow-hidden">
+                <Link
+                  href={`/reviews/${featured.slug}`}
+                  tabIndex={-1}
+                  aria-hidden
+                  className="relative block min-h-[280px] lg:min-h-[440px] bg-surface-raised rounded-2xl overflow-hidden"
+                >
                   {featured.image_url && (
                     <Image
                       src={featured.image_url}
@@ -282,7 +287,7 @@ export default async function HomePage() {
                       <BossApprovedBadge size="sm" variant="card" />
                     </div>
                   )}
-                </div>
+                </Link>
                 <div className="py-6 lg:py-4 lg:pr-6 flex flex-col justify-center">
                   {(() => {
                     const cat = getCategoryBySlug(featured.category)
@@ -293,7 +298,9 @@ export default async function HomePage() {
                     )
                   })()}
                   <h3 className="font-black text-prose text-3xl md:text-4xl leading-[1.05] tracking-tight mt-3">
-                    {featured.product_name}
+                    <Link href={`/reviews/${featured.slug}`} className="hover:text-accent transition-colors">
+                      {featured.product_name}
+                    </Link>
                   </h3>
                   {featured.excerpt && (
                     <p className="text-base md:text-lg text-prose-muted leading-[1.75] mt-5">

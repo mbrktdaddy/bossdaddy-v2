@@ -514,12 +514,12 @@ export default async function ComparisonDetailPage({ params }: Props) {
                       <div className={`flex flex-col ${imageLeft ? 'sm:flex-row' : 'sm:flex-row-reverse'} gap-0`}>
                         {/* Hero image column */}
                         {review.image_url && (
-                          <div className="relative w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto sm:min-h-[280px] bg-surface-sunken shrink-0">
+                          <Link href={`/reviews/${review.slug}`} tabIndex={-1} aria-hidden className="relative block w-full sm:w-2/5 aspect-[4/3] sm:aspect-auto sm:min-h-[280px] bg-surface-sunken shrink-0">
                             <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 320px" />
                             {(review.rating ?? 0) >= 8 && (
                               <div className="absolute top-3 right-3"><BossApprovedBadge size="sm" variant="card" /></div>
                             )}
-                          </div>
+                          </Link>
                         )}
 
                         {/* Body column */}

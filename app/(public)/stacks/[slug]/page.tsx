@@ -425,12 +425,12 @@ export default async function StackDetailPage({ params }: Props) {
                       className="relative flex flex-col sm:flex-row gap-5 py-6 first:pt-0 last:pb-0"
                     >
                       {review!.image_url && (
-                        <div className="relative w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
+                        <Link href={`/reviews/${review!.slug}`} tabIndex={-1} aria-hidden className="relative block w-full sm:w-44 h-44 sm:h-36 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                           <Image src={review!.image_url} alt={review!.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 176px" />
                           {(review!.rating ?? 0) >= 8 && (
                             <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
                           )}
-                        </div>
+                        </Link>
                       )}
 
                       <div className="flex-1 min-w-0 flex flex-col">

@@ -447,12 +447,12 @@ export default async function PickDetailPage({ params }: Props) {
                       </div>
 
                       {review.image_url && (
-                        <div className="relative w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
+                        <Link href={`/reviews/${review.slug}`} tabIndex={-1} aria-hidden className="relative block w-full sm:w-40 h-40 sm:h-32 shrink-0 rounded-xl overflow-hidden bg-surface-raised">
                           <Image src={review.image_url} alt={review.product_name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 160px" />
                           {review.rating >= 8 && (
                             <div className="absolute top-2 right-2"><BossApprovedBadge size="sm" variant="card" /></div>
                           )}
-                        </div>
+                        </Link>
                       )}
 
                       <div className="flex-1 min-w-0 flex flex-col">
