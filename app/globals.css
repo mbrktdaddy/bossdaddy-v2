@@ -472,6 +472,24 @@ h1, h2, h3, h4 {
 .bd-content figure.bd-image-filled img {
   width: 100%;
   height: auto;
+  border-color: var(--bd-border-strong); /* hairline must read on white */
+}
+/* Explicit figure margins. Each body figure is the ONLY child of its own prose
+   wrapper (ArticleBody), so Typography's `:first-child { margin-top: 0 }` /
+   `:last-child { margin-bottom: 0 }` zeroed both — and the paragraph before it is
+   likewise a last-child with no bottom margin, so the image touched the text.
+   These margins collapse through the wrappers; a following h2/h3 top margin wins
+   when larger. */
+.bd-content figure.bd-image-filled {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+/* Caption hugs its image and stays clear of the next block. */
+.bd-content figure.bd-image-filled figcaption {
+  margin-top: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--bd-text-faint);
 }
 
 /* ── Code blocks in review/article body ──────────────────────────────── */

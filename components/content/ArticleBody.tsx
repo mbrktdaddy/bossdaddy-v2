@@ -18,6 +18,8 @@ import { BodyFigure, BODY_FIGURE_SIZES } from './BodyFigure'
 // written before mig 166 in ONE query, and renders. Galleries (.bd-image-grid)
 // stay raw HTML on purpose — the scroll-snap strip is CSS-driven.
 
+const FIRST_CHILD_RESET = '[&>*:first-child]:mt-0'
+
 interface Props {
   html: string
   /** Products referenced by [[BUY:slug]] anchors (already fetched by the page). */
@@ -42,6 +44,14 @@ export default async function ArticleBody({
   const clean = stripPlaceholderFigures(stripAuthoringAttrs(html))
   const segments = splitContentForInlineCards(clean, products)
 
+  // Pages pass `[&>*:first-child]:mt-0` so the body's first block sits flush under
+  // the header. Each segment is its own prose wrapper, so applying it to every
+  // segment zeroed the top margin of whatever followed a figure/card — the
+  // heading after an image hugged it, and the image lost its lead-in space.
+  // Only the first segment keeps the reset.
+  const tailProseClassName = proseClassName.replace(FIRST_CHILD_RESET, '')
+  const proseFor = (i: number) => (i === 0 ? proseClassName : tailProseClassName)
+
   // Only figures missing a fact need the lookup; fill-time attributes cover the rest.
   const needLookup = segments.flatMap((s) =>
     s.type === 'figure' && !(s.width && s.height && s.origin) ? [s.src] : [],
@@ -62,13 +72,13 @@ export default async function ArticleBody({
         }
         if (segment.type === 'figure') {
           return (
-            <div key={`figure-${i}`} className={proseClassName}>
+            <div key={`figure-${i}`} className={proseFor(i)}>
               <BodyFigure figure={segment} facts={assets?.get(segment.src) ?? null} sizes={figureSizes} />
             </div>
           )
         }
         return segment.content.trim() ? (
-          <div key={`html-${i}`} className={proseClassName} dangerouslySetInnerHTML={{ __html: segment.content }} />
+          <div key={`html-${i}`} className={proseFor(i)} dangerouslySetInnerHTML={{ __html: segment.content }} />
         ) : null
       })}
     </ImageLightbox>
