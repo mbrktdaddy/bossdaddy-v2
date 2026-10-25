@@ -38,6 +38,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 import EditorialHeader from '@/components/EditorialHeader'
 import { LabelBlock } from '@/components/ui/LabelBlock'
 import { buttonVariants } from '@/components/ui/Button'
+import { extractSteps } from '@/lib/content/elements'
 
 const TableOfContents = dynamic(() => import('@/components/TableOfContents'))
 const EngagementTracker = dynamic(() => import('@/components/EngagementTracker'))
@@ -154,6 +155,17 @@ export default async function GuidePage({ params }: Props) {
   // Any AI-generated image (hero or body) → the one byline disclosure.
   const { hasAiImage } = await pageImageFacts(guide.image_url, guide.content)
 
+  // A steps box in the body = a procedure the piece teaches → HowTo structured
+  // data (the first box; Google reads one HowTo per page). Steps are the
+  // author-approved element, never prose parsed by guesswork.
+  const stepsBox = extractSteps(guide.content)[0] ?? null
+  const howToJsonLd = stepsBox ? {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: guide.title,
+    step: stepsBox.items.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.name, text: s.text })),
+  } : null
+
   const faqJsonLd = guideFaqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -207,6 +219,9 @@ export default async function GuidePage({ params }: Props) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
+      )}
+      {howToJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
       )}
       <div className="max-w-[1100px] mx-auto px-6 py-12 overflow-x-clip">
 

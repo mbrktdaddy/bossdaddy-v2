@@ -389,6 +389,121 @@ h1, h2, h3, h4 {
   text-underline-offset: 2px;
 }
 
+/* Lists inside the body (lane 1, docs/rich-elements-plan.md §2) — Hard Goods
+   ink only: orange square bullets, bold Montserrat counters, no fills. */
+.bd-editorial ul > li::marker {
+  color: var(--bd-orange);
+  content: '■  ';
+  font-size: 0.6em;
+}
+.bd-editorial ol > li::marker {
+  color: var(--bd-text);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.bd-editorial li { margin-top: 0.35em; margin-bottom: 0.35em; }
+.bd-editorial li > p { margin-top: 0; margin-bottom: 0; }
+.bd-editorial li strong { color: var(--bd-text); }
+
+/* ── Body elements: callout + steps (docs/rich-elements-plan.md §3) ─────────
+   Hard Goods inside the article lane: hairline box, 3px orange LEFT RULE, a
+   Montserrat kicker read from data-title — never a fill. Shared by the public
+   page and the Tiptap node views, so the box looks the same while editing. */
+.bd-callout,
+.bd-steps,
+.bd-facts,
+.bd-timeline {
+  margin: 1.75rem 0;
+  padding: 1rem 1.25rem 1.1rem;
+  border: 1px solid var(--bd-border);
+  border-left: 3px solid var(--bd-orange);
+  border-radius: 0 4px 4px 0;
+  background: var(--bd-surface);
+}
+.bd-callout::before,
+.bd-steps::before,
+.bd-facts::before,
+.bd-timeline::before {
+  content: attr(data-title);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bd-text);
+}
+.bd-callout[data-kind="warning"]::before,
+.bd-callout[data-kind="safety"]::before { color: var(--bd-orange-text); }
+.bd-callout > p,
+.bd-steps > p { margin: 0.35rem 0; }
+.bd-callout > p { color: var(--bd-text); }
+.bd-steps > ol { margin: 0.25rem 0 0; padding-left: 1.5rem; }
+.bd-steps > ol > li { margin: 0.5rem 0; }
+.bd-steps li > p { margin: 0; }
+.bd-steps li strong { color: var(--bd-text); }
+.bd-steps[data-time]::after {
+  content: 'About ' attr(data-time);
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--bd-text-faint);
+}
+/* Key facts — label / value rows, two columns from the small breakpoint. */
+.bd-facts ul,
+.bd-facts ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem 1.5rem;
+}
+@media (min-width: 640px) {
+  .bd-facts ul,
+  .bd-facts ol { grid-template-columns: 1fr 1fr; }
+}
+.bd-facts li { margin: 0; padding: 0.35rem 0; border-bottom: 1px solid var(--bd-border); font-size: 0.95em; }
+.bd-facts li > p { margin: 0; }
+.bd-facts li strong { color: var(--bd-text-muted); font-weight: 600; margin-right: 0.35em; }
+.bd-facts li::marker { content: ''; }
+
+/* Timeline — a vertical rail; the bold "when" sits as a small label above each moment. */
+.bd-timeline ol {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0 0 0 1.25rem;
+  border-left: 2px solid var(--bd-border-strong);
+}
+.bd-timeline li { position: relative; margin: 0 0 0.9rem; }
+.bd-timeline li::marker { content: ''; }
+.bd-timeline li::before {
+  content: '';
+  position: absolute;
+  left: calc(-1.25rem - 5px);
+  top: 0.45em;
+  width: 8px;
+  height: 8px;
+  background: var(--bd-orange);
+}
+.bd-timeline li > p { margin: 0; }
+.bd-timeline li strong:first-child,
+.bd-timeline li > p > strong:first-child {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bd-text-faint);
+}
+
+.bd-callout:empty,
+.bd-steps:empty,
+.bd-facts:empty,
+.bd-timeline:empty { display: none; }
+
 /* Pull-quote / blockquote — zinc-200 well with orange left rule.
    Body text color (no cream) — clean editorial pause on light canvas. */
 .bd-editorial blockquote {

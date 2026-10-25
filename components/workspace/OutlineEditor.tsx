@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { buttonVariants } from '@/components/ui/Button'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Field } from '@/components/ui/Field'
-import type { BlockChoices, Outline, OutlinePart } from '@/lib/content/pipeline/types'
+import type { BlockChoices, Outline, OutlinePart, PartFormat } from '@/lib/content/pipeline/types'
+import { ELEMENT_LABEL } from '@/lib/content/elements'
 
 // The author's one real decision point in the staged pipeline: what the piece
 // is, part by part, which facts go where, how long, which blocks. Everything
@@ -113,6 +114,9 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
               <Field as="textarea" label="What this part must do" rows={2} value={p.intent} onChange={(e) => patchPart(i, { intent: e.target.value })} maxLength={400} />
               <NotesField notes={p.notes} onChange={(notes) => patchPart(i, { notes })} />
               <TargetWordsField value={p.targetWords} onChange={(targetWords) => patchPart(i, { targetWords })} />
+              {p.kind === 'body' && (
+                <FormatField value={p.format ?? 'prose'} onChange={(format) => patchPart(i, { format })} />
+              )}
               {p.kind !== 'closing' && (
                 <button type="button" onClick={() => addBodyPart(i)} className="text-xs text-prose-muted underline">+ add a section after this</button>
               )}
@@ -143,6 +147,33 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
           onChange={(e) => setDraft((d) => ({ ...d, imageCount: Math.max(0, Math.min(6, parseInt(e.target.value || '0', 10) || 0)) }))}
         />
       </div>
+
+      {(draft.elements?.length ?? 0) > 0 && (
+        <div className="space-y-3">
+          <Eyebrow>Body elements the planner recommends</Eyebrow>
+          <ul className="space-y-2">
+            {draft.elements!.map((el, i) => (
+              <li key={`${el.type}:${el.afterHeading}:${i}`} className="flex items-start gap-3 border border-soft rounded-lg px-3 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm text-prose">
+                    <span className="font-semibold uppercase tracking-wider text-xs">{ELEMENT_LABEL[el.type]}</span>
+                    <span className="text-prose-faint"> · {el.afterHeading ? `after "${el.afterHeading}"` : 'after the intro'}</span>
+                  </p>
+                  <p className="text-xs text-prose-muted">{el.reason}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDraft((d) => ({ ...d, elements: (d.elements ?? []).filter((_, j) => j !== i) }))}
+                  className="min-h-[44px] px-2 text-xs text-danger-ink"
+                >
+                  Drop
+                </button>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-prose-faint">Each is drafted from the finished prose and lands in the body, where you can edit or delete it.</p>
+        </div>
+      )}
 
       {draft.related.length > 0 && (
         <div className="space-y-2">
@@ -228,6 +259,39 @@ function clampWords(n: number): number {
  * and an empty field restores the value you started from — clearing it and
  * tapping away changes nothing.
  */
+const FORMAT_OPTIONS: { value: PartFormat; label: string; hint: string }[] = [
+  { value: 'prose', label: 'Prose',  hint: 'paragraphs' },
+  { value: 'steps', label: 'Steps',  hint: 'one numbered list' },
+  { value: 'list',  label: 'List',   hint: 'one bulleted list' },
+]
+
+/** The shape of the part's prose — recommended by the outline stage, decided here. */
+function FormatField({ value, onChange }: { value: PartFormat; onChange: (f: PartFormat) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Format" className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-prose-faint">Format</span>
+      {FORMAT_OPTIONS.map((o) => {
+        const active = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            title={o.hint}
+            onClick={() => onChange(o.value)}
+            className={`min-h-[44px] px-3 text-xs font-semibold uppercase tracking-wider border transition-colors ${
+              active ? 'border-prose bg-prose text-surface' : 'border-soft bg-surface text-prose-muted hover:border-strong'
+            }`}
+          >
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function TargetWordsField({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const [text, setText] = useState(() => String(value))
   // The last value this field and the outline agreed on. Differs from `value`

@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react'
+import { useEditor, EditorContent, ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from '@tiptap/react'
+import { CALLOUT_KINDS, CALLOUT_LABEL, FACTS_DEFAULT_TITLE, STEPS_DEFAULT_TITLE, TIMELINE_DEFAULT_TITLE, type CalloutKind } from '@/lib/content/elements'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
@@ -121,6 +122,176 @@ const ImageGridNode = Node.create({
     return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-image-grid' }), 0]
   },
 })
+
+// ── Body elements: callout + steps ──────────────────────────────────────────
+// Editable boxes (docs/rich-elements-plan.md §3). The wrapper carries the
+// marker class + data-* the sanitizer allows; the kicker is a non-editable
+// control (kind / title) and the body is ordinary editable content. The same
+// globals.css rules style them here and on the public page.
+
+function ElementKicker({ node, updateAttributes, deleteNode, kinds }: NodeViewProps & { kinds: boolean }) {
+  const title = (node.attrs['data-title'] as string | null) ?? ''
+  const kind = (node.attrs['data-kind'] as CalloutKind | null) ?? 'note'
+  return (
+    <div contentEditable={false} className="flex flex-wrap items-center gap-2 mb-2 select-none" style={{ userSelect: 'none' }}>
+      <input
+        value={title}
+        onChange={(e) => updateAttributes({ 'data-title': e.target.value })}
+        className="min-h-[44px] flex-1 min-w-[8rem] bg-transparent text-xs font-extrabold uppercase tracking-widest text-prose outline-none border-b border-soft focus:border-strong"
+        aria-label="Box title"
+        placeholder="Title"
+      />
+      {kinds && (
+        <select
+          value={kind}
+          onChange={(e) => {
+            const k = e.target.value as CalloutKind
+            const wasDefault = !title || (Object.values(CALLOUT_LABEL) as string[]).includes(title)
+            updateAttributes({ 'data-kind': k, ...(wasDefault ? { 'data-title': CALLOUT_LABEL[k] } : {}) })
+          }}
+          className="min-h-[44px] bg-transparent text-xs text-prose-muted border border-soft px-2"
+          aria-label="Callout kind"
+        >
+          {CALLOUT_KINDS.map((k) => <option key={k} value={k}>{CALLOUT_LABEL[k]}</option>)}
+        </select>
+      )}
+      <button type="button" onClick={() => deleteNode()} className="min-h-[44px] px-2 text-xs text-danger-ink" aria-label="Remove box">Remove</button>
+    </div>
+  )
+}
+
+function CalloutView(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper as="div" className="bd-callout" data-kind={props.node.attrs['data-kind']} data-title="">
+      <ElementKicker {...props} kinds />
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+
+function StepsView(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper as="div" className="bd-steps" data-title="">
+      <ElementKicker {...props} kinds={false} />
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+
+// Only text blocks inside a box: a figure, gallery or nested box would end the
+// marker's non-greedy </div> match early (lib/content/sections.ts PRESERVED_BLOCK_RE).
+const BOX_CONTENT = '(paragraph | bulletList | orderedList)+'
+
+const CalloutNode = Node.create({
+  name: 'callout',
+  group: 'block',
+  content: BOX_CONTENT,
+  defining: true,
+  addAttributes() {
+    return {
+      'data-kind':  { default: 'note' },
+      'data-title': { default: 'Note' },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-callout' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-callout' }), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(CalloutView)
+  },
+})
+
+const StepsNode = Node.create({
+  name: 'stepsBox',
+  group: 'block',
+  content: BOX_CONTENT,
+  defining: true,
+  addAttributes() {
+    return {
+      'data-title': { default: STEPS_DEFAULT_TITLE },
+      'data-time':  { default: null },
+    }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-steps' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-steps' }), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(StepsView)
+  },
+})
+
+function FactsView(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper as="div" className="bd-facts" data-title="">
+      <ElementKicker {...props} kinds={false} />
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+
+function TimelineView(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper as="div" className="bd-timeline" data-title="">
+      <ElementKicker {...props} kinds={false} />
+      <NodeViewContent />
+    </NodeViewWrapper>
+  )
+}
+
+const FactsNode = Node.create({
+  name: 'factsBox',
+  group: 'block',
+  content: BOX_CONTENT,
+  defining: true,
+  addAttributes() {
+    return { 'data-title': { default: FACTS_DEFAULT_TITLE } }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-facts' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-facts' }), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(FactsView)
+  },
+})
+
+const TimelineNode = Node.create({
+  name: 'timelineBox',
+  group: 'block',
+  content: BOX_CONTENT,
+  defining: true,
+  addAttributes() {
+    return { 'data-title': { default: TIMELINE_DEFAULT_TITLE } }
+  },
+  parseHTML() {
+    return [{ tag: 'div.bd-timeline' }]
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { class: 'bd-timeline' }), 0]
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(TimelineView)
+  },
+})
+
+/** A list-based box with N seeded items — the "+ Facts" / "+ Timeline" inserts. */
+function boxContent(list: 'bulletList' | 'orderedList', lead: string, rest: string, n: number) {
+  return [{
+    type: list,
+    content: Array.from({ length: n }, () => ({
+      type: 'listItem',
+      content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: lead }, { type: 'text', text: rest }] }],
+    })),
+  }]
+}
 
 // ── Link with affiliate attribute preservation ──────────────────────────────
 // Default Link strips data-product-slug and overrides rel. Affiliate anchors
@@ -456,6 +627,10 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       CharacterCount,
       FigureNode,
       ImageGridNode,
+      CalloutNode,
+      StepsNode,
+      FactsNode,
+      TimelineNode,
     ],
     content: value,
     editorProps: {
@@ -668,6 +843,62 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
             + Read Next
           </button>
         )}
+
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            if (editor.isActive('callout')) { editor.chain().focus().lift('callout').run(); return }
+            editor.chain().focus().wrapIn('callout', { 'data-kind': 'tip', 'data-title': CALLOUT_LABEL.tip }).run()
+          }}
+          className={btn(editor.isActive('callout'))}
+          title="Wrap the current paragraph in a callout box (tip / warning / safety / faith / note)"
+        >
+          + Callout
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            if (editor.isActive('stepsBox')) return
+            editor.chain().focus().insertContent({
+              type: 'stepsBox',
+              attrs: { 'data-title': STEPS_DEFAULT_TITLE },
+              content: [{
+                type: 'orderedList',
+                content: [1, 2, 3].map(() => ({ type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Step.' }, { type: 'text', text: ' What to do.' }] }] })),
+              }],
+            }).run()
+          }}
+          className={btn(editor.isActive('stepsBox'))}
+          title="Insert a numbered steps box"
+        >
+          + Steps
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            if (editor.isActive('factsBox')) return
+            editor.chain().focus().insertContent({ type: 'factsBox', attrs: { 'data-title': FACTS_DEFAULT_TITLE }, content: boxContent('bulletList', 'Label:', ' value', 3) }).run()
+          }}
+          className={btn(editor.isActive('factsBox'))}
+          title="Insert a key-facts box (label: value rows)"
+        >
+          + Facts
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault()
+            if (editor.isActive('timelineBox')) return
+            editor.chain().focus().insertContent({ type: 'timelineBox', attrs: { 'data-title': TIMELINE_DEFAULT_TITLE }, content: boxContent('orderedList', 'When', ' What happened.', 3) }).run()
+          }}
+          className={btn(editor.isActive('timelineBox'))}
+          title="Insert a timeline (when + what happened)"
+        >
+          + Timeline
+        </button>
 
         <div className="flex-1" />
 

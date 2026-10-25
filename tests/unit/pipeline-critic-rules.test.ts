@@ -61,3 +61,39 @@ describe('runRules', () => {
     expect(f.some((x) => x.code === 'over-length' && x.part === 1)).toBe(true)
   })
 })
+
+describe('runRules — structure (lane 1)', () => {
+  const essay: Brief = { contentType: 'guide', topic: 'T', category: 'faith', pieceType: 'essay', keyPoints: [], productSlugs: [], imageSlots: 0, inquiryMode: false }
+  const noTokenParts: OutlinePart[] = parts.map((p) => ({ ...p, productToken: null }))
+  const noTokens = [clean[0], 'The latches feel cheap but the tester works.', 'Buy it if your garage is a mess.']
+
+  it('blocks a # / ## heading inside a part', () => {
+    const f = runRules({ brief: review, parts, texts: [clean[0], '## Build\n' + clean[1], clean[2]], familyNames: [] })
+    expect(f.find((x) => x.code === 'heading-in-part')).toMatchObject({ severity: 'block', part: 1 })
+  })
+  it('warns on a list inside an essay', () => {
+    const f = runRules({ brief: essay, parts: noTokenParts, texts: [noTokens[0], 'Three things:\n- one\n- two', noTokens[2]], familyNames: [] })
+    expect(f.find((x) => x.code === 'list-in-essay')).toMatchObject({ severity: 'warn', part: 1 })
+  })
+  it('notes a list-heavy part only when the outline did not ask for a list', () => {
+    const texts = [noTokens[0], 'Lead.\n- one\n- two\n- three', noTokens[2]]
+    const prose = runRules({ brief: review, parts: noTokenParts, texts, familyNames: [] })
+    expect(prose.find((x) => x.code === 'list-heavy')).toMatchObject({ part: 1 })
+    const listed = noTokenParts.map((p, i) => (i === 1 ? { ...p, format: 'list' as const } : p))
+    expect(codes(runRules({ brief: review, parts: listed, texts, familyNames: [] }))).not.toContain('list-heavy')
+  })
+  it('notes more than one pull-quote across the piece', () => {
+    const f = runRules({ brief: review, parts: noTokenParts, texts: ['> One.\n\nProse.', '> Two.\n\nMore prose.', noTokens[2]], familyNames: [] })
+    expect(f.find((x) => x.code === 'pullquote-count')?.message).toMatch(/^2 pull-quote/)
+    expect(codes(runRules({ brief: review, parts: noTokenParts, texts: ['> One.\n\nProse.', noTokens[1], noTokens[2]], familyNames: [] }))).not.toContain('pullquote-count')
+  })
+  it('notes when steps were asked for and none (or only bullets) were written', () => {
+    const steps = noTokenParts.map((p, i) => (i === 1 ? { ...p, format: 'steps' as const } : p))
+    const none = runRules({ brief: review, parts: steps, texts: noTokens, familyNames: [] })
+    expect(none.find((x) => x.code === 'format-missing')?.message).toMatch(/numbered steps/)
+    const bullets = runRules({ brief: review, parts: steps, texts: [noTokens[0], 'Go:\n- a\n- b', noTokens[2]], familyNames: [] })
+    expect(bullets.find((x) => x.code === 'format-missing')?.message).toMatch(/numbered list, not bullets/)
+    const numbered = runRules({ brief: review, parts: steps, texts: [noTokens[0], 'Go:\n1. a\n2. b', noTokens[2]], familyNames: [] })
+    expect(codes(numbered)).not.toContain('format-missing')
+  })
+})

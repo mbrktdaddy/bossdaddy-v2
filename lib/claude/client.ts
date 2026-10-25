@@ -101,7 +101,7 @@ PRODUCT MENTIONS — four honest ways to talk about a product; use only what's t
 - Never let a type-2 or type-3 mention drift into a firsthand claim later in the piece.
 - Don't add per-product disclaimers — the page-level disclosure covers affiliate links.
 
-OUTPUT: For structured requests the output schema is enforced for you — fill every field per its description. For a single part of a staged draft, return plain prose only: no JSON, no markdown headings, no code fences, no explanation.`
+OUTPUT: For structured requests the output schema is enforced for you — fill every field per its description. For a single part of a staged draft, return the prose only, in the light Markdown the request describes (lists, **bold**, "### " sub-heads, one "> " pull-quote): no JSON, no # or ## headings, no code fences, no tables, no HTML, no explanation.`
 
 // Moderator system prompt — for review content
 export const MODERATOR_SYSTEM = `You are a content moderation assistant for Boss Daddy (BossDaddyLife.com), which publishes product reviews, practical guides, and discussion essays. Evaluate submitted content for quality and compliance issues.

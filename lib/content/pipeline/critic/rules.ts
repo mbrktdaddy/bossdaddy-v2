@@ -11,6 +11,8 @@ const SPONSORED = ['in partnership with', 'thanks to our friends at', 'brought t
 const SOFT_PARENTING = ['every child is unique', 'no judgment', 'you do you']
 const BRAND_GREETING = [/\b(hey|listen up|alright|okay|ok),?\s+boss\s+dads?\b/i, /\bboss\s+dads?,\s+(listen|here)/i]
 const HEDGES = /\b(may|might|could)\b/gi
+const LIST_LINE = /^(?:[-*]|\d+[.)])\s+\S/
+const NUMBERED_LINE = /^\d+[.)]\s+\S/
 const VAGUE_TIME = /\brecently\b/gi
 
 function esc(s: string): string {
@@ -103,6 +105,37 @@ export function runRules({ brief, parts, texts, familyNames }: RulesInput): Crit
   }
   if (/https?:\/\/|amazon\.com|geni\.us/i.test(all)) {
     out.push({ severity: 'block', code: 'raw-url', source: 'rules', message: 'A raw product URL appears in the prose — only [[BUY:]] tokens may link.' })
+  }
+
+  // Structure: the light-Markdown subset (docs/rich-elements-plan.md §2).
+  const essay = brief.contentType === 'guide' && brief.pieceType === 'essay'
+  let partsWithLists = 0
+  for (let i = 0; i < texts.length; i++) {
+    const lines = texts[i].split('\n').map((l) => l.trim()).filter(Boolean)
+    if (!lines.length) continue
+    const heading = lines.findIndex((l) => /^#{1,2}\s/.test(l))
+    if (heading >= 0) out.push({ severity: 'block', code: 'heading-in-part', source: 'rules', part: i, quote: lines[heading].slice(0, 80),
+      message: 'A # / ## heading inside a part — the outline owns the headings; rewrite the line as prose or a ### sub-head.' })
+    const listLines = lines.filter((l) => LIST_LINE.test(l)).length
+    const hasList = listLines > 0
+    if (hasList) partsWithLists++
+    if (hasList && essay) out.push({ severity: 'warn', code: 'list-in-essay', source: 'rules', part: i, message: 'A list inside an essay — the argument should carry itself in paragraphs.' })
+    if (hasList && listLines / lines.length > 0.5 && parts[i]?.format !== 'steps' && parts[i]?.format !== 'list') {
+      out.push({ severity: 'note', code: 'list-heavy', source: 'rules', part: i, message: 'More list than prose in a part the outline marked as prose.' })
+    }
+    const wanted = parts[i]?.kind === 'body' ? parts[i]?.format : undefined
+    if ((wanted === 'steps' || wanted === 'list') && !hasList) {
+      out.push({ severity: 'note', code: 'format-missing', source: 'rules', part: i, message: `The outline asked for ${wanted === 'steps' ? 'numbered steps' : 'a bulleted list'} here and none was written.` })
+    }
+    if (wanted === 'steps' && hasList && !lines.some((l) => NUMBERED_LINE.test(l))) {
+      out.push({ severity: 'note', code: 'format-missing', source: 'rules', part: i, message: 'Steps should be a numbered list, not bullets.' })
+    }
+  }
+  const quotes = all.split('\n').filter((l) => /^>\s?\S/.test(l.trim())).length
+  if (quotes > 1) out.push({ severity: 'note', code: 'pullquote-count', source: 'rules', message: `${quotes} pull-quote lines — one per piece, and only a line that earns re-reading.` })
+  const bodyCount = parts.filter((p) => p.kind === 'body').length
+  if (!essay && bodyCount >= 3 && partsWithLists > bodyCount / 2) {
+    out.push({ severity: 'note', code: 'list-heavy', source: 'rules', message: `Lists in ${partsWithLists} of ${bodyCount} body parts — the piece reads as a checklist, not a column.` })
   }
 
   // Rhythm: a flat sentence-length distribution reads machine-made.

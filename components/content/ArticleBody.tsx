@@ -5,6 +5,7 @@ import ContentLinkCard from '@/components/ContentLinkCard'
 import { splitContentForInlineCards, type InlineProduct } from '@/lib/inline-content'
 import { stripAuthoringAttrs } from '@/lib/content/html'
 import { stripPlaceholderFigures } from '@/lib/content/publish-gate'
+import { stripEmptyElements } from '@/lib/content/elements'
 import { lookupImageAssets } from '@/lib/images/assets'
 import { BodyFigure, BODY_FIGURE_SIZES } from './BodyFigure'
 
@@ -41,7 +42,7 @@ export default async function ArticleBody({
   figureSizes = BODY_FIGURE_SIZES,
   className = 'bd-content',
 }: Props) {
-  const clean = stripPlaceholderFigures(stripAuthoringAttrs(html))
+  const clean = stripEmptyElements(stripPlaceholderFigures(stripAuthoringAttrs(html)))
   const segments = splitContentForInlineCards(clean, products)
 
   // Pages pass `[&>*:first-child]:mt-0` so the body's first block sits flush under

@@ -5,7 +5,7 @@ import { MODELS } from '@/lib/ai/models'
 import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
-import { OutlineEdit, OutlineOutput, assignProductTokens, buildOutline, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { OutlineEdit, OutlineOutput, assignProductTokens, buildOutline, normalizeElementPlans, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
 import { findRelated } from '@/lib/content/pipeline/related'
 import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
@@ -108,6 +108,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     ),
     blocks: parsed.data.blocks,
     imageCount: parsed.data.imageCount,
+    elements: normalizeElementPlans(parsed.data.elements, parsed.data.parts.map((p) => ({ ...p, productToken: null })), run.brief),
   }
   const next = await updateRun(supabase, run, {
     outline,

@@ -14,6 +14,7 @@ import ShareButtons from '@/components/ShareButtons'
 import RatingScore from '@/components/RatingScore'
 import VerdictCard from '@/components/reviews/VerdictCard'
 import TakeawaysCard from '@/components/reviews/TakeawaysCard'
+import ProsConsCard from '@/components/reviews/ProsConsCard'
 import TrustReceipt from '@/components/reviews/TrustReceipt'
 import BossApprovedBadge from '@/components/BossApprovedBadge'
 import ViewTracker from '@/components/ViewTracker'
@@ -519,6 +520,9 @@ export default async function ReviewPage({ params }: Props) {
 
         {/* Key Takeaways — separate block, visually quieter than the verdict */}
         <TakeawaysCard items={keyTakeaways} />
+
+        {/* Pros & cons — the columns the JSON-LD below already carries, finally on the page */}
+        <ProsConsCard pros={pros} cons={cons} />
 
         {/* Follow-up TOC — auto-generated from the required headings the body contains */}
         {isFollowup && followupToc.length >= 2 && (

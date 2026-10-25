@@ -87,7 +87,7 @@ RULES:
       ? `Product links: this section contains ${tokenEntries.map(([s, n]) => `${n} × [[BUY:${s}]]`).join(', ')}. Keep exactly those tokens, written exactly like that, placed where they still make sense. Add none, drop none.`
       : 'Product links: this section has no [[BUY:]] tokens — add none.'}
 - Keep the first-person dad voice, the house rules, and roughly the same length unless told to lengthen or shorten.
-- Return the section's prose ONLY: no heading, no title, no preamble, no commentary, no JSON, no markdown headings. Paragraphs separated by a blank line.`
+- Return the section's prose ONLY: no heading, no title, no preamble, no commentary, no JSON, no # or ## headings, no code fences, no tables. Paragraphs separated by a blank line. The text may carry light Markdown — "- " bullets, "1." numbered items, "### " sub-heads, "> " pull-quotes, **bold** — keep what is there in the same marks (a numbered list stays numbered); add a list only if the instruction asks for one.`
 
   const startedAt = Date.now()
   const words = text.split(/\s+/).filter(Boolean).length

@@ -1,5 +1,6 @@
 import type { SpecLike } from '../specs'
 import type { DraftInlineImage } from '../html'
+import type { ContentElement, ElementPlan } from '../elements'
 
 // The staged pipeline's state. One `content_runs` row (mig 165) holds a RunState;
 // each stage reads the state, calls a model, writes its slice back. The wizard
@@ -69,7 +70,16 @@ export interface OutlinePart {
   targetWords: number
   /** A slug to embed exactly once in this part, or null. Assigned in code, not by the model. */
   productToken: string | null
+  /**
+   * The shape the prose takes (docs/rich-elements-plan.md §2): `steps` = one
+   * numbered list is the spine of the part, `list` = one bulleted list,
+   * `prose` = paragraphs. Recommended by the outline stage, changed by the
+   * author. Absent on runs stored before 2026-10-25 → prose.
+   */
+  format?: PartFormat
 }
+
+export type PartFormat = 'prose' | 'steps' | 'list'
 
 export interface RelatedPiece {
   type: ContentType
@@ -83,6 +93,8 @@ export interface Outline {
   excerpt: string
   parts: OutlinePart[]
   blocks: BlockChoices
+  /** Recommended body elements (callout / steps) the author keeps or drops. Absent on runs before 2026-10-25. */
+  elements?: ElementPlan[]
   imageCount: number
   related: RelatedPiece[]
   duplicateWarning: string | null
@@ -111,6 +123,8 @@ export interface Blocks {
   /** Suggested — the author confirms them in the wizard (claims only when set). */
   subScores?: SubScores
   wouldRebuy?: boolean
+  /** The planned elements, drafted from the finished prose (lib/content/elements.ts). */
+  elements?: ContentElement[]
   suggestedTags: string[]
 }
 

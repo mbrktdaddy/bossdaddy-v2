@@ -4,16 +4,22 @@ import { INQUIRY_TRIGGER } from '../prompts'
 import { tagSlugList, type TagVocab } from '@/lib/claude/tag-vocab'
 import { briefFacts, briefLabel } from './briefs'
 import { runProse } from './section'
+import { CALLOUT_LABEL, ElementDraftOutput, type ElementPlan } from '../elements'
 import type { BlockChoices, Blocks, RunState } from './types'
 
 // Stage 3 — the structured blocks, derived from the FINISHED prose rather than
 // invented in parallel with it. Only the blocks the outline chose are in the
 // schema, so nothing is forced and nothing is paid for that gets discarded.
 
-export function blocksOutput(choices: BlockChoices, contentType: 'review' | 'guide'): z.ZodType<Blocks> {
+export function blocksOutput(choices: BlockChoices, contentType: 'review' | 'guide', elements: ElementPlan[] = []): z.ZodType<Blocks> {
   const shape: Record<string, z.ZodTypeAny> = {
     suggestedTags: z.array(z.string().min(1).max(80)).max(10).describe('3–6 slugs from the controlled vocabulary in the prompt'),
   }
+  // max only: a strict count would fail validation (and burn the retries) when
+  // the model judges one element unsupported by the prose — a missing box is
+  // the right outcome, a failed blocks stage is not.
+  if (elements.length) shape.elements = z.array(ElementDraftOutput).max(elements.length)
+    .describe(`The ${elements.length} planned element(s) in the prompt, in order, each drafted from the prose; omit one only if the prose gives it nothing to say`)
   if (choices.tldr) shape.tldr = z.string().min(1).max(600).describe(contentType === 'review'
     ? '1–2 sentence verdict for skimmers; lead with the gut answer'
     : '2–3 plain-English sentences; lead with the main takeaway (inquiry: name the question and the answer you land on)')
@@ -54,6 +60,7 @@ ${runProse(run)}
 """
 
 BLOCKS WANTED: ${wanted.join(', ') || 'none'}${choices.subScores && brief.contentType === 'review' ? ', subScores + wouldRebuy (suggested — the author confirms)' : ''}.
+${elementsInstruction(run.outline!.elements ?? [])}
 ${choices.subScores && brief.contentType === 'review' ? `- subScores: four 1–10 integers that DEFEND a target overall of ${brief.ratingHint}/10 and average to ~${brief.ratingHint}.0 (no 10s on a 6). One can be a clear weak spot.\n` : ''}
 TAGS: pick 3–6 slugs from this controlled vocabulary that genuinely apply.
 Editorial (at most 1): ${tagSlugList(vocab, 'editorial')}
@@ -62,4 +69,23 @@ ${brief.contentType === 'review' ? `Price: ${tagSlugList(vocab, 'price')}\n` : '
 Topic: ${tagSlugList(vocab, 'topic')}
 
 Each field's description says its shape. Everything must be traceable to the prose above.`
+}
+
+/** The planned body elements, drafted here FROM the prose (never new claims). */
+export function elementsInstruction(plans: ElementPlan[]): string {
+  if (!plans.length) return ''
+  const lines = plans.map((p, i) => {
+    const where = p.afterHeading ? `after "${p.afterHeading}"` : 'after the introduction'
+    switch (p.type) {
+      case 'callout':
+        return `${i + 1}. CALLOUT ${where} — ${p.reason}. Set "kind" (${Object.entries(CALLOUT_LABEL).map(([k, v]) => `${k} = "${v}"`).join(', ')}), a 1–4 word "title", and a 1–3 sentence "body" lifted from the prose. Safety and faith kinds: edge off, plain and warm.`
+      case 'steps':
+        return `${i + 1}. STEPS ${where} — ${p.reason}. A short "title", 3–8 "items" in the order the reader performs them (imperative 2–6 word title + one sentence from the prose), and "time" only if the prose states a total.`
+      case 'facts':
+        return `${i + 1}. FACTS ${where} — ${p.reason}. A short "title" and 3–8 "facts" (label + value) that the prose or the author facts STATE — a number the piece never gives is not a fact here.`
+      case 'timeline':
+        return `${i + 1}. TIMELINE ${where} — ${p.reason}. A short "title" and 3–8 "events" in order (when + what happened + one sentence), each a moment the prose actually narrates.`
+    }
+  })
+  return `ELEMENTS (exactly these, in order, "afterHeading" copied verbatim):\n${lines.join('\n')}\n`
 }

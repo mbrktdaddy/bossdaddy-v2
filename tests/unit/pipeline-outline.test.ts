@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { assignProductTokens, buildOutline, defaultBlockChoices, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { OutlineEdit, assignProductTokens, buildOutline, defaultBlockChoices, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
 import type { Brief, OutlinePart } from '@/lib/content/pipeline/types'
 
 const review: Brief = {
@@ -40,11 +40,12 @@ describe('buildOutline', () => {
     titleOptions: ['DUPLICATE? Battery Daddy review', 'Battery Daddy: 180 cells, one box'],
     excerpt: 'Fine.',
     parts: [
-      { kind: 'body', heading: 'Build', intent: 'b', notes: ['Used it four months'], targetWords: 200 },
-      { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60 },
-      { kind: 'closing', heading: 'Verdict', intent: 'land', notes: [], targetWords: 120 },
+      { kind: 'body', heading: 'Build', intent: 'b', notes: ['Used it four months'], targetWords: 200, format: 'steps' },
+      { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60, format: 'prose' },
+      { kind: 'closing', heading: 'Verdict', intent: 'land', notes: [], targetWords: 120, format: 'prose' },
     ],
     blocks: { tldr: true, keyTakeaways: true, faqs: false, bestFor: true, notFor: true, prosCons: true },
+    elements: [],
     imageCount: 5,
   }
   it('puts the intro first and the closing last whatever order the model used', () => {
@@ -85,5 +86,37 @@ describe('validateOutlineShape', () => {
     expect(validateOutlineShape([{ kind: 'body' }, { kind: 'closing' }])).toMatch(/intro/)
     expect(validateOutlineShape([{ kind: 'intro' }, { kind: 'body' }])).toMatch(/closing/)
     expect(validateOutlineShape([{ kind: 'intro' }, { kind: 'closing' }])).toMatch(/body/)
+  })
+})
+
+describe('buildOutline — part format (lane 1)', () => {
+  const model: OutlineModelOutput = {
+    titleOptions: ['A', 'B'], excerpt: 'e', imageCount: 0, elements: [],
+    blocks: { tldr: false, keyTakeaways: false, faqs: false, bestFor: false, notFor: false, prosCons: false },
+    parts: [
+      { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60, format: 'prose' },
+      { kind: 'body', heading: 'Do it', intent: 'b', notes: [], targetWords: 200, format: 'steps' },
+      { kind: 'body', heading: 'Options', intent: 'c', notes: [], targetWords: 200, format: 'list' },
+      { kind: 'closing', heading: 'Wrapping Up', intent: 'land', notes: [], targetWords: 80, format: 'prose' },
+    ],
+  }
+  it('carries the recommended format onto body parts', () => {
+    const o = buildOutline(model, guide, [])
+    expect(o.parts.filter((p) => p.kind === 'body').map((p) => p.format)).toEqual(['steps', 'list'])
+  })
+  it('an essay forces prose whatever the model recommended', () => {
+    const o = buildOutline(model, { ...guide, pieceType: 'essay', productSlugs: [] }, [])
+    expect(o.parts.filter((p) => p.kind === 'body').map((p) => p.format)).toEqual(['prose', 'prose'])
+  })
+  it('the author-edit schema keeps format on save and tolerates its absence (older runs)', () => {
+    const parts = [
+      { kind: 'intro', heading: '', intent: 'o', notes: [], targetWords: 60, productToken: null },
+      { kind: 'body', heading: 'Do it', intent: 'b', notes: [], targetWords: 200, productToken: null, format: 'steps' },
+      { kind: 'closing', heading: 'Wrapping Up', intent: 'l', notes: [], targetWords: 80, productToken: null },
+    ]
+    const parsed = OutlineEdit.safeParse({ title: 't', excerpt: 'e', imageCount: 0, parts, blocks: { tldr: false, keyTakeaways: false, faqs: false, bestFor: false, notFor: false, prosCons: false, subScores: false } })
+    expect(parsed.success).toBe(true)
+    expect(parsed.success && parsed.data.parts[1].format).toBe('steps')
+    expect(parsed.success && parsed.data.parts[0].format).toBeUndefined()
   })
 })

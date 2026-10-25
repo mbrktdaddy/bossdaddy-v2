@@ -79,3 +79,35 @@ describe('sectionBudget', () => {
     expect(sectionBudget(5000)).toBe(6000)
   })
 })
+
+describe('formatRules (lane 1, docs/rich-elements-plan.md §2)', () => {
+  it('a body part marked steps is told to write one numbered list as its spine', () => {
+    const r = run()
+    r.outline!.parts[1].format = 'steps'
+    const p = sectionPrompt(r, 1)
+    expect(p).toContain('This part is STEPS')
+    expect(p).toContain('FORMAT (light Markdown')
+    expect(p).not.toContain('no bullet lists unless')
+  })
+  it('a steps part with a product token is told to keep the token out of the list', () => {
+    const r = run()
+    r.outline!.parts[1].format = 'steps'
+    expect(sectionPrompt(r, 1)).toContain('never inside a list item')
+    r.outline!.parts[1].format = 'prose'
+    expect(sectionPrompt(r, 1)).not.toContain('never inside a list item')
+  })
+  it('a body part without a format (pre-2026-10-25 run) is prose with a short list allowed', () => {
+    expect(sectionPrompt(run(), 1)).toContain('This part is PROSE')
+  })
+  it('intro and closing are paragraphs only, whatever the stored format says', () => {
+    const r = run()
+    r.outline!.parts[0].format = 'list'
+    expect(sectionPrompt(r, 0)).toContain('Paragraphs only — no lists here.')
+  })
+  it('an essay is paragraphs only even when a part says list', () => {
+    const r = run({ contentType: 'guide', brief: { contentType: 'guide', topic: 'Fatherhood', category: 'faith', pieceType: 'essay', keyPoints: [], productSlugs: [], imageSlots: 0, inquiryMode: false } })
+    r.outline!.parts[1].format = 'list'
+    r.outline!.parts[1].productToken = null
+    expect(sectionPrompt(r, 1)).toContain('This is an essay: paragraphs only')
+  })
+})
