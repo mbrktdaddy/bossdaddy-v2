@@ -173,6 +173,7 @@ Surface/text/border tokens (light page): `--color-chrome` (masthead/footer, alwa
 - **Mobile tap targets:** minimum 44px. Use `py-2.5` on pills, `py-3` on buttons/pagination/nav links.
 - **Filter tabs** on listing pages: `overflow-x-auto scrollbar-hide` — never `flex-wrap`.
 - **Horizontal scroll sections:** Never use `overflow-x-auto` inside a padded container — it bleeds to page level and breaks the layout. Always split into `sm:hidden` scroll strip (with `overflow-x-auto` + padding inside the scrollable div) and `hidden sm:grid` desktop grid. If inside a padded parent, use `-mx-{n}` to break out and restore padding inside.
+- **Article bodies never get a scroll wrapper.** Wide elements scroll themselves (`.bd-editorial pre`, `.bd-image-grid`), the sanitizer strips `<table>`, and `html`/`body` + the page container (`overflow-x-clip`) clip overflow. A wrapper around the body clipped affiliate links on reviews (removed `9cde395`) and trapped the body-image lightbox on guides (removed 2026-10-25).
 
 ---
 

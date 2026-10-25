@@ -208,7 +208,7 @@ export default async function GuidePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       )}
-      <div className="max-w-[1100px] mx-auto px-6 py-12">
+      <div className="max-w-[1100px] mx-auto px-6 py-12 overflow-x-clip">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-3 text-sm text-prose-muted mb-8 flex-wrap">
@@ -292,7 +292,7 @@ export default async function GuidePage({ params }: Props) {
             </div>
 
             {/* Guide body — ProductCtaCards injected inline at [[BUY:slug]] positions */}
-            <div className="overflow-x-auto min-w-0 w-full">
+            <div className="min-w-0 w-full">
               <ArticleBody
                 html={guide.content}
                 products={mentionedProducts ?? []}

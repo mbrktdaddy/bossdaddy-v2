@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type ReactNode, type MouseEvent } from 'react'
+import { createPortal } from 'react-dom'
 import GalleryViewer, { type GalleryItem } from '@/components/GalleryViewer'
 
 interface Props {
@@ -57,14 +58,20 @@ export default function ImageLightbox({ children, className }: Props) {
         {children}
       </div>
 
-      {items && (
+      {/* Portalled to <body>, like LightboxImage (the hero), so no ancestor of the
+          article body (scroll wrappers, clipping, descendant CSS) can touch the
+          viewer. Rendered inline inside the guide body's old `overflow-x-auto`
+          wrapper, its close X / scrim stopped responding on phones. Only mounts
+          after a click, so `document` is always there. */}
+      {items && createPortal(
         <GalleryViewer
           items={items}
           index={index}
           onIndexChange={setIndex}
           onClose={() => setItems(null)}
           optimized
-        />
+        />,
+        document.body,
       )}
     </>
   )

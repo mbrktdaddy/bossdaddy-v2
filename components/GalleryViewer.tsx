@@ -81,7 +81,10 @@ export default function GalleryViewer({ items, index, onIndexChange, onClose, op
         onTouchEnd={onTouchEnd}
       >
         {/* Close first in DOM order: the dialog focuses its first focusable. */}
-        <div className="absolute right-3 top-3">
+        {/* z-10 on the controls: the optimized photo box is 92vw × 85vh, a positioned
+            sibling later in the DOM, so on a phone it would paint over (and swallow
+            taps meant for) anything not lifted above it. */}
+        <div className="absolute right-3 top-3 z-10">
           <IconButton tone="overlay" label="Close image" onClick={onClose}>
             <XIcon className="w-5 h-5" strokeWidth={2} />
           </IconButton>
@@ -94,12 +97,12 @@ export default function GalleryViewer({ items, index, onIndexChange, onClose, op
                 {safeIndex + 1} / {len}
               </span>
             </div>
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
               <IconButton tone="overlay" label="Previous image" onClick={() => go(-1)}>
                 <ChevronLeftIcon className="w-5 h-5" strokeWidth={2} />
               </IconButton>
             </div>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
               <IconButton tone="overlay" label="Next image" onClick={() => go(1)}>
                 <ChevronRightIcon className="w-5 h-5" strokeWidth={2} />
               </IconButton>
