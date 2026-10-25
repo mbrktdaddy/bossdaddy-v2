@@ -86,7 +86,12 @@ export default function TopicBlock({
       <EditorialHeader
         eyebrow="Topic"
         title={label}
-        right={{ label: viewAllCount ? `View all ${viewAllCount}` : `View all in ${label}`, href: viewAllHref }}
+        right={{
+          label: viewAllCount ? `View all ${viewAllCount}` : `View all in ${label}`,
+          // The title sits right above the button, so a phone doesn't need the topic repeated.
+          shortLabel: viewAllCount ? undefined : 'View all',
+          href: viewAllHref,
+        }}
       />
       {description && (
         <p className="-mt-3 mb-6 text-sm text-prose-faint line-clamp-1">{description}</p>
