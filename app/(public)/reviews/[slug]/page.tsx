@@ -31,8 +31,7 @@ import { extractProductSlugs } from '@/lib/inline-content'
 import { stripAuthoringAttrs } from '@/lib/content/html'
 import ArticleBody from '@/components/content/ArticleBody'
 import { AiAssistanceNote } from '@/components/content/AiAssistanceNote'
-import { lookupImageAssets } from '@/lib/images/assets'
-import { imageCredit } from '@/lib/images/credit'
+import { pageImageFacts } from '@/lib/images/assets'
 import StickyMobileCta from '@/components/StickyMobileCta'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { NewsletterCard } from '@/components/NewsletterCard'
@@ -255,9 +254,8 @@ export default async function ReviewPage({ params }: Props) {
     ? review.profiles[0]
     : (review.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
-  // The hero's credit line (AI-generated scene / Photo: Boss Daddy) from the asset's origin.
-  const heroFacts = review.image_url ? await lookupImageAssets([review.image_url]) : null
-  const heroCredit = review.image_url ? imageCredit(heroFacts?.get(review.image_url)?.origin) : null
+  // Any AI-generated image (hero or body) → the one byline disclosure.
+  const { hasAiImage } = await pageImageFacts(review.image_url, renderedBodyHtml)
   const category = getCategoryBySlug(review.category ?? '')
 
   const tldr          = review.tldr as string | null
@@ -463,7 +461,7 @@ export default async function ReviewPage({ params }: Props) {
             {review.reading_time_minutes && (
               <span>{review.reading_time_minutes} min read</span>
             )}
-            <AiAssistanceNote method={review.generation_method} />
+            <AiAssistanceNote method={review.generation_method} hasAiImage={hasAiImage} />
           </div>
 
           {/* Trust receipt — what I paid + how long I tested. Sits right under the
@@ -500,7 +498,6 @@ export default async function ReviewPage({ params }: Props) {
                 />
               </Card>
             </LightboxImage>
-            {heroCredit && <p className="mt-2 text-xs tracking-wide text-prose-faint">{heroCredit}</p>}
             {(review.rating ?? 0) >= 8 && (
               <div className="absolute top-3 right-3 pointer-events-none">
                 <BossApprovedBadge size="sm" variant="card" />

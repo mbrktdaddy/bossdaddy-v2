@@ -97,8 +97,11 @@ export default function EditorialStandardsPage() {
  <li><strong>AI helps with research and structure.</strong> Specs, comparisons, pros-and-cons framing, plain-English explanations — AI is a good tool for that. It is not a good tool for telling you whether something is worth your money. That&apos;s a human call.</li>
  </ul>
  <p>
- Where AI assistance is substantial, we note it. This is how we read FTC guidance on
- AI-generated content, and it&apos;s how we&apos;d want to be told if the roles were reversed.
+ Where AI assistance is substantial, we note it — one short line under the headline.
+ Some images on the site are AI-generated illustrations of a scene or mood; when a page
+ has one, that line says so. Photos of the actual product are never AI-generated. This is
+ how we read FTC guidance on AI-generated content, and it&apos;s how we&apos;d want to be told
+ if the roles were reversed.
  </p>
 
  <h2>5. Contributor Standards</h2>

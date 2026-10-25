@@ -14,8 +14,7 @@ import BossApprovedBadge from '@/components/BossApprovedBadge'
 import { extractProductSlugs } from '@/lib/inline-content'
 import ArticleBody from '@/components/content/ArticleBody'
 import { AiAssistanceNote } from '@/components/content/AiAssistanceNote'
-import { lookupImageAssets } from '@/lib/images/assets'
-import { imageCredit } from '@/lib/images/credit'
+import { pageImageFacts } from '@/lib/images/assets'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import RatingScore from '@/components/RatingScore'
 import ShareButtons from '@/components/ShareButtons'
@@ -152,9 +151,8 @@ export default async function GuidePage({ params }: Props) {
     : (guide.profiles as unknown as { username: string } | null)
   const author = profileData?.username ?? 'Boss Daddy'
   const category = getCategoryBySlug(guide.category ?? '')
-  // The hero's credit line (AI-generated scene / Photo: Boss Daddy) from the asset's origin.
-  const heroFacts = guide.image_url ? await lookupImageAssets([guide.image_url]) : null
-  const heroCredit = guide.image_url ? imageCredit(heroFacts?.get(guide.image_url)?.origin) : null
+  // Any AI-generated image (hero or body) → the one byline disclosure.
+  const { hasAiImage } = await pageImageFacts(guide.image_url, guide.content)
 
   const faqJsonLd = guideFaqs.length > 0 ? {
     '@context': 'https://schema.org',
@@ -243,7 +241,7 @@ export default async function GuidePage({ params }: Props) {
             {guide.reading_time_minutes && (
               <span>{guide.reading_time_minutes} min read</span>
             )}
-            <AiAssistanceNote method={guide.generation_method} />
+            <AiAssistanceNote method={guide.generation_method} hasAiImage={hasAiImage} />
           </div>
         </div>
 
@@ -263,7 +261,6 @@ export default async function GuidePage({ params }: Props) {
                 />
               </div>
             </LightboxImage>
-            {heroCredit && <p className="mt-2 text-xs tracking-wide text-prose-faint">{heroCredit}</p>}
           </div>
         )}
 

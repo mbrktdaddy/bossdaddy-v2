@@ -69,7 +69,7 @@ export function createSlotId(): string {
 export interface FigureImageMeta {
   width?: number | null
   height?: number | null
-  /** 'own' | 'web' | 'amazon' | 'ai' — drives the credit line (lib/images/credit.ts). */
+  /** 'own' | 'web' | 'amazon' | 'ai' — drives the page-level AI note (pageImageFacts in lib/images/assets.ts). */
   origin?: string | null
 }
 

@@ -7,7 +7,7 @@
  *   - `[[COLLECTION:slug]]` → `<div class="bd-collection-embed">` marker
  *   - `[[REVIEW:slug]]` / `[[GUIDE:slug]]` → `<div class="bd-content-link">` marker
  *   - a filled inline image → `<figure class="bd-image-filled">` (Phase 3: rendered
- *     through next/image with its stored size, lazy, with a credit line)
+ *     through next/image with its stored size, lazy)
  *
  * Figures inside a `.bd-image-grid` gallery stay HTML — the scroll-snap strip
  * is CSS-driven and must keep its children in one div.

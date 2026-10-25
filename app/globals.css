@@ -467,24 +467,11 @@ h1, h2, h3, h4 {
 }
 
 /* ── Body figure (content pipeline Phase 3) — next/image keeps its intrinsic
-   ratio inside the measure; the credit line (AI-generated scene / Photo:
-   Boss Daddy) sits in the figcaption after the caption, never as a badge
-   over the photo (brand guide: one mark per image at most). ──────────── */
+   ratio inside the measure. No per-image AI credit: disclosure is one line in
+   the byline row (AiAssistanceNote). ──────────────────────────────────── */
 .bd-content figure.bd-image-filled img {
   width: 100%;
   height: auto;
-}
-.bd-figure-credit {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-style: normal;
-  letter-spacing: 0.04em;
-  color: var(--bd-text-faint);
-  white-space: nowrap;
-}
-.bd-figure-credit[data-sep='1']::before {
-  content: '·';
-  margin: 0 0.5em;
 }
 
 /* ── Code blocks in review/article body ──────────────────────────────── */

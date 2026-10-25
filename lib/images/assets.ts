@@ -1,8 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { extractFigureSrcs } from '@/lib/inline-content'
 
 // Server-only: resolve stored image URLs → the media_assets facts a public
 // page needs to render them well (intrinsic size for next/image, origin for the
-// credit line). One query per page for every figure + the hero, so figures
+// page-level AI note). One query per page for every figure + the hero, so figures
 // written before mig 166 (no width/height on the <img>, no data-origin on the
 // <figure>) still get dimensions and disclosure without a content rewrite.
 // media_assets is author/admin-read under RLS, hence the admin client — a
@@ -15,6 +16,24 @@ export interface ImageAssetFacts {
 }
 
 export type ImageAssetMap = Map<string, ImageAssetFacts>
+
+/**
+ * Does a public page carry any AI-generated image (hero or body)? Drives the one
+ * page-level disclosure in the byline row — there are no per-image captions.
+ * Fill-time `data-origin="ai"` on a figure wins without a lookup; hero + older
+ * figures resolve through ONE media_assets query (`facts` is returned so the
+ * caller can reuse it, e.g. for hero dimensions).
+ */
+export async function pageImageFacts(
+  heroUrl: string | null | undefined,
+  html: string,
+): Promise<{ hasAiImage: boolean; facts: ImageAssetMap }> {
+  const urls = [heroUrl ?? '', ...extractFigureSrcs(html)]
+  const facts = await lookupImageAssets(urls)
+  const hasAiImage =
+    /\bdata-origin="ai"/.test(html) || Array.from(facts.values()).some((f) => f.origin === 'ai')
+  return { hasAiImage, facts }
+}
 
 export async function lookupImageAssets(urls: Iterable<string>): Promise<ImageAssetMap> {
   const out: ImageAssetMap = new Map()

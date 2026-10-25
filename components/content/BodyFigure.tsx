@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import { imageCredit } from '@/lib/images/credit'
 import { isRenderableImageUrl } from '@/lib/images/remote-hosts'
 import type { FigureSegment } from '@/lib/inline-content'
 import type { ImageAssetFacts } from '@/lib/images/assets'
@@ -8,9 +7,9 @@ import type { ImageAssetFacts } from '@/lib/images/assets'
 // next/image when the intrinsic size is known — from the <img> (written at fill
 // time since mig 166) or from the media_assets lookup for older figures — so the
 // browser reserves the space (no layout shift) and gets a srcset + AVIF/WebP
-// instead of the stored 1536px file. The credit line ("AI-generated scene",
-// "Photo: Boss Daddy") sits in the figcaption: the brand guide allows one mark
-// over an image and a magazine credits a picture under it, not on it.
+// instead of the stored 1536px file. No per-image AI credit — the page carries
+// one disclosure line in its byline row (AiAssistanceNote); `data-origin` stays
+// on the <figure> as provenance.
 //
 // A figure whose host next/image cannot load (not in next.config remotePatterns)
 // or whose size is unknown falls back to a lazy <img> — never a crash, never a
@@ -29,7 +28,6 @@ export function BodyFigure({ figure, facts, sizes = BODY_FIGURE_SIZES }: Props) 
   const width = figure.width ?? facts?.width ?? null
   const height = figure.height ?? facts?.height ?? null
   const origin = figure.origin ?? facts?.origin ?? null
-  const credit = imageCredit(origin)
   const hasCaption = figure.caption.length > 0
   const optimizable = !!width && !!height && isRenderableImageUrl(figure.src)
 
@@ -53,14 +51,7 @@ export function BodyFigure({ figure, facts, sizes = BODY_FIGURE_SIZES }: Props) 
         // eslint-disable-next-line @next/next/no-img-element
         <img src={figure.src} alt={figure.alt} loading="lazy" decoding="async" />
       )}
-      {(hasCaption || credit) && (
-        <figcaption>
-          {figure.caption}
-          {credit && (
-            <span className="bd-figure-credit" data-sep={hasCaption ? '1' : undefined}>{credit}</span>
-          )}
-        </figcaption>
-      )}
+      {hasCaption && <figcaption>{figure.caption}</figcaption>}
     </figure>
   )
 }

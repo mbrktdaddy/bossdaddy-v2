@@ -12,7 +12,7 @@ import { PhotoIcon } from '@/components/icons'
 import { MEDIA_ORIGINS } from '@/lib/media/origin'
 
 // Where an asset came from (lib/media/origin.ts) — so picking owned photos
-// first, the stated hierarchy, is one glance. 'ai' drives the public credit line.
+// first, the stated hierarchy, is one glance. 'ai' drives the page-level AI note.
 const ORIGIN_LABEL: Record<string, string> = { own: 'Own photo', web: 'Web', amazon: 'Amazon', ai: 'AI scene' }
 
 interface MediaAsset {

@@ -9,7 +9,6 @@ import {
 } from '@/lib/images/safety'
 import { HOUSE_STYLE, HOUSE_STYLE_MARKER, applyHouseStyle } from '@/lib/images/style'
 import { judgeQa, avoidanceClause, type QaReport } from '@/lib/images/qa'
-import { imageCredit, AI_SCENE_CREDIT, OWN_PHOTO_CREDIT } from '@/lib/images/credit'
 
 // The allowance model per lane (plan §6, brand guide §2 "Images"): what the
 // prompt rules say, how the house style is applied, and how vision QA judges
@@ -132,15 +131,5 @@ describe('judgeQa', () => {
     expect(avoidanceClause(['a face is visible', 'rendered text is visible'])).toBe(
       'The previous attempt was rejected because: a face is visible; rendered text is visible. Avoid all of that.',
     )
-  })
-})
-
-describe('imageCredit', () => {
-  it('credits AI scenes and own photos only', () => {
-    expect(imageCredit('ai')).toBe(AI_SCENE_CREDIT)
-    expect(imageCredit('own')).toBe(OWN_PHOTO_CREDIT)
-    expect(imageCredit('web')).toBeNull()
-    expect(imageCredit('amazon')).toBeNull()
-    expect(imageCredit(null)).toBeNull()
   })
 })

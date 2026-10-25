@@ -16,7 +16,7 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   // that Claude attaches to inline-image placeholder stubs in generated drafts,
   // and that the InlineMediaPanel uses to manage every inline image. The
   // authoring three are stripped before public render (lib/content/html.ts);
-  // data-origin stays — it drives the credit line under the public figure.
+  // data-origin stays — it drives the page-level AI note.
   figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption', 'data-origin'],
   div:    ['class', 'id', 'data-slot-id', 'data-collection-slug', 'data-content-type', 'data-content-slug'],
   '*':    ['class', 'id'],
