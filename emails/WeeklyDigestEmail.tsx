@@ -21,6 +21,9 @@ interface Props {
   siteUrl?: string
 }
 
+// Attribution for the operator dashboard — Vercel Web Analytics breaks visits out by UTM.
+const UTM = '?utm_source=newsletter&utm_medium=email&utm_campaign=weekly-digest'
+
 export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_SITE_URL }: Props) {
   const reviews = items.filter((i) => i.type === 'review')
   const guides  = items.filter((i) => i.type === 'guide')
@@ -98,7 +101,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
       <table width='100%' cellPadding={0} cellSpacing={0}>
         <tr>
           <td style={{ padding: '32px 0 24px 0' }}>
-            <EmailButton href={siteUrl} style={{ margin: 0 }}>Visit Boss Daddy →</EmailButton>
+            <EmailButton href={`${siteUrl}/?${UTM.slice(1)}`} style={{ margin: 0 }}>Visit Boss Daddy →</EmailButton>
           </td>
         </tr>
       </table>
@@ -117,7 +120,7 @@ export function WeeklyDigestEmail({ email, items, weekLabel, siteUrl = DEFAULT_S
 }
 
 function ItemRow({ item, siteUrl }: { item: DigestItem; siteUrl: string }) {
-  const url = `${siteUrl}/${item.type}s/${item.slug}`
+  const url = `${siteUrl}/${item.type}s/${item.slug}${UTM}`
   return (
     <table width='100%' cellPadding={0} cellSpacing={0} style={{ marginBottom: '12px' }}>
       <tr>

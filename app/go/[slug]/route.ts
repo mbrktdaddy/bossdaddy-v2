@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getProductBySlug } from '@/lib/products'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { appendAmazonTag } from '@/lib/amazon-tag'
+import { track } from '@vercel/analytics/server'
 
 const SLUG_RE = /^[a-z0-9-]+$/
 
@@ -31,6 +32,13 @@ export async function GET(
 
   const supabase = await createClient()
   const product = await getProductBySlug(supabase, slug)
+
+  // Operator metric: every outbound affiliate click, with the page that sent it.
+  // Vercel Web Analytics custom event — never blocks or breaks the redirect.
+  const referer = req.headers.get('referer')
+  let from = ''
+  try { if (referer) from = new URL(referer).pathname } catch { /* ignore */ }
+  await track('affiliate_click', { slug, from, kind: product ? 'product' : 'candidate' }).catch(() => {})
 
   const tag = process.env.AMAZON_ASSOCIATE_TAG ?? ''
 
