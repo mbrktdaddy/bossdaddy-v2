@@ -8,9 +8,9 @@
 | # | Number | Source | Baseline (fill in) |
 |---|---|---|---|
 | 1 | Google clicks / wk | Search Console → Performance → Last 7 days | **5 clicks / 28d** (Sep 28–Oct 25), ~970 impressions, 53% of them the brand query. Index: 47 indexed / 89 not (was 58/73 on Aug 4 — falling). 36 'crawled, not indexed', 37 noindex, 4 robots-blocked, 7 redirects. |
-| 2 | Amazon clicks / wk | Associates → Reports → Clicks (truth) · Vercel Analytics `affiliate_click` event (per-page, added 2026-10-27) | |
-| 3 | Newsletter signups / wk | `newsletter_subscribers` where `confirmed = true`, count + weekly delta | |
-| 4 | Merch orders / wk | Printful → Orders · `merch_orders` table | |
+| 2 | Amazon clicks / wk | Associates → Reports → Clicks (truth) · Vercel Analytics `affiliate_click` event (per-page, added 2026-10-27) | **69 clicks / 30d (52 on bossdaddylife-20, 17 'Other'), 0 orders, $0.** 14× the Google clicks → traffic is coming from somewhere Search Console can't see. |
+| 3 | Newsletter signups / wk | `newsletter_subscribers` where `confirmed = true`, count + weekly delta | **9 confirmed, 0 in the last 28 days** (first signup 2026-04-25) |
+| 4 | Merch orders / wk | Printful → Orders · `orders` table | **3 orders ever, 0 in the last 90 days** (last 2026-06-19); 9 live designs + 2 concepts |
 | — | Monthly cost | Vercel + Supabase + Resend + Upstash + AI Gateway + Sentry + domain/Cloudflare | |
 
 **Self-supporting** = affiliate + merch margin ≥ monthly cost. **Goal** = $300–500/mo run-rate by day 90.
@@ -55,12 +55,15 @@
 
 | Week | Dates | Numbers (G / A / N / M) | The one task | Handed to him |
 |---|---|---|---|---|
-| 1 | Oct 27 – Nov 2 | G: 5/28d · A: ? · N: ? · M: ? | **Indexing triage** — why only 47 of ~130 content pages are indexed and falling; click tracking + newsletter UTM shipped `6e7ec5b` | Search Console exports (crawled-not-indexed, noindex, robots, redirect URL lists), URL-inspect homepage + 2 reviews, sitemap status; Associates / newsletter / merch / cost numbers still owed |
+| 1 | Oct 27 – Nov 2 | G: 5/28d · A: 69/30d, $0 · N: 9 total, 0 new · M: 0 orders/90d | **Indexing triage** — why only 47 of ~130 content pages are indexed and falling; click tracking + newsletter UTM shipped `6e7ec5b` | Search Console exports (crawled-not-indexed, noindex, robots, redirect URL lists), URL-inspect homepage + 2 reviews, sitemap status; Associates / newsletter / merch / cost numbers still owed |
 
 ### Week 1 findings (2026-10-27)
 
 - **Sitemap last read by Google: May 8, 2026** (103 discovered then). Everything published since was link-discovered only. Live sitemap today: 200 OK, 190 URLs = 29 reviews · 33 guides · 57 tag pages · 29 gift occasions (28 empty) · 10 shop · 15 category · hubs. → He resubmits in Search Console.
-- **The site has 29 public reviews and 33 public guides**, not 72/60 — the rest are drafts/dupes. 47 indexed is most of the real content, not a third of it.
+- **The site has 28 public reviews and 32 public guides** (DB-verified 2026-10-27; 1 review draft), not 72/60 — the rest are drafts/dupes. 47 indexed is most of the real content, not a third of it.
 - **37 "noindex" = 35 dead review slugs (now 404, stale June–July crawls) + /search + one tag page.** Not a bug. Some dead slugs are old versions of live reviews (Enfamil ×3, Nuobell ×2, Step2, Ergobaby ×2, Thorne ×2…) → map into `legacy_slugs` for a 301 once the review list arrives.
 - **36 "crawled, not indexed" = 20 build-asset URLs (noise) + 7 empty gift shelves (fixed: noindex + out of sitemap) + 6 guides + 3 legacy /articles/ (301 exists).**
 - Follow-up: `/reviews/tag/gear-haul` is in the sitemap yet renders noindex — sitemap tag keys vs page count query disagree. 57 tag URLs is crawl bloat; fix when touching the sitemap next.
+- Sitemap verified live after `2a5659c`: 163 URLs, 1 gift page (Father's Day, the only occasion with a guide). Google read the 190-URL version on 10/27; next read picks up the trim.
+- Legacy-slug mapping drafted: `scripts/sql/legacy-slugs-2026-10-27.sql` (25 dead URLs → 17 live reviews). He runs it.
+- Associates: 69 clicks, 0 orders in 30 days. The 17 'Other' clicks carry no tag or a different one — check `appendAmazonTag` coverage + his own test clicks. **180-day rule risk:** Amazon closes new Associates accounts with no 3 qualifying sales in the first 180 days — account open date needed.
