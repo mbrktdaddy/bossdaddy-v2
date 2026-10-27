@@ -7,7 +7,7 @@
 
 | # | Number | Source | Baseline (fill in) |
 |---|---|---|---|
-| 1 | Google clicks / wk | Search Console → Performance → Last 7 days | |
+| 1 | Google clicks / wk | Search Console → Performance → Last 7 days | **5 clicks / 28d** (Sep 28–Oct 25), ~970 impressions, 53% of them the brand query. Index: 47 indexed / 89 not (was 58/73 on Aug 4 — falling). 36 'crawled, not indexed', 37 noindex, 4 robots-blocked, 7 redirects. |
 | 2 | Amazon clicks / wk | Associates → Reports → Clicks (truth) · Vercel Analytics `affiliate_click` event (per-page, added 2026-10-27) | |
 | 3 | Newsletter signups / wk | `newsletter_subscribers` where `confirmed = true`, count + weekly delta | |
 | 4 | Merch orders / wk | Printful → Orders · `merch_orders` table | |
@@ -20,7 +20,8 @@
 - Amazon: ~3.5% average commission × ~$50 cart × ~8% click-to-order ≈ **$0.14 per click**. $250/mo of affiliate ≈ 1,800 clicks/mo ≈ 60/day.
 - Merch: Printful tee ~$13 landed, sold at $28 ≈ **$12 margin per order**. $150/mo ≈ 13 orders/mo ≈ 3/week.
 - Newsletter is the multiplier: a subscriber visits on our schedule, not Google's. Every issue carries one gear pick (lane 1) and one merch line (lane 2).
-- Honest caveat: if Google clicks are under ~1,000/week today, day 90 lands closer to $100–200/mo with the trajectory set, and $300–500 is a month-4-to-6 number. Week one tells us which.
+- **Baseline verdict (2026-10-27):** Google is effectively zero (5 clicks/28d) and the index is shrinking. Affiliate revenue from search is a 6–12 month lane, not a 90-day one. The 90-day number has to come from the newsletter + any audience outside Google + merch pushed to that audience, while indexing gets fixed underneath. Striking-distance queries DO exist (Stihl KMA 135 R review at position 6, 19 impressions; Enfamil Enspire ~28–33; Sorinex, Genie Hourglass, Rogue Y-1 in the 30s–40s) — all product-review queries, so the review pages are what Google will rank first.
+- Brand-query leak: "boss daddy" = 514 impressions, 0 clicks, position 9.5 — and it's `/about` that ranks (526 imp), not the homepage (5 imp). Either the homepage isn't indexed or Google prefers /about. Diagnose with URL Inspection.
 
 ## 3. Division of labor (fixed)
 
@@ -54,4 +55,12 @@
 
 | Week | Dates | Numbers (G / A / N / M) | The one task | Handed to him |
 |---|---|---|---|---|
-| 1 | Oct 27 – Nov 2 | baseline pending | Christmas gift guide from existing reviews (+ click tracking shipped) | numbers + access list, commit, pick approvals |
+| 1 | Oct 27 – Nov 2 | G: 5/28d · A: ? · N: ? · M: ? | **Indexing triage** — why only 47 of ~130 content pages are indexed and falling; click tracking + newsletter UTM shipped `6e7ec5b` | Search Console exports (crawled-not-indexed, noindex, robots, redirect URL lists), URL-inspect homepage + 2 reviews, sitemap status; Associates / newsletter / merch / cost numbers still owed |
+
+### Week 1 findings (2026-10-27)
+
+- **Sitemap last read by Google: May 8, 2026** (103 discovered then). Everything published since was link-discovered only. Live sitemap today: 200 OK, 190 URLs = 29 reviews · 33 guides · 57 tag pages · 29 gift occasions (28 empty) · 10 shop · 15 category · hubs. → He resubmits in Search Console.
+- **The site has 29 public reviews and 33 public guides**, not 72/60 — the rest are drafts/dupes. 47 indexed is most of the real content, not a third of it.
+- **37 "noindex" = 35 dead review slugs (now 404, stale June–July crawls) + /search + one tag page.** Not a bug. Some dead slugs are old versions of live reviews (Enfamil ×3, Nuobell ×2, Step2, Ergobaby ×2, Thorne ×2…) → map into `legacy_slugs` for a 301 once the review list arrives.
+- **36 "crawled, not indexed" = 20 build-asset URLs (noise) + 7 empty gift shelves (fixed: noindex + out of sitemap) + 6 guides + 3 legacy /articles/ (301 exists).**
+- Follow-up: `/reviews/tag/gear-haul` is in the sitemap yet renders noindex — sitemap tag keys vs page count query disagree. 57 tag URLs is crawl bloat; fix when touching the sitemap next.

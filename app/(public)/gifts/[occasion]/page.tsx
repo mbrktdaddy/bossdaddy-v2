@@ -58,6 +58,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: { absolute: occ.metaTitle },
     description: occ.metaDesc,
     alternates: { canonical: `${siteUrl}/gifts/${occ.slug}` },
+    // An occasion with no published gift guide is an empty shelf. Google rejected
+    // seven of them as thin ("crawled, currently not indexed", Search Console
+    // 2026-10-27) — noindex until a guide exists, follow so the links still count.
+    ...(coll ? {} : { robots: { index: false, follow: true } }),
     openGraph: {
       ...OG_SITE,
       title: occ.metaTitle,

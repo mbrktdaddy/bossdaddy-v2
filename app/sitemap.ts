@@ -264,10 +264,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  // Every defined occasion — stable URLs that compound SEO whether content
-  // exists or not. Occasions with no guide written yet carry NO lastmod: the
-  // URL is real and worth crawling, but nothing has been modified.
-  const giftUrls: MetadataRoute.Sitemap = OCCASIONS.map((occ) => ({
+  // Only occasions with a published gift guide. Empty shelves used to be listed
+  // "to compound SEO" — Google's answer (Search Console 2026-10-27) was to reject
+  // them as thin, which drags the whole site's quality signal. The page itself
+  // sends noindex while empty; keeping it out of the sitemap matches that.
+  const giftUrls: MetadataRoute.Sitemap = OCCASIONS.filter((occ) => giftDates.has(occ.value)).map((occ) => ({
     url: `${base}/gifts/${occ.slug}`,
     lastModified: giftDates.get(occ.value),
     changeFrequency: 'monthly',
