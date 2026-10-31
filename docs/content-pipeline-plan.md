@@ -79,10 +79,10 @@ Acceptance: `npm run check && npm test && npm run build` green; a generated draf
 
 | Stage | Model / effort / temp | Input | Output |
 |---|---|---|---|
-| `outline` | Haiku 4.5, low, 0.7 | wizard fields, notes, `related[]` from embeddings | title options, `sections[{heading, intent, notesToUse, targetWords}]`, blocks to include, image count, cross-link suggestions, near-duplicate warning |
-| `section` ×N | Sonnet 5 (A/B Fable 5), high, 0.8 | system (voice + exemplars), approved outline, prior sections, this section's notes | one section, **streamed** (`streamText`) |
-| `blocks` | Sonnet 5, low, 0.5 | the finished prose + notes | only the blocks the outline chose; sub-scores/would-rebuy are *suggestions* the author confirms |
-| `critic` | Sonnet 5, low, 0 | prose + blocks + notes + rubric | findings with locations: banlist, hedge/passive, claims without specifics, firsthand claims absent from notes, family names, product-token count, sentence-length monotony, heading/image mismatch |
+| `outline` | Opus 5 (content bucket), high, 0.7 | wizard fields, notes, `related[]` from embeddings | title options, `sections[{heading, intent, notesToUse, targetWords}]`, blocks to include, image count, cross-link suggestions, near-duplicate warning |
+| `section` ×N | Opus 5 (content bucket; Fable 5 later — needs refusal handling), high, 0.8 | system (voice + exemplars), approved outline, prior sections, this section's notes | one section, **streamed** (`streamText`) |
+| `blocks` | Opus 5 (content bucket), medium, 0.5 | the finished prose + notes | only the blocks the outline chose; sub-scores/would-rebuy are *suggestions* the author confirms |
+| `critic` | Opus 5 (content bucket), high, 0 | prose + blocks + notes + rubric | findings with locations: banlist, hedge/passive, claims without specifics, firsthand claims absent from notes, family names, product-token count, sentence-length monotony, heading/image mismatch |
 | `images` | Haiku 4.5, low, 0.7 | final prose + house style | subject-only prompts per chosen section, alt, caption |
 
 - The section prompt's grounding line: *write only from the notes; if a detail isn't in them, don't claim it.* The outline is where the author adds per-section detail — this is what retires defect #1.

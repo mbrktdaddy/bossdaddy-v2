@@ -15,10 +15,14 @@ afterEach(() => {
 })
 
 describe('resolveModel', () => {
-  it('defaults every non-concierge bucket to Claude Sonnet with no fallback', () => {
-    for (const b of ['content', 'research', 'utility', 'moderation'] as const) {
+  it('defaults research, utility and moderation to Claude Sonnet with no fallback', () => {
+    for (const b of ['research', 'utility', 'moderation'] as const) {
       expect(resolveModel(b)).toEqual({ model: MODELS.claudeSonnet, fallback: [] })
     }
+  })
+
+  it('defaults content to Claude Opus (the production tier) with the automatic Sonnet fallback', () => {
+    expect(resolveModel('content')).toEqual({ model: MODELS.claudeOpus, fallback: [MODELS.claudeSonnet] })
   })
 
   it('defaults the concierge to Grok (live search) with the Claude fallback', () => {
@@ -37,7 +41,7 @@ describe('resolveModel', () => {
 
   it('ignores a non-slug override and stays on the default', () => {
     process.env.AI_MODEL_CONTENT = 'grok4' // missing provider/ prefix
-    expect(resolveModel('content')).toEqual({ model: MODELS.claudeSonnet, fallback: [] })
+    expect(resolveModel('content')).toEqual({ model: MODELS.claudeOpus, fallback: [MODELS.claudeSonnet] })
   })
 
   it('never lets moderation be overridden (compliance pin)', () => {
@@ -67,8 +71,8 @@ describe('resolveModel', () => {
 
   it('ignores an invalid explicit model and falls back to normal resolution', () => {
     expect(resolveModel('content', { model: 'opus' })).toEqual({
-      model: MODELS.claudeSonnet,
-      fallback: [],
+      model: MODELS.claudeOpus,
+      fallback: [MODELS.claudeSonnet],
     })
   })
 

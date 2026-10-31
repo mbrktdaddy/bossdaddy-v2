@@ -1,7 +1,7 @@
 # Boss Daddy — Brand Guide
 
 > Single source of truth for the Boss Daddy v2 design system. Update this file when design decisions change.
-> Last revised: 2026-07-24 (v3.5 — "The Boss Dad Standard" positioning; design sections reconciled to shipped reality)
+> Last revised: 2026-10-30 (§1.6 "Faith — the foundation" added and the inquiry register rewritten to the witness posture; mission triad → God, Family, and Country; v3.5 — "The Boss Dad Standard" positioning; design sections reconciled to shipped reality 2026-07-24)
 
 ## 0. Naming & Vocabulary
 
@@ -47,7 +47,7 @@ These are non-obvious places that earlier regex sweeps missed during the article
 ### 1.1 Mission Statement
 Boss Daddy's mission is to be the gold standard and trusted hub for men of all ages committed to being the ultimate dads — strong, present, and proud fathers their families deserve.
 
-Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty, loyalty, and brotherhood. Through smart tools, honest reviews, practical guides, and real brotherhood, we help dads make better decisions and lead with strength, pride, and purpose — because being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
+Rooted in an uncompromising duty to God, Family, and Country, we stand for honesty, loyalty, and brotherhood. Through smart tools, honest reviews, practical guides, and real brotherhood, we help dads make better decisions and lead with strength, pride, and purpose — because being a proud and present father isn't a compromise of his strength, but the ultimate expression of it.
 
 ### 1.2 Positioning & Brand Essence
 **Positioning (who we are):** *The Boss Dad Standard* — the identity line. Boss Dads aren't a softer kind of man; they live to a standard: present, proud fatherhood as the ultimate expression of strength.
@@ -55,7 +55,7 @@ Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty
 **Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad Like a Boss.*
 
 ### 1.3 Core Values
-1. **Faith-First Leadership** — Uncompromising duty to God, family, and faith as the foundation for family leadership and meaningful purpose.
+1. **Faith-First Leadership** — Uncompromising duty to God, family, and faith as the foundation for family leadership and meaningful purpose. The ground under that foundation is grace: a man leads from a standing he received, not one he earned (§1.6, *Faith — the foundation*).
 2. **Honesty** — Transparent reviews, informative guides, real talk. No fluff, no sponsored BS.
 3. **Loyalty & Brotherhood** — A tight community for men who support and challenge each other like brothers.
 4. **Present & Proud** — Strong, fully present, and proud fathers every day.
@@ -71,7 +71,7 @@ Rooted in an uncompromising duty to God, Family, and Faith, we stand for honesty
 ### 1.5 Brand Personality Archetype
 **The Wise Warrior / Protector King** — a strong, stoic patriarch who leads by example and isn't afraid to tell it like it is.
 
-**Core traits:** Authoritative yet approachable. Confident, competent, disciplined, no-nonsense. Inspiring. Trustworthy. Loving and warm toward family. Brings humor and playfulness with a playfully cynical, borderline-condescending edge — the experienced dad who's seen it all and lightly roasts mediocrity while still having your back.
+**Core traits:** Authoritative yet approachable. Confident, competent, disciplined, no-nonsense. Inspiring. Trustworthy. Loving and warm toward family. Leads from a secured identity — grace received, not standing earned — so his confidence is steadiness, not anxiety wearing armor. Brings humor and playfulness with a playfully cynical, borderline-condescending edge — the experienced dad who's seen it all and lightly roasts mediocrity while still having your back.
 
 ### 1.6 Tone of Voice
 
@@ -102,7 +102,7 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 - Hype phrases: "revolutionary." Hype is for mediocrity.
 - Corporate jargon: "leverage" (as verb), "synergy," "circle back," "stakeholder," "deep-dive," "ecosystem."
 - Sponsored-content phrasing: "in partnership with," "thanks to our friends at," "brought to you by."
-- Soft-parenting tells: "every child is unique," "no judgment," "you do you."
+- Soft-parenting tells: "every child is unique," "no judgment," "you do you." *(Grace is not permissiveness — these are permissive tells, not mercy. Mercy keeps the Standard and shows the way back; see §1.6 Faith.)*
 
 *Sanctioned brand language (v3.5 — NOT hype, do not flag)*
 - **"The Boss Dad Standard"** and **"Boss Up."** are brand-owned messaging (see §1.7), not banned swagger. Use "The Boss Dad Standard" as the positioning line; use "Boss Up." as the action/CTA verb. Don't spray them through body copy as filler — that's what makes hype hype.
@@ -119,30 +119,38 @@ Declarative is for **display moments only** — heroes, taglines, creed, sign-of
 *Humor calibration*
 - One dad joke per piece, max. Earn it.
 - Playfully cynical edge aims at *mediocrity, soft culture, weak excuses, participation-trophy parenting* — never at individual dads who are struggling, asking, or learning.
+- **Controversial targets are fair game (affirmed 2026-10-30).** Ideas, trends, institutions and cultural fashions can be made fun of — that edge is part of the brand and it stays, including in discussion pieces. The line is *persons*: never a named individual's worth, never a struggling man, and nothing about loss, grief or safety. Condescension toward a bad idea is humor; condescension toward a man is contempt, and grace rules it out.
 - When in doubt, see "Where the edge is OFF" below — default to warm Protector mode.
 
-*Faith mentions*
-- Faith and family-as-foundation referenced naturally when it fits ("we lead our households," "what we owe our wives and kids").
-- Never preach. No scripture dropped without context. No moralizing about other men's choices.
-- Faith content earns its own posture — warm and grounded, not cynical.
+*Faith — the foundation (grace through faith; added 2026-10-30)*
+- **The conviction under the whole brand:** we are saved by grace through faith, and that faith is itself a gift — not a result of works, not manufactured by willpower or understanding (Ephesians 2:8–9). A man's standing with God rests on Christ's work received by trust, not on his own obedience or goodness. This is the founder's lived experience and a central reason the site exists: it ended the exhausting cycle of earning standing through performance, gave him back a real relationship with God, and renewed his appreciation for every gift he's been given.
+- **What it does to the voice.** Boss Daddy leads from a *secured* identity, not from anxiety or self-justification. The Standard is fruit, not the price of admission — a changed life and good works flow *from* grace; they never buy it. So the tough-love edge aims at mediocrity, never at a man's worth: we call men higher because they are already accepted, not so they can earn it. Hustle-for-approval copy ("prove you're worthy," "earn your place") is off-voice. Grace raises the bar; it never lowers it — the call to action stays loud. *Boss Up.* is what a man does with what he's been given.
+- **Household leadership frame.** A father's job is serving God's will by protecting, providing, teaching, and modeling these realities for his family — gently, consistently, without coercion. Connect faith to the everyday: presence, discipline, provision, and the long work of raising children.
+- **Posture: invitational, not evangelistic.** Clear, humble, *for* something. Share what changed him the way you'd tell a friend at the table, never as a pitch. No theological debate language, no attacks on other views, no moralizing about another man's choices or walk. Say what we're for and how it shapes the home.
+- **Quietly undergird, never dominate — the density is topic-driven (settled 2026-10-30).** These convictions sit under the writing; they don't surface in every sentence. **Product, review, how-to and money content:** faith is undertone only — steadiness, at most one natural reference, no scripture unless the author's notes brought it. **Discussion pieces, faith topics, the About story:** conviction spoken plainly, scripture in context, still never a sermon. The failure he is guarding against is a gear review that reads like a church bulletin — not a Table Duty essay that says what he believes.
+- **"Never preach" — what it means.** Preaching is saturation and sermon: scripture stacked into a piece that didn't ask for it, a lecture aimed at the reader, a verse used as a club, judging another man's walk. Stating what you believe and have lived, where the subject earns it, is *witness* — not preaching. The critic flags sermon creep (density) and lecturing (posture); it never flags a conviction for being a conviction.
+- **Grace is not permissiveness.** Mercy keeps the Standard and shows the way back; soft parenting denies there is one. The soft-parenting banlist ("no judgment," "you do you," "every child is unique") stays banned — those are permissive tells, not mercy.
+- **Gentle is not soft.** Gentleness is strength under control; soft is the absence of a standard. A father leads with authority and a clear bar, delivered without coercion.
+- **Doubt is a subject, not a posture.** We take the reader's doubt seriously, and the author lived his own season of it (ten years of asking before the answer). It is not his current posture on the foundation — honor the reader's doubt; don't perform your own.
+- **Mechanics.** Referenced naturally when it fits ("we lead our households," "what we owe our wives and kids"). No scripture dropped without context — one verse in context carrying real weight beats three sprinkled in. Language stays natural for a modern dad site: clear, direct, human; never churchy or academic. Faith content earns its own posture — warm, steady, grounded, not cynical — and the edge is OFF (below).
 
 *Inquiry register — philosophical & moral discussion (scoped exception)*
 - **What it's for:** meaning and purpose, faith and doubt, the existence of God, death and grief, duty, conscience, what a life is for, what we're handing our kids. It is the house default for **Table Duty** and **Watch Duty**, and it can be switched on for any pillar when a piece has earned it (a Health & Wellness essay on grief and faith wants it).
-- **The balance is humble in posture, decisive in substance.** Both halves are load-bearing, and the failure modes run in both directions: the abrasive verdict-first hot take on one side, the wishy-washy survey that never commits on the other. The second is the easier mistake to make here.
-- Write **student-first**: an imperfect dad thinking it through out loud, not a man handing down the verdict. Show the reasoning so the reader can follow it and disagree.
-- **But land it.** Make a real attempt at an answer — a position, an explanation, a way of thinking that actually helps. Humility governs how you *hold* a conclusion; it is not permission to avoid reaching one. A piece that circles a question and walks away has failed the reader. A closing question is welcome *after* the answer, never instead of it.
+- **Humble in posture, decisive in substance — a witness, not a student (rewritten 2026-10-30).** Both halves are load-bearing, and the failure modes run in both directions: the abrasive verdict-first hot take on one side, the wishy-washy survey that never commits on the other. The second was the register's actual failure mode as first written, so the bullets below are weighted toward landing.
+- **Witness, not student.** The author is a man who has done the thinking, reached his convictions, and is showing his work — not a student thinking out loud, and not a judge handing down a verdict. Humility governs the *tone* and how he treats the reader (show the reasoning so a reader can follow it and disagree); it never governs *whether he has an answer*. He does. The reader is free to disagree. The author is not undecided.
+- **Land it, and land it as a conviction.** Make a real attempt at an answer — a position, an explanation, a way of thinking that actually helps — and close on it. A piece that circles a question and walks away has failed the reader. The closing is the position restated as something you believe, with the reason it convinced you — not a recap, not a caveat paragraph, not "ultimately it's up to each dad." A closing question is welcome *after* the answer, never instead of it.
 - **Use what's already known.** Philosophy, theology, psychology, history and hard-won common sense have serious answers to most of these questions. Bring them, say where the weight of thoughtful opinion sits, and name which view convinces you. Don't reason from scratch on a question people have worked on for millennia.
-- Engage the **strongest** version of the opposing view, never a strawman — then say why you still land where you land.
-- Honest uncertainty is allowed but it isn't the deliverable. "I don't know" earns its place attached to what you *do* think — name the specific unsettled piece rather than hedging the whole essay.
+- **Answer the opposing view where you raise it.** Engage the strongest version, never a strawman — then say, in the same part, specifically where it fails and why you still land where you land. Airing an objection at full strength and calling it a draw is this register's failure mode, not a sign of fairness.
+- **Doubt belongs to the reader, not the performance.** Honor his objections; never shame him for them. Don't perform your own: no "I don't know" on the thesis, no closing shrug. "I don't know" is allowed once, on a *named* sub-question, attached to what you do think (§1.6 Faith — *Doubt is a subject, not a posture*).
 - **Suspended here:** the four gear content pillars (Practical Win / Family Proof / Honest Assessment / Value Play) and affiliate links. Don't force a gear-style action item onto a moral question — what you owe the reader is clearer thinking.
-- **Relaxed here:** the hedge-word ban, for the purpose above. Vagueness is still banned.
-- Faith is **lived, not preached** — no sermonizing, no judging another man's walk. It can absolutely be where you land; show the reasoning that got you there rather than letting a verse stand in for it. Doubt gets honest airtime too.
-- **Weight varies with the subject** — some pieces are hard-won life lessons, others are genuinely fun thought experiments. Match it.
-- No partisan cheerleading, no personal attacks. Every piece answers one question: **why does this matter at the family table?** (fathers, family, faith, the next generation).
+- **Hedges (may/might/could) are tolerated here, not free.** Use them to describe a view you are not taking or a sub-question you have named as open — never on the thesis, never in the closing. The critic still counts them (the closing is held to the strict count). Vagueness is still banned.
+- **Faith speaks from conviction.** Faith is lived, not preached — no sermonizing, no judging another man's walk. But when a piece touches the foundation (§1.6 *Faith — the foundation*: grace through faith), the author states it as what he believes and has lived, not as one option he's weighing. Show the reasoning that brought you there rather than letting a verse stand in for it; honor the reader who isn't there yet; don't pretend to be undecided about the thing that changed your life.
+- **Weight varies with the subject** — some pieces are hard-won life lessons, others are genuinely fun thought experiments. Match it. **Humor stays on here**, including at controversial ideas, trends and cultural fashions (see *Humor calibration*). The line is persons, loss, grief and safety — not controversy.
+- **A clear moral position is required; party politics is banned.** Taking a stance on a moral or cultural question is the job, not a violation — say what's right, what's wrong, and what a father should do about it at his own table. **Judge ideas, choices and culture out loud; never judge men.** *Partisan* means party: no candidates, parties, campaign framing or team-sport scorekeeping, and no personal attacks on named people. Every piece answers one question: **why does this matter at the family table?** (fathers, family, faith, the next generation).
 - Warm Protector mode still auto-engages on vulnerability (loss, mental health, struggling dads); the rest of the banlist still applies.
 - **Table Duty** = timeless conversation; **Watch Duty** = timely, with a freshness window (weeks, then archive or grow into a Table Duty essay). Same register for both. Scope + boundaries: `docs/pillar-taxonomy.md`.
 
-> **How it fires (execution layer).** The register is opt-in, never ambient: `BOSS_DADDY_SYSTEM` only applies it when the user message carries a literal `INQUIRY MODE: ON` line. The guide wizard's **Inquiry mode** toggle sends it — checked by default for `table-duty`/`watch-duty` (`isInquiryCategory()` in `lib/categories.ts`), overridable in both directions. `guide-draft`, `guide-refine` and `suggest-prompt` all honor the flag; refine infers it from the article's category, since the mode isn't persisted on the row. The submit-time moderator (`MODERATOR_SYSTEM`) has the matching carve-out and judges these as essays — it derives the mode from the pillar rather than accepting it from the caller, because a compliance gate must not be steerable by what it is gating.
+> **How it fires (execution layer).** The register is opt-in, never ambient: `BOSS_DADDY_SYSTEM` only applies it when the user message carries a literal `INQUIRY MODE: ON` line. The guide wizard's **Inquiry mode** toggle sends it — checked by default for `table-duty`/`watch-duty` (`isInquiryCategory()` in `lib/categories.ts`), overridable in both directions. `guide-draft`, `guide-refine` and `suggest-prompt` all honor the flag; refine infers it from the article's category, since the mode isn't persisted on the row. The submit-time moderator (`MODERATOR_SYSTEM`) has the matching carve-out and judges these as essays — it derives the mode from the pillar rather than accepting it from the caller, because a compliance gate must not be steerable by what it is gating. The pipeline enforces the posture (2026-10-30): the critic's rules block a shrug in the closing (`inquiry-shrug`), count hedges in the closing, note a piece that ends on a question, and note scripture in a gear piece (`scripture-in-gear`); the editor model blocks a piece that never lands and never flags a stance for being a stance.
 
 *Trust & legal*
 - Zero sponsors. Affiliate is fine, disclosed, and earned. Sponsored placement positioned as honest review is forbidden.
@@ -259,7 +267,7 @@ Keep it a display/CTA line — don't drop "boss up" into the middle of editorial
 - Use the default vivid Tailwind orange (`#f97316`). Our accent is `#CC5500` (core, on the light page) / `#E55A1A` (Hot, inside dark zones) — warm and earthy, never the loud default.
 - Per-category rainbow colors. All categories share one unified treatment (`lib/categories.ts`).
 - Sponsored content positioned as honest reviews. Affiliate is fine and disclosed; sponsored is not.
-- Preach faith — it's the foundation, not the lecture.
+- Preach faith — it's the foundation, not the lecture. And never turn it into performance: no copy that makes a man's standing with God something he has to earn. Stating conviction where the subject earns it is witness, not preaching — "never preach" is the density rule in §1.6.
 - Punch down on struggling dads. The edge is for mediocrity, not for men in the trenches.
 - Imply firsthand testing of a product we haven't used — in copy, meta descriptions, or AI drafts.
 - Invent an endorsement — a made-up friend's recommendation or an unsourced "best-seller" claim.

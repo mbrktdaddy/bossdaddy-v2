@@ -107,7 +107,7 @@ Each pillar below lists **what belongs**, **what does NOT**, and where the near-
   citizenship & duty, and the tough talks (death, money, sex, failure). Essays and
   thought-experiments, not gear.
 - **Not:** a product review (→ its gear pillar), a timely news reaction (→ Watch Duty).
-- **Voice:** the student-first, Socratic *inquiry register* — see brand-guide §1.6. Never the
+- **Voice:** the *inquiry register* — a witness, not a student: humble in posture, decisive in substance (brand-guide §1.6). Never the
   confident reviewer voice. Every piece answers: *why does this matter at the family table?*
 
 ### Watch Duty — `watch-duty`  *(non-gear / essay pillar)*

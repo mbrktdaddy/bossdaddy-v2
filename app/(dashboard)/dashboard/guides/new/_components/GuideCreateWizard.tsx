@@ -83,7 +83,7 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
     } catch { /* ignore */ }
   }, [restore, description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride])
 
-  // Inquiry register: student-first, Socratic voice for philosophical/moral
+  // Inquiry register: a witness, not a student — the voice for philosophical/moral
   // topics. Defaults on for Table Duty / Watch Duty, off elsewhere — and the
   // operator can flip it either way for any category.
   const inquiryMode = inquiryOverride ?? isInquiryCategory(category)
@@ -478,7 +478,7 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
           </select>
         </div>
 
-        {/* Inquiry register — the student-first, Socratic voice for meaning,
+        {/* Inquiry register — a witness, not a student: the voice for meaning,
             purpose, faith and doubt. On by default for Table Duty / Watch Duty,
             available to any category, and always overridable either way. */}
         <div>
@@ -507,8 +507,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
               </span>
               <span className="block text-xs text-prose-faint mt-0.5 leading-snug">
                 For philosophical and moral discussion — meaning, purpose, faith and doubt, the existence of God.
-                Humble in posture, decisive in substance: reasons out loud, engages the other side fairly,
-                then commits to a best answer. Drops the gear pillars, the forced action-item takeaways,
+                Humble in posture, decisive in substance: reasons out loud, gives the other side its strongest case and answers it,
+                then lands on a conviction. Drops the gear pillars, the forced action-item takeaways,
                 and all affiliate links.
               </span>
             </span>

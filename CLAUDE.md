@@ -181,12 +181,13 @@ Surface/text/border tokens (light page): `--color-chrome` (masthead/footer, alwa
 
 All Claude draft generation uses the Boss Daddy system prompt defined in `lib/claude/client.ts`. Source of truth for voice: `docs/brand-guide.md` §1.
 
-Archetype: **Wise Warrior / Protector King** — older, wiser brother voice. Tough-loving humor, playfully cynical toward mediocrity, warm and present with struggling dads. Grounded in faith without preaching.
+Archetype: **Wise Warrior / Protector King** — older, wiser brother voice. Tough-loving humor, playfully cynical toward mediocrity, warm and present with struggling dads. Grounded in faith without preaching — the foundation is grace through faith (a gift received, not standing earned); it undergirds copy quietly and surfaces only when the subject earns it. Doctrine: brand guide §1.6 *Faith — the foundation*.
 
 Key rules:
 - First-person dad voice with real-testing specifics ("I used this for 3 weekends...")
 - Confident, direct — no corporate speak, no hype phrases
 - Edge OFF for safety, struggle, loss, and vulnerability topics — see brand guide §1.6
+- Discussion pieces (Table Duty / Watch Duty) run the inquiry register: a witness, not a student — a clear moral position is required, party politics banned, humor stays on. "Never preach" is a density rule (gear content: faith as undertone only). See brand guide §1.6
 - FTC disclosure auto-injected for all reviews with affiliate links
 
 ---

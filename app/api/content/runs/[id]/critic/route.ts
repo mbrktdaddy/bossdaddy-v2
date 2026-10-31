@@ -18,7 +18,7 @@ export const maxDuration = 90
 // the critic informs the author, it never blocks the pipeline by itself.
 // `blocksText` / `CRITIC_SYSTEM` live in the model module so the content eval
 // (tests/eval/content-eval.ts) judges with exactly this editor.
-const EFFORT = 'low' as const
+const EFFORT = 'high' as const
 const TEMPERATURE = 0
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

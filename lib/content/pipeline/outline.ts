@@ -62,14 +62,14 @@ function structureGuidance(brief: Brief): string {
   }
   const inquiry = brief.inquiryMode
   if (brief.pieceType === 'essay') {
-    return `- Parts: an intro that opens inside a real moment FROM THE AUTHOR FACTS (or on the question itself if there is none — never an invented memory), 4–7 body parts (150–300 words each) that move the story or argument forward${inquiry ? ', one of which gives the strongest opposing view a fair hearing' : ''}, and a closing (1–2 paragraphs) that lands honestly without a bow on top.
+    return `- Parts: an intro that opens inside a real moment FROM THE AUTHOR FACTS (or on the question itself if there is none — never an invented memory), 4–7 body parts (150–300 words each) that move the story or argument forward${inquiry ? ', one of which states the strongest opposing view and answers it in the same part' : ''}, and a closing (1–2 paragraphs) that lands honestly without a bow on top${inquiry ? ' — on the position, stated as a conviction, with the reason it convinced you; never a shrug' : ''}.
 - Blocks: essays normally earn none.`
   }
   if (brief.pieceType === 'howto') {
     return `- Parts: an intro (2–3 sentences naming the problem), 3–5 body parts (120–200 words each, one step or decision each, phone-skimmable), and a closing (1–2 sentences, the single most important next step).
 - Blocks: tldr + keyTakeaways; faqs rarely.`
   }
-  return `- Parts: an intro (2–3 sentences, a real scenario from the facts or the reader's own situation — no invented anecdote), 5–8 body parts (200–350 words each, each with a clear takeaway${inquiry ? ' — or, in the inquiry register, each advancing the argument one real step, one part giving the strongest opposing view a fair hearing' : ''}), and a closing titled "Wrapping Up" (1–2 paragraphs with a specific next step${inquiry ? ' — committing to your best answer and why' : ''}).
+  return `- Parts: an intro (2–3 sentences, a real scenario from the facts or the reader's own situation — no invented anecdote), 5–8 body parts (200–350 words each, each with a clear takeaway${inquiry ? ' — or, in the inquiry register, each advancing the argument one real step, one part stating the strongest opposing view and answering it' : ''}), and a closing titled "Wrapping Up" (1–2 paragraphs with a specific next step${inquiry ? ' — stating the position as a conviction and the reason it convinced you' : ''}).
 - Blocks: tldr + keyTakeaways + faqs for a comprehensive guide; drop any the topic doesn't earn.`
 }
 
@@ -79,7 +79,7 @@ export function outlinePrompt(brief: Brief, related: RelatedPiece[]): string {
   const inquiry = brief.contentType === 'guide' && brief.inquiryMode
   const fixedImages = brief.imageSlots !== 'auto' ? brief.imageSlots : null
 
-  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece, not a gear piece — plan it in the inquiry register (humble in posture, decisive in substance).\n\n` : ''}Plan a dad-focused ${briefLabel(brief)}. Produce the OUTLINE only — no prose.
+  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece, not a gear piece — plan it in the inquiry register — a witness, not a student: humble in posture, decisive in substance. The outline must arrive at a position; every body part moves toward it.\n\n` : ''}Plan a dad-focused ${briefLabel(brief)}. Produce the OUTLINE only — no prose.
 
 ${briefHeaderLines(brief)}
 ${briefDataBlocks(brief) ? `\n${briefDataBlocks(brief)}\n` : ''}

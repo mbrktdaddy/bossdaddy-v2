@@ -21,7 +21,12 @@ export type AiBucket = 'content' | 'research' | 'utility' | 'moderation' | 'conc
 // handles its own Claude backup (lib/boss/agent.ts); AI_MODEL_CONCIERGE can
 // point it back at Claude, which runs it tool-less.
 const BUCKET_DEFAULT: Record<AiBucket, string> = {
-  content: MODELS.claudeSonnet,
+  // Production content — every public-facing review, guide and essay. Opus is the
+  // operator's floor for first-impression copy (decision 2026-10-30: he is the
+  // only editor and throttles spend himself; never default this lane down to
+  // Sonnet for cost). `AI_MODEL_CONTENT` can raise it to Fable once the pipeline
+  // handles Fable's always-on thinking and `refusal` stop reason (lib/ai/models.ts).
+  content: MODELS.claudeOpus,
   research: MODELS.claudeSonnet,
   utility: MODELS.claudeSonnet,
   // ⚠️ COMPLIANCE GATE. This tracks MODELS.claudeSonnet, so bumping that constant

@@ -281,11 +281,11 @@ export const CATEGORIES = [
     border: 'border-strong/40',
     accent: 'text-accent-text',
     targetWords: 1600,
-    pov: "I don't write these as a man who has it all figured out. I write them as a dad who refuses to hand his kids a world he never bothered to think about. Student first, imperfect, still learning — but unwilling to stay silent on the things that matter most. These are the talks we should be having at the table: what a life is for, what we believe, what we let shape our kids, and what we owe the people counting on us. I'll take a position and show my work — but I'd rather leave you with a sharper question than a cheap answer.",
+    pov: "I don't write these as a man who has it all figured out. I write them as a dad who refuses to hand his kids a world he never bothered to think about — and who has done the thinking, landed on his convictions, and will show you his work. These are the talks we should be having at the table: what a life is for, what we believe, what we let shape our kids, and what we owe the people counting on us. I'll take a position and tell you why it convinced me. I'll give the other side its strongest case and answer it. And I'll laugh at what deserves laughing at. You're free to land somewhere else — but you'll never have to guess where I stand.",
     faqs: [
       {
         question: 'Is this political?',
-        answer: "Not in the partisan sense. I treat these as questions worth wrestling with, not sides to pick. When a piece takes a position, it earns it out loud — and you're free to think it through and land somewhere else.",
+        answer: "Not in the partisan sense — no parties, no candidates, no team-sport scorekeeping. But I don't dodge the moral question underneath a headline, and I'm not neutral about the world my kids are inheriting. When a piece takes a position, it earns it out loud, names where the other side is strongest, and answers it. You're free to land somewhere else.",
       },
       {
         question: 'Why cover this on a site about dad gear?',
@@ -332,8 +332,8 @@ export const CATEGORIES = [
 export type CategorySlug = (typeof CATEGORIES)[number]['slug']
 
 /**
- * Pillars whose pieces default to the INQUIRY REGISTER — the student-first,
- * Socratic voice used for philosophical and moral discussion (meaning, purpose,
+ * Pillars whose pieces default to the INQUIRY REGISTER — a witness, not a student
+ * (humble in posture, decisive in substance), used for philosophical and moral discussion (meaning, purpose,
  * faith and doubt, the existence of God, duty, what we hand the next
  * generation). See the INQUIRY REGISTER block in `BOSS_DADDY_SYSTEM`
  * (`lib/claude/client.ts`) and `docs/brand-guide.md` §1.6.

@@ -11,6 +11,10 @@ const SPONSORED = ['in partnership with', 'thanks to our friends at', 'brought t
 const SOFT_PARENTING = ['every child is unique', 'no judgment', 'you do you']
 const BRAND_GREETING = [/\b(hey|listen up|alright|okay|ok),?\s+boss\s+dads?\b/i, /\bboss\s+dads?,\s+(listen|here)/i]
 const HEDGES = /\b(may|might|could)\b/gi
+// The inquiry-register shrug — the closing that hands the question back (brand-guide §1.6).
+const SHRUG = ['up to each dad', 'up to every dad', 'up to you to decide', 'only you can decide', 'no right answer', 'no right or wrong answer', 'no easy answer', 'both sides have a point', 'both sides make', 'reasonable people can disagree', "i'll leave that to you", 'leave it to you to decide', 'the choice is yours', "there's no one answer", 'decide for yourself']
+// A chapter:verse citation — fine where the notes brought it; sermon creep in a gear piece (brand-guide §1.6 Faith, density rule).
+const SCRIPTURE = /\b(Genesis|Exodus|Leviticus|Numbers|Deuteronomy|Joshua|Judges|Ruth|Samuel|Kings|Chronicles|Ezra|Nehemiah|Esther|Job|Psalms?|Proverbs|Ecclesiastes|Isaiah|Jeremiah|Lamentations|Ezekiel|Daniel|Hosea|Joel|Amos|Obadiah|Jonah|Micah|Nahum|Habakkuk|Zephaniah|Haggai|Zechariah|Malachi|Matthew|Mark|Luke|John|Acts|Romans|Corinthians|Galatians|Ephesians|Philippians|Colossians|Thessalonians|Timothy|Titus|Philemon|Hebrews|James|Peter|Jude|Revelation)\s+\d{1,3}:\d{1,3}/g
 const LIST_LINE = /^(?:[-*]|\d+[.)])\s+\S/
 const NUMBERED_LINE = /^\d+[.)]\s+\S/
 const VAGUE_TIME = /\brecently\b/gi
@@ -73,11 +77,39 @@ export function runRules({ brief, parts, texts, familyNames }: RulesInput): Crit
     }
   }
 
-  // Hedges are banned outside the inquiry register; vague time refs always.
-  if (!inquiry) {
+  // Hedges: banned outside the inquiry register (2+ in a part is a note). Inside
+  // it they are tolerated for a view the author is not taking — never on the
+  // thesis — so bodies get slack and the closing is held to the strict count
+  // (brand-guide §1.6, "a witness, not a student"). Vague time refs: always.
+  for (let i = 0; i < texts.length; i++) {
+    const m = texts[i].match(HEDGES)
+    if (!m) continue
+    if (!inquiry) {
+      if (m.length >= 2) out.push({ severity: 'note', code: 'hedge-words', source: 'rules', part: i, message: `${m.length} hedge words (may/might/could) in this part.` })
+    } else if (parts[i]?.kind === 'closing' && m.length >= 2) {
+      out.push({ severity: 'warn', code: 'hedge-words', source: 'rules', part: i, message: `${m.length} hedge words (may/might/could) in the closing — the position is stated as a conviction, not a maybe.` })
+    } else if (m.length >= 4) {
+      out.push({ severity: 'note', code: 'hedge-words', source: 'rules', part: i, message: `${m.length} hedge words (may/might/could) in this part — fine on a view you're not taking, never on the thesis.` })
+    }
+  }
+  if (inquiry) {
+    // The shrug: a block in the closing (that is where the position lives), a warn anywhere else.
+    for (const p of SHRUG) {
+      const h = findPhrase(texts, p)
+      if (!h) continue
+      const closing = parts[h.part]?.kind === 'closing'
+      out.push({ severity: closing ? 'block' : 'warn', code: 'inquiry-shrug', source: 'rules', part: h.part, quote: h.quote,
+        message: closing ? `"${p}" in the closing — the register lands on a conviction; it does not hand the question back.` : `"${p}" — state the position; the reader is free to disagree with it.` })
+    }
+    const ci = parts.findIndex((p) => p.kind === 'closing')
+    if (ci >= 0 && (texts[ci] ?? '').trim().endsWith('?')) {
+      out.push({ severity: 'note', code: 'closing-question', source: 'rules', part: ci, message: 'The piece ends on a question — welcome after the answer, never instead of it. Make sure the position landed first.' })
+    }
+  } else {
+    // Gear pieces: a verse the notes didn't bring is sermon creep (density rule).
     for (let i = 0; i < texts.length; i++) {
-      const m = texts[i].match(HEDGES)
-      if (m && m.length >= 2) out.push({ severity: 'note', code: 'hedge-words', source: 'rules', part: i, message: `${m.length} hedge words (may/might/could) in this part.` })
+      const m = texts[i].match(SCRIPTURE)
+      if (m) out.push({ severity: 'note', code: 'scripture-in-gear', source: 'rules', part: i, quote: m[0], message: `Scripture (${m[0]}) in a gear piece — keep it only if the author's notes brought it; otherwise it reads as a sermon insert.` })
     }
   }
   for (let i = 0; i < texts.length; i++) {

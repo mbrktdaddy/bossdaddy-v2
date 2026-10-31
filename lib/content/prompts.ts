@@ -11,7 +11,7 @@ import { sanitizeSpecs, type SpecLike } from './specs'
  * pieces written under the old prompt. Date + ordinal, not semver — the
  * question is "before or after", never "compatible".
  */
-export const PROMPT_VERSION = '2026-10-25.1'
+export const PROMPT_VERSION = '2026-10-30.1'
 
 /**
  * The literal line that switches BOSS_DADDY_SYSTEM (and MODERATOR_SYSTEM) into

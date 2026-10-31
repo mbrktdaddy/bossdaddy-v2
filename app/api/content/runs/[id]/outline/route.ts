@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { aiGenerateObjectWithMeta, failedCallMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
-import { MODELS } from '@/lib/ai/models'
 import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
@@ -13,11 +12,12 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 export const maxDuration = 60
 
-// Stage 1 — POST generates the outline (Haiku, cheap, fast); PUT saves the
+// Stage 1 — POST generates the outline (content-bucket model at effort high —
+// the outline is where the argument is decided, 2026-10-30); PUT saves the
 // author's edited outline and opens drafting. The author ALWAYS passes through
 // PUT: the outline is the contract the sections are written against.
 
-const EFFORT = 'low' as const
+const EFFORT = 'high' as const
 const TEMPERATURE = 0.7
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +40,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   try {
     const { object, meta } = await aiGenerateObjectWithMeta<OutlineModelOutput>({
       bucket: 'content',
-      model: MODELS.claudeHaiku,
       tag: 'draft-outline',
       schema: OutlineOutput,
       system,
@@ -65,7 +64,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'outline',
       status: c.kind === 'truncated' ? 'truncated' : 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind, MODELS.claudeHaiku),
+      meta: failedCallMeta('content', startedAt, c.kind),
       effort: EFFORT, temperature: TEMPERATURE, input: { brief: run.brief, prompt },
     })
     await updateRun(supabase, run, { error: c.userMessage }).catch(() => {})

@@ -37,7 +37,7 @@ Set any toggle to a gateway slug, e.g. `AI_MODEL_CONTENT=xai/grok-4.5`. Invalid 
 
 The Boss (`concierge`) defaults to `xai/grok-4.7` **in code** (`BUCKET_DEFAULT`, moved from 4.5 on 2026-09-25), for xAI's server-side `web_search` + `x_search`, at `reasoningEffort: 'low'` (measured on a search question: default ≈ 33s / $0.25, low ≈ 21s / $0.15, same quality; `'none'` is rejected). The Gateway catalog lists **no** xAI models, so `ai:drift` reports them as unverifiable — confirm any new Grok slug with a live `scripts/xai-search-smoke.mjs` call. Both run through the Gateway (verified live 2026-09-24 with `scripts/xai-search-smoke.mjs`; xAI BYOK is configured in the Gateway, so no `XAI_API_KEY` in the app). Gateway failover is **off** for that call — it would hand xAI's tools to Claude — so `lib/boss/agent.ts` retries once on tool-less Claude itself if xAI fails before any text streams. Through the Gateway the tool results arrive empty (`{}`); only `source` parts (URLs) carry data, which is all the source cards use. Setting `AI_MODEL_CONCIERGE` to a Claude slug runs the Boss tool-less.
 
-Earlier state (2026-07-28 → 2026-09-24): no xAI/Grok calls at all, by operator directive. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
+Earlier state (2026-07-28 → 2026-09-24): no xAI/Grok calls at all, by operator directive. **No `AI_MODEL_*` override is set in any environment** — every bucket resolves to its `BUCKET_DEFAULT` (Claude Sonnet 5; `content` → Claude Opus 5 since 2026-10-30 — every public-facing piece runs on the production tier, operator decision). The Grok pilot that ran `utility` + `research` on xAI (2026-07-26 → 2026-07-28) is reverted by deleting those two env vars; nothing in code changed then or now.
 
 The multi-provider seam is intentionally left intact — `@ai-sdk/xai`, the `MODELS.grok`/`grokFast` registry entries, and `research.ts`'s provider dispatch all still work. Re-enabling is setting one env var; there is no code to un-write. Keep it that way: if this doc ever says "Anthropic everywhere" while a dashboard var says otherwise, **the dashboard wins** — routing is env-driven and this file cannot enforce it.
 
@@ -81,10 +81,11 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 | suggest-prompt | `0.7` | Ideation the operator re-clicks for fresh angles; identical output would be the bug. |
 | the Boss (concierge chat) | `0.7` | Conversation: warm and varied, but it answers questions, so not as loose as long-form voice. |
 | drafts, guides, repurpose | `0.8` | Brand-voice long-form. |
-| pipeline `outline` / `images` (Haiku 4.5, effort low) | `0.7` | Planning, not prose — cheap, fast, varied enough to re-plan. |
-| pipeline `section` (Sonnet, effort high, streamed) | `0.8` | The prose itself; same lane as the old single-call draft. |
-| pipeline `blocks` (Sonnet, effort low) | `0.5` | Summaries of finished prose — faithful first. |
-| pipeline `critic` (Sonnet, effort low) | `0` | An editor's findings must be reproducible to be trusted. |
+| pipeline `outline` (content bucket → Opus 5, effort high — since 2026-10-30) | `0.7` | The outline is where the argument is decided; it runs on the production tier. |
+| pipeline `images` (Haiku 4.5, effort low) | `0.7` | Planning, not prose — cheap, fast, varied enough to re-plan. |
+| pipeline `section` (content bucket → Opus 5, effort high, streamed) | `0.8` | The prose itself — public-facing copy runs on the production tier (operator decision 2026-10-30). |
+| pipeline `blocks` (content bucket → Opus 5, effort medium) | `0.5` | Summaries of finished prose — faithful first. |
+| pipeline `critic` (content bucket → Opus 5, effort high) | `0` | An editor's findings must be reproducible to be trusted. |
 | merch sayings | `1.0` | Deliberately widest — short, punchy, high-variance output. |
 
 Anything left unset inherits the provider default (~1.0), which is why the deterministic lanes above are now explicit.

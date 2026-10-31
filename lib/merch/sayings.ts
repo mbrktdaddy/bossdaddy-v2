@@ -28,7 +28,7 @@ MERCH COPY RULES:
 - Punchy, meme-able, and true to the archetype. It should make a dad grin or nod.
 - "Dad", "Boss Daddy", "the good stuff", "boss stuff" are on-brand vocabulary.
 - BRAND MESSAGING LINES (premium merch copy — print directly or riff on): "The Boss Dad Standard." (positioning), "Dad Like a Boss." (primary tagline), "Boss Up." (action line). Title Case with periods, never all-caps. "The Boss Dad Standard" and "Boss Up" are sanctioned brand phrases (NOT the banned hype below).
-- Faith/family angles welcome when natural — warm, never preachy.
+- Faith/family angles welcome when natural — warm, never preachy. Boss Daddy's faith is grace received, not standing earned: a faith line can be grateful, steady, or proud — never a scold, a sermon, or an earn-your-way line.
 - One idea per design. No run-ons, no explanation baked into the line.
 - Sublines are OPTIONAL and usually empty — only add one if it lands a real punchline or clarifies. Never pad.
 

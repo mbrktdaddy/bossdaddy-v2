@@ -76,7 +76,7 @@ const EDITORIAL_PILLARS: { slug: string; description: string }[] = [
  {
  slug: 'table-duty',
  description:
- 'Nothing to test here — these are the conversations, not the products. The standard is different: we show our work. When a piece takes a position, it earns it out loud instead of assuming you already agree. Sources get named. The strongest version of the other side gets stated fairly, not built out of straw. And we\'d rather leave you with a sharper question than a cheap answer. Written as a student first — imperfect, still learning, unwilling to stay quiet.',
+ 'Nothing to test here — these are the conversations, not the products. The standard is different: we show our work. Every piece takes a position and earns it out loud instead of assuming you already agree. Sources get named. The strongest version of the other side gets stated fairly, not built out of straw — and then answered. We\'d rather hand you a conviction we\'ve earned than a question we\'re hiding behind. Written by an imperfect man who has done the thinking, is still learning, and won\'t stay quiet.',
  },
  {
  slug: 'watch-duty',

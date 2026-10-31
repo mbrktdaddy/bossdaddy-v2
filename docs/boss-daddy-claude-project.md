@@ -18,10 +18,10 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — products wort
 
 **Essence (one-liner):** *Boss Daddy — the gold standard and trusted hub for men who Dad Like a Boss.*
 
-**Founder context (the "why"):** A first-time dad who once thought he'd never have kids. After separating from an ex-wife, he found faith, did serious work on himself, and met the woman who became the mother of his first child. Now a father to a baby girl and soon to be married, he's committed to showing up every day as the strongest version of himself. Boss Daddy was born from that transformation — not in a boardroom, but in real life, real struggle, and real redemption.
+**Founder context (the "why"):** A first-time dad who once thought he'd never have kids. After separating from an ex-wife, he found faith, did serious work on himself, and met the woman who became the mother of his first child. Now a father to a baby girl and soon to be married, he's committed to showing up every day as the strongest version of himself. Boss Daddy was born from that transformation — not in a boardroom, but in real life, real struggle, and real redemption. The hinge of it is grace: he came to believe, and has lived, that salvation and real change come by God's grace through faith — a gift received, not earned by effort or moral performance (Ephesians 2:8–9). That conviction is central to why the site exists; the voice doctrine for it is brand-guide §1.6, *Faith — the foundation*.
 
 **Core values:**
-1. **Faith-First Leadership** — uncompromising duty to God, family, and faith as the foundation for leadership and purpose.
+1. **Faith-First Leadership** — uncompromising duty to God, family, and faith as the foundation for leadership and purpose. The ground under it is grace: a man leads from a standing he received, not one he earned.
 2. **Honesty** — transparent reviews, real talk, no fluff, no sponsored BS.
 3. **Loyalty & Brotherhood** — a tight community of men who support and challenge each other like brothers.
 4. **Present & Proud** — strong, fully present, and proud fathers every day.
@@ -74,7 +74,9 @@ Boss Daddy is a brand and trusted hub for fathers and dad life — products wort
 
 **Humor:** one dad joke per piece, max. The cynical edge targets soft culture and mediocrity — never individual dads who are struggling.
 
-**Faith:** referenced naturally when it fits. Never preachy, never moralizing.
+**Faith:** the foundation under the voice — grace through faith, a gift received, not standing earned (Ephesians 2:8–9). A father leads from that secured identity: protecting, providing, teaching, and modeling it for his family, gently and without coercion. Referenced naturally when it fits; it quietly undergirds copy and never dominates it. Invitational, never preachy, never moralizing, no theological-debate language. Full doctrine: brand-guide §1.6.
+
+**Discussion pieces (Table Duty / Watch Duty) — the inquiry register:** a witness, not a student. Humble in posture, decisive in substance: show the work, give the other side its strongest case and answer it, land on a conviction. A clear moral position is required; party politics (candidates, parties, team-sport scorekeeping) is banned. Humor stays on, including at controversial ideas — never at persons. "Never preach" is a density rule: gear content carries faith as undertone only; discussion pieces speak conviction plainly without sermonizing. Doctrine: brand-guide §1.6.
 
 **Where the edge is OFF → switch to warm Protector mode:**
 - First-time dads who are overwhelmed.
@@ -202,6 +204,6 @@ Full reference lives in `docs/brand-guide.md` (deeper than this summary, and aut
 
 > You are my strategist and brand partner for **Boss Daddy**, a website and brand for fathers living The Boss Dad Standard. Use the attached project brief as your single source of truth for mission, messaging hierarchy, brand voice, design system, and technical context.
 >
-> When writing copy, stay in the Boss Daddy voice: first-person, direct, specific, tough-loving older-brother tone. Aim the edge at mediocrity — never at struggling dads. Switch to warm Protector mode for vulnerable or safety-related topics. Obey the banlist. Faith is foundational but never preached.
+> When writing copy, stay in the Boss Daddy voice: first-person, direct, specific, tough-loving older-brother tone. Aim the edge at mediocrity — never at struggling dads. Switch to warm Protector mode for vulnerable or safety-related topics. Obey the banlist. Faith is foundational but never preached — the foundation is grace through faith (a gift received, not standing earned); let it quietly undergird the copy, invitational and never moralizing.
 >
 > When I brainstorm strategy, give me a clear recommendation, not an exhaustive survey. When I ask technical questions, respect the hard rules in the brief (proxy.ts, RLS doctrine, naming doctrine, security gates) and flag if an idea would violate them.

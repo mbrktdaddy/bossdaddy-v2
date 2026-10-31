@@ -14,7 +14,7 @@ export const CRITIC_CODES = [
   'claim-without-specifics', // "long battery life" where a number was available or none exists
   'contradiction',           // the prose disagrees with a spec, a note, or itself
   'tone-edge-on',            // roast/smirk on a vulnerable or safety topic
-  'preachy',                 // sermonising, judging another man's walk
+  'preachy',                 // sermonising, scripture saturation, judging another man's walk — conviction stated as the author's own is NOT preachy
   'generic',                 // a part that could be about any product / any topic
   'rating-mismatch',         // verdict or tone disagrees with the target rating
   'other',
@@ -100,7 +100,14 @@ WHAT TO CHECK (the banlist words, product-token counts and family names are chec
 - Firsthand claims and anecdotes against the notes (the FTC question).
 - Claims without specifics where a specific was available, or where none exists and the claim should go.
 - Contradictions with the specs, the notes, or between parts.
-- Tone: the roast must be OFF on safety, loss, struggle, money hardship — flag edge where it shouldn't be.${inquiry ? '\n- Inquiry register: does it commit to an answer? Does it engage the strongest opposing view honestly? Preaching or partisanship is a block.' : ''}
+- Tone: the roast must be OFF on safety, loss, struggle, money hardship — flag edge where it shouldn't be. Humor aimed at an idea, a trend or an institution is on-brand — flag only humor aimed at a named person, a man's worth, or his struggle.
+- Faith density (brand-guide §1.6): on product, review, how-to and money pieces, more than one faith reference, or any scripture the notes didn't supply, is a warn ("sermon creep"); on discussion pieces, conviction stated plainly is correct — flag only saturation or lecturing the reader.${inquiry ? `
+- Inquiry register — a witness, not a student. Severities here are fixed:
+  - block: the piece never lands — no position stated as the author's conviction, or a closing that hands the question back ("it's up to each dad", a both-sides-equal wrap-up, a question in place of the answer).
+  - block: preaching that judges another man's walk, or party politics (candidates, parties, campaign framing, personal attacks on named people). A firm moral position is NOT preaching and NOT partisanship — it is the job; never flag a stance for being a stance.
+  - warn: an opposing view aired at full strength and not answered in the same part, or a strawman.
+  - warn: the author performing doubt about his own thesis ("I'm not sure about any of this", "I could be wrong about all of it") instead of naming one open sub-question.
+  - warn: a faith passage that presents the foundation (grace through faith) as one option among several the author is weighing.` : ''}
 - A part that could be about any product or topic ("generic").
 ${brief.contentType === 'review' ? '- Does the verdict and the overall tone match the target rating?\n' : ''}
 Return the structured object. An empty findings list is a valid, good answer.`

@@ -51,11 +51,13 @@ export function sectionPrompt(run: RunState, index: number): string {
       ? (brief.contentType === 'review'
           ? 'This is the verdict: a clear buy / skip call that matches the target rating, honest about who it is not for.'
           : inquiry
-            ? 'Commit to your best answer and say plainly why you find it convincing; name what genuinely stays open, but don\'t end on a shrug.'
+            ? 'State the position as a conviction — what you believe and the reason it convinced you. If one specific sub-question genuinely stays open, name it in a sentence. Never end on a shrug, a both-sides wrap-up, "it\'s up to each dad", or a question in place of the answer. No recap.'
             : 'Land it with one specific next step. No bow on top, no recap of every section.')
-      : 'Lead with the most useful information, not background. Every claim needs a specific. End when the part has done its job — no summary sentence.'
+      : inquiry
+        ? 'Advance the argument one real step — this part exists to move the reader toward the position, not to survey. If this part raises the opposing view, state it at its strongest and answer it here, in the same part. No hedging on the thesis. Humor is welcome at an idea or a trend, never at a person. End when the step is made — no summary sentence, no "but who\'s to say".'
+        : 'Lead with the most useful information, not background. Every claim needs a specific. End when the part has done its job — no summary sentence.'
 
-  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece in the inquiry register (see your system prompt): humble in posture, decisive in substance.\n\n` : ''}STAGED DRAFTING — you are writing ONE part of a ${briefLabel(brief)}: part ${index + 1} of ${total}, the ${KIND_LABEL[part.kind]} ${headingLine}.
+  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece in the inquiry register (see your system prompt): a witness, not a student — humble in posture, decisive in substance. You have reached a conviction and are showing your work.\n\n` : ''}STAGED DRAFTING — you are writing ONE part of a ${briefLabel(brief)}: part ${index + 1} of ${total}, the ${KIND_LABEL[part.kind]} ${headingLine}.
 
 Title: ${outline.title}
 ${briefHeaderLines(brief)}

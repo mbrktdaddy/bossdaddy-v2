@@ -18,7 +18,7 @@ export const maxDuration = 90
 // fraction of the whole-document refine and can't touch anything it wasn't
 // shown.
 const TEMPERATURE = 0.5
-const EFFORT = 'medium' as const
+const EFFORT = 'high' as const
 const NEIGHBOUR_CHARS = 1200
 
 const Input = z.object({
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   const next = sections[sectionIndex + 1]
   const clip = (s: string) => (s.length > NEIGHBOUR_CHARS ? s.slice(0, NEIGHBOUR_CHARS) + ' …' : s)
 
-  const prompt = `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis piece runs in the inquiry register (see your system prompt): keep the visible reasoning and the honest treatment of opposing views, and keep it committed to an answer.\n\n` : ''}STAGED DRAFTING — you are rewriting ONE section of an existing Boss Daddy ${contentType === 'review' ? 'product review' : 'guide'} to an editor's instruction. Everything outside this section stays as it is; you return only this section's prose.
+  const prompt = `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis piece runs in the inquiry register (see your system prompt): a witness, not a student — keep the visible reasoning, answer the opposing view where it's raised, and keep the position stated as a conviction; never soften it into a shrug.\n\n` : ''}STAGED DRAFTING — you are rewriting ONE section of an existing Boss Daddy ${contentType === 'review' ? 'product review' : 'guide'} to an editor's instruction. Everything outside this section stays as it is; you return only this section's prose.
 
 Title: ${title}${productName ? `\nProduct: ${productName}` : ''}
 Category: ${category}

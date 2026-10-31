@@ -47,13 +47,39 @@ describe('runRules', () => {
     const f = runRules({ brief: review, parts, texts: [clean[0], clean[1] + ' https://amazon.com/x', clean[2]], familyNames: [] })
     expect(codes(f)).toContain('raw-url')
   })
-  it('hedges are a note outside the inquiry register and ignored inside it', () => {
+  it('hedges are a note outside the inquiry register and tolerated inside it, except in the closing', () => {
     const texts = ['It may work. It might not. It could.', clean[1], clean[2]]
     expect(codes(runRules({ brief: review, parts, texts, familyNames: [] }))).toContain('hedge-words')
     const inquiry: Brief = { contentType: 'guide', topic: 't', category: 'table-duty', pieceType: 'essay', keyPoints: [], productSlugs: [], imageSlots: 0, inquiryMode: true }
     const noTokens = parts.map((p) => ({ ...p, productToken: null }))
     const plain = texts.map((t) => t.replace(/\s*\[\[BUY:[^\]]+\]\]/g, ''))
+    // Three hedges in a non-closing part: slack inside the register.
     expect(codes(runRules({ brief: inquiry, parts: noTokens, texts: plain, familyNames: [] }))).not.toContain('hedge-words')
+    // Four in one part: still a note.
+    const four = ['It may work. It might not. It could. It may.', plain[1], plain[2]]
+    expect(runRules({ brief: inquiry, parts: noTokens, texts: four, familyNames: [] }).find((x) => x.code === 'hedge-words')?.severity).toBe('note')
+    // Two in the closing: a warn — the position is a conviction, not a maybe.
+    const hedgedClose = [plain[0].replace(/may|might|could/g, 'will'), plain[1], 'It may be right. It might be wrong.']
+    expect(runRules({ brief: inquiry, parts: noTokens, texts: hedgedClose, familyNames: [] }).find((x) => x.code === 'hedge-words')?.severity).toBe('warn')
+  })
+  it('inquiry register: a shrug blocks in the closing and warns elsewhere; a closing question is a note', () => {
+    const inquiry: Brief = { contentType: 'guide', topic: 't', category: 'table-duty', pieceType: 'essay', keyPoints: [], productSlugs: [], imageSlots: 0, inquiryMode: true }
+    const noTokens = parts.map((p) => ({ ...p, productToken: null }))
+    const shrugClose = ['Here is the question.', 'Here is the argument.', "In the end it's up to each dad."]
+    expect(runRules({ brief: inquiry, parts: noTokens, texts: shrugClose, familyNames: [] }).find((x) => x.code === 'inquiry-shrug')?.severity).toBe('block')
+    const shrugBody = ['Here is the question.', 'Some say there is no right answer here.', 'I land on presence.']
+    expect(runRules({ brief: inquiry, parts: noTokens, texts: shrugBody, familyNames: [] }).find((x) => x.code === 'inquiry-shrug')?.severity).toBe('warn')
+    const question = ['Here is the question.', 'Here is the argument.', 'I land on presence. What will you do with yours?']
+    expect(codes(runRules({ brief: inquiry, parts: noTokens, texts: question, familyNames: [] }))).toContain('closing-question')
+    // Outside the register none of these fire.
+    expect(codes(runRules({ brief: review, parts, texts: [clean[0], clean[1], "It's up to each dad. [[BUY:x-slug]]"], familyNames: [] }))).not.toContain('inquiry-shrug')
+  })
+  it('notes scripture in a gear piece, never in the inquiry register', () => {
+    const verse = [clean[0], 'Ephesians 2:8 says it plainly. [[BUY:x-slug]]', clean[2]]
+    expect(codes(runRules({ brief: review, parts, texts: verse, familyNames: [] }))).toContain('scripture-in-gear')
+    const inquiry: Brief = { contentType: 'guide', topic: 't', category: 'table-duty', pieceType: 'essay', keyPoints: [], productSlugs: [], imageSlots: 0, inquiryMode: true }
+    const noTokens = parts.map((p) => ({ ...p, productToken: null }))
+    expect(codes(runRules({ brief: inquiry, parts: noTokens, texts: ['Q.', 'Ephesians 2:8 says it plainly.', 'I land here.'], familyNames: [] }))).not.toContain('scripture-in-gear')
   })
   it('notes a part far over its target length', () => {
     const long = Array.from({ length: 400 }, () => 'word').join(' ') + ' [[BUY:x-slug]]'

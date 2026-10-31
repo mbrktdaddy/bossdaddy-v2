@@ -15,7 +15,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 export const maxDuration = 90
 
 // Stage 3 — the structured blocks, derived from the finished prose.
-const EFFORT = 'low' as const
+const EFFORT = 'medium' as const
 const TEMPERATURE = 0.5
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
