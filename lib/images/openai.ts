@@ -136,7 +136,10 @@ async function callImageModel(
 /**
  * Re-render a picked draft on the Publication tier as an image edit. `moderation`
  * is deliberately absent: the SDK's edit params have no such field.
- * `input_fidelity: 'high'` is what holds the draft's composition.
+ * `input_fidelity` is deliberately absent too: gpt-image-2.5-sunburst rejects it
+ * with a 400 `invalid_input_fidelity_model` (seen 2026-11-01), and the SDK types
+ * are a generation behind on that. The draft itself is the reference image; the
+ * reference note at the end of the prompt is what holds its composition.
  */
 async function callEditModel(
   client: OpenAI,
@@ -153,7 +156,6 @@ async function callEditModel(
       prompt,
       size,
       quality: 'high',
-      input_fidelity: 'high',
       output_format: 'webp',
       output_compression: WEBP_QUALITY,
     })
@@ -415,7 +417,7 @@ export interface FinalizeArgs extends Omit<GenerateImageArgs, 'premium'> {
 
 /**
  * Publication render of a picked draft: the draft is attached to an image edit
- * (`input_fidelity: 'high'`) with the reference note appended LAST, so the
+ * as the reference image, with the reference note appended LAST, so the
  * composition he chose is what ships. QA + one retry work like `generateImage`
  * (the retry is a second edit from the same draft plus the avoidance clause);
  * then the normal crop → store → verify, and the sheet's scratch drafts go.

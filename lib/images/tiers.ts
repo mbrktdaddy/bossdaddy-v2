@@ -15,6 +15,11 @@
 // Publication tier) and gpt-image-2.5-flare (fast everyday generation, now the
 // Draft tier).
 //
+// REQUEST-SHAPE GOTCHA: Sunburst rejects `input_fidelity` on images.edit (400
+// `invalid_input_fidelity_model`, 2026-11-01) even though the SDK's types still
+// allow it. finalizeFromDraft relies on the reference image + prompt instead.
+// A pin can be served and still 400 on our shape — bump, then run a real finalize.
+//
 // `npm run images:check` (scripts/image-model-check.mjs) reads the pins out of
 // this file and verifies each one live against OpenAI; add `-- --generate` to
 // also prove the Images API still accepts our request shape (about a cent). Run
