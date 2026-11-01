@@ -69,6 +69,19 @@ Old versions stay served for a long time (`claude-3-haiku`, `opus-4`, `sonnet-4`
 
 Version ordering is a heuristic across xAI's scheme (`4.20` sorts above `4.5`), which is another reason the script only advises.
 
+### Image models — OpenAI Images API, not the Gateway (pins verified 2026-10-31)
+
+Pictures do not go through the Gateway: `lib/images/openai.ts` calls the OpenAI Images API with the `openai` SDK and the OpenAI key from the environment. That also means `ai:drift` cannot see these pins, which is how the Draft tier died unnoticed — OpenAI shut `gpt-image-1` down on 2026-10-23 and retires `gpt-image-1.5` and `gpt-image-1-mini` on 2026-12-01.
+
+| Tier | Model | Quality | Use |
+|---|---|---|---|
+| Publication (default) | `gpt-image-2.5-sunburst` | high | the public page |
+| Draft | `gpt-image-2.5-flare` | medium | roughing out a composition |
+
+- The pins live in `lib/images/tiers.ts` (one place; the panels read their labels from it). `npm run images:check` retrieves each pin from OpenAI and exits 1 if one is missing; `npm run images:check -- --generate` also renders one low-quality square per pin (about a cent) to prove the Images API accepts it. Run it before trusting a pin bump and whenever OpenAI announces a deprecation.
+- Price rows in `lib/ai/pricing.ts` (2 and 2.5 share token rates: $5 text in / $8 image in / $30 image out per 1M) were read from the OpenAI pricing page on 2026-10-31; the retired rows stay so historical `generations` still price, and a unit test fails if a pinned model has no row.
+- The house style (`lib/images/style.ts`) was tuned on gpt-image-1.5; compare a handful of heroes on Sunburst before publishing a batch and retune the suffix there, never in a prompt.
+
 ### Sampling temperature per lane
 
 Temperature is set per call site, not per bucket, because it tracks the *task* rather than the provider:
@@ -82,7 +95,8 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 | the Boss (concierge chat) | `0.7` | Conversation: warm and varied, but it answers questions, so not as loose as long-form voice. |
 | drafts, guides, repurpose | `0.8` | Brand-voice long-form. |
 | pipeline `outline` (content bucket → Opus 5, effort high — since 2026-10-30) | `0.7` | The outline is where the argument is decided; it runs on the production tier. |
-| pipeline `images` (Haiku 4.5, effort low) | `0.7` | Planning, not prose — cheap, fast, varied enough to re-plan. |
+| pipeline `images` (Sonnet 5, effort medium, 6000-token cap — since 2026-10-31) | `0.7` | The photo editor's shot list: decides which pictures an AI can take and which the author must capture (`owned`), writes 400–700-char five-clause prompts from `lib/images/doctrine.ts`; varied enough to re-plan. |
+| image-prompt (prompt help: rewrite / 3 ideas / suggest / describe — utility bucket pinned to Sonnet 5, effort low) | `0.9` variations + fresh, `0.7` rewrite + describe | Ideation the author re-clicks for new pictures runs hot; a rewrite or a description stays near its source. |
 | pipeline `section` (content bucket → Opus 5, effort high, streamed) | `0.8` | The prose itself — public-facing copy runs on the production tier (operator decision 2026-10-30). |
 | pipeline `blocks` (content bucket → Opus 5, effort medium) | `0.5` | Summaries of finished prose — faithful first. |
 | pipeline `critic` (content bucket → Opus 5, effort high) | `0` | An editor's findings must be reproducible to be trusted. |

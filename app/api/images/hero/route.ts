@@ -7,8 +7,10 @@ import { logGeneration } from '@/lib/content/generations'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-// Generation + QA + one retry + QA can run past 60s on the premium tier.
-export const maxDuration = 120
+// OpenAI says complex prompts on the gpt-image-2.5 models can take up to 2 minutes;
+// add the vision QA pass and one retry on a hard fail. 180s is headroom for a slow
+// render plus QA — it is not a budget for two worst-case renders back to back.
+export const maxDuration = 180
 
 const HeroInput = z.object({
   title:         z.string().min(1).max(150),
@@ -16,7 +18,9 @@ const HeroInput = z.object({
   excerpt:       z.string().max(200).optional().nullable(),
   content_type:  z.enum(['guide', 'review']),
   product_name:  z.string().max(120).optional().nullable(),
-  custom_prompt: z.string().max(600).optional().nullable(),
+  // Same ceiling as /api/images/generate: the photo editor writes up to 700
+  // characters (lib/images/doctrine.ts) and the author may extend one in the panel.
+  custom_prompt: z.string().max(1000).optional().nullable(),
   premium:       z.boolean().optional().default(false),
   // Lane knobs (lib/images/safety.ts EDITORIAL is the baseline: no text,
   // people anonymous, brands pinned off). The panel sends them explicitly.

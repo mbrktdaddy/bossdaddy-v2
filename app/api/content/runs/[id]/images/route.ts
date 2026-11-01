@@ -9,12 +9,18 @@ import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-export const maxDuration = 60
+export const maxDuration = 120
 
-// Stage 5 — image placements from the finished prose (Haiku; subject only, the
-// house style is applied at generation time).
-const EFFORT = 'low' as const
+// Stage 5 — the photo editor's shot list from the finished prose (Sonnet 5; it
+// decides which pictures an AI can take and which the author must capture). The
+// house style is applied at generation time, so the plan is subject only.
+// This was Haiku at effort low writing subject-only prompts under 180 chars.
+const EFFORT = 'medium' as const
 const TEMPERATURE = 0.7
+// Reasoning tokens share this cap (see the outline route): the plan is a hero
+// plus up to six five-clause prompts of about 600 characters, and the thinking
+// has to fit beside them.
+const MAX_OUTPUT_TOKENS = 6000
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -34,12 +40,12 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   try {
     const { object, meta } = await aiGenerateObjectWithMeta<ImagesModelOutput>({
       bucket: 'content',
-      model: MODELS.claudeHaiku,
+      model: MODELS.claudeSonnet,
       tag: 'draft-images',
       schema: ImagesOutput,
-      system: 'You plan editorial photography for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. Scenes, never product replicas; no people, no text, no logos.',
+      system: 'You are the photo editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. You plan editorial photographs from finished prose and decide which pictures the author must capture himself. Scenes, never product replicas; people only anonymously; no text, no logos.',
       messages: [{ role: 'user', content: prompt }],
-      maxOutputTokens: 1500,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       effort: EFFORT,
       temperature: TEMPERATURE,
       maxRetries: 2,
@@ -58,7 +64,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'images',
       status: c.kind === 'truncated' ? 'truncated' : 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind, MODELS.claudeHaiku, c.usage), effort: EFFORT, temperature: TEMPERATURE,
+      meta: failedCallMeta('content', startedAt, c.kind, MODELS.claudeSonnet, c.usage), effort: EFFORT, temperature: TEMPERATURE,
       input: { prompt },
       output: c.rawText ? { rawText: c.rawText } : undefined,
     })

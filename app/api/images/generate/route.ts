@@ -7,12 +7,17 @@ import { logGeneration } from '@/lib/content/generations'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
-// Generation + one QA + one retry + one QA can run past 60s on the premium tier.
-export const maxDuration = 120
+// The 2.5 image models can take up to 2 minutes at high quality, plus vision QA and one retry.
+export const maxDuration = 180
 
 const GenerateSchema = z.object({
-  prompt:   z.string().min(4).max(600),
+  // The photo-editor stage writes 400-700 characters (lib/images/doctrine.ts) and
+  // the author may extend one in the panel, so the ceiling sits above both.
+  prompt:   z.string().min(4).max(1000),
   size:     z.enum(['1024x1024', '1536x1024', '1024x1536']).default('1024x1024'),
+  // '4:5' is generated on the 1024x1536 portrait and centre-cropped to the phone-first
+  // figure shape; every other shape is the size itself, so only 4:5 is sent.
+  aspect:   z.enum(['4:5']).optional().nullable(),
   alt_text: z.string().max(200).optional().nullable(),
   premium:  z.boolean().optional().default(false),
   // Where the image is used (lib/images/safety.ts presets + the house style):
@@ -52,7 +57,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { prompt, size, alt_text, premium, lane, no_text, no_people, people, subject, source_type, source_id } = parsed.data
+  const { prompt, size, aspect, alt_text, premium, lane, no_text, no_people, people, subject, source_type, source_id } = parsed.data
 
   const base = lane === 'editorial' ? EDITORIAL : SOCIAL_FLEXIBLE
   const toggles = resolveToggles(base, {
@@ -67,6 +72,7 @@ export async function POST(request: NextRequest) {
       prompt,
       bucket: 'media',
       size,
+      aspect: aspect ?? null,
       premium,
       toggles,
       lane,
@@ -115,7 +121,7 @@ export async function POST(request: NextRequest) {
       stage: 'image',
       status: 'done',
       meta: { model: result.model, usage: undefined, finishReason: 'stop', latencyMs: result.latencyMs, costUsd: result.costUsd },
-      input: { prompt, lane, size, premium, quality: result.quality, toggles, attempts: result.attempts, rules: buildSafetyRules(toggles) },
+      input: { prompt, lane, size, aspect: aspect ?? null, premium, quality: result.quality, toggles, attempts: result.attempts, rules: buildSafetyRules(toggles) },
       output: { url: result.url, qa: result.qa },
     })
   }

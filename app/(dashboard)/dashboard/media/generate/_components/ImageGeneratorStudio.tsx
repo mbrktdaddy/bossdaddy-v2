@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { downloadImage } from '@/lib/images/download'
 import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
+import { PromptAssist } from '@/components/workspace/PromptAssist'
 import { PhotoIcon } from '@/components/icons'
+import { IMAGE_TIERS } from '@/lib/images/tiers'
 
 interface SessionImage {
   id?: string
@@ -68,6 +70,16 @@ Tips:
 - Say what to exclude ('no people', 'no text')"
             className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none font-mono"
           />
+          <div className="mt-2">
+            <PromptAssist
+              value={prompt}
+              onUse={(p) => setPrompt(p.prompt)}
+              target="social"
+              people={noPeople ? 'none' : 'allowed'}
+              allowText={!noText}
+              disabled={loading}
+            />
+          </div>
         </div>
 
         <div>
@@ -99,21 +111,22 @@ Tips:
           <label className="block text-sm text-prose-muted mb-2">Model tier</label>
           <div className="flex gap-2">
             {[
-              { value: false, label: 'Standard', tag: 'gpt-image-1 · medium' },
-              { value: true,  label: 'Premium',  tag: 'gpt-image-1.5 · high' },
+              { value: false, tier: IMAGE_TIERS.draft },
+              { value: true,  tier: IMAGE_TIERS.publication },
             ].map((opt) => (
               <button
                 key={String(opt.value)}
                 type="button"
                 onClick={() => setPremium(opt.value)}
+                title={opt.tier.hint}
                 className={`flex-1 flex flex-col items-center gap-1 px-3 py-3 rounded-xl transition-colors ${
                   premium === opt.value
                     ? 'bg-accent text-white'
                     : 'bg-surface border border-soft text-prose-muted hover:border-strong'
                 }`}
               >
-                <span className="text-xs font-semibold">{opt.label}</span>
-                <span className="text-xs opacity-70 font-mono">{opt.tag}</span>
+                <span className="text-xs font-semibold">{opt.tier.label}</span>
+                <span className="text-xs opacity-70 font-mono">{opt.tier.quality}</span>
               </button>
             ))}
           </div>

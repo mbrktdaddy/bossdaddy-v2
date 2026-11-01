@@ -31,7 +31,10 @@ import {
 import { buttonVariants } from '@/components/ui/Button'
 import { Segmented } from '@/components/ui/Segmented'
 import { TrashIcon } from '@/components/icons'
+import { PromptAssist } from '@/components/workspace/PromptAssist'
 import type { PeoplePolicy } from '@/lib/images/safety'
+import { FIGURE_ASPECTS, isFigureAspect, type FigureAspect } from '@/lib/images/doctrine'
+import { IMAGE_TIERS } from '@/lib/images/tiers'
 import type { FigureImageMeta } from '@/lib/inlineImages'
 
 interface Props {
@@ -48,6 +51,9 @@ type AddMode = 'generate' | 'library' | 'upload' | 'placeholder' | 'gallery'
 
 /** What the generator reported about a slot's last image (vision QA / refusal). */
 export type SlotNote = { tone: 'warn' | 'fail' | 'policy' | 'error'; text: string }
+
+/** What Prompt help hands back when the author uses a result (components/workspace/PromptAssist.tsx). */
+type AssistPick = { prompt: string; aspect?: string | null; altText?: string; caption?: string }
 
 type GenerateResponse = {
   asset?: { url?: string; alt_text?: string | null; width?: number | null; height?: number | null; origin?: string | null }
@@ -66,6 +72,19 @@ const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
   { value: 'anonymous', label: 'Anonymous' },
   { value: 'allowed',   label: 'Faces OK' },
 ]
+
+// The figure shape (data-aspect). 3:2 is what a slot without one has always been.
+const DEFAULT_ASPECT: FigureAspect = '3:2'
+const ASPECT_OPTIONS: { value: FigureAspect; label: string }[] = FIGURE_ASPECTS.map((a) => ({ value: a, label: a }))
+
+// How a figure shape becomes a generate request. 3:2 and 1:1 are image sizes in
+// their own right; 4:5 is generated on the 1024x1536 portrait and centre-cropped
+// by the route (aspect '4:5'), so the stored file IS the framing the reader sees.
+const GENERATE_REQUEST: Record<FigureAspect, { size: '1536x1024' | '1024x1024' | '1024x1536'; aspect?: '4:5' }> = {
+  '3:2': { size: '1536x1024' },
+  '1:1': { size: '1024x1024' },
+  '4:5': { size: '1024x1536', aspect: '4:5' },
+}
 
 export function InlineMediaPanel({ content, onChangeContent, category, productId, contentType, contentId }: Props) {
 
@@ -87,6 +106,8 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const filledCount  = allSlots.filter(s => s.filled).length
   const openCount    = allSlots.length - filledCount
   const fillableSlots = allSlots.filter(s => !s.filled && s.prompt.trim())
+  // Owned slots the author has not given a prompt: waiting for his own photo, and skipped by bulk fill.
+  const ownedWaiting  = allSlots.filter(s => !s.filled && s.need === 'owned' && !s.prompt.trim()).length
 
   // ── Add-image form state ────────────────────────────────────────────────
   const [showAdd, setShowAdd]       = useState(false)
@@ -94,6 +115,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [addPrompt, setAddPrompt]   = useState('')
   const [addCaption, setAddCaption] = useState('')
   const [addAlt, setAddAlt]         = useState('')
+  const [addAspect, setAddAspect]   = useState<FigureAspect>(DEFAULT_ASPECT)
   const [addPosKey, setAddPosKey]   = useState<string>('end')
   const [addBusy, setAddBusy]       = useState(false)
 
@@ -110,8 +132,8 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [uploadingForNew, setUploadingForNew] = useState(false)
   const [busySlotId, setBusySlotId]           = useState<string | null>(null)
   const [bulkBusy, setBulkBusy]               = useState<{ done: number; total: number } | null>(null)
-  // Publication quality by default (gpt-image-1.5 · high); drop to the draft
-  // tier to rough out a composition, then regenerate for the page.
+  // Publication tier by default (lib/images/tiers.ts pins the models); drop to
+  // the Draft tier to rough out a composition, then regenerate for the page.
   const [premium, setPremium]                 = useState(true)
   // Lane knobs (lib/images/safety.ts EDITORIAL): people anonymous, no text.
   const [people, setPeople]                   = useState<PeoplePolicy>('anonymous')
@@ -123,13 +145,15 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
   // ── Generation plumbing ──────────────────────────────────────────────────
 
-  async function callGenerate(prompt: string, subject: string): Promise<GenerateResponse> {
+  async function callGenerate(prompt: string, subject: string, aspect: FigureAspect = DEFAULT_ASPECT): Promise<GenerateResponse> {
+    const target = GENERATE_REQUEST[aspect]
     const res = await fetch('/api/images/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         prompt,
-        size: '1536x1024',
+        size: target.size,
+        ...(target.aspect ? { aspect: target.aspect } : {}),
         alt_text: subject.slice(0, 200),
         subject: subject.slice(0, 400),
         premium,
@@ -186,12 +210,30 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     return { kind: 'afterHeading', index: idx }
   }
 
+  // Prompt help context. The H2 a figure sits under: the last heading that
+  // ends before the figure starts.
+  function headingBefore(start: number): string | undefined {
+    let text: string | undefined
+    for (const h of headings) {
+      if (h.end <= start) text = h.text
+    }
+    return text
+  }
+  // The draft the prompt route reads for title, category and the prose under
+  // `afterHeading` (matched by heading text).
+  function assistSource(afterHeading?: string) {
+    return contentType && contentId ? { type: contentType, id: contentId, afterHeading } : undefined
+  }
+  // The section the add form inserts under, when the author picked one.
+  const addHeading = addPosKey.startsWith('h-') ? headings[Number(addPosKey.replace('h-', ''))]?.text : undefined
+
   function resetAddForm() {
     setShowAdd(false)
     setAddMode('generate')
     setAddPrompt('')
     setAddCaption('')
     setAddAlt('')
+    setAddAspect(DEFAULT_ASPECT)
     setAddPosKey('end')
     setAddBusy(false)
   }
@@ -216,6 +258,20 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   }
   function handleFieldChange(slotId: string, field: 'caption' | 'alt' | 'prompt', value: string) {
     onChangeContent(updateSlotMeta(content, slotId, { [field]: value }))
+  }
+  function handleAspectChange(slotId: string, aspect: FigureAspect) {
+    onChangeContent(updateSlotMeta(content, slotId, { aspect }))
+  }
+  // Prompt help picked a prompt for a slot. Alt text and caption fill only where
+  // the author left them empty; a returned shape lands only if it is a figure aspect.
+  function handleUsePrompt(slot: InlineSlot, p: AssistPick) {
+    const next = updateSlotMeta(content, slot.slotId, {
+      prompt: p.prompt,
+      ...(slot.alt ? {} : p.altText ? { alt: p.altText } : {}),
+      ...(slot.caption ? {} : p.caption ? { caption: p.caption } : {}),
+      ...(p.aspect && isFigureAspect(p.aspect) ? { aspect: p.aspect } : {}),
+    })
+    onChangeContent(next)
   }
 
   // ── Gallery child operations ─────────────────────────────────────────────
@@ -244,7 +300,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     for (let i = 0; i < targets.length; i++) {
       const slot = targets[i]
       try {
-        const json = await callGenerate(slot.prompt, slot.alt || slot.caption || slot.prompt.slice(0, 120))
+        const json = await callGenerate(slot.prompt, slot.alt || slot.caption || slot.prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
         // The alt from the pixels (QA) beats the pre-generation guess.
         working = fillSlot(working, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json))
         onChangeContent(working)
@@ -266,7 +322,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (!prompt) { setError('Add an image prompt first, then click Regenerate.'); return }
     setBusySlotId(slot.slotId); setError(null)
     try {
-      const json = await callGenerate(prompt, slot.alt || slot.caption || prompt.slice(0, 120))
+      const json = await callGenerate(prompt, slot.alt || slot.caption || prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
       onChangeContent(fillSlot(content, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json)))
       setNote(slot.slotId, noteFor(json))
     } catch (err) {
@@ -375,7 +431,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     const position = resolveAddPosition()
 
     if (addMode === 'placeholder') {
-      onChangeContent(insertAtPosition(content, buildPlaceholderFigure({ prompt: addPrompt, alt: addAlt, caption: addCaption }), position))
+      onChangeContent(insertAtPosition(content, buildPlaceholderFigure({ prompt: addPrompt, alt: addAlt, caption: addCaption, aspect: addAspect }), position))
       resetAddForm()
       return
     }
@@ -397,12 +453,13 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     if (!addPrompt.trim()) { setError('Enter a prompt for the AI to generate the image.'); return }
     setAddBusy(true)
     try {
-      const json = await callGenerate(addPrompt.trim(), addAlt || addCaption || addPrompt.slice(0, 120))
+      const json = await callGenerate(addPrompt.trim(), addAlt || addCaption || addPrompt.slice(0, 120), addAspect)
       const markup = buildFilledFigure({
         imageUrl: json.asset!.url!,
         alt: json.asset?.alt_text || addAlt || addPrompt.slice(0, 120),
         caption: addCaption,
         prompt: addPrompt,
+        aspect: addAspect,
         ...metaOf(json),
       })
       onChangeContent(insertAtPosition(content, markup, position))
@@ -501,6 +558,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               {openCount} open
             </span>
           )}
+          {ownedWaiting > 0 && (
+            <span className="px-2 py-0.5 bg-surface border border-strong text-prose-muted rounded-full text-xs">
+              {ownedWaiting} waiting for your photo
+            </span>
+          )}
           {allSlots.length === 0 && (
             <span className="text-xs text-prose-faint font-normal">none yet</span>
           )}
@@ -519,9 +581,9 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               className={`px-2.5 py-1 rounded-md transition-colors ${
                 premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
               }`}
-              title="gpt-image-1.5 · high — the publication tier"
+              title={IMAGE_TIERS.publication.hint}
             >
-              Publication
+              {IMAGE_TIERS.publication.label}
             </button>
             <button
               type="button"
@@ -529,9 +591,9 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               className={`px-2.5 py-1 rounded-md transition-colors ${
                 !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
               }`}
-              title="gpt-image-1 · medium — cheaper, for roughing out a composition"
+              title={IMAGE_TIERS.draft.hint}
             >
-              Draft
+              {IMAGE_TIERS.draft.label}
             </button>
           </div>
           <div className="flex items-center gap-2">
@@ -559,6 +621,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               ? `✨ Generating ${bulkBusy.done}/${bulkBusy.total}…`
               : `✨ Fill ${fillableSlots.length} empty slot${fillableSlots.length === 1 ? '' : 's'} with AI`}
           </button>
+        )}
+        {!showAdd && ownedWaiting > 0 && (
+          <p className="text-xs text-prose-muted">
+            {ownedWaiting} slot{ownedWaiting === 1 ? ' is' : 's are'} waiting for your own photo: a screen, a document or a specific product that AI cannot draw. Upload {ownedWaiting === 1 ? 'it' : 'them'} or pick from the library; bulk fill skips {ownedWaiting === 1 ? 'it' : 'them'}.
+          </p>
         )}
 
         {/* ── Add image button + form ─────────────────────────────────── */}
@@ -617,9 +684,34 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
                   value={addPrompt}
                   onChange={(e) => setAddPrompt(e.target.value)}
                   rows={2}
-                  placeholder="e.g. close-up of a worn cordless drill on a workbench, warm natural light, editorial"
+                  placeholder="e.g. a worn cordless drill on a garage workbench in late afternoon, sawdust on the floor, one half-finished shelf"
                   className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
                 />
+                {/* Rewrite / 3 ideas / suggest one from the section: a cheap text
+                    call, separate from the paid generate. */}
+                <div className="mt-2">
+                  <PromptAssist
+                    compact
+                    target="inline"
+                    value={addPrompt}
+                    people={people}
+                    allowText={allowText}
+                    aspect={addAspect}
+                    context={addHeading ? { heading: addHeading } : undefined}
+                    source={assistSource(addHeading)}
+                    disabled={addBusy}
+                    onUse={(p) => {
+                      setAddPrompt(p.prompt)
+                      if (!addAlt && p.altText) setAddAlt(p.altText)
+                      if (!addCaption && p.caption) setAddCaption(p.caption)
+                      if (p.aspect && isFigureAspect(p.aspect)) setAddAspect(p.aspect)
+                    }}
+                  />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-prose-muted">Shape</span>
+                  <Segmented value={addAspect} options={ASPECT_OPTIONS} onChange={setAddAspect} label="Image shape" />
+                </div>
               </div>
             )}
 
@@ -688,13 +780,19 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               position={idx + 1}
               total={items.length}
               headings={headings}
+              heading={headingBefore(item.slot.start)}
               busy={busySlotId === item.slot.slotId}
               note={slotNotes[item.slot.slotId] ?? null}
+              people={people}
+              allowText={allowText}
+              source={assistSource(headingBefore(item.slot.start))}
               onMove={(toPos) => handleMoveItem(item.slot.slotId, toPos)}
               onMoveToSection={(pos) => handleMoveToSection(item.slot.slotId, pos)}
               onRemove={() => handleRemoveItem(item.slot.slotId)}
               onRevert={() => handleRevert(item.slot.slotId)}
               onFieldChange={(field, value) => handleFieldChange(item.slot.slotId, field, value)}
+              onAspectChange={(aspect) => handleAspectChange(item.slot.slotId, aspect)}
+              onUsePrompt={(p) => handleUsePrompt(item.slot, p)}
               onRegenerate={() => handleRegenerate(item.slot)}
               onPickReplace={() => setPickerSlot(item.slot)}
               onUpload={() => { setUploadSlotId(item.slot.slotId); fileInputRef.current?.click() }}
@@ -1005,14 +1103,24 @@ interface SlotCardProps {
   position: number
   total: number
   headings: H2Heading[]
+  /** The H2 this slot sits under, if any: section context for Prompt help. */
+  heading?: string
   busy: boolean
   /** The generator's last word on this slot (QA warning, refusal, error). */
   note: SlotNote | null
+  /** The panel's lane knobs, so Prompt help writes for what Generate allows. */
+  people: PeoplePolicy
+  allowText: boolean
+  /** The draft this figure belongs to; the prompt route reads it for context. */
+  source?: { type: 'review' | 'guide'; id: string; afterHeading?: string }
   onMove: (toPos: number) => void
   onMoveToSection: (pos: InsertPosition) => void
   onRemove: () => void
   onRevert: () => void
   onFieldChange: (field: 'caption' | 'alt' | 'prompt', value: string) => void
+  onAspectChange: (aspect: FigureAspect) => void
+  /** The author used a Prompt help result for this slot. */
+  onUsePrompt: (p: AssistPick) => void
   onRegenerate: () => void
   onPickReplace: () => void
   onUpload: () => void
@@ -1039,6 +1147,8 @@ function SlotNoteLine({ note }: { note: SlotNote | null }) {
 function SlotCard(p: SlotCardProps) {
   const { slot, position, total, headings, busy } = p
   const filled = slot.filled
+  // The photo editor marked this slot as one only the author can capture.
+  const owned = slot.need === 'owned'
 
   const sectionOptions: Array<{ label: string; pos: InsertPosition }> = [
     { label: 'Start of article', pos: { kind: 'start' } },
@@ -1110,6 +1220,12 @@ function SlotCard(p: SlotCardProps) {
         </div>
       </div>
 
+      {owned && !filled && (
+        <p className="text-xs text-prose bg-surface border border-soft rounded-lg px-3 py-2 leading-snug">
+          <span className="font-semibold">Your photo:</span> {slot.ask || 'add your own picture for this slot'}
+        </p>
+      )}
+
       {/* Body: thumbnail + editable fields */}
       <div className="flex gap-3 items-start">
         {filled && slot.imageUrl ? (
@@ -1124,8 +1240,29 @@ function SlotCard(p: SlotCardProps) {
         <div className="min-w-0 flex-1 space-y-2">
           <EditableField label="Caption" value={slot.caption} placeholder="Shown under the image" onCommit={(v) => p.onFieldChange('caption', v)} disabled={busy} />
           <EditableField label="Alt text" value={slot.alt} placeholder="Short description for screen readers" onCommit={(v) => p.onFieldChange('alt', v)} disabled={busy} />
-          <EditableField label="AI prompt" value={slot.prompt} placeholder="Describe the image — used by Regenerate" onCommit={(v) => p.onFieldChange('prompt', v)} disabled={busy} multiline />
+          <EditableField label="AI prompt" value={slot.prompt} placeholder={owned ? 'Add your own photo below, or describe an image here to generate one instead' : 'Describe the image — used by Regenerate'} onCommit={(v) => p.onFieldChange('prompt', v)} disabled={busy} multiline />
+          {/* Rewrite / 3 ideas / suggest / describe the photo: a cheap text call;
+              Regenerate stays the paid step. */}
+          <PromptAssist
+            compact
+            target="inline"
+            value={slot.prompt}
+            people={p.people}
+            allowText={p.allowText}
+            aspect={slot.aspect ?? DEFAULT_ASPECT}
+            imageUrl={slot.imageUrl}
+            context={p.heading ? { heading: p.heading } : undefined}
+            source={p.source}
+            disabled={busy}
+            onUse={p.onUsePrompt}
+          />
         </div>
+      </div>
+
+      {/* Shape: the figure aspect Generate and Regenerate use (3:2 when none is set). */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[10px] uppercase tracking-widest text-prose-faint">Shape</span>
+        <Segmented value={slot.aspect ?? DEFAULT_ASPECT} options={ASPECT_OPTIONS} onChange={p.onAspectChange} label="Image shape" />
       </div>
 
       <SlotNoteLine note={p.note} />
@@ -1134,7 +1271,7 @@ function SlotCard(p: SlotCardProps) {
       <div className="flex flex-wrap gap-2 pt-1 border-t border-soft">
         <button type="button" onClick={p.onRegenerate} disabled={busy || !slot.prompt.trim()}
           className={buttonVariants({ size: 'sm' })}
-          title={!slot.prompt.trim() ? 'Add an AI prompt first' : 'Regenerate with current prompt'}>
+          title={!slot.prompt.trim() ? (owned ? 'This one wants your own photo; add an AI prompt only to generate it instead' : 'Add an AI prompt first') : 'Regenerate with current prompt'}>
           {busy ? '✨ Working…' : filled ? '🔄 Regenerate' : '✨ Generate'}
         </button>
         <button type="button" onClick={p.onPickReplace} disabled={busy}

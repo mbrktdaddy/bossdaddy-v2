@@ -34,7 +34,7 @@ npm run update:scan
 
 Read the whole output. Do **not** re-run `npm outdated` / `npm audit` separately.
 
-For the `ai` lane also run `npm run ai:drift` (PowerShell; it loads `.env.local` for gateway access — use `ai:drift:ci` if no local env). It reports retired or generation-behind slugs against the Gateway catalog.
+For the `ai` lane also run `npm run ai:drift` (PowerShell; it loads `.env.local` for gateway access — use `ai:drift:ci` if no local env). It reports retired or generation-behind slugs against the Gateway catalog. Also run `npm run images:check` — the OpenAI image-model pins in `lib/images/tiers.ts` are not on the Gateway, so `ai:drift` cannot see them.
 
 ## Step 2 — judge against the project's standing decisions
 

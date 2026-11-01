@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { assembleDraftHtml, htmlToStructuredText, paragraphsToHtml, stripAuthoringAttrs } from '@/lib/content/html'
+import { buildPlaceholderFigure } from '@/lib/inlineImages'
 
 // The one draft→HTML assembly (content pipeline plan Ph 0). Before this the four
 // UI copies each wrapped the verdict/conclusion in a single <p>, dropping the
@@ -44,6 +45,26 @@ describe('assembleDraftHtml', () => {
     const html = assembleDraftHtml({ sections: [{ heading: 'A', body: 'b' }], closing: { heading: 'Wrapping Up', body: '  ' } })
     expect(html).not.toContain('Wrapping Up')
   })
+
+  it('writes the photo editor plan on each placeholder, and an owned one tells the author what to take', () => {
+    const html = assembleDraftHtml({
+      sections: [{ heading: 'Setup', body: 'x' }],
+      inlineImages: [
+        { afterHeading: 'Setup', prompt: '', altText: 'The sign-in screen', caption: '', need: 'owned', shot: 'medium', aspect: '4:5', ask: 'a screenshot of the sign-in screen' },
+        { afterHeading: 'Setup', prompt: 'a long prompt', altText: 'A porch', caption: 'Cap', need: 'scene', shot: 'wide', aspect: '3:2' },
+      ],
+    })
+    expect(html).toContain('data-slot-id="slot-1" data-prompt="" data-alt="The sign-in screen" data-caption="" data-need="owned" data-shot="medium" data-aspect="4:5" data-ask="a screenshot of the sign-in screen"><figcaption>Photo to take: a screenshot of the sign-in screen</figcaption>')
+    expect(html).toContain('data-slot-id="slot-2" data-prompt="a long prompt" data-alt="A porch" data-caption="Cap" data-need="scene" data-shot="wide" data-aspect="3:2"><figcaption>Cap</figcaption>')
+  })
+
+  it('an image from an older run, with no plan, assembles exactly as before', () => {
+    const html = assembleDraftHtml({
+      sections: [{ heading: 'Setup', body: 'x' }],
+      inlineImages: [{ afterHeading: 'Setup', prompt: 'p', altText: 'a', caption: 'c' }],
+    })
+    expect(html).toContain('<figure class="bd-image-placeholder" data-slot-id="slot-1" data-prompt="p" data-alt="a" data-caption="c"><figcaption>c</figcaption></figure>')
+  })
 })
 
 describe('htmlToStructuredText', () => {
@@ -69,5 +90,22 @@ describe('stripAuthoringAttrs', () => {
   it('leaves other markup alone', () => {
     const html = '<p>Hi</p><a href="/x" data-product-slug="y">buy</a>'
     expect(stripAuthoringAttrs(html)).toBe(html)
+  })
+
+  it('removes the photo editor plan too, keeping the slot id and the origin', () => {
+    const html = '<figure class="bd-image-filled" data-slot-id="slot-1" data-prompt="p" data-alt="a" data-caption="c" data-need="owned" data-shot="detail" data-aspect="4:5" data-ask="a screenshot of the app" data-origin="own"><img src="x.webp" alt="a" /><figcaption>c</figcaption></figure>'
+    const out = stripAuthoringAttrs(html)
+    for (const attr of ['data-prompt', 'data-alt', 'data-caption', 'data-need', 'data-shot', 'data-aspect', 'data-ask']) {
+      expect(out).not.toContain(attr)
+    }
+    expect(out).not.toContain('a screenshot of the app')
+    expect(out).toContain('data-slot-id="slot-1"')
+    expect(out).toContain('data-origin="own"')
+    expect(out).toContain('<img src="x.webp" alt="a" />')
+  })
+
+  it('strips an ask that held a quote or an angle bracket (the writer entity-escapes it)', () => {
+    const fig = buildPlaceholderFigure({ slotId: 's', need: 'owned', ask: 'the "A > B" menu' })
+    expect(stripAuthoringAttrs(fig)).toBe('<figure class="bd-image-placeholder" data-slot-id="s"><figcaption>Photo to take: the &quot;A &gt; B&quot; menu</figcaption></figure>')
   })
 })

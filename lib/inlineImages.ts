@@ -2,10 +2,14 @@
  * Inline-image management — pure-string operations on article/review HTML.
  *
  * Every inline image is represented as a `<figure>` with a `data-slot-id` and
- * `data-prompt` / `data-alt` / `data-caption` attributes carrying the metadata.
+ * `data-prompt` / `data-alt` / `data-caption` attributes carrying the metadata,
+ * plus the photo editor's plan for the slot when the pipeline wrote one:
+ * `data-need` / `data-shot` / `data-aspect` / `data-ask` (lib/images/doctrine.ts).
  * The InlineMediaPanel renders one card per slot and calls these helpers to
  * mutate the body content as the user clicks visual buttons.
  */
+
+import { isFigureAspect, isImageNeed, isImageShot, type FigureAspect, type ImageNeed, type ImageShot } from './images/doctrine'
 
 const SLOT_ID_PREFIX = 'slot-'
 
@@ -21,6 +25,12 @@ export interface InlineSlot {
   height?: number
   /** The asset's origin (lib/media/origin.ts) written as data-origin at fill time. */
   origin?: string
+  /** The photo editor's plan for the slot (lib/images/doctrine.ts); absent on older figures. */
+  need?: ImageNeed
+  shot?: ImageShot
+  aspect?: FigureAspect
+  /** For an `owned` slot: what the author is asked to capture. */
+  ask?: string
   start: number   // index into source content where the figure starts
   end: number     // index into source content where the figure ends (exclusive)
   raw: string     // exact substring of the figure block
@@ -54,8 +64,9 @@ function escapeRegex(s: string): string {
 
 function setAttr(tagOpen: string, name: string, value: string): string {
   const re = new RegExp(`\\b${escapeRegex(name)}="[^"]*"`)
-  if (re.test(tagOpen)) return tagOpen.replace(re, `${name}="${value}"`)
-  return tagOpen.replace(/>\s*$/, ` ${name}="${value}">`)
+  // Function replacers: free text such as an `ask` may contain dollar sequences.
+  if (re.test(tagOpen)) return tagOpen.replace(re, () => `${name}="${value}"`)
+  return tagOpen.replace(/>\s*$/, () => ` ${name}="${value}">`)
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +84,15 @@ export interface FigureImageMeta {
   origin?: string | null
 }
 
-interface BuildFilledArgs extends FigureImageMeta {
+/** The photo editor's plan for a slot, written onto the markup so it survives the editor and the panel. */
+export interface FigureAuthoringMeta {
+  need?: ImageNeed | null
+  shot?: ImageShot | null
+  aspect?: FigureAspect | null
+  ask?: string | null
+}
+
+interface BuildFilledArgs extends FigureImageMeta, FigureAuthoringMeta {
   imageUrl: string
   alt: string
   caption?: string
@@ -98,14 +117,46 @@ function originAttr(meta?: FigureImageMeta): string {
   return o ? ` data-origin="${escAttr(o)}"` : ''
 }
 
+/** ` data-need=".." data-shot=".." data-aspect=".." data-ask=".."` — only the ones that are set (and valid). */
+function authoringAttrs(meta?: FigureAuthoringMeta): string {
+  if (!meta) return ''
+  const ask = meta.ask?.trim()
+  return (
+    (isImageNeed(meta.need) ? ` data-need="${meta.need}"` : '') +
+    (isImageShot(meta.shot) ? ` data-shot="${meta.shot}"` : '') +
+    (isFigureAspect(meta.aspect) ? ` data-aspect="${meta.aspect}"` : '') +
+    (ask ? ` data-ask="${escAttr(ask)}"` : '')
+  )
+}
+
+/** The plan attributes of a figure (or just its open tag), as an InlineSlot patch. Invalid values read as absent. */
+function readAuthoringAttrs(figure: string): Pick<InlineSlot, 'need' | 'shot' | 'aspect' | 'ask'> {
+  const open = figure.slice(0, figure.indexOf('>') + 1)
+  const need = open.match(/\bdata-need="([^"]*)"/)?.[1]
+  const shot = open.match(/\bdata-shot="([^"]*)"/)?.[1]
+  const aspect = open.match(/\bdata-aspect="([^"]*)"/)?.[1]
+  const ask = open.match(/\bdata-ask="([^"]*)"/)?.[1]
+  return {
+    ...(isImageNeed(need) ? { need } : {}),
+    ...(isImageShot(shot) ? { shot } : {}),
+    ...(isFigureAspect(aspect) ? { aspect } : {}),
+    ...(ask?.trim() ? { ask: decodeAttr(ask) } : {}),
+  }
+}
+
+/** What an unfilled owned slot's figcaption says when the slot has no caption of its own. */
+export function ownedCaption(ask: string): string {
+  return `Photo to take: ${ask}`
+}
+
 export function buildFilledFigure(args: BuildFilledArgs): string {
   const slotId  = args.slotId ?? createSlotId()
   const caption = args.caption ?? ''
   const figcap  = caption.trim() ? `<figcaption>${escAttr(caption)}</figcaption>` : ''
-  return `<figure class="bd-image-filled" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt)}" data-caption="${escAttr(caption)}"${originAttr(args)}>${imgTag(args.imageUrl, args.alt, args)}${figcap}</figure>`
+  return `<figure class="bd-image-filled" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt)}" data-caption="${escAttr(caption)}"${authoringAttrs(args)}${originAttr(args)}>${imgTag(args.imageUrl, args.alt, args)}${figcap}</figure>`
 }
 
-interface BuildPlaceholderArgs {
+interface BuildPlaceholderArgs extends FigureAuthoringMeta {
   prompt?: string
   alt?: string
   caption?: string
@@ -113,8 +164,13 @@ interface BuildPlaceholderArgs {
 }
 export function buildPlaceholderFigure(args: BuildPlaceholderArgs): string {
   const slotId  = args.slotId ?? createSlotId()
-  const caption = args.caption ?? args.alt ?? args.prompt ?? 'Image slot'
-  return `<figure class="bd-image-placeholder" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt ?? '')}" data-caption="${escAttr(args.caption ?? '')}"><figcaption>${escAttr(caption)}</figcaption></figure>`
+  // An owned slot with no caption of its own tells the author what to take;
+  // everything else keeps the caption, alt, prompt, "Image slot" chain.
+  const ask     = args.ask?.trim()
+  const caption = args.need === 'owned' && ask && !args.caption?.trim()
+    ? ownedCaption(ask)
+    : args.caption ?? args.alt ?? args.prompt ?? 'Image slot'
+  return `<figure class="bd-image-placeholder" data-slot-id="${escAttr(slotId)}" data-prompt="${escAttr(args.prompt ?? '')}" data-alt="${escAttr(args.alt ?? '')}" data-caption="${escAttr(args.caption ?? '')}"${authoringAttrs(args)}><figcaption>${escAttr(caption)}</figcaption></figure>`
 }
 
 // ---------------------------------------------------------------------------
@@ -144,6 +200,7 @@ export function extractSlots(content: string): InlineSlot[] {
       imageUrl: imgSrc ? decodeAttr(imgSrc) : undefined,
       ...(w > 0 && h > 0 ? { width: w, height: h } : {}),
       ...(origin ? { origin: decodeAttr(origin) } : {}),
+      ...readAuthoringAttrs(raw),
       start: m.index,
       end:   m.index + raw.length,
       raw,
@@ -213,7 +270,7 @@ function figureBlockRegex(slotId: string): RegExp {
 export function updateSlotMeta(
   content: string,
   slotId: string,
-  patch: Partial<{ caption: string; alt: string; prompt: string }>,
+  patch: Partial<{ caption: string; alt: string; prompt: string; ask: string; aspect: FigureAspect; need: ImageNeed }>,
 ): string {
   return content.replace(figureBlockRegex(slotId), (_full, openTag, body, closeTag) => {
     let newOpen = openTag as string
@@ -245,6 +302,18 @@ export function updateSlotMeta(
 
     if (patch.prompt !== undefined) {
       newOpen = setAttr(newOpen, 'data-prompt', escAttr(patch.prompt))
+    }
+
+    // The plan attributes are optional on the markup: a blank ask is removed, not left as data-ask="".
+    if (patch.ask !== undefined) {
+      const ask = patch.ask.trim()
+      newOpen = ask ? setAttr(newOpen, 'data-ask', escAttr(ask)) : newOpen.replace(/\s+data-ask="[^"]*"/, '')
+    }
+    if (patch.aspect !== undefined && isFigureAspect(patch.aspect)) {
+      newOpen = setAttr(newOpen, 'data-aspect', patch.aspect)
+    }
+    if (patch.need !== undefined && isImageNeed(patch.need)) {
+      newOpen = setAttr(newOpen, 'data-need', patch.need)
     }
 
     return newOpen + newBody + closeTag
@@ -288,7 +357,10 @@ export function revertSlot(content: string, slotId: string): string {
     const newOpen = open
       .replace(/\bclass="[^"]*"/, 'class="bd-image-placeholder"')
       .replace(/\s+data-origin="[^"]*"/, '') // no image, no origin
-    const figcap  = `<figcaption>${escAttr(captionText || 'Image slot')}</figcaption>`
+    // An owned slot with no caption goes back to telling the author what to take.
+    const plan     = readAuthoringAttrs(open)
+    const fallback = plan.need === 'owned' && plan.ask ? ownedCaption(plan.ask) : 'Image slot'
+    const figcap   = `<figcaption>${escAttr(captionText || fallback)}</figcaption>`
     return newOpen + figcap + close
   })
 }

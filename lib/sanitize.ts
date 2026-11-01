@@ -14,10 +14,12 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   img:    ['src', 'alt', 'width', 'height', 'class', 'id', 'data-slot-id'],
   // data-slot-id / data-prompt / data-alt / data-caption carry the metadata
   // that Claude attaches to inline-image placeholder stubs in generated drafts,
-  // and that the InlineMediaPanel uses to manage every inline image. The
-  // authoring three are stripped before public render (lib/content/html.ts);
-  // data-origin stays — it drives the page-level AI note.
-  figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption', 'data-origin'],
+  // and that the InlineMediaPanel uses to manage every inline image.
+  // data-need / data-shot / data-aspect / data-ask are the photo editor's plan
+  // for the slot (lib/images/doctrine.ts): authoring metadata, stripped before
+  // public render by stripAuthoringAttrs (lib/content/html.ts) like the three
+  // above. data-origin stays — it drives the page-level AI note.
+  figure: ['class', 'id', 'data-slot-id', 'data-prompt', 'data-alt', 'data-caption', 'data-need', 'data-shot', 'data-aspect', 'data-ask', 'data-origin'],
   // data-kind / data-title / data-time belong to the bd-callout / bd-steps
   // body elements (lib/content/elements.ts); the CSS kicker reads data-title.
   // data-unit = bd-chart; data-provider / data-id / data-caption / data-subject = bd-video (an ID, never an iframe).

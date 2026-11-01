@@ -1,4 +1,5 @@
 import { buildPlaceholderFigure } from '@/lib/inlineImages'
+import type { FigureAspect, ImageNeed, ImageShot } from '@/lib/images/doctrine'
 import { videoMarker, type ContentElement } from './elements'
 
 // The ONE place a generated draft becomes body HTML, and the one place body
@@ -14,9 +15,16 @@ export interface DraftSection {
 
 export interface DraftInlineImage {
   afterHeading: string
+  /** The AI prompt. Empty for an `owned` placement — the author captures that one. */
   prompt: string
   altText: string
   caption: string
+  /** The photo editor's plan (lib/images/doctrine.ts). All absent on drafts planned before 2026-10-31 → an AI scene. */
+  need?: ImageNeed
+  shot?: ImageShot
+  aspect?: FigureAspect
+  /** For `owned`: the one line telling the author exactly what to capture. */
+  ask?: string
 }
 
 export interface AssembleDraftArgs {
@@ -174,7 +182,10 @@ export function assembleDraftHtml(args: AssembleDraftArgs): string {
     const els = elementsAfter(s.heading)
     const figures = slots
       .filter((sl) => normHeading(sl.afterHeading) === normHeading(s.heading))
-      .map((sl) => buildPlaceholderFigure({ slotId: sl.slotId, prompt: sl.prompt, alt: sl.altText, caption: sl.caption }))
+      .map((sl) => buildPlaceholderFigure({
+        slotId: sl.slotId, prompt: sl.prompt, alt: sl.altText, caption: sl.caption,
+        need: sl.need, shot: sl.shot, aspect: sl.aspect, ask: sl.ask,
+      }))
       .join('\n')
     parts.push(`<h2>${s.heading.trim()}</h2>\n${body}${els ? `\n${els}` : ''}${figures ? `\n${figures}` : ''}`)
   }
@@ -221,13 +232,15 @@ export function htmlToStructuredText(html: string): string {
 
 /**
  * Remove authoring-only metadata before body HTML is rendered publicly. The
- * image prompt, the pre-generation alt and the caption copy live on the
+ * image prompt, the pre-generation alt and the caption copy, and the photo
+ * editor's plan for the slot (need / shot / aspect / ask), live on the
  * <figure> for the InlineMediaPanel; on the public page they are dead weight
  * and the prompt text is an "AI-generated" tell in view-source. `data-slot-id`
- * stays (harmless, and the lightbox keys off figure identity).
+ * stays (harmless, and the lightbox keys off figure identity), and so does
+ * `data-origin` (it drives the page-level AI note).
  */
 export function stripAuthoringAttrs(html: string): string {
   return html.replace(/<(figure|div)\b[^>]*>/gi, (tag) =>
-    tag.replace(/\s+data-(prompt|alt|caption)="[^"]*"/gi, ''),
+    tag.replace(/\s+data-(prompt|alt|caption|need|shot|aspect|ask)="[^"]*"/gi, ''),
   )
 }

@@ -17,13 +17,26 @@ const PRICING: Record<string, { in: number; out: number; cacheRead?: number; cac
 // Image models bill per token too (OpenAI Images API `usage`): text input,
 // image input and image output at different rates per 1M. Rows are the
 // Standard (non-batch) list prices read from developers.openai.com/api/docs/pricing
-// on 2026-10-23. Cached-input rates exist (1.5: $2 image / $1.25 text) but the
-// Images API `usage` reports no cached split, so they are not modelled. An
-// unknown slug returns null, never a guess.
+// — the gpt-image-1 family on 2026-10-23, gpt-image-2 and 2.5 on 2026-10-31.
+// Cached-input rates exist (1.5: $2 image / $1.25 text) but the Images API
+// `usage` reports no cached split, so they are not modelled. An unknown slug
+// returns null, never a guess.
+//
+// Keep this in step with lib/images/tiers.ts — tests/unit/ai-image-pricing.test.ts
+// fails when a pinned tier model has no row here.
 const IMAGE_PRICING: Record<string, { textIn: number; imageIn: number; imageOut: number }> = {
-  'openai/gpt-image-1':      { textIn: 5, imageIn: 10,  imageOut: 40 },
-  'openai/gpt-image-1.5':    { textIn: 5, imageIn: 8,   imageOut: 32 },
-  'openai/gpt-image-1-mini': { textIn: 2, imageIn: 2.5, imageOut: 8 },
+  // CURRENT — the two models lib/images/tiers.ts pins, plus plain gpt-image-2 so an
+  // ad-hoc run still prices. Verified 2026-10-31 on OpenAI's pricing page
+  // ($5.00 text in / $8.00 image in / $30.00 image out per 1M); the image guide
+  // states that gpt-image-2 and 2.5 share token rates.
+  'openai/gpt-image-2.5-sunburst': { textIn: 5, imageIn: 8, imageOut: 30 },
+  'openai/gpt-image-2.5-flare':    { textIn: 5, imageIn: 8, imageOut: 30 },
+  'openai/gpt-image-2':            { textIn: 5, imageIn: 8, imageOut: 30 },
+  // RETIRED — nothing calls these any more; the rows stay so historical
+  // `generations` rows still price on the cost chip.
+  'openai/gpt-image-1':      { textIn: 5, imageIn: 10,  imageOut: 40 }, // retired: shutdown 2026-10-23
+  'openai/gpt-image-1.5':    { textIn: 5, imageIn: 8,   imageOut: 32 }, // retired: shutdown 2026-12-01
+  'openai/gpt-image-1-mini': { textIn: 2, imageIn: 2.5, imageOut: 8 },  // retired: shutdown 2026-12-01
 }
 
 export interface ImageUsage {

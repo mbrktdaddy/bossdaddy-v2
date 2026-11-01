@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ASPECT_GUIDE, FIGURE_ASPECTS, IMAGE_NEEDS, IMAGE_SHOTS, PROMPT_CHARS, SHOT_GUIDE } from '../images/doctrine'
 
 // Zod output schemas for every content generation. Until 2026-10-23 the routes
 // passed `jsonSchema()` with no `validate`, and in that case the AI SDK validates
@@ -22,9 +23,30 @@ export const SectionOutput = z.object({
   body:    z.string().min(1).describe('Paragraphs separated by a blank line (\\n\\n)'),
 })
 
+// One image placement: the pipeline's photo-editor stage (lib/content/pipeline/
+// images.ts) plans it, and the single-shot draft routes still emit it. The
+// photo-editor fields (`need`, `shot`, `aspect`, `ask`) are optional here so
+// older callers and stored drafts keep parsing; the pipeline's own schema marks
+// them required, and `validateImagePlan` normalises whatever comes back.
+// `prompt` may be empty because an `owned` placement carries an `ask` instead.
+// Field order is the decision order: need, then shot and aspect, then the prompt.
 export const InlineImageOutput = z.object({
   afterHeading: z.string().min(1).max(200).describe('MUST exactly match one of your section headings'),
-  prompt:       z.string().min(1).max(400).describe('Editorial photography prompt, no people, no text; aim for under 180 chars'),
+  need:         z.enum(IMAGE_NEEDS).optional().describe(
+    'What this placement needs. scene, detail or hands = an AI photograph. owned = something only a real capture can show (a screen, an app, a document, a map, a chart, a specific product) that the author must photograph or screenshot himself.',
+  ),
+  shot:         z.enum(IMAGE_SHOTS).optional().describe(
+    `Shot type: ${IMAGE_SHOTS.map((s) => `${s} = ${SHOT_GUIDE[s]}`).join('; ')}. Vary it across the piece.`,
+  ),
+  aspect:       z.enum(FIGURE_ASPECTS).optional().describe(
+    `Figure shape, phone readers first: ${FIGURE_ASPECTS.map((a) => `${a} for ${ASPECT_GUIDE[a]}`).join('; ')}`,
+  ),
+  prompt:       z.string().max(PROMPT_CHARS.max).default('').describe(
+    `For scene, detail and hands: ONE paragraph of ${PROMPT_CHARS.min}–${PROMPT_CHARS.max} characters in five labelled clauses (SUBJECT, SETTING, MOMENT, FOCAL, EXCLUDE), no lighting, lens or style words. Empty string for owned.`,
+  ),
+  ask:          z.string().max(200).default('').describe(
+    'For owned only: one concrete second-person line naming exactly what to capture, e.g. "Screenshot of the sign-in screen with your account details hidden". Empty string otherwise.',
+  ),
   altText:      z.string().min(1).max(300).describe('Accessible description of what would be visible; aim for under 120 chars'),
   caption:      z.string().max(300).describe('Short editorial sentence shown under the image; aim for under 100 chars'),
 })

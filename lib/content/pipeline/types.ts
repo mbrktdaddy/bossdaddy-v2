@@ -1,6 +1,7 @@
 import type { SpecLike } from '../specs'
 import type { DraftInlineImage } from '../html'
 import type { ContentElement, ElementPlan } from '../elements'
+import type { ImageShot } from '../../images/doctrine'
 
 // The staged pipeline's state. One `content_runs` row (mig 165) holds a RunState;
 // each stage reads the state, calls a model, writes its slice back. The wizard
@@ -147,6 +148,8 @@ export interface Critic {
 
 export interface ImagePlan {
   heroPrompt: string
+  /** The hero's shot type, kept so a re-plan can vary the slots against it. Absent on runs planned before 2026-10-31. */
+  heroShot?: ImageShot
   inline: DraftInlineImage[]
 }
 

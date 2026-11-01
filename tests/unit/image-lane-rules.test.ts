@@ -7,7 +7,14 @@ import {
   resolveToggles,
   peopleFromLegacy,
 } from '@/lib/images/safety'
-import { HOUSE_STYLE, HOUSE_STYLE_MARKER, applyHouseStyle } from '@/lib/images/style'
+import {
+  CROP_NOTE_MARKER,
+  HOUSE_STYLE,
+  HOUSE_STYLE_MARKER,
+  applyCropNote,
+  applyHouseStyle,
+  cropNote,
+} from '@/lib/images/style'
 import { judgeQa, avoidanceClause, type QaReport } from '@/lib/images/qa'
 
 // The allowance model per lane (plan §6, brand guide §2 "Images"): what the
@@ -83,6 +90,48 @@ describe('house style', () => {
     expect(HOUSE_STYLE).toMatch(/documentary editorial photography/i)
     expect(HOUSE_STYLE).toMatch(/35mm/)
     expect(HOUSE_STYLE).toMatch(/Not a studio product shot/)
+  })
+})
+
+describe('crop note', () => {
+  const aspects = ['16:10', '4:5'] as const
+
+  it('both aspects produce a Composition clause that names the crop', () => {
+    for (const aspect of aspects) {
+      const note = cropNote(aspect)
+      expect(note.startsWith(CROP_NOTE_MARKER)).toBe(true)
+      expect(note).toContain(`centre-cropped to ${aspect}`)
+      expect(note).toContain('keep the subject in the central band')
+      expect(note.endsWith('nothing that matters near the top or bottom edges.')).toBe(true)
+    }
+  })
+
+  it('only the 4:5 note mentions the taller portrait it is cropped from', () => {
+    expect(cropNote('4:5')).toContain('from a taller portrait')
+    expect(cropNote('16:10')).not.toContain('taller portrait')
+    expect(cropNote('16:10')).toContain('breathing room on every side')
+  })
+
+  it('is appended once and never twice', () => {
+    for (const aspect of aspects) {
+      const once = applyCropNote('  A bench by a window  ', aspect)
+      expect(once.startsWith('A bench by a window\n\n')).toBe(true)
+      expect(once.endsWith(cropNote(aspect))).toBe(true)
+      expect(applyCropNote(once, aspect)).toBe(once)
+      expect(once.split(CROP_NOTE_MARKER)).toHaveLength(2)
+    }
+  })
+
+  it('leaves a prompt that already has a Composition clause alone', () => {
+    const authored = 'A bench by a window. Composition: low angle, bench on the left third.'
+    expect(applyCropNote(authored, '16:10')).toBe(authored)
+  })
+
+  it('lands after the house style, the order the generator builds an editorial prompt in', () => {
+    const styled = applyHouseStyle('A bench by a window')
+    const full = applyCropNote(styled, '16:10')
+    expect(full.startsWith(styled)).toBe(true)
+    expect(full.indexOf(HOUSE_STYLE_MARKER)).toBeLessThan(full.indexOf(CROP_NOTE_MARKER))
   })
 })
 

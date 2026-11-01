@@ -6,8 +6,10 @@ import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
 import { buttonVariants } from '@/components/ui/Button'
 import { Segmented } from '@/components/ui/Segmented'
+import { PromptAssist } from '@/components/workspace/PromptAssist'
 import { XIcon } from '@/components/icons'
 import type { PeoplePolicy } from '@/lib/images/safety'
+import { IMAGE_TIERS } from '@/lib/images/tiers'
 
 const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
   { value: 'none',      label: 'No people' },
@@ -47,8 +49,8 @@ export function HeroImagePanel({
   }, [initialPrompt]) // eslint-disable-line react-hooks/exhaustive-deps
   const [generating, setGenerating] = useState(false)
   const [uploading, setUploading] = useState(false)
-  // Publication quality by default (gpt-image-1.5 · high); the draft tier is
-  // for roughing out a composition before the real one.
+  // The publication tier by default (IMAGE_TIERS in lib/images/tiers.ts names
+  // the model); the draft tier is for roughing out a composition before the real one.
   const [premium, setPremium] = useState(true)
   // Lane knob (lib/images/safety.ts EDITORIAL): no text always; people anonymous.
   const [people, setPeople] = useState<PeoplePolicy>('anonymous')
@@ -232,13 +234,14 @@ export function HeroImagePanel({
       )}
 
       {/* Inline generate */}
-      <div className="flex gap-2">
-        <input
-          type="text"
+      <div className="flex items-start gap-2">
+        {/* A textarea, not a one-line input: Prompt help writes 400-700 character paragraphs. */}
+        <textarea
           value={imagePrompt}
           onChange={(e) => setImagePrompt(e.target.value)}
-          placeholder="Auto-filled after first generation — tweak and regenerate to refine the scene."
-          className="flex-1 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover"
+          rows={3}
+          placeholder="Describe the scene, or use Prompt help below"
+          className="flex-1 min-w-0 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
         />
         <button
           type="button"
@@ -250,6 +253,20 @@ export function HeroImagePanel({
         </button>
       </div>
 
+      {/* Rewrite / 3 ideas / suggest / describe the current photo — a cheap
+          text call, so a prompt no longer has to wait for a paid generation. */}
+      <PromptAssist
+        value={imagePrompt}
+        onUse={(p) => setImagePrompt(p.prompt)}
+        target="hero"
+        people={people}
+        allowText={false}
+        context={{ title: title?.trim() || productName, category, excerpt }}
+        source={sourceId ? { type: contentType, id: sourceId } : undefined}
+        imageUrl={imageUrl ?? undefined}
+        disabled={generating || uploading}
+      />
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]">
         <div className="flex items-center gap-1">
           <span className="text-prose-faint mr-1">Quality</span>
@@ -259,9 +276,9 @@ export function HeroImagePanel({
             className={`px-2.5 py-1 rounded-md transition-colors ${
               premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
             }`}
-            title="gpt-image-1.5 · high — the publication tier"
+            title={IMAGE_TIERS.publication.hint}
           >
-            Publication
+            {IMAGE_TIERS.publication.label}
           </button>
           <button
             type="button"
@@ -269,9 +286,9 @@ export function HeroImagePanel({
             className={`px-2.5 py-1 rounded-md transition-colors ${
               !premium ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:text-prose'
             }`}
-            title="gpt-image-1 · medium — cheaper, for roughing out a composition"
+            title={IMAGE_TIERS.draft.hint}
           >
-            Draft
+            {IMAGE_TIERS.draft.label}
           </button>
         </div>
         <div className="flex items-center gap-2">

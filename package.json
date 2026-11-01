@@ -34,6 +34,7 @@
     "ai:ab-content": "node --env-file=.env.local scripts/ai-content-quality-ab.mjs",
     "ai:which": "node --env-file=.env.local scripts/which-research-model.mjs",
     "ai:drift:ci": "node scripts/ai-model-drift.mjs",
+    "images:check": "node --env-file=.env.local scripts/image-model-check.mjs",
     "update:scan": "node scripts/update-scan.mjs",
     "ai:research-smoke": "node --env-file=.env.local scripts/ai-research-smoke.mjs",
     "embed:smoke": "node --env-file=.env.local scripts/embed-smoke.mjs",

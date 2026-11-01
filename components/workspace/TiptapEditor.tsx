@@ -10,6 +10,7 @@ import CharacterCount from '@tiptap/extension-character-count'
 import { Node, mergeAttributes } from '@tiptap/core'
 import type { NodeViewProps } from '@tiptap/react'
 import { PHRASE_KINDS, PHRASE_KIND_LABEL, type PhraseKind } from '@/lib/voiceLexicon'
+import { ownedCaption } from '@/lib/inlineImages'
 
 // ── Figure node ─────────────────────────────────────────────────────────────
 // Opaque block: preserves all data-* attributes through edit cycles.
@@ -20,6 +21,11 @@ function FigureView({ node }: NodeViewProps) {
   const alt    = node.attrs.alt as string
   const caption = node.attrs.caption as string
   const isPlaceholder = !src
+  // The photo editor marked this slot as one only the author can capture: say what to take.
+  const owned = node.attrs['data-need'] === 'owned'
+  const ask = ((node.attrs['data-ask'] as string | null) ?? '').trim()
+  // The default caption of an owned slot repeats the ask; show the ask line alone then.
+  const showCaption = !(owned && ask && caption === ownedCaption(ask))
 
   return (
     <NodeViewWrapper
@@ -29,12 +35,17 @@ function FigureView({ node }: NodeViewProps) {
       data-prompt={node.attrs['data-prompt']}
       data-alt={node.attrs['data-alt']}
       data-caption={node.attrs['data-caption']}
+      data-need={node.attrs['data-need']}
+      data-shot={node.attrs['data-shot']}
+      data-aspect={node.attrs['data-aspect']}
+      data-ask={node.attrs['data-ask']}
       contentEditable={false}
       style={{ userSelect: 'none' }}
     >
       {isPlaceholder ? (
         <div className="bd-image-placeholder">
-          <figcaption className="text-prose-faint text-sm">🖼 {caption || 'Image placeholder — fill via the Media panel'}</figcaption>
+          {owned && <p className="text-prose text-sm font-semibold">Your photo: {ask || 'add your own picture here'}</p>}
+          {showCaption && <figcaption className="text-prose-faint text-sm">🖼 {caption || 'Image placeholder — fill via the Media panel'}</figcaption>}
         </div>
       ) : (
         <>
@@ -60,6 +71,12 @@ const FigureNode = Node.create({
       'data-prompt':    { default: null },
       'data-alt':       { default: null },
       'data-caption':   { default: null },
+      // The photo editor's plan for the slot (lib/images/doctrine.ts). Declared so an
+      // editor round trip, and the panel writing them, never drops them.
+      'data-need':      { default: null },
+      'data-shot':      { default: null },
+      'data-aspect':    { default: null },
+      'data-ask':       { default: null },
       src:              { default: null },
       alt:              { default: '' },
       caption:          { default: '' },
@@ -79,6 +96,10 @@ const FigureNode = Node.create({
           'data-prompt':    el.getAttribute('data-prompt'),
           'data-alt':       el.getAttribute('data-alt'),
           'data-caption':   el.getAttribute('data-caption'),
+          'data-need':      el.getAttribute('data-need'),
+          'data-shot':      el.getAttribute('data-shot'),
+          'data-aspect':    el.getAttribute('data-aspect'),
+          'data-ask':       el.getAttribute('data-ask'),
           src:              img?.getAttribute('src') ?? null,
           alt:              img?.getAttribute('alt') ?? '',
           caption:          figcaption?.textContent ?? '',

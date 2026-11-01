@@ -198,7 +198,7 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       title: run.outline?.title ?? rb?.topic ?? topic,
       excerpt: run.outline?.excerpt ?? '',
       content: runToDraftHtml(run),
-      imagePrompt: run.images?.heroPrompt ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`,
+      imagePrompt: run.images?.heroPrompt ?? `A candid real-world scene that carries the idea of "${topic}" — the setting, the objects and the moment; people only anonymously`,
       tldr: b?.tldr ?? '',
       keyTakeaways: b?.keyTakeaways ?? [],
       faqs: b?.faqs ?? [],

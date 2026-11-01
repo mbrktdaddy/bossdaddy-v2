@@ -21,3 +21,32 @@ export function applyHouseStyle(prompt: string): string {
   if (base.includes(HOUSE_STYLE_MARKER)) return base
   return `${base}\n\n${HOUSE_STYLE}`
 }
+
+// The crop note — told to the model when the stored file is centre-cropped after
+// generation (heroes 16:10, portrait frames 4:5), so the subject lands in the band
+// that survives the crop instead of being cut at an edge. Like the house style it
+// is written HERE, never in a subject prompt; lib/images/openai.ts applies it
+// after the house style and before the safety rules. Editorial lane only — a
+// social card is not cropped.
+
+export const CROP_NOTE_MARKER = 'Composition:'
+
+const CROP_NOTES: Record<'16:10' | '4:5', string> = {
+  '16:10':
+    `${CROP_NOTE_MARKER} this frame is centre-cropped to 16:10 — keep the subject in the central band ` +
+    'with breathing room on every side; nothing that matters near the top or bottom edges.',
+  '4:5':
+    `${CROP_NOTE_MARKER} this frame is centre-cropped to 4:5 from a taller portrait — keep the subject ` +
+    'in the central band; nothing that matters near the top or bottom edges.',
+}
+
+export function cropNote(aspect: '16:10' | '4:5'): string {
+  return CROP_NOTES[aspect]
+}
+
+/** Append the crop note once; a prompt that already carries it is returned as-is. */
+export function applyCropNote(prompt: string, aspect: '16:10' | '4:5'): string {
+  const base = prompt.trim()
+  if (base.includes(CROP_NOTE_MARKER)) return base
+  return `${base}\n\n${cropNote(aspect)}`
+}

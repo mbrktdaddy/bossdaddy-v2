@@ -218,8 +218,9 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
   useEffect(() => {
     const key = `bd:hero-prompt:${review.id}`
     const val = sessionStorage.getItem(key)
+    // The suggestion stays in sessionStorage so a reload keeps it; it is per-tab and harmless.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (val) { setHeroPromptSuggestion(val); sessionStorage.removeItem(key) }
+    if (val) setHeroPromptSuggestion(val)
   }, [review.id])
 
   const [refineInstruction, setRefineInstruction] = useState('')
