@@ -15,7 +15,7 @@ import {
   applyHouseStyle,
   cropNote,
 } from '@/lib/images/style'
-import { judgeQa, avoidanceClause, type QaReport } from '@/lib/images/qa'
+import { judgeQa, avoidanceClause, quotedText, type QaReport } from '@/lib/images/qa'
 
 // The allowance model per lane (plan §6, brand guide §2 "Images"): what the
 // prompt rules say, how the house style is applied, and how vision QA judges
@@ -138,7 +138,7 @@ describe('crop note', () => {
 const clean: QaReport = {
   altText: 'A wooden bench with a folded blanket by a window.',
   text: false, logos: false, faces: false, identifiableChild: false,
-  artifacts: false, rendered: false, matchesSubject: true, notes: '',
+  artifacts: false, rendered: false, matchesSubject: true, textSeen: '', publishable: 4, notes: '',
 }
 
 describe('judgeQa', () => {
@@ -180,5 +180,86 @@ describe('judgeQa', () => {
     expect(avoidanceClause(['a face is visible', 'rendered text is visible'])).toBe(
       'The previous attempt was rejected because: a face is visible; rendered text is visible. Avoid all of that.',
     )
+  })
+})
+
+describe('judgeQa text read-back', () => {
+  const opts = { expectedText: 'Boss Up' }
+
+  it('passes when the text reads as expected, ignoring case and punctuation', () => {
+    const j = judgeQa({ ...clean, text: true, textSeen: 'BOSS UP.' }, SOCIAL_FLEXIBLE, opts)
+    expect(j).toEqual({ verdict: 'pass', reasons: [] })
+  })
+
+  it('fails when the text reads differently', () => {
+    const j = judgeQa({ ...clean, text: true, textSeen: 'Boss Up Dad' }, SOCIAL_FLEXIBLE, opts)
+    expect(j.verdict).toBe('fail')
+    expect(j.reasons).toEqual(['text reads "Boss Up Dad" instead of "Boss Up"'])
+  })
+
+  it('fails when no text was rendered', () => {
+    const j = judgeQa({ ...clean, text: false }, SOCIAL_FLEXIBLE, opts)
+    expect(j.verdict).toBe('fail')
+    expect(j.reasons).toEqual(['expected text "Boss Up" is missing'])
+  })
+
+  it('noText lanes keep the existing rule; the read-back does not fire', () => {
+    const j = judgeQa({ ...clean, text: true, textSeen: 'Boss Up Dad' }, EDITORIAL, opts)
+    expect(j.reasons).toEqual(['rendered text is visible'])
+    expect(judgeQa(clean, EDITORIAL, opts)).toEqual({ verdict: 'pass', reasons: [] })
+  })
+
+  it('text allowed with no expected text: any text passes', () => {
+    expect(judgeQa({ ...clean, text: true, textSeen: 'OPEN' }, SOCIAL_FLEXIBLE).verdict).toBe('pass')
+  })
+})
+
+describe('judgeQa publishable score', () => {
+  it('a score under 3 warns', () => {
+    expect(judgeQa({ ...clean, publishable: 2 }, EDITORIAL)).toEqual({
+      verdict: 'warn',
+      reasons: ['weak as a photograph (publishable 2/5)'],
+    })
+  })
+
+  it('a 3 passes', () => {
+    expect(judgeQa({ ...clean, publishable: 3 }, EDITORIAL)).toEqual({ verdict: 'pass', reasons: [] })
+  })
+
+  it('a fail still lists the weak-score warning after the fails', () => {
+    const j = judgeQa({ ...clean, text: true, publishable: 1 }, EDITORIAL)
+    expect(j.verdict).toBe('fail')
+    expect(j.reasons).toEqual(['rendered text is visible', 'weak as a photograph (publishable 1/5)'])
+  })
+})
+
+describe('quotedText', () => {
+  it('reads straight double quotes', () => {
+    expect(quotedText('A hand-painted sign that says "Boss Up" on a barn')).toBe('Boss Up')
+  })
+
+  it('reads curly double quotes', () => {
+    expect(quotedText('A mug printed with “Dad Mode” in block letters')).toBe('Dad Mode')
+  })
+
+  it('reads curly single quotes', () => {
+    expect(quotedText('A chalkboard reading ‘Open Late’')).toBe('Open Late')
+  })
+
+  it('ignores apostrophes', () => {
+    expect(quotedText("A bench at a kid's eye level")).toBeNull()
+  })
+
+  it('skips a long quote in favour of a later short one', () => {
+    const long = '"one two three four five six seven eight nine"'
+    expect(quotedText(`A banner with ${long} and a tag that says "Ship It"`)).toBe('Ship It')
+  })
+
+  it('returns null for a quote over 60 characters', () => {
+    expect(quotedText(`A sign: "${'a'.repeat(70)}"`)).toBeNull()
+  })
+
+  it('returns null for an empty prompt', () => {
+    expect(quotedText('')).toBeNull()
   })
 })

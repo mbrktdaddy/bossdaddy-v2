@@ -171,7 +171,7 @@ export function PromptAssist({
             void run(hasPrompt ? 'rewrite' : 'fresh')
           }}
           aria-label="How should the prompt change?"
-          placeholder="How should it change? wider, winter, overhead, from a kid's height"
+          placeholder={compact ? 'How should it change?' : "How should it change? wider, winter, overhead, from a kid's height"}
           className="w-full min-h-[44px] px-3 py-2 bg-surface border border-strong rounded-lg text-base sm:text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover disabled:opacity-60"
         />
 

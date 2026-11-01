@@ -50,3 +50,20 @@ export function applyCropNote(prompt: string, aspect: '16:10' | '4:5'): string {
   if (base.includes(CROP_NOTE_MARKER)) return base
   return `${base}\n\n${cropNote(aspect)}`
 }
+
+// The reference note — told to the model on the finalize pass, where the picked
+// contact-sheet draft is attached as an image edit and the Publication tier
+// re-renders it. The draft is the composition; the render is the finish. Written
+// HERE like the other notes, and appended LAST (after the safety rules) so
+// nothing in the house style or the rules reads as a request to recompose.
+
+export const REFERENCE_NOTE_MARKER = 'Reference:'
+
+export const REFERENCE_NOTE = `${REFERENCE_NOTE_MARKER} the attached image is the composition to keep — the same framing, subject placement, setting and moment. Render it as the finished photograph: sharper, cleaner light, true materials, anything malformed corrected. Add nothing that is not already in it.`
+
+/** Append the reference note once; a prompt that already carries it is returned as-is. */
+export function applyReferenceNote(prompt: string): string {
+  const base = prompt.trim()
+  if (base.includes(REFERENCE_NOTE_MARKER)) return base
+  return `${base}\n\n${REFERENCE_NOTE}`
+}

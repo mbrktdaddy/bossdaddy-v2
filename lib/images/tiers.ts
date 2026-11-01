@@ -52,3 +52,11 @@ export const PINNED_IMAGE_MODELS: readonly string[] = [IMAGE_TIERS.publication.m
 export function tierFor(premium: boolean): ImageTier {
   return premium ? 'publication' : 'draft'
 }
+
+/**
+ * The contact sheet: three cheap Draft-model renders at low quality, to pick a
+ * composition before the Publication render. The model is the Draft tier's own
+ * (referenced, never re-typed, so `images:check` and a pin bump stay one edit).
+ */
+export const CONTACT_SHEET: ImageTierSpec = { model: IMAGE_TIERS.draft.model, quality: 'low', label: 'Sheet', hint: 'gpt-image-2.5 Flare · low — three cheap drafts to pick a composition from' }
+export const CONTACT_SHEET_COUNT = 3

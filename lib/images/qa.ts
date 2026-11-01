@@ -10,6 +10,12 @@ import type { SafetyToggles } from './safety'
 // is actually in the image — the pre-generation guess described what was
 // ASKED for, not what came back.
 //
+// Two more reads ride the same call. The text read-back: when the prompt asked
+// for a quoted phrase, the model transcribes what is actually on the pixels
+// and `judgeQa` compares it to the phrase (a misspelled sign is a fail). And a
+// 1–5 `publishable` score — would a picky photo editor run this as-is — which
+// only ever warns; the rule checks never sway it.
+//
 // `judgeQa` turns the report into a verdict against the lane's toggles:
 //   fail → regenerate once (the generator appends the reasons as avoidances)
 //   warn → store, but tell the author
@@ -26,6 +32,8 @@ export const QaReportSchema = z.object({
   artifacts: z.boolean().describe('Obvious generation artifacts: extra or fused fingers, warped objects, impossible geometry, melted text-like shapes'),
   rendered: z.boolean().describe('Looks like an illustration, 3D render, HDR composite or stock photo rather than a candid documentary photograph'),
   matchesSubject: z.boolean().describe('The frame shows the requested subject'),
+  textSeen: z.string().max(120).describe('The visible text, verbatim, in reading order; an empty string when there is none'),
+  publishable: z.number().int().min(1).max(5).describe('1–5: would a picky magazine photo editor run this image as-is? 5 = yes without a note, 3 = usable with a caveat, 1 = no'),
   notes: z.string().max(240).describe('One short sentence on the biggest problem, or empty'),
 })
 export type QaReport = z.infer<typeof QaReportSchema>
@@ -47,7 +55,9 @@ export interface QaResult {
 const QA_SYSTEM =
   'You are a photo editor checking an AI-generated image before it is published on an editorial website for dads. ' +
   'Judge only what is visible. Be literal and strict about text, logos and faces — a single readable word or one ' +
-  'clear face counts. Describe the image accurately for the alt text.'
+  'clear face counts. Describe the image accurately for the alt text. Transcribe any visible text verbatim into ' +
+  'textSeen, and score publishable as a photo editor would (composition, light, believability, artifacts) — do ' +
+  'not let the rule checks sway the score.'
 
 export async function inspectImage(args: {
   bytes: Buffer
@@ -55,28 +65,40 @@ export async function inspectImage(args: {
   /** What the image was meant to show (the subject prompt). */
   subject: string
   toggles: SafetyToggles
+  /** The quoted phrase the prompt asked to render, when it did. */
+  expectedText?: string | null
 }): Promise<QaResult> {
+  const expectedText = args.expectedText?.trim() || null
+  const textLine = expectedText
+    ? `Expected visible text (it must read exactly this, nothing more): "${expectedText}"\n\n`
+    : args.toggles.noText
+      ? 'No text is expected in this image.\n\n'
+      : ''
   const { object, meta } = await aiGenerateObjectWithMeta<QaReport>({
     bucket: 'utility',
     tag: 'image-qa',
     schema: QaReportSchema,
     system: QA_SYSTEM,
-    maxOutputTokens: 400,
+    maxOutputTokens: 500,
     temperature: 0,
     effort: 'low',
     messages: [{
       role: 'user',
       content: [
         { type: 'image', image: args.bytes, mediaType: args.mediaType },
-        { type: 'text', text: `Intended subject: ${args.subject.slice(0, 400)}\n\nInspect the image and fill every field.` },
+        { type: 'text', text: `Intended subject: ${args.subject.slice(0, 400)}\n\n${textLine}Inspect the image and fill every field.` },
       ],
     }],
   })
-  return { report: object, judgement: judgeQa(object, args.toggles), meta }
+  return { report: object, judgement: judgeQa(object, args.toggles, { expectedText }), meta }
 }
 
 /** Pure: report + the lane's rules → verdict. Unit-tested. */
-export function judgeQa(report: QaReport, toggles: SafetyToggles): QaJudgement {
+export function judgeQa(
+  report: QaReport,
+  toggles: SafetyToggles,
+  opts?: { expectedText?: string | null },
+): QaJudgement {
   const fails: string[] = []
   const warns: string[] = []
 
@@ -86,13 +108,42 @@ export function judgeQa(report: QaReport, toggles: SafetyToggles): QaJudgement {
   if (report.faces && toggles.people !== 'allowed') {
     fails.push(toggles.people === 'none' ? 'a person is visible' : 'a face is visible')
   }
+  const expected = opts?.expectedText
+  if (!toggles.noText && typeof expected === 'string' && expected.trim()) {
+    const seen = normalizeText(report.textSeen)
+    if (!report.text || !seen) fails.push(`expected text "${expected}" is missing`)
+    else if (seen !== normalizeText(expected)) fails.push(`text reads "${report.textSeen}" instead of "${expected}"`)
+  }
   if (report.artifacts) warns.push('generation artifacts (hands, warped objects)')
   if (report.rendered && toggles.editorialOnly) warns.push('looks rendered or staged, not a candid photograph')
   if (!report.matchesSubject) warns.push('does not show the requested subject')
+  if (report.publishable < 3) warns.push(`weak as a photograph (publishable ${report.publishable}/5)`)
 
   if (fails.length) return { verdict: 'fail', reasons: [...fails, ...warns] }
   if (warns.length) return { verdict: 'warn', reasons: warns }
   return { verdict: 'pass', reasons: [] }
+}
+
+/** Case, punctuation and spacing don't count against a rendered phrase ("BOSS UP." reads as "Boss Up"). */
+function normalizeText(s: string): string {
+  return s.toLowerCase().replace(/[^\p{L}\p{N} ]+/gu, ' ').replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * The first quoted phrase in a prompt, or null. The doctrine (lib/images/doctrine.ts)
+ * says text in a generated image is a quoted phrase of at most 4 words, English,
+ * and QA reads it back — so a short quoted run IS the expected text. Straight
+ * single quotes are deliberately not matched: "kid's eye level" is an apostrophe,
+ * not a quotation. Long runs (over 60 chars or 8 words) are prose that happens to
+ * be quoted, not signage, so keep looking.
+ */
+export function quotedText(prompt: string): string | null {
+  const re = /"([^"]*)"|“([^”]*)”|‘([^’]*)’/g
+  for (const m of prompt.matchAll(re)) {
+    const inner = (m[1] ?? m[2] ?? m[3] ?? '').trim()
+    if (inner.length >= 1 && inner.length <= 60 && inner.split(/\s+/).length <= 8) return inner
+  }
+  return null
 }
 
 /** The negative instruction appended to the prompt for the retry after a failed QA. */

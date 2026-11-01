@@ -6,10 +6,29 @@ import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import { downloadImage } from '@/lib/images/download'
 import { buttonVariants } from '@/components/ui/Button'
 import { Segmented } from '@/components/ui/Segmented'
+import { Switch } from '@/components/ui/Switch'
 import { PromptAssist } from '@/components/workspace/PromptAssist'
+import { ContactSheetPicker, type SheetDraft } from '@/components/workspace/ContactSheetPicker'
 import { XIcon } from '@/components/icons'
 import type { PeoplePolicy } from '@/lib/images/safety'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
+
+/** A contact sheet in progress: three Draft-tier renders of one prompt, waiting for a pick. */
+type HeroSheet = {
+  drafts: SheetDraft[]
+  picked: string | null
+  busy: 'finalizing' | 'rerolling' | null
+  /** The prompt the drafts were rendered from — Finalize re-sends it so the final matches. */
+  prompt: string
+}
+
+type HeroResponse = {
+  imageUrl?: string
+  promptUsed?: string
+  qa?: { judgement?: { verdict: 'pass' | 'warn' | 'fail'; reasons: string[] } } | null
+  attempts?: number
+  sheet?: { drafts?: SheetDraft[] }
+}
 
 const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
   { value: 'none',      label: 'No people' },
@@ -54,6 +73,11 @@ export function HeroImagePanel({
   const [premium, setPremium] = useState(true)
   // Lane knob (lib/images/safety.ts EDITORIAL): no text always; people anonymous.
   const [people, setPeople] = useState<PeoplePolicy>('anonymous')
+  // OpenAI's own content filter: 'low' loosens it for benign dad-life scenes that
+  // 'auto' sometimes refuses (a kid on shoulders, a campfire). Our rules are unchanged.
+  const [moderation, setModeration] = useState<'auto' | 'low'>('auto')
+  // The contact sheet for this hero, when one is open (Sprint B).
+  const [sheet, setSheet] = useState<HeroSheet | null>(null)
   // What vision QA said about the last generated hero (warn/fail + reasons).
   const [qaNote, setQaNote] = useState<{ verdict: 'warn' | 'fail'; reasons: string[]; attempts: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -120,39 +144,48 @@ export function HeroImagePanel({
     }
   }
 
+  // One body for every hero call; `mode` picks single / sheet / finalize / discard
+  // (app/api/images/hero). The prompt is passed in so Finalize can re-send the
+  // exact text the drafts were rendered from, even if the field changed since.
+  function heroBody(mode: 'single' | 'sheet' | 'finalize' | 'discard', prompt: string, extra: Record<string, unknown> = {}) {
+    return JSON.stringify({
+      mode,
+      title: title ?? productName ?? '',
+      category: category ?? 'other',
+      excerpt: excerpt ?? null,
+      content_type: contentType,
+      product_name: productName ?? null,
+      custom_prompt: prompt.trim() || null,
+      premium,
+      people,
+      no_text: true,
+      moderation,
+      source_id: sourceId ?? null,
+      ...extra,
+    })
+  }
+
+  async function postHero(body: string, fallback: string): Promise<HeroResponse> {
+    const res = await fetch('/api/images/hero', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
+    // A 422 `content_policy` is a refusal, surfaced as the error text —
+    // never a silent stock scene. The prompt stays in the field to edit.
+    return readJsonResponse<HeroResponse>(res, fallback)
+  }
+
+  function applyFinal(json: HeroResponse) {
+    if (json.imageUrl) onChange(json.imageUrl)
+    const j = json.qa?.judgement
+    if (j && j.verdict !== 'pass') setQaNote({ verdict: j.verdict, reasons: j.reasons, attempts: json.attempts ?? 1 })
+  }
+
   async function handleGenerate() {
     if (!title && !productName) { setError('Need a title first to generate an image.'); return }
     setGenerating(true)
     setError(null)
     setQaNote(null)
     try {
-      const res = await fetch('/api/images/hero', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title ?? productName ?? '',
-          category: category ?? 'other',
-          excerpt: excerpt ?? null,
-          content_type: contentType,
-          product_name: productName ?? null,
-          custom_prompt: imagePrompt.trim() || null,
-          premium,
-          people,
-          no_text: true,
-          source_id: sourceId ?? null,
-        }),
-      })
-      // A 422 `content_policy` is a refusal, surfaced as the error text —
-      // never a silent stock scene. The prompt stays in the field to edit.
-      const json = await readJsonResponse<{
-        imageUrl?: string
-        promptUsed?: string
-        qa?: { judgement?: { verdict: 'pass' | 'warn' | 'fail'; reasons: string[] } } | null
-        attempts?: number
-      }>(res, 'Image generation failed')
-      if (json.imageUrl) onChange(json.imageUrl)
-      const j = json.qa?.judgement
-      if (j && j.verdict !== 'pass') setQaNote({ verdict: j.verdict, reasons: j.reasons, attempts: json.attempts ?? 1 })
+      const json = await postHero(heroBody('single', imagePrompt), 'Image generation failed')
+      applyFinal(json)
       // Populate the prompt field with the auto-generated prompt so the user can
       // inspect and tweak it before regenerating. Only overwrite if they hadn't
       // typed a custom prompt themselves (i.e. the field was empty when they hit Generate).
@@ -161,6 +194,70 @@ export function HeroImagePanel({
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }
     setGenerating(false)
+  }
+
+  // Three cheap drafts of the current prompt, to pick a composition from.
+  async function requestSheet(previous: HeroSheet | null) {
+    if (!title && !productName) { setError('Need a title first to generate an image.'); return }
+    if (previous) setSheet({ ...previous, busy: 'rerolling' })
+    else setGenerating(true)
+    setError(null)
+    setQaNote(null)
+    try {
+      const json = await postHero(heroBody('sheet', imagePrompt), 'Contact sheet failed')
+      const drafts = json.sheet?.drafts ?? []
+      if (drafts.length === 0) throw new Error('No drafts came back — try again.')
+      if (previous) discardDrafts(previous.drafts.map((d) => d.filename))
+      const prompt = json.promptUsed ?? imagePrompt
+      if (json.promptUsed && !imagePrompt.trim()) setImagePrompt(json.promptUsed)
+      setSheet({ drafts, picked: null, busy: null, prompt })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Contact sheet failed')
+      if (previous) setSheet({ ...previous, busy: null })
+    }
+    if (!previous) setGenerating(false)
+  }
+
+  // Render the pick at the Publication tier from its composition; the unpicked
+  // drafts are deleted server-side on success.
+  async function handleFinalize() {
+    if (!sheet?.picked) return
+    const picked = sheet.picked
+    setSheet({ ...sheet, busy: 'finalizing' })
+    setError(null)
+    setQaNote(null)
+    try {
+      const json = await postHero(
+        heroBody('finalize', sheet.prompt, {
+          premium: true,
+          draft_filename: picked,
+          discard_filenames: sheet.drafts.map((d) => d.filename).filter((f) => f !== picked),
+        }),
+        'Finalize failed',
+      )
+      applyFinal(json)
+      setSheet(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Finalize failed')
+      // Keep the sheet so he can pick another draft or try again.
+      setSheet((cur) => (cur ? { ...cur, busy: null } : cur))
+    }
+  }
+
+  // Best effort, fire-and-forget: the drafts are scratch files in the bucket.
+  function discardDrafts(filenames: string[]) {
+    if (filenames.length === 0) return
+    void fetch('/api/images/hero', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: heroBody('discard', '', { discard_filenames: filenames }),
+    }).catch(() => { /* scratch files; nothing to recover */ })
+  }
+
+  function handleDiscardSheet() {
+    if (!sheet) return
+    discardDrafts(sheet.drafts.map((d) => d.filename))
+    setSheet(null)
   }
 
   return (
@@ -233,25 +330,52 @@ export function HeroImagePanel({
         </div>
       )}
 
-      {/* Inline generate */}
-      <div className="flex items-start gap-2">
-        {/* A textarea, not a one-line input: Prompt help writes 400-700 character paragraphs. */}
+      {/* Inline generate. The textarea takes the full width (Prompt help writes
+          400-700 character paragraphs) and the two paid actions sit under it:
+          one straight render, or a contact sheet to pick a composition first. */}
+      <div className="space-y-2">
         <textarea
           value={imagePrompt}
           onChange={(e) => setImagePrompt(e.target.value)}
           rows={3}
           placeholder="Describe the scene, or use Prompt help below"
-          className="flex-1 min-w-0 px-3 py-2 bg-surface border border-strong rounded-lg text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
+          className="w-full px-3 py-2 bg-surface border border-strong rounded-lg text-base sm:text-xs text-prose placeholder:text-prose-faint focus:outline-none focus:ring-1 focus:ring-accent-hover resize-none"
         />
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={generating || (!title && !productName)}
-          className={buttonVariants({ size: 'sm', className: 'shrink-0' })}
-        >
-          {generating ? 'Generating…' : imageUrl ? '↺ Regenerate' : 'Generate'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={generating || sheet !== null || (!title && !productName)}
+            className={buttonVariants({ className: 'grow' })}
+          >
+            {generating && !sheet ? 'Generating…' : imageUrl ? 'Regenerate' : 'Generate'}
+          </button>
+          <button
+            type="button"
+            onClick={() => requestSheet(null)}
+            disabled={generating || sheet !== null || (!title && !productName)}
+            className={buttonVariants({ variant: 'outline' })}
+            title="Three cheap drafts to pick a composition from, then finalize at Publication"
+          >
+            Contact sheet
+          </button>
+        </div>
       </div>
+
+      {sheet && (
+        <ContactSheetPicker
+          drafts={sheet.drafts}
+          aspect="16:10"
+          picked={sheet.picked}
+          onPick={(filename) => setSheet((cur) => (cur ? { ...cur, picked: filename } : cur))}
+          onFinalize={handleFinalize}
+          onReroll={() => requestSheet(sheet)}
+          onDiscard={handleDiscardSheet}
+          busy={sheet.busy}
+          disabled={generating || uploading}
+          finalLabel={IMAGE_TIERS.publication.label}
+        />
+      )}
 
       {/* Rewrite / 3 ideas / suggest / describe the current photo — a cheap
           text call, so a prompt no longer has to wait for a paid generation. */}
@@ -295,9 +419,13 @@ export function HeroImagePanel({
           <span className="text-prose-faint">People</span>
           <Segmented value={people} options={PEOPLE_OPTIONS} onChange={setPeople} label="People in the generated hero" />
         </div>
+        <div className="flex items-center gap-1">
+          <label htmlFor="hero-moderation" className="text-prose-muted cursor-pointer">Relaxed moderation</label>
+          <Switch id="hero-moderation" checked={moderation === 'low'} onChange={(on) => setModeration(on ? 'low' : 'auto')} />
+        </div>
       </div>
       <p className="text-[11px] text-prose-faint">
-        AI heroes are a scene from the category, never the product — shoot the product with 📷 Take Photo. House style, no text, no brands and no identifiable children are always on; stored at 16:10.
+        AI heroes are a scene from the category, never the product — shoot the product with 📷 Take Photo. House style, no text, no brands and no identifiable children are always on; stored at 16:10. Relaxed moderation loosens only the model&apos;s own filter for benign dad-life scenes; brands, faces and text rules are unchanged.
       </p>
 
       {qaNote && (

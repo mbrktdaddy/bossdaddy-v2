@@ -55,7 +55,10 @@ function getLimiter(type: string): Ratelimit | null {
     // throttles flood/pollution of the affiliate-click + scroll-depth tables.
     'track':            new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 m'), prefix: 'bd_track' }),
     // OpenAI image generation — the most expensive call in the stack.
-    'image-gen':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, '1 h'), prefix: 'bd_image_gen' }),
+    // 60/h (his call, 2026-10-31): a contact sheet is one request for three
+    // Draft-tier renders and Finalize is a second, so a guide with six figures
+    // plus a hero spends ~14 requests in one sitting; 20 pinched. One key, both tiers.
+    'image-gen':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_image_gen' }),
     // AI specs grading — uses the web_search tool (per-search cost) on top of
     // tokens, so the priciest Claude call. Author-triggered; this is a light
     // backstop, the manual button is the real throttle.

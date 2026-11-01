@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import { fetchAssetAsFile } from '@/lib/images/derive-crop'
 import ImageCropper from '@/components/ui/ImageCropper'
@@ -30,8 +30,10 @@ import {
 } from '@/lib/inlineImages'
 import { buttonVariants } from '@/components/ui/Button'
 import { Segmented } from '@/components/ui/Segmented'
+import { Switch } from '@/components/ui/Switch'
 import { TrashIcon } from '@/components/icons'
 import { PromptAssist } from '@/components/workspace/PromptAssist'
+import { ContactSheetPicker } from '@/components/workspace/ContactSheetPicker'
 import type { PeoplePolicy } from '@/lib/images/safety'
 import { FIGURE_ASPECTS, isFigureAspect, type FigureAspect } from '@/lib/images/doctrine'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
@@ -59,8 +61,17 @@ type GenerateResponse = {
   asset?: { url?: string; alt_text?: string | null; width?: number | null; height?: number | null; origin?: string | null }
   qa?: { judgement?: { verdict: 'pass' | 'warn' | 'fail'; reasons: string[] } } | null
   attempts?: number
+  /** mode 'sheet': the cheap drafts to pick a composition from. */
+  sheet?: { drafts: Array<{ url: string; filename: string }> }
   error?: string
   code?: string
+}
+
+/** One slot's open contact sheet: the drafts, the pick, and what is in flight. */
+type SheetState = {
+  drafts: Array<{ url: string; filename: string }>
+  picked: string | null
+  busy: 'finalizing' | 'rerolling' | null
 }
 
 class GenerateError extends Error {
@@ -76,6 +87,11 @@ const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
 // The figure shape (data-aspect). 3:2 is what a slot without one has always been.
 const DEFAULT_ASPECT: FigureAspect = '3:2'
 const ASPECT_OPTIONS: { value: FigureAspect; label: string }[] = FIGURE_ASPECTS.map((a) => ({ value: a, label: a }))
+
+// Bulk fill runs this many slots at once: three slots in the time of one. The
+// per-user limiter is 60 images an hour, so three in flight never trips it on
+// its own; more would just queue behind the provider.
+const CONCURRENCY = 3
 
 // How a figure shape becomes a generate request. 3:2 and 1:1 are image sizes in
 // their own right; 4:5 is generated on the 1024x1536 portrait and centre-cropped
@@ -138,6 +154,11 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   // Lane knobs (lib/images/safety.ts EDITORIAL): people anonymous, no text.
   const [people, setPeople]                   = useState<PeoplePolicy>('anonymous')
   const [allowText, setAllowText]             = useState(false)
+  // 'low' loosens only the image model's own filter (benign dad-life scenes).
+  const [moderation, setModeration]           = useState<'auto' | 'low'>('auto')
+  const moderationId = useId()
+  // Open contact sheets, keyed by slotId.
+  const [sheets, setSheets]                   = useState<Record<string, SheetState>>({})
   // Per-slot notes from the generator: QA warnings, a refusal, an error.
   const [slotNotes, setSlotNotes]             = useState<Record<string, SlotNote>>({})
   const [error, setError]                     = useState<string | null>(null)
@@ -145,29 +166,73 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
   // ── Generation plumbing ──────────────────────────────────────────────────
 
-  async function callGenerate(prompt: string, subject: string, aspect: FigureAspect = DEFAULT_ASPECT): Promise<GenerateResponse> {
+  /** The body every image request shares (single, sheet, finalize). */
+  function generateBody(prompt: string, subject: string, aspect: FigureAspect) {
     const target = GENERATE_REQUEST[aspect]
+    return {
+      prompt,
+      size: target.size,
+      ...(target.aspect ? { aspect: target.aspect } : {}),
+      alt_text: subject.slice(0, 200),
+      subject: subject.slice(0, 400),
+      premium,
+      lane: 'editorial',
+      people,
+      no_text: !allowText,
+      moderation,
+      source_type: contentType ?? null,
+      source_id: contentId ?? null,
+    }
+  }
+
+  async function postGenerate(body: Record<string, unknown>): Promise<GenerateResponse> {
     const res = await fetch('/api/images/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt,
-        size: target.size,
-        ...(target.aspect ? { aspect: target.aspect } : {}),
-        alt_text: subject.slice(0, 200),
-        subject: subject.slice(0, 400),
-        premium,
-        lane: 'editorial',
-        people,
-        no_text: !allowText,
-        source_type: contentType ?? null,
-        source_id: contentId ?? null,
-      }),
+      body: JSON.stringify(body),
     })
     const json = (await res.json().catch(() => ({}))) as GenerateResponse
     if (!res.ok) throw new GenerateError(json.error ?? 'Image generation failed', json.code)
+    return json
+  }
+
+  async function callGenerate(prompt: string, subject: string, aspect: FigureAspect = DEFAULT_ASPECT): Promise<GenerateResponse> {
+    const json = await postGenerate({ ...generateBody(prompt, subject, aspect), mode: 'single' })
     if (!json.asset?.url) throw new GenerateError('Generator returned no URL')
     return json
+  }
+
+  /** Three cheap drafts of one prompt (Draft tier; `premium` is ignored by the route). */
+  async function callSheet(prompt: string, subject: string, aspect: FigureAspect = DEFAULT_ASPECT): Promise<SheetState['drafts']> {
+    const json = await postGenerate({ ...generateBody(prompt, subject, aspect), mode: 'sheet' })
+    const drafts = json.sheet?.drafts
+    if (!drafts || drafts.length === 0) throw new GenerateError('Generator returned no drafts')
+    return drafts.map((d) => ({ url: d.url, filename: d.filename }))
+  }
+
+  /** Render the picked draft at the Publication tier; the route deletes the unpicked siblings. */
+  async function callFinalize(
+    prompt: string, subject: string, aspect: FigureAspect, draftFilename: string, discardFilenames: string[],
+  ): Promise<GenerateResponse> {
+    const json = await postGenerate({
+      ...generateBody(prompt, subject, aspect),
+      premium: true,
+      mode: 'finalize',
+      draft_filename: draftFilename,
+      discard_filenames: discardFilenames,
+    })
+    if (!json.asset?.url) throw new GenerateError('Generator returned no URL')
+    return json
+  }
+
+  /** Delete drafts nobody will finalize. Fire-and-forget: a failed cleanup must never block the author. */
+  function discardDrafts(filenames: string[]) {
+    if (filenames.length === 0) return
+    void fetch('/api/images/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'discard', discard_filenames: filenames }),
+    }).catch(() => {})
   }
 
   function noteFor(json: GenerateResponse): SlotNote | null {
@@ -192,6 +257,25 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       else delete next[slotId]
       return next
     })
+  }
+
+  function patchSheet(slotId: string, patch: Partial<SheetState>) {
+    setSheets((prev) => (prev[slotId] ? { ...prev, [slotId]: { ...prev[slotId], ...patch } } : prev))
+  }
+  function clearSheet(slotId: string) {
+    setSheets((prev) => {
+      if (!prev[slotId]) return prev
+      const next = { ...prev }
+      delete next[slotId]
+      return next
+    })
+  }
+  /** The slot is being removed, reverted or replaced: discard its drafts and close its sheet. */
+  function dropSheet(slotId: string) {
+    const sheet = sheets[slotId]
+    if (!sheet) return
+    discardDrafts(sheet.drafts.map((d) => d.filename))
+    clearSheet(slotId)
   }
 
   function metaOf(json: GenerateResponse): FigureImageMeta {
@@ -248,12 +332,14 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   }
   function handleRemoveItem(slotId: string) {
     if (!confirm('Remove this image (or gallery) from the article?')) return
+    dropSheet(slotId)
     onChangeContent(removeItem(content, slotId))
   }
 
   // ── Single-slot operations ───────────────────────────────────────────────
 
   function handleRevert(slotId: string) {
+    dropSheet(slotId)
     onChangeContent(revertSlot(content, slotId))
   }
   function handleFieldChange(slotId: string, field: 'caption' | 'alt' | 'prompt', value: string) {
@@ -295,24 +381,41 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
     setError(null); setBulkBusy({ done: 0, total: targets.length })
 
     // Skip-and-continue: one refused or failed slot must not strand the rest.
+    // A worker pool: CONCURRENCY workers pull the next unclaimed slot off a
+    // shared index until none are left.
     let working = content
-    const failures: string[] = []
-    for (let i = 0; i < targets.length; i++) {
-      const slot = targets[i]
-      try {
-        const json = await callGenerate(slot.prompt, slot.alt || slot.caption || slot.prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
-        // The alt from the pixels (QA) beats the pre-generation guess.
-        working = fillSlot(working, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json))
-        onChangeContent(working)
-        setNote(slot.slotId, noteFor(json))
-      } catch (err) {
-        setNote(slot.slotId, noteForError(err))
-        failures.push(`slot ${i + 1}`)
+    const failedAt: number[] = []
+    let nextIndex = 0
+    let done = 0
+
+    async function worker() {
+      while (nextIndex < targets.length) {
+        const i = nextIndex++
+        const slot = targets[i]
+        try {
+          const json = await callGenerate(slot.prompt, slot.alt || slot.caption || slot.prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
+          // JS is single-threaded: each continuation after an await runs to
+          // completion before another starts, so every worker applies its slot
+          // on the latest `working` and no fill is lost to a stale copy.
+          // The alt from the pixels (QA) beats the pre-generation guess.
+          working = fillSlot(working, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json))
+          onChangeContent(working)
+          setNote(slot.slotId, noteFor(json))
+        } catch (err) {
+          setNote(slot.slotId, noteForError(err))
+          failedAt.push(i + 1)
+        }
+        done++
+        setBulkBusy({ done, total: targets.length })
       }
-      setBulkBusy({ done: i + 1, total: targets.length })
     }
+
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, targets.length) }, () => worker()))
     setBulkBusy(null)
-    if (failures.length) setError(`${failures.length} of ${targets.length} slots did not fill (${failures.join(', ')}) — see the notes on each.`)
+    if (failedAt.length) {
+      failedAt.sort((x, y) => x - y)
+      setError(`${failedAt.length} of ${targets.length} slots did not fill (${failedAt.map((n) => `slot ${n}`).join(', ')}) — see the notes on each.`)
+    }
   }
 
   // ── Per-slot AI/upload operations ────────────────────────────────────────
@@ -330,6 +433,81 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       setError(err instanceof Error ? err.message : 'Image generation failed')
     }
     setBusySlotId(null)
+  }
+
+  // ── Contact sheet: three cheap drafts, pick one, finalize at Publication ──
+
+  async function handleSheet(slot: InlineSlot) {
+    const prompt = slot.prompt.trim()
+    if (!prompt) { setError('Add an image prompt first, then click Contact sheet.'); return }
+    setBusySlotId(slot.slotId); setError(null)
+    try {
+      const old = sheets[slot.slotId]
+      const drafts = await callSheet(prompt, slot.alt || slot.caption || prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
+      if (old) discardDrafts(old.drafts.map((d) => d.filename))
+      setSheets((prev) => ({ ...prev, [slot.slotId]: { drafts, picked: null, busy: null } }))
+      setNote(slot.slotId, null)
+    } catch (err) {
+      setNote(slot.slotId, noteForError(err))
+      setError(err instanceof Error ? err.message : 'Image generation failed')
+    }
+    setBusySlotId(null)
+  }
+
+  function handlePick(slotId: string, filename: string) {
+    patchSheet(slotId, { picked: filename })
+  }
+
+  async function handleFinalize(slot: InlineSlot) {
+    const sheet = sheets[slot.slotId]
+    const prompt = slot.prompt.trim()
+    if (!sheet || !sheet.picked || !prompt) return
+    const picked = sheet.picked
+    setBusySlotId(slot.slotId); setError(null)
+    patchSheet(slot.slotId, { busy: 'finalizing' })
+    try {
+      const json = await callFinalize(
+        prompt,
+        slot.alt || slot.caption || prompt.slice(0, 120),
+        slot.aspect ?? DEFAULT_ASPECT,
+        picked,
+        sheet.drafts.map((d) => d.filename).filter((f) => f !== picked),
+      )
+      onChangeContent(fillSlot(content, slot.slotId, json.asset!.url!, json.asset?.alt_text || slot.alt || '', metaOf(json)))
+      setNote(slot.slotId, noteFor(json))
+      clearSheet(slot.slotId)
+    } catch (err) {
+      // Keep the sheet so he can retry or pick another draft.
+      setNote(slot.slotId, noteForError(err))
+      setError(err instanceof Error ? err.message : 'Image generation failed')
+      patchSheet(slot.slotId, { busy: null })
+    }
+    setBusySlotId(null)
+  }
+
+  async function handleReroll(slot: InlineSlot) {
+    const sheet = sheets[slot.slotId]
+    const prompt = slot.prompt.trim()
+    if (!sheet) return
+    if (!prompt) { setError('Add an image prompt first, then reroll.'); return }
+    setBusySlotId(slot.slotId); setError(null)
+    patchSheet(slot.slotId, { busy: 'rerolling' })
+    try {
+      const drafts = await callSheet(prompt, slot.alt || slot.caption || prompt.slice(0, 120), slot.aspect ?? DEFAULT_ASPECT)
+      // The old drafts go only once the new ones exist, so a failed reroll leaves a usable sheet.
+      discardDrafts(sheet.drafts.map((d) => d.filename))
+      setSheets((prev) => ({ ...prev, [slot.slotId]: { drafts, picked: null, busy: null } }))
+      setNote(slot.slotId, null)
+    } catch (err) {
+      setNote(slot.slotId, noteForError(err))
+      setError(err instanceof Error ? err.message : 'Image generation failed')
+      patchSheet(slot.slotId, { busy: null })
+    }
+    setBusySlotId(null)
+  }
+
+  function handleDiscardSheet(slotId: string) {
+    dropSheet(slotId)
   }
 
   // Reframe a filled slot's current image (AI-generated, library, or uploaded).
@@ -383,6 +561,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       if (!res.ok) throw new Error(json.error ?? 'Upload failed')
       onChangeContent(fillSlot(content, slot.slotId, json.asset.url, slot.alt || json.asset.alt_text || '', uploadMeta(json.asset)))
       setNote(slot.slotId, null)
+      dropSheet(slot.slotId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     }
@@ -395,6 +574,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
 
   function handlePickerSelect(url: string, altText: string) {
     if (pickerSlot) {
+      dropSheet(pickerSlot.slotId)
       onChangeContent(fillSlot(content, pickerSlot.slotId, url, pickerSlot.alt || altText))
       setPickerSlot(null)
     } else if (addToGalleryId) {
@@ -604,9 +784,13 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             <input type="checkbox" checked={allowText} onChange={(e) => setAllowText(e.target.checked)} className="accent-[var(--bd-orange)]" />
             Allow text in image
           </label>
+          <div className="flex items-center">
+            <Switch id={moderationId} checked={moderation === 'low'} onChange={(on) => setModeration(on ? 'low' : 'auto')} />
+            <label htmlFor={moderationId} className="text-prose-muted cursor-pointer">Relaxed moderation</label>
+          </div>
         </div>
         <p className="text-[11px] text-prose-faint -mt-1">
-          House style, no brands and no identifiable children are always on. Anonymous = hands, from behind, face out of frame. Every result is checked by vision QA; a problem shows on the slot.
+          House style, no brands and no identifiable children are always on. Anonymous = hands, from behind, face out of frame. Every result is checked by vision QA; a problem shows on the slot. Relaxed moderation loosens only the model&apos;s own filter for benign dad-life scenes; brands, faces and text rules are unchanged.
         </p>
 
         {/* ── Bulk fill ───────────────────────────────────────────────── */}
@@ -797,6 +981,12 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               onPickReplace={() => setPickerSlot(item.slot)}
               onUpload={() => { setUploadSlotId(item.slot.slotId); fileInputRef.current?.click() }}
               onCrop={() => handleCropSlot(item.slot)}
+              sheet={sheets[item.slot.slotId] ?? null}
+              onSheet={() => handleSheet(item.slot)}
+              onPick={(filename) => handlePick(item.slot.slotId, filename)}
+              onFinalize={() => handleFinalize(item.slot)}
+              onReroll={() => handleReroll(item.slot)}
+              onDiscardSheet={() => handleDiscardSheet(item.slot.slotId)}
             />
           ) : (
             <GalleryCard
@@ -1125,6 +1315,13 @@ interface SlotCardProps {
   onPickReplace: () => void
   onUpload: () => void
   onCrop: () => void
+  /** This slot's open contact sheet, if any. */
+  sheet: SheetState | null
+  onSheet: () => void
+  onPick: (filename: string) => void
+  onFinalize: () => void
+  onReroll: () => void
+  onDiscardSheet: () => void
 }
 
 /** One line under a slot: what vision QA or the model said about the last image. */
@@ -1241,23 +1438,25 @@ function SlotCard(p: SlotCardProps) {
           <EditableField label="Caption" value={slot.caption} placeholder="Shown under the image" onCommit={(v) => p.onFieldChange('caption', v)} disabled={busy} />
           <EditableField label="Alt text" value={slot.alt} placeholder="Short description for screen readers" onCommit={(v) => p.onFieldChange('alt', v)} disabled={busy} />
           <EditableField label="AI prompt" value={slot.prompt} placeholder={owned ? 'Add your own photo below, or describe an image here to generate one instead' : 'Describe the image — used by Regenerate'} onCommit={(v) => p.onFieldChange('prompt', v)} disabled={busy} multiline />
-          {/* Rewrite / 3 ideas / suggest / describe the photo: a cheap text call;
-              Regenerate stays the paid step. */}
-          <PromptAssist
-            compact
-            target="inline"
-            value={slot.prompt}
-            people={p.people}
-            allowText={p.allowText}
-            aspect={slot.aspect ?? DEFAULT_ASPECT}
-            imageUrl={slot.imageUrl}
-            context={p.heading ? { heading: p.heading } : undefined}
-            source={p.source}
-            disabled={busy}
-            onUse={p.onUsePrompt}
-          />
         </div>
       </div>
+
+      {/* Rewrite / 3 ideas / suggest / describe the photo: a cheap text call;
+          Regenerate stays the paid step. Full card width on purpose — beside
+          the thumbnail it had ~220px on a phone and its buttons stacked three deep. */}
+      <PromptAssist
+        compact
+        target="inline"
+        value={slot.prompt}
+        people={p.people}
+        allowText={p.allowText}
+        aspect={slot.aspect ?? DEFAULT_ASPECT}
+        imageUrl={slot.imageUrl}
+        context={p.heading ? { heading: p.heading } : undefined}
+        source={p.source}
+        disabled={busy}
+        onUse={p.onUsePrompt}
+      />
 
       {/* Shape: the figure aspect Generate and Regenerate use (3:2 when none is set). */}
       <div className="flex flex-wrap items-center gap-2">
@@ -1267,12 +1466,32 @@ function SlotCard(p: SlotCardProps) {
 
       <SlotNoteLine note={p.note} />
 
+      {p.sheet && (
+        <ContactSheetPicker
+          drafts={p.sheet.drafts}
+          aspect={slot.aspect ?? DEFAULT_ASPECT}
+          picked={p.sheet.picked}
+          busy={p.sheet.busy}
+          disabled={busy}
+          finalLabel={IMAGE_TIERS.publication.label}
+          onPick={p.onPick}
+          onFinalize={p.onFinalize}
+          onReroll={p.onReroll}
+          onDiscard={p.onDiscardSheet}
+        />
+      )}
+
       {/* Actions */}
       <div className="flex flex-wrap gap-2 pt-1 border-t border-soft">
         <button type="button" onClick={p.onRegenerate} disabled={busy || !slot.prompt.trim()}
           className={buttonVariants({ size: 'sm' })}
           title={!slot.prompt.trim() ? (owned ? 'This one wants your own photo; add an AI prompt only to generate it instead' : 'Add an AI prompt first') : 'Regenerate with current prompt'}>
           {busy ? '✨ Working…' : filled ? '🔄 Regenerate' : '✨ Generate'}
+        </button>
+        <button type="button" onClick={p.onSheet} disabled={busy || !slot.prompt.trim()}
+          className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          title="Three cheap drafts to pick a composition, then finalize at Publication">
+          Contact sheet
         </button>
         <button type="button" onClick={p.onPickReplace} disabled={busy}
           className={buttonVariants({ variant: 'secondary', size: 'sm' })}>

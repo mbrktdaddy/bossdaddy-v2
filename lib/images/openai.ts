@@ -1,12 +1,12 @@
-import OpenAI from 'openai'
+import OpenAI, { toFile } from 'openai'
 import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toStorageBody, verifyStoredMagic } from '../storage-body'
 import { estimateImageCostUsd, type ImageUsage } from '@/lib/ai/pricing'
-import { applyCropNote, applyHouseStyle } from './style'
-import { IMAGE_TIERS, tierFor, type ImageTierSpec } from './tiers'
+import { applyCropNote, applyHouseStyle, applyReferenceNote } from './style'
+import { CONTACT_SHEET, CONTACT_SHEET_COUNT, IMAGE_TIERS, tierFor, type ImageTierSpec } from './tiers'
 import { buildSafetyRules, type SafetyToggles } from './safety'
-import { avoidanceClause, inspectImage, type QaJudgement, type QaReport } from './qa'
+import { avoidanceClause, inspectImage, quotedText, type QaJudgement, type QaReport } from './qa'
 
 export type ImageBucket = 'guide-images' | 'review-images' | 'media'
 export type ImageSize = '1024x1024' | '1536x1024' | '1024x1536'
@@ -14,12 +14,19 @@ export type ImageSize = '1024x1024' | '1536x1024' | '1024x1536'
 export type ImageLane = 'editorial' | 'social'
 /** Centre-crop the stored file to this ratio; null keeps the API's frame as-is. */
 export type ImageAspect = '16:10' | '4:5' | null
+/** The Images API's content moderation level. Only `generate` accepts it — `edit` has no such field. */
+export type ImageModeration = 'low' | 'auto'
 
 // Model + quality per tier live in ./tiers (IMAGE_TIERS) — pinned by hand and
 // verified live by `npm run images:check`. `premium` is the request flag: true =
 // the Publication tier, the editorial default (he wants the public page at the
 // highest quality, and the panels start on it); false = the Draft tier, the
 // cheaper knob for roughing out a prompt.
+//
+// Two more paths ride the same tiers (./tiers CONTACT_SHEET): a contact sheet is
+// three cheap low-quality Draft renders to pick a composition from, and the
+// finalize pass re-renders the picked draft on the Publication tier as an image
+// edit, so the composition he chose is the one that ships.
 
 // The API encodes WebP itself (`output_format`), so no decode/re-encode pass:
 // 90 is visually indistinguishable from PNG on photo-style content and ~10x
@@ -33,6 +40,11 @@ const WEBP_QUALITY = 90
 // so its crop is top and bottom. The prompt is told about the crop up front
 // (cropNote in ./style) so the subject lands in the band that survives it.
 const ASPECT_RATIO: Record<NonNullable<ImageAspect>, number> = { '16:10': 1.6, '4:5': 0.8 }
+
+// Contact-sheet drafts are scratch files in the destination bucket. The strict
+// name shape is what lets the routes accept a filename from the client and the
+// cleanup delete by name without ever touching a real asset.
+export const SHEET_FILENAME_RE = /^sheet-\d+-[a-z0-9]+-\d\.webp$/
 
 let openaiInstance: OpenAI | null = null
 function getClient(): OpenAI {
@@ -68,6 +80,8 @@ export interface GenerateImageArgs {
   qa?: boolean
   /** What QA should expect to see when it differs from the prompt. */
   subject?: string
+  /** 'low' relaxes the API's content filter (generate only); omitted otherwise. */
+  moderation?: ImageModeration
 }
 
 export interface GeneratedImage {
@@ -92,6 +106,7 @@ async function callImageModel(
   prompt: string,
   size: ImageSize,
   tier: ImageTierSpec,
+  moderation?: ImageModeration,
 ): Promise<{ bytes: Buffer; usage: ImageUsage | undefined }> {
   let response
   try {
@@ -101,6 +116,42 @@ async function callImageModel(
       n: 1,
       size,
       quality: tier.quality,
+      output_format: 'webp',
+      output_compression: WEBP_QUALITY,
+      // Sent only when relaxed — 'auto' is the API default, so omitting it keeps
+      // the request byte-identical to every pre-sheet call.
+      ...(moderation === 'low' ? { moderation: 'low' as const } : {}),
+    })
+  } catch (err) {
+    if (isContentPolicyError(err)) throw new ImageContentPolicyError(prompt)
+    throw err
+  }
+  const b64 = response.data?.[0]?.b64_json
+  if (!b64) throw new Error('No image data returned from image model')
+  return { bytes: Buffer.from(b64, 'base64'), usage: response.usage as ImageUsage | undefined }
+}
+
+/**
+ * Re-render a picked draft on the Publication tier as an image edit. `moderation`
+ * is deliberately absent: the SDK's edit params have no such field.
+ * `input_fidelity: 'high'` is what holds the draft's composition.
+ */
+async function callEditModel(
+  client: OpenAI,
+  prompt: string,
+  draft: Buffer,
+  size: ImageSize,
+): Promise<{ bytes: Buffer; usage: ImageUsage | undefined }> {
+  let response
+  try {
+    response = await client.images.edit({
+      model: IMAGE_TIERS.publication.model,
+      // A fresh File per call — the upload stream is consumed by the request.
+      image: await toFile(draft, 'draft.webp', { type: 'image/webp' }),
+      prompt,
+      size,
+      quality: 'high',
+      input_fidelity: 'high',
       output_format: 'webp',
       output_compression: WEBP_QUALITY,
     })
@@ -114,67 +165,53 @@ async function callImageModel(
 }
 
 /**
- * Generate → (QA, retry once on a hard fail) → crop → store → verify.
- *
- * Nothing is substituted on failure: a content-policy refusal throws
- * `ImageContentPolicyError` for the route to turn into a 422 the panel can act
- * on, and a second QA fail is still stored and RETURNED with its report so the
- * author sees exactly what is wrong (defect #13 was the silent tools-on-wood
- * fallback).
+ * The full prompt the model sees. Editorial order: subject, house style, then the
+ * crop note (only when the stored file is centre-cropped), all BEFORE the safety
+ * rules. `subject` is what QA should expect to see.
  */
-export async function generateImage(args: GenerateImageArgs): Promise<GeneratedImage> {
-  const startedAt = Date.now()
-  const client = getClient()
-  const size = args.size ?? '1024x1024'
-  const tier = IMAGE_TIERS[tierFor(args.premium ?? false)]
-  const runQa = args.qa ?? (args.lane === 'editorial')
-  const model = `openai/${tier.model}`
-  const quality = tier.quality
-
-  // Editorial prompt order: subject, house style, then the crop note (only when
-  // the stored file is centre-cropped), all BEFORE the safety rules.
+function buildEditorialPrompt(args: Pick<GenerateImageArgs, 'prompt' | 'lane' | 'aspect' | 'toggles' | 'subject'>): { fullPrompt: string; subject: string } {
   const styled = args.lane === 'editorial' ? applyHouseStyle(args.prompt) : args.prompt.trim()
   const subjectPrompt = args.lane === 'editorial' && args.aspect ? applyCropNote(styled, args.aspect) : styled
   const rules = buildSafetyRules(args.toggles)
-  const fullPrompt = `${subjectPrompt}\n\n${rules}`
-  const subject = (args.subject ?? args.prompt).trim()
+  return {
+    fullPrompt: `${subjectPrompt}\n\n${rules}`,
+    subject: (args.subject ?? args.prompt).trim(),
+  }
+}
 
-  let cost: number | null = 0
-  const addCost = (c: number | null) => { cost = cost == null || c == null ? null : cost + c }
+/** Upload one WebP and read its header back before anyone gets a URL for it. */
+async function uploadVerified(bucket: ImageBucket, filename: string, bytes: Buffer): Promise<string> {
+  const admin = createAdminClient()
+  const { error } = await admin.storage
+    .from(bucket)
+    .upload(filename, toStorageBody(bytes, 'image/webp'), { contentType: 'image/webp', upsert: false })
+  if (error) throw new Error(`Storage upload failed: ${error.message}`)
 
-  let attempts = 0
-  let bytes: Buffer
-  let qa: GeneratedImage['qa'] = null
-
-  // Attempt 1.
-  attempts++
-  const first = await callImageModel(client, fullPrompt, size, tier)
-  bytes = first.bytes
-  addCost(estimateImageCostUsd(model, first.usage))
-
-  if (runQa) {
-    const check = await inspectImage({ bytes, mediaType: 'image/webp', subject, toggles: args.toggles })
-    addCost(check.meta.costUsd)
-    qa = { report: check.report, judgement: check.judgement }
-
-    // One retry on a hard fail, with the reasons as explicit avoidances.
-    if (check.judgement.verdict === 'fail') {
-      attempts++
-      const retryPrompt = `${fullPrompt}\n\n${avoidanceClause(check.judgement.reasons)}`
-      const second = await callImageModel(client, retryPrompt, size, tier)
-      addCost(estimateImageCostUsd(model, second.usage))
-      const recheck = await inspectImage({ bytes: second.bytes, mediaType: 'image/webp', subject, toggles: args.toggles })
-      addCost(recheck.meta.costUsd)
-      bytes = second.bytes
-      qa = { report: recheck.report, judgement: recheck.judgement }
-    }
+  // Read the header back before handing out a URL. The 2026-07-28 corruption was
+  // silent — a stringified body still stores an object with a sane size and the
+  // right mimetype — so one range read makes it loud instead, and the bad
+  // object is deleted rather than left unrenderable.
+  const corruption = await verifyStoredMagic(admin.storage.from(bucket), filename, 'image/webp')
+  if (corruption) {
+    await admin.storage.from(bucket).remove([filename]).catch(() => { /* best effort */ })
+    console.error(`Image upload verification FAILED for ${bucket}/${filename}: ${corruption}`)
+    throw new Error('Generated image was corrupted in transit and was discarded. Please try again.')
   }
 
-  // Crop to the requested ratio, else keep the API's WebP as-is.
+  const { data: { publicUrl } } = admin.storage.from(bucket).getPublicUrl(filename)
+  return publicUrl
+}
+
+/** Crop to the requested ratio (else keep the API's WebP as-is), then store + verify. */
+async function storeFinal(
+  bytes: Buffer,
+  aspect: ImageAspect | undefined,
+  bucket: ImageBucket,
+): Promise<{ url: string; filename: string; width: number; height: number }> {
   let width: number
   let height: number
-  if (args.aspect) {
-    const ratio = ASPECT_RATIO[args.aspect]
+  if (aspect) {
+    const ratio = ASPECT_RATIO[aspect]
     const meta = await sharp(bytes).metadata()
     const srcW = meta.width ?? 0
     const srcH = meta.height ?? 0
@@ -195,32 +232,247 @@ export async function generateImage(args: GenerateImageArgs): Promise<GeneratedI
   }
 
   const filename = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`
-  const admin = createAdminClient()
-  const { error } = await admin.storage
-    .from(args.bucket)
-    .upload(filename, toStorageBody(bytes, 'image/webp'), { contentType: 'image/webp', upsert: false })
-  if (error) throw new Error(`Storage upload failed: ${error.message}`)
+  const url = await uploadVerified(bucket, filename, bytes)
+  return { url, filename, width, height }
+}
 
-  // Read the header back before handing out a URL. The 2026-07-28 corruption was
-  // silent — a stringified body still stores an object with a sane size and the
-  // right mimetype — so one range read makes it loud instead, and the bad
-  // object is deleted rather than left unrenderable.
-  const corruption = await verifyStoredMagic(admin.storage.from(args.bucket), filename, 'image/webp')
-  if (corruption) {
-    await admin.storage.from(args.bucket).remove([filename]).catch(() => { /* best effort */ })
-    console.error(`Image upload verification FAILED for ${args.bucket}/${filename}: ${corruption}`)
-    throw new Error('Generated image was corrupted in transit and was discarded. Please try again.')
+/** Vision QA on one render. `expectedText` is the quoted string the prompt asked for, when text is allowed. */
+function runQa(bytes: Buffer, subject: string, toggles: SafetyToggles, expectedText: string | null) {
+  return inspectImage({ bytes, mediaType: 'image/webp', subject, toggles, expectedText })
+}
+
+/**
+ * Generate → (QA, retry once on a hard fail) → crop → store → verify.
+ *
+ * Nothing is substituted on failure: a content-policy refusal throws
+ * `ImageContentPolicyError` for the route to turn into a 422 the panel can act
+ * on, and a second QA fail is still stored and RETURNED with its report so the
+ * author sees exactly what is wrong (defect #13 was the silent tools-on-wood
+ * fallback).
+ */
+export async function generateImage(args: GenerateImageArgs): Promise<GeneratedImage> {
+  const startedAt = Date.now()
+  const client = getClient()
+  const size = args.size ?? '1024x1024'
+  const tier = IMAGE_TIERS[tierFor(args.premium ?? false)]
+  const doQa = args.qa ?? (args.lane === 'editorial')
+  const model = `openai/${tier.model}`
+  const quality = tier.quality
+
+  const { fullPrompt, subject } = buildEditorialPrompt(args)
+  const expectedText = args.toggles.noText ? null : quotedText(args.prompt)
+
+  let cost: number | null = 0
+  const addCost = (c: number | null) => { cost = cost == null || c == null ? null : cost + c }
+
+  let attempts = 0
+  let bytes: Buffer
+  let qa: GeneratedImage['qa'] = null
+
+  // Attempt 1.
+  attempts++
+  const first = await callImageModel(client, fullPrompt, size, tier, args.moderation)
+  bytes = first.bytes
+  addCost(estimateImageCostUsd(model, first.usage))
+
+  if (doQa) {
+    const check = await runQa(bytes, subject, args.toggles, expectedText)
+    addCost(check.meta.costUsd)
+    qa = { report: check.report, judgement: check.judgement }
+
+    // One retry on a hard fail, with the reasons as explicit avoidances.
+    if (check.judgement.verdict === 'fail') {
+      attempts++
+      const retryPrompt = `${fullPrompt}\n\n${avoidanceClause(check.judgement.reasons)}`
+      const second = await callImageModel(client, retryPrompt, size, tier, args.moderation)
+      addCost(estimateImageCostUsd(model, second.usage))
+      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText)
+      addCost(recheck.meta.costUsd)
+      bytes = second.bytes
+      qa = { report: recheck.report, judgement: recheck.judgement }
+    }
   }
 
-  const { data: { publicUrl } } = admin.storage.from(args.bucket).getPublicUrl(filename)
+  const stored = await storeFinal(bytes, args.aspect, args.bucket)
   return {
-    url: publicUrl,
+    url: stored.url,
     bucket: args.bucket,
-    filename,
-    width,
-    height,
+    filename: stored.filename,
+    width: stored.width,
+    height: stored.height,
     model,
     quality,
+    attempts,
+    qa,
+    costUsd: cost,
+    latencyMs: Date.now() - startedAt,
+  }
+}
+
+// ── Contact sheet ───────────────────────────────────────────────────────────
+
+export interface SheetDraft {
+  url: string
+  filename: string
+  width: number
+  height: number
+  costUsd: number | null
+}
+
+export interface ContactSheetArgs extends Omit<GenerateImageArgs, 'premium' | 'qa'> {
+  /** How many drafts to render; default CONTACT_SHEET_COUNT. */
+  count?: number
+}
+
+export interface ContactSheetResult {
+  drafts: SheetDraft[]
+  model: string
+  quality: string
+  latencyMs: number
+}
+
+/**
+ * Three cheap drafts to pick a composition from. Parallel low-quality renders on
+ * the Draft model — no vision QA (the author IS the QA here) and no crop (the
+ * panel previews the crop with CSS; the Publication pass applies the real one).
+ * Drafts are stored as-is under `sheet-*` names, and are NOT indexed into
+ * media_assets: they are scratch, removed by `finalizeFromDraft` / `discardDrafts`.
+ *
+ * Partial success is success: if some renders or uploads fail, the ones that
+ * worked come back (with a console.warn); only an all-failed sheet throws.
+ */
+export async function generateContactSheet(args: ContactSheetArgs): Promise<ContactSheetResult> {
+  const startedAt = Date.now()
+  const client = getClient()
+  const size = args.size ?? '1024x1024'
+  const count = args.count ?? CONTACT_SHEET_COUNT
+  const model = `openai/${CONTACT_SHEET.model}`
+
+  const { fullPrompt } = buildEditorialPrompt(args)
+
+  const renders = await Promise.allSettled(
+    Array.from({ length: count }, () => callImageModel(client, fullPrompt, size, CONTACT_SHEET, args.moderation)),
+  )
+  const rendered: { index: number; bytes: Buffer; costUsd: number | null }[] = []
+  const renderErrors: unknown[] = []
+  renders.forEach((r, index) => {
+    if (r.status === 'fulfilled') rendered.push({ index, bytes: r.value.bytes, costUsd: estimateImageCostUsd(model, r.value.usage) })
+    else renderErrors.push(r.reason)
+  })
+  // Every call failed: surface the first (a content-policy refusal is already an
+  // ImageContentPolicyError, so the route turns it into the usual 422).
+  if (rendered.length === 0) throw renderErrors[0] ?? new Error('Contact sheet failed')
+  if (renderErrors.length) console.warn(`Contact sheet: ${renderErrors.length}/${count} renders failed`, renderErrors[0])
+
+  // One upload failing must not lose the other drafts.
+  const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const uploads = await Promise.allSettled(rendered.map(async (d): Promise<SheetDraft> => {
+    const meta = await sharp(d.bytes).metadata()
+    const width = meta.width ?? 0
+    const height = meta.height ?? 0
+    if (!width || !height) throw new Error('Generated image has no readable dimensions')
+    const filename = `sheet-${stamp}-${d.index}.webp`
+    const url = await uploadVerified(args.bucket, filename, d.bytes)
+    return { url, filename, width, height, costUsd: d.costUsd }
+  }))
+  const drafts: SheetDraft[] = []
+  const uploadErrors: unknown[] = []
+  for (const u of uploads) {
+    if (u.status === 'fulfilled') drafts.push(u.value)
+    else uploadErrors.push(u.reason)
+  }
+  if (drafts.length === 0) throw uploadErrors[0] ?? new Error('Contact sheet upload failed')
+  if (uploadErrors.length) console.warn(`Contact sheet: ${uploadErrors.length}/${rendered.length} uploads failed`, uploadErrors[0])
+
+  return { drafts, model, quality: CONTACT_SHEET.quality, latencyMs: Date.now() - startedAt }
+}
+
+/**
+ * Remove scratch drafts. Only `sheet-*` names are ever touched, whatever the
+ * caller passes, and a storage failure is logged, never thrown — a leftover
+ * scratch file must not fail a render that already succeeded.
+ */
+export async function discardDrafts(bucket: ImageBucket, filenames: string[]): Promise<void> {
+  const names = [...new Set(filenames)].filter(n => SHEET_FILENAME_RE.test(n))
+  if (names.length === 0) return
+  try {
+    const { error } = await createAdminClient().storage.from(bucket).remove(names)
+    if (error) console.warn(`discardDrafts: ${bucket} remove failed: ${error.message}`)
+  } catch (err) {
+    console.warn('discardDrafts failed (non-fatal):', err)
+  }
+}
+
+export interface FinalizeArgs extends Omit<GenerateImageArgs, 'premium'> {
+  /** The picked contact-sheet draft, a `sheet-*` file in `bucket`. */
+  draftFilename: string
+  /** The other drafts from the same sheet, removed along with the picked one. */
+  discardFilenames?: string[]
+}
+
+/**
+ * Publication render of a picked draft: the draft is attached to an image edit
+ * (`input_fidelity: 'high'`) with the reference note appended LAST, so the
+ * composition he chose is what ships. QA + one retry work like `generateImage`
+ * (the retry is a second edit from the same draft plus the avoidance clause);
+ * then the normal crop → store → verify, and the sheet's scratch drafts go.
+ */
+export async function finalizeFromDraft(args: FinalizeArgs): Promise<GeneratedImage> {
+  if (!SHEET_FILENAME_RE.test(args.draftFilename)) throw new Error('Invalid draft filename')
+  const startedAt = Date.now()
+  const client = getClient()
+  const size = args.size ?? '1024x1024'
+  const doQa = args.qa ?? (args.lane === 'editorial')
+  const model = `openai/${IMAGE_TIERS.publication.model}`
+
+  const { data: blob, error: dlError } = await createAdminClient().storage.from(args.bucket).download(args.draftFilename)
+  if (dlError || !blob) throw new Error(`Draft not found or expired: ${dlError?.message ?? args.draftFilename}`)
+  const draft = Buffer.from(await blob.arrayBuffer())
+
+  const { fullPrompt: styledPrompt, subject } = buildEditorialPrompt(args)
+  const fullPrompt = applyReferenceNote(styledPrompt)
+  const expectedText = args.toggles.noText ? null : quotedText(args.prompt)
+
+  let cost: number | null = 0
+  const addCost = (c: number | null) => { cost = cost == null || c == null ? null : cost + c }
+
+  let attempts = 0
+  let bytes: Buffer
+  let qa: GeneratedImage['qa'] = null
+
+  attempts++
+  const first = await callEditModel(client, fullPrompt, draft, size)
+  bytes = first.bytes
+  addCost(estimateImageCostUsd(model, first.usage))
+
+  if (doQa) {
+    const check = await runQa(bytes, subject, args.toggles, expectedText)
+    addCost(check.meta.costUsd)
+    qa = { report: check.report, judgement: check.judgement }
+
+    if (check.judgement.verdict === 'fail') {
+      attempts++
+      const retryPrompt = `${fullPrompt}\n\n${avoidanceClause(check.judgement.reasons)}`
+      const second = await callEditModel(client, retryPrompt, draft, size)
+      addCost(estimateImageCostUsd(model, second.usage))
+      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText)
+      addCost(recheck.meta.costUsd)
+      bytes = second.bytes
+      qa = { report: recheck.report, judgement: recheck.judgement }
+    }
+  }
+
+  const stored = await storeFinal(bytes, args.aspect, args.bucket)
+  await discardDrafts(args.bucket, [args.draftFilename, ...(args.discardFilenames ?? [])])
+
+  return {
+    url: stored.url,
+    bucket: args.bucket,
+    filename: stored.filename,
+    width: stored.width,
+    height: stored.height,
+    model,
+    quality: IMAGE_TIERS.publication.quality,
     attempts,
     qa,
     costUsd: cost,
