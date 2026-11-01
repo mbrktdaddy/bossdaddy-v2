@@ -37,8 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
-# claude code
-.claude/
+# claude code — local state ignored; project skills (.claude/skills/) are committed
+.claude/*
+!.claude/skills/
 
 # local files
 *.html
