@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     : null
   const ctx = resolveAssistContext(input, piece)
 
-  const system = buildAssistSystem({ target: input.target, people: input.people, allowText: input.allow_text })
+  const system = buildAssistSystem({ target: input.target, people: input.people, allowText: input.allow_text, look: input.look })
   const userText = buildAssistUser(input, ctx)
   const messages: ModelMessage[] | undefined = photo
     ? [{

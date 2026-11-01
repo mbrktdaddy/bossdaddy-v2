@@ -63,6 +63,7 @@ export function imagesPrompt(run: RunState): string {
     `Kind: ${kind}`,
     `Category: ${brief.category}`,
     essay ? 'An essay or discussion piece: each picture is an object or a place that carries the idea. Never a staged emotion, never a face.' : null,
+    essay ? 'Rendered as editorial illustrations (see the illustration rule): each subject is a drawable idea.' : null,
     brief.contentType === 'review' ? 'A product review: the product is a specific make and model, so a picture of the product itself is an owned placement. AI scenes show the place and the use around it.' : null,
     count === 0
       ? 'The author wants NO inline images: return an empty inline array and only the hero.'
@@ -82,7 +83,7 @@ THE PROSE:
 ${runProse(run)}
 """
 
-${doctrineBlock({ people: 'anonymous', allowText: false })}
+${doctrineBlock({ people: 'anonymous', allowText: false, look: essay ? 'illustration' : 'photo' })}
 
 HOW TO PLAN IT
 1. Read each section before you choose. Set "need" from what its prose is about: scene, detail or hands when an AI can photograph it; owned when the picture depends on anything in the never-ask-for list above. An owned placement has an empty "prompt" and an "ask": one concrete line telling the author what to capture.

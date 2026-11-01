@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { buttonVariants } from '@/components/ui/Button'
 import { ChevronDownIcon } from '@/components/icons'
 import type { AssistMode, AssistPrompt } from '@/lib/images/prompt-assist'
+import type { ImageLook } from '@/lib/images/style'
 
 // "Prompt help" under an image-prompt field: ask a photo-editor model to
 // rewrite the prompt, give three different takes, suggest one from the piece,
@@ -39,6 +40,8 @@ interface Props {
   target: 'hero' | 'inline' | 'social'
   people: 'none' | 'anonymous' | 'allowed'
   allowText: boolean
+  /** Photograph (house style) or editorial illustration — the essays' second sanctioned style. */
+  look?: ImageLook
   /** The slot's frame aspect when it has one ('3:2' | '1:1' | '4:5' | '16:10'). */
   aspect?: string
   context?: { title?: string; category?: string; excerpt?: string; heading?: string }
@@ -75,7 +78,7 @@ function shotLine(r: AssistPrompt): string {
 }
 
 export function PromptAssist({
-  value, onUse, target, people, allowText, aspect, context, source, imageUrl, disabled = false, compact = false,
+  value, onUse, target, people, allowText, look = 'photo', aspect, context, source, imageUrl, disabled = false, compact = false,
 }: Props) {
   const [instruction, setInstruction] = useState('')
   const [busy, setBusy] = useState<AssistMode | null>(null)
@@ -104,6 +107,7 @@ export function PromptAssist({
       target,
       people,
       allow_text: allowText,
+      look,
       aspect: aspect && SLOT_ASPECTS.includes(aspect) ? aspect : undefined,
       context: {
         title: clip(context?.title, 150),

@@ -37,6 +37,7 @@ import { ContactSheetPicker } from '@/components/workspace/ContactSheetPicker'
 import type { PeoplePolicy } from '@/lib/images/safety'
 import { FIGURE_ASPECTS, isFigureAspect, type FigureAspect } from '@/lib/images/doctrine'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
+import type { ImageLook } from '@/lib/images/style'
 import type { FigureImageMeta } from '@/lib/inlineImages'
 
 interface Props {
@@ -47,6 +48,8 @@ interface Props {
   /** The piece these figures belong to — links generated assets + puts their cost on the piece's chip. */
   contentType?: 'review' | 'guide'
   contentId?: string
+  /** The piece's default look: 'illustration' for Table Duty / Watch Duty essays (brand guide §2). */
+  defaultLook?: ImageLook
 }
 
 type AddMode = 'generate' | 'library' | 'upload' | 'placeholder' | 'gallery'
@@ -78,6 +81,11 @@ class GenerateError extends Error {
   constructor(message: string, readonly code?: string) { super(message) }
 }
 
+const LOOK_OPTIONS: { value: ImageLook; label: string }[] = [
+  { value: 'photo',        label: 'Photo' },
+  { value: 'illustration', label: 'Illustration' },
+]
+
 const PEOPLE_OPTIONS: { value: PeoplePolicy; label: string }[] = [
   { value: 'none',      label: 'No people' },
   { value: 'anonymous', label: 'Anonymous' },
@@ -102,7 +110,7 @@ const GENERATE_REQUEST: Record<FigureAspect, { size: '1536x1024' | '1024x1024' |
   '4:5': { size: '1024x1536', aspect: '4:5' },
 }
 
-export function InlineMediaPanel({ content, onChangeContent, category, productId, contentType, contentId }: Props) {
+export function InlineMediaPanel({ content, onChangeContent, category, productId, contentType, contentId, defaultLook = 'photo' }: Props) {
 
   // ── Auto-promote untagged <figure> elements ONCE per mount ──────────────
   const promotedRef = useRef(false)
@@ -156,6 +164,8 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   const [allowText, setAllowText]             = useState(false)
   // 'low' loosens only the image model's own filter (benign dad-life scenes).
   const [moderation, setModeration]           = useState<'auto' | 'low'>('auto')
+  // Photograph or editorial illustration (lib/images/style.ts); essays default to illustration.
+  const [look, setLook]                       = useState<ImageLook>(defaultLook)
   const moderationId = useId()
   // Open contact sheets, keyed by slotId.
   const [sheets, setSheets]                   = useState<Record<string, SheetState>>({})
@@ -180,6 +190,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
       people,
       no_text: !allowText,
       moderation,
+      look,
       source_type: contentType ?? null,
       source_id: contentId ?? null,
     }
@@ -777,6 +788,10 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
             </button>
           </div>
           <div className="flex items-center gap-2">
+            <span className="text-prose-faint">Look</span>
+            <Segmented value={look} options={LOOK_OPTIONS} onChange={setLook} label="Photograph or illustration" />
+          </div>
+          <div className="flex items-center gap-2">
             <span className="text-prose-faint">People</span>
             <Segmented value={people} options={PEOPLE_OPTIONS} onChange={setPeople} label="People in generated images" />
           </div>
@@ -880,6 +895,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
                     value={addPrompt}
                     people={people}
                     allowText={allowText}
+                    look={look}
                     aspect={addAspect}
                     context={addHeading ? { heading: addHeading } : undefined}
                     source={assistSource(addHeading)}
@@ -969,6 +985,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
               note={slotNotes[item.slot.slotId] ?? null}
               people={people}
               allowText={allowText}
+              look={look}
               source={assistSource(headingBefore(item.slot.start))}
               onMove={(toPos) => handleMoveItem(item.slot.slotId, toPos)}
               onMoveToSection={(pos) => handleMoveToSection(item.slot.slotId, pos)}
@@ -1301,6 +1318,7 @@ interface SlotCardProps {
   /** The panel's lane knobs, so Prompt help writes for what Generate allows. */
   people: PeoplePolicy
   allowText: boolean
+  look: ImageLook
   /** The draft this figure belongs to; the prompt route reads it for context. */
   source?: { type: 'review' | 'guide'; id: string; afterHeading?: string }
   onMove: (toPos: number) => void
@@ -1450,6 +1468,7 @@ function SlotCard(p: SlotCardProps) {
         value={slot.prompt}
         people={p.people}
         allowText={p.allowText}
+        look={p.look}
         aspect={slot.aspect ?? DEFAULT_ASPECT}
         imageUrl={slot.imageUrl}
         context={p.heading ? { heading: p.heading } : undefined}

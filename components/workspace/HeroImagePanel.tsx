@@ -11,7 +11,13 @@ import { PromptAssist } from '@/components/workspace/PromptAssist'
 import { ContactSheetPicker, type SheetDraft } from '@/components/workspace/ContactSheetPicker'
 import { XIcon } from '@/components/icons'
 import type { PeoplePolicy } from '@/lib/images/safety'
+import type { ImageLook } from '@/lib/images/style'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
+
+const LOOK_OPTIONS: { value: ImageLook; label: string }[] = [
+  { value: 'photo',        label: 'Photo' },
+  { value: 'illustration', label: 'Illustration' },
+]
 
 /** A contact sheet in progress: three Draft-tier renders of one prompt, waiting for a pick. */
 type HeroSheet = {
@@ -50,12 +56,18 @@ interface Props {
   excerpt?: string
   productName?: string
   initialPrompt?: string
+  /** The piece's default look: 'illustration' for Table Duty / Watch Duty essays (brand guide §2). */
+  defaultLook?: ImageLook
 }
 
 export function HeroImagePanel({
   imageUrl, onChange, label = 'Hero Image',
-  contentType, sourceId, title, category, excerpt, productName, initialPrompt,
+  contentType, sourceId, title, category, excerpt, productName, initialPrompt, defaultLook = 'photo',
 }: Props) {
+  // Reviews never use AI images (his call, 2026-10-31: own photos or a library
+  // image — the hero IS the trust receipt). The whole generate lane is hidden,
+  // not disabled; Take Photo, Library and Crop remain.
+  const aiAllowed = contentType !== 'review'
   const [showPicker, setShowPicker] = useState(false)
   const [pendingCrop, setPendingCrop] = useState<File | null>(null)
   const [imagePrompt, setImagePrompt] = useState('')
@@ -76,6 +88,9 @@ export function HeroImagePanel({
   // OpenAI's own content filter: 'low' loosens it for benign dad-life scenes that
   // 'auto' sometimes refuses (a kid on shoulders, a campfire). Our rules are unchanged.
   const [moderation, setModeration] = useState<'auto' | 'low'>('auto')
+  // Photograph or editorial illustration (lib/images/style.ts). Essays default
+  // to illustration; the knob stays so a photo essay is one tap away.
+  const [look, setLook] = useState<ImageLook>(defaultLook)
   // The contact sheet for this hero, when one is open (Sprint B).
   const [sheet, setSheet] = useState<HeroSheet | null>(null)
   // What vision QA said about the last generated hero (warn/fail + reasons).
@@ -160,6 +175,7 @@ export function HeroImagePanel({
       people,
       no_text: true,
       moderation,
+      look,
       source_id: sourceId ?? null,
       ...extra,
     })
@@ -330,6 +346,7 @@ export function HeroImagePanel({
         </div>
       )}
 
+      {aiAllowed ? (<>
       {/* Inline generate. The textarea takes the full width (Prompt help writes
           400-700 character paragraphs) and the two paid actions sit under it:
           one straight render, or a contact sheet to pick a composition first. */}
@@ -385,6 +402,7 @@ export function HeroImagePanel({
         target="hero"
         people={people}
         allowText={false}
+        look={look}
         context={{ title: title?.trim() || productName, category, excerpt }}
         source={sourceId ? { type: contentType, id: sourceId } : undefined}
         imageUrl={imageUrl ?? undefined}
@@ -416,6 +434,10 @@ export function HeroImagePanel({
           </button>
         </div>
         <div className="flex items-center gap-2">
+          <span className="text-prose-faint">Look</span>
+          <Segmented value={look} options={LOOK_OPTIONS} onChange={setLook} label="Photograph or illustration" />
+        </div>
+        <div className="flex items-center gap-2">
           <span className="text-prose-faint">People</span>
           <Segmented value={people} options={PEOPLE_OPTIONS} onChange={setPeople} label="People in the generated hero" />
         </div>
@@ -425,8 +447,13 @@ export function HeroImagePanel({
         </div>
       </div>
       <p className="text-[11px] text-prose-faint">
-        AI heroes are a scene from the category, never the product — shoot the product with 📷 Take Photo. House style, no text, no brands and no identifiable children are always on; stored at 16:10. Relaxed moderation loosens only the model&apos;s own filter for benign dad-life scenes; brands, faces and text rules are unchanged.
+        AI heroes are a scene from the piece, never a product. House style (or the illustration style for essays), no text, no brands and no identifiable children are always on; stored at 16:10. Relaxed moderation loosens only the model&apos;s own filter for benign dad-life scenes; brands, faces and text rules are unchanged.
       </p>
+      </>) : (
+        <p className="text-[11px] text-prose-faint">
+          Reviews use your own photo or a library image — the product in the hero is the trust receipt, so there is no AI scene here. Take Photo crops to 16:10.
+        </p>
+      )}
 
       {qaNote && (
         <p

@@ -19,6 +19,8 @@
 // Studio and social use SOCIAL_FLEXIBLE. Vision QA (lib/images/qa.ts) judges
 // the result against the same toggles.
 
+import type { ImageLook } from './style'
+
 export type PeoplePolicy = 'none' | 'anonymous' | 'allowed'
 
 export type SafetyToggles = {
@@ -93,7 +95,7 @@ export function peopleFromLegacy(noPeople: boolean | undefined, fallback: People
  * Build the safety-rule text block appended to an image prompt. Never empty:
  * `noBrands` is pinned, so at least the brand clause is present.
  */
-export function buildSafetyRules(toggles: SafetyToggles): string {
+export function buildSafetyRules(toggles: SafetyToggles, look: ImageLook = 'photo'): string {
   const clauses: string[] = []
 
   if (toggles.noBrands) {
@@ -118,7 +120,11 @@ export function buildSafetyRules(toggles: SafetyToggles): string {
     clauses.push('Any child in the frame must be unidentifiable (face turned away, out of frame, or out of focus)')
   }
   if (toggles.editorialOnly) {
-    clauses.push('A candid editorial scene in a real-world setting — not a studio product shot, not a product replica')
+    clauses.push(
+      look === 'illustration'
+        ? 'An editorial illustration of a real-world scene — not a product shot, not a product replica'
+        : 'A candid editorial scene in a real-world setting — not a studio product shot, not a product replica',
+    )
   }
 
   return `Strict rules: ${clauses.join('. ')}.`

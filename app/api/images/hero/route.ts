@@ -36,6 +36,9 @@ const HeroInput = z.object({
   // people anonymous, brands pinned off). The panel sends them explicitly.
   people:        z.enum(['none', 'anonymous', 'allowed']).optional(),
   no_text:       z.boolean().optional(),
+  // The editorial look (lib/images/style.ts): photo by default; an essay or
+  // flagged guide asks for an illustration. Same rules either way.
+  look:          z.enum(['photo', 'illustration']).optional(),
   // The guide/review draft id this hero belongs to. Used to index the generated
   // image into media_assets with source linkage so it's reusable from the
   // library/picker (e.g. attaching it to an X post), and to put the cost on the
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
   }
 
   const {
-    title, category, excerpt, content_type, custom_prompt, premium, people, no_text, source_id,
+    title, category, excerpt, content_type, custom_prompt, premium, people, no_text, look, source_id,
     mode, moderation, draft_filename, discard_filenames,
   } = parsed.data
 
@@ -121,6 +124,7 @@ export async function POST(request: NextRequest) {
         aspect: '16:10',
         subject,
         moderation,
+        look,
       })
     } catch (err) {
       return fail(err)
@@ -138,7 +142,7 @@ export async function POST(request: NextRequest) {
         stage: 'image',
         status: 'done',
         meta: { model: sheet.model, usage: undefined, finishReason: 'stop', latencyMs: sheet.latencyMs, costUsd: d.costUsd },
-        input: { prompt: basePrompt, lane: 'editorial', size: '1536x1024', aspect: '16:10', kind: 'sheet', index: i, quality: sheet.quality, moderation, toggles, rules: buildSafetyRules(toggles) },
+        input: { prompt: basePrompt, lane: 'editorial', size: '1536x1024', aspect: '16:10', kind: 'sheet', index: i, quality: sheet.quality, moderation, toggles, rules: buildSafetyRules(toggles, look ?? 'photo'), look: look ?? 'photo' },
         output: { url: d.url, filename: d.filename },
       })
     }
@@ -171,6 +175,7 @@ export async function POST(request: NextRequest) {
         subject,
         draftFilename: draft_filename,
         discardFilenames: discard_filenames,
+        look,
       })
     } else {
       result = await generateImage({
@@ -183,6 +188,7 @@ export async function POST(request: NextRequest) {
         aspect: '16:10',
         subject,
         moderation,
+        look,
       })
     }
   } catch (err) {
@@ -223,7 +229,7 @@ export async function POST(request: NextRequest) {
     meta: { model: result.model, usage: undefined, finishReason: 'stop', latencyMs: result.latencyMs, costUsd: result.costUsd },
     input: {
       prompt: basePrompt, lane: 'editorial', size: '1536x1024', aspect: '16:10', premium, quality: result.quality, moderation,
-      toggles, attempts: result.attempts, rules: buildSafetyRules(toggles),
+      toggles, attempts: result.attempts, rules: buildSafetyRules(toggles, look ?? 'photo'), look: look ?? 'photo',
       ...(mode === 'finalize' ? { kind: 'finalize', draft: draft_filename } : {}),
     },
     output: { url: result.url, qa: result.qa },

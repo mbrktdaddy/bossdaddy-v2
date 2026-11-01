@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
     // include them explicitly for every function that renders.
     '/api/merch/render': merchRenderAssets,
     '/api/merch/publish': merchRenderAssets,
+    // Text cards render through lib/images/card.tsx -> lib/merch/fonts.ts, which reads the Montserrat TTFs from disk.
+    '/api/images/card': merchRenderAssets,
   },
 
   images: {

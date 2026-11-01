@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES, INQUIRY_CATEGORY_SLUGS } from '@/lib/categories'
+import type { ImageLook } from '@/lib/images/style'
 import { assembleDraftHtml } from '@/lib/content/html'
 import { preserveBlocksAcrossRefine } from '@/lib/content/markers'
 import { replaceSectionProse, splitSections } from '@/lib/content/sections'
@@ -74,6 +75,11 @@ interface Props {
 export function GuideWorkspace({ guide: article, generationCostUsd = null }: Props) {
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
+  // The image look the panels start on (brand guide §2): Table Duty / Watch
+  // Duty essays are illustrated; an explicit inquiry_mode wins over the pillar
+  // default either way. A knob in each panel can still flip it per piece.
+  const defaultLook: ImageLook =
+    (article.inquiry_mode ?? (INQUIRY_CATEGORY_SLUGS as readonly string[]).includes(category)) ? 'illustration' : 'photo'
   const [excerpt, setExcerpt]       = useState(article.excerpt ?? '')
   const [content, setContent]       = useState(article.content)
   const [imageUrl, setImageUrl]     = useState<string | null>(article.image_url)
@@ -427,6 +433,7 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
               category={category}
               excerpt={excerpt}
               initialPrompt={heroPromptSuggestion}
+              defaultLook={defaultLook}
             />
           </Card>
           <Card tone="faint" className="p-4">
@@ -437,6 +444,7 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
               category={category}
               contentType="guide"
               contentId={article.id}
+              defaultLook={defaultLook}
             />
           </Card>
         </div>

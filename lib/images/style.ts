@@ -22,6 +22,35 @@ export function applyHouseStyle(prompt: string): string {
   return `${base}\n\n${HOUSE_STYLE}`
 }
 
+// The second sanctioned look: an editorial illustration instead of the
+// documentary photograph. Table Duty / Watch Duty essays (and any guide the
+// author flags) use it; the choice is a `look` that rides every editorial
+// request. The rules (no brands, no text, no identifiable children, the people
+// policy) are the same either way - only the style text and the framing words
+// in the notes change.
+
+export type ImageLook = 'photo' | 'illustration'
+export const IMAGE_LOOKS: readonly ImageLook[] = ['photo', 'illustration']
+
+export const ILLUSTRATION_STYLE_MARKER = 'Illustration style:'
+
+export const ILLUSTRATION_STYLE =
+  `${ILLUSTRATION_STYLE_MARKER} editorial spot illustration for the op-ed page of a print magazine. ` +
+  'A flat, hand-drawn feel with confident ink linework and loose textured fills; a limited palette of warm off-white paper, near-black ink and one burnt-orange accent; generous negative space; the subject simplified to its telling shape. ' +
+  'Not a cartoon, not clip art, not a 3D render, not a photograph, not a watercolour wash.'
+
+/** Append the illustration style once; a prompt that already carries it is returned as-is. */
+export function applyIllustrationStyle(prompt: string): string {
+  const base = prompt.trim()
+  if (base.includes(ILLUSTRATION_STYLE_MARKER)) return base
+  return `${base}\n\n${ILLUSTRATION_STYLE}`
+}
+
+/** The look's style text, appended once: the house style for a photo, the illustration style for an illustration. */
+export function applyLook(prompt: string, look: ImageLook = 'photo'): string {
+  return look === 'illustration' ? applyIllustrationStyle(prompt) : applyHouseStyle(prompt)
+}
+
 // The crop note — told to the model when the stored file is centre-cropped after
 // generation (heroes 16:10, portrait frames 4:5), so the subject lands in the band
 // that survives the crop instead of being cut at an edge. Like the house style it
@@ -61,9 +90,16 @@ export const REFERENCE_NOTE_MARKER = 'Reference:'
 
 export const REFERENCE_NOTE = `${REFERENCE_NOTE_MARKER} the attached image is the composition to keep — the same framing, subject placement, setting and moment. Render it as the finished photograph: sharper, cleaner light, true materials, anything malformed corrected. Add nothing that is not already in it.`
 
+const ILLUSTRATION_REFERENCE_NOTE = `${REFERENCE_NOTE_MARKER} the attached image is the composition to keep — the same framing, subject placement, setting and moment. Render it as the finished illustration: cleaner line, flatter fills, anything malformed corrected. Add nothing that is not already in it.`
+
+/** The reference note for a look: the photograph clause for a photo, the illustration clause for an illustration. */
+export function referenceNote(look: ImageLook = 'photo'): string {
+  return look === 'illustration' ? ILLUSTRATION_REFERENCE_NOTE : REFERENCE_NOTE
+}
+
 /** Append the reference note once; a prompt that already carries it is returned as-is. */
-export function applyReferenceNote(prompt: string): string {
+export function applyReferenceNote(prompt: string, look: ImageLook = 'photo'): string {
   const base = prompt.trim()
   if (base.includes(REFERENCE_NOTE_MARKER)) return base
-  return `${base}\n\n${REFERENCE_NOTE}`
+  return `${base}\n\n${referenceNote(look)}`
 }

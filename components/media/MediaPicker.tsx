@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { CloseButton } from '@/components/ui/Modal'
 import { CheckIcon, PhotoIcon } from '@/components/icons'
+import { CARD_SIZES, CARD_TEXT_MAX, type CardSize, type CardVariant } from '@/lib/images/card'
 
 interface MediaAsset {
   id: string
@@ -69,7 +70,7 @@ interface MediaPickerProps {
   uploadAspect?: number
 }
 
-type Tab = 'library' | 'generate'
+type Tab = 'library' | 'generate' | 'card'
 
 export default function MediaPicker({ onSelect, onClose, defaultProductId, defaultCategory, multi, onMultiSelect, uploadAspect, sourceType, sourceId }: MediaPickerProps) {
   const [tab, setTab] = useState<Tab>('library')
@@ -195,6 +196,15 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
   // two situational clauses. Default OFF = text + people allowed (SOCIAL_FLEXIBLE).
   const [genNoText, setGenNoText] = useState(false)
   const [genNoPeople, setGenNoPeople] = useState(false)
+
+  // Text card state — a statement set in Montserrat by the site (code-rendered)
+  const [cardText, setCardText] = useState('')
+  const [cardKicker, setCardKicker] = useState('')
+  const [cardAttribution, setCardAttribution] = useState('')
+  const [cardVariant, setCardVariant] = useState<CardVariant>('block')
+  const [cardSize, setCardSize] = useState<CardSize>('square')
+  const [cardLoading, setCardLoading] = useState(false)
+  const [cardError, setCardError] = useState<string | null>(null)
 
   const LIMIT = 40
 
@@ -377,6 +387,46 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
     setGenLoading(false)
   }
 
+  async function handleRenderCard() {
+    if (cardText.trim().length < 2) { setCardError('Enter the statement first'); return }
+    if (cardVariant === 'photo' && !selected) { setCardError('Pick a photo in the Library tab first'); return }
+    setCardLoading(true); setCardError(null)
+    try {
+      const res = await fetch('/api/images/card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: cardText.trim(),
+          kicker: cardKicker.trim(),
+          attribution: cardAttribution.trim(),
+          variant: cardVariant,
+          size: cardSize,
+          image_url: cardVariant === 'photo' ? selected : undefined,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Card render failed')
+      const newAsset: MediaAsset = {
+        id: json.asset.id ?? `card-${Date.now()}`,
+        url: json.asset.url,
+        filename: json.asset.filename ?? 'card.webp',
+        alt_text: json.asset.alt_text ?? null,
+        file_size: null,
+        product_id: null,
+        label: null,
+        is_primary: false,
+      }
+      setAssets((prev) => [newAsset, ...prev])
+      setTotal((t) => t + 1)
+      setSelected(newAsset.url)
+      setTab('library')
+      setCardText('')
+    } catch (err) {
+      setCardError(err instanceof Error ? err.message : 'Card render failed')
+    }
+    setCardLoading(false)
+  }
+
   function handleConfirm() {
     if (multi) {
       if (multiSelected.size === 0) return
@@ -434,6 +484,15 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
               }`}
             >
               Generate
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('card')}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                tab === 'card' ? 'bg-surface-raised text-prose' : 'text-prose-faint hover:text-prose'
+              }`}
+            >
+              Text card
             </button>
           </Card>
           <div className="flex items-center gap-2 flex-wrap grow sm:grow-0 justify-end">
@@ -601,7 +660,7 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 })}
               </div>
             )
-          ) : (
+          ) : tab === 'generate' ? (
             /* Generate tab */
             <div className="space-y-4 max-w-2xl mx-auto">
               <div>
@@ -677,6 +736,106 @@ export default function MediaPicker({ onSelect, onClose, defaultProductId, defau
                 <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{genError}</p>
               )}
               <p className="text-xs text-prose-faint">Generated image will be added to the library and auto-selected.</p>
+            </div>
+          ) : (
+            /* Text card tab */
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <div>
+                <label htmlFor="card-text" className="block text-sm text-prose-muted mb-2">Statement</label>
+                <textarea
+                  id="card-text"
+                  value={cardText}
+                  onChange={(e) => setCardText(e.target.value)}
+                  rows={3}
+                  maxLength={CARD_TEXT_MAX}
+                  placeholder="The line that goes on the card. Short lands harder."
+                  className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
+                />
+                <p className="mt-1 text-right text-xs text-prose-faint font-mono">{cardText.length}/{CARD_TEXT_MAX}</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="card-kicker" className="block text-sm text-prose-muted mb-2">Kicker</label>
+                  <input
+                    id="card-kicker"
+                    type="text"
+                    value={cardKicker}
+                    onChange={(e) => setCardKicker(e.target.value)}
+                    maxLength={40}
+                    placeholder="Boss Daddy says"
+                    className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="card-attribution" className="block text-sm text-prose-muted mb-2">Attribution</label>
+                  <input
+                    id="card-attribution"
+                    type="text"
+                    value={cardAttribution}
+                    onChange={(e) => setCardAttribution(e.target.value)}
+                    maxLength={40}
+                    placeholder="— Boss Daddy"
+                    className="w-full px-4 py-3 bg-surface border border-strong rounded-xl text-sm text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-prose-muted mb-2">Shape</label>
+                <div className="flex gap-2">
+                  {(Object.keys(CARD_SIZES) as CardSize[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setCardSize(key)}
+                      className={`flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
+                        cardSize === key ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:border-strong'
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">{CARD_SIZES[key].label}</span>
+                      <span className="text-xs opacity-70 font-mono">{CARD_SIZES[key].ratio}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-prose-muted mb-2">Look</label>
+                <div className="flex gap-2">
+                  {([
+                    { value: 'block', label: 'Black block' },
+                    { value: 'photo', label: 'Your photo' },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setCardVariant(opt.value)}
+                      className={`flex-1 flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors ${
+                        cardVariant === opt.value ? 'bg-accent text-white' : 'bg-surface border border-soft text-prose-muted hover:border-strong'
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">{opt.label}</span>
+                    </button>
+                  ))}
+                </div>
+                {cardVariant === 'photo' && (
+                  <p className="mt-2 text-xs text-prose-faint">
+                    {selected
+                      ? `Using ${assets.find((a) => a.url === selected)?.filename ?? decodeURIComponent(selected.split('?')[0].split('/').pop() ?? 'the selected photo')}`
+                      : 'Pick a photo in the Library tab first'}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleRenderCard}
+                disabled={cardLoading || cardText.trim().length < 2 || (cardVariant === 'photo' && !selected)}
+                className={buttonVariants({ className: 'w-full' })}
+              >
+                {cardLoading ? 'Rendering…' : 'Render & Use'}
+              </button>
+              {cardError && (
+                <p className="text-red-700 text-sm bg-red-50 border border-red-300 rounded-lg px-4 py-3">{cardError}</p>
+              )}
+              <p className="text-xs text-prose-faint">Set in Montserrat by the site, not by the image model — the words come out exactly as typed. Saved to the library.</p>
             </div>
           )}
         </div>

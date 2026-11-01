@@ -3,7 +3,7 @@ import sharp from 'sharp'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { toStorageBody, verifyStoredMagic } from '../storage-body'
 import { estimateImageCostUsd, type ImageUsage } from '@/lib/ai/pricing'
-import { applyCropNote, applyHouseStyle, applyReferenceNote } from './style'
+import { applyCropNote, applyLook, applyReferenceNote, type ImageLook } from './style'
 import { CONTACT_SHEET, CONTACT_SHEET_COUNT, IMAGE_TIERS, tierFor, type ImageTierSpec } from './tiers'
 import { buildSafetyRules, type SafetyToggles } from './safety'
 import { avoidanceClause, inspectImage, quotedText, type QaJudgement, type QaReport } from './qa'
@@ -82,6 +82,8 @@ export interface GenerateImageArgs {
   subject?: string
   /** 'low' relaxes the API's content filter (generate only); omitted otherwise. */
   moderation?: ImageModeration
+  /** Editorial look: the documentary photograph (default) or an editorial illustration. Ignored on the social lane. */
+  look?: ImageLook
 }
 
 export interface GeneratedImage {
@@ -169,10 +171,10 @@ async function callEditModel(
  * crop note (only when the stored file is centre-cropped), all BEFORE the safety
  * rules. `subject` is what QA should expect to see.
  */
-function buildEditorialPrompt(args: Pick<GenerateImageArgs, 'prompt' | 'lane' | 'aspect' | 'toggles' | 'subject'>): { fullPrompt: string; subject: string } {
-  const styled = args.lane === 'editorial' ? applyHouseStyle(args.prompt) : args.prompt.trim()
+function buildEditorialPrompt(args: Pick<GenerateImageArgs, 'prompt' | 'lane' | 'aspect' | 'toggles' | 'subject' | 'look'>): { fullPrompt: string; subject: string } {
+  const styled = args.lane === 'editorial' ? applyLook(args.prompt, args.look ?? 'photo') : args.prompt.trim()
   const subjectPrompt = args.lane === 'editorial' && args.aspect ? applyCropNote(styled, args.aspect) : styled
-  const rules = buildSafetyRules(args.toggles)
+  const rules = buildSafetyRules(args.toggles, args.look ?? 'photo')
   return {
     fullPrompt: `${subjectPrompt}\n\n${rules}`,
     subject: (args.subject ?? args.prompt).trim(),
@@ -237,8 +239,8 @@ async function storeFinal(
 }
 
 /** Vision QA on one render. `expectedText` is the quoted string the prompt asked for, when text is allowed. */
-function runQa(bytes: Buffer, subject: string, toggles: SafetyToggles, expectedText: string | null) {
-  return inspectImage({ bytes, mediaType: 'image/webp', subject, toggles, expectedText })
+function runQa(bytes: Buffer, subject: string, toggles: SafetyToggles, expectedText: string | null, look: ImageLook) {
+  return inspectImage({ bytes, mediaType: 'image/webp', subject, toggles, expectedText, look })
 }
 
 /**
@@ -261,6 +263,7 @@ export async function generateImage(args: GenerateImageArgs): Promise<GeneratedI
 
   const { fullPrompt, subject } = buildEditorialPrompt(args)
   const expectedText = args.toggles.noText ? null : quotedText(args.prompt)
+  const look = args.look ?? 'photo'
 
   let cost: number | null = 0
   const addCost = (c: number | null) => { cost = cost == null || c == null ? null : cost + c }
@@ -276,7 +279,7 @@ export async function generateImage(args: GenerateImageArgs): Promise<GeneratedI
   addCost(estimateImageCostUsd(model, first.usage))
 
   if (doQa) {
-    const check = await runQa(bytes, subject, args.toggles, expectedText)
+    const check = await runQa(bytes, subject, args.toggles, expectedText, look)
     addCost(check.meta.costUsd)
     qa = { report: check.report, judgement: check.judgement }
 
@@ -286,7 +289,7 @@ export async function generateImage(args: GenerateImageArgs): Promise<GeneratedI
       const retryPrompt = `${fullPrompt}\n\n${avoidanceClause(check.judgement.reasons)}`
       const second = await callImageModel(client, retryPrompt, size, tier, args.moderation)
       addCost(estimateImageCostUsd(model, second.usage))
-      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText)
+      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText, look)
       addCost(recheck.meta.costUsd)
       bytes = second.bytes
       qa = { report: recheck.report, judgement: recheck.judgement }
@@ -427,10 +430,11 @@ export async function finalizeFromDraft(args: FinalizeArgs): Promise<GeneratedIm
 
   const { data: blob, error: dlError } = await createAdminClient().storage.from(args.bucket).download(args.draftFilename)
   if (dlError || !blob) throw new Error(`Draft not found or expired: ${dlError?.message ?? args.draftFilename}`)
+  const look = args.look ?? 'photo'
   const draft = Buffer.from(await blob.arrayBuffer())
 
   const { fullPrompt: styledPrompt, subject } = buildEditorialPrompt(args)
-  const fullPrompt = applyReferenceNote(styledPrompt)
+  const fullPrompt = applyReferenceNote(styledPrompt, look)
   const expectedText = args.toggles.noText ? null : quotedText(args.prompt)
 
   let cost: number | null = 0
@@ -446,7 +450,7 @@ export async function finalizeFromDraft(args: FinalizeArgs): Promise<GeneratedIm
   addCost(estimateImageCostUsd(model, first.usage))
 
   if (doQa) {
-    const check = await runQa(bytes, subject, args.toggles, expectedText)
+    const check = await runQa(bytes, subject, args.toggles, expectedText, look)
     addCost(check.meta.costUsd)
     qa = { report: check.report, judgement: check.judgement }
 
@@ -455,7 +459,7 @@ export async function finalizeFromDraft(args: FinalizeArgs): Promise<GeneratedIm
       const retryPrompt = `${fullPrompt}\n\n${avoidanceClause(check.judgement.reasons)}`
       const second = await callEditModel(client, retryPrompt, draft, size)
       addCost(estimateImageCostUsd(model, second.usage))
-      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText)
+      const recheck = await runQa(second.bytes, subject, args.toggles, expectedText, look)
       addCost(recheck.meta.costUsd)
       bytes = second.bytes
       qa = { report: recheck.report, judgement: recheck.judgement }

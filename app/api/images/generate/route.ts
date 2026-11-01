@@ -36,6 +36,8 @@ const GenerateSchema = z.object({
   //   social    — media library, X Studio, quote cards: text + people allowed, no style.
   lane:      z.enum(['editorial', 'social']).optional().default('social'),
   no_text:   z.boolean().optional(),
+  /** Editorial look (lib/images/style.ts): photo by default, or an illustration. Editorial lane only; ignored on social. */
+  look:      z.enum(['photo', 'illustration']).optional(),
   /** Legacy boolean from the social-lane clients; `people` wins when both are sent. */
   no_people: z.boolean().optional(),
   people:    z.enum(['none', 'anonymous', 'allowed']).optional(),
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
   }
 
   const {
-    prompt, size, aspect, alt_text, premium, lane, no_text, no_people, people, subject, source_type, source_id,
+    prompt, size, aspect, alt_text, premium, lane, no_text, no_people, people, look: lookInput, subject, source_type, source_id,
     mode, moderation, draft_filename, discard_filenames,
   } = parsed.data
 
@@ -104,6 +106,9 @@ export async function POST(request: NextRequest) {
     noText: no_text,
     people: people ?? peopleFromLegacy(no_people, base.people),
   })
+
+  // The look only exists on the editorial lane; a social image is never styled.
+  const look = lane === 'editorial' ? (lookInput ?? 'photo') : undefined
 
   const qaSubject = subject?.trim() || alt_text?.trim() || prompt
 
@@ -129,6 +134,7 @@ export async function POST(request: NextRequest) {
         lane,
         subject: qaSubject,
         moderation,
+        look,
       })
     } catch (err) {
       return fail(err)
@@ -147,7 +153,7 @@ export async function POST(request: NextRequest) {
         stage: 'image',
         status: 'done',
         meta: { model: sheet.model, usage: undefined, finishReason: 'stop', latencyMs: sheet.latencyMs, costUsd: d.costUsd },
-        input: { prompt, lane, size, aspect: aspect ?? null, kind: 'sheet', index: i, quality: sheet.quality, moderation, toggles, rules: buildSafetyRules(toggles) },
+        input: { prompt, lane, size, aspect: aspect ?? null, kind: 'sheet', index: i, quality: sheet.quality, moderation, toggles, rules: buildSafetyRules(toggles, look), look: look ?? null },
         output: { url: d.url, filename: d.filename },
       })
     }
@@ -180,6 +186,7 @@ export async function POST(request: NextRequest) {
         subject: qaSubject,
         draftFilename: draft_filename,
         discardFilenames: discard_filenames,
+        look,
       })
     } else {
       result = await generateImage({
@@ -192,6 +199,7 @@ export async function POST(request: NextRequest) {
         lane,
         subject: qaSubject,
         moderation,
+        look,
       })
     }
   } catch (err) {
@@ -233,7 +241,7 @@ export async function POST(request: NextRequest) {
       meta: { model: result.model, usage: undefined, finishReason: 'stop', latencyMs: result.latencyMs, costUsd: result.costUsd },
       input: {
         prompt, lane, size, aspect: aspect ?? null, premium, quality: result.quality, moderation,
-        toggles, attempts: result.attempts, rules: buildSafetyRules(toggles),
+        toggles, attempts: result.attempts, rules: buildSafetyRules(toggles, look), look: look ?? null,
         ...(mode === 'finalize' ? { kind: 'finalize', draft: draft_filename } : {}),
       },
       output: { url: result.url, qa: result.qa },

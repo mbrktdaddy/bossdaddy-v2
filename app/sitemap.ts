@@ -68,13 +68,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from('reviews')
       // `rating` is here only to date the /gear/category pages, which list
       // reviews scoring 8+ — see gearCategoryUrls.
-      .select('slug, category, rating, published_at, updated_at')
+      .select('slug, category, rating, published_at, updated_at, image_url')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
     supabase
       .from('guides')
-      .select('slug, category, published_at, updated_at')
+      .select('slug, category, published_at, updated_at, image_url')
       .eq('status', 'approved')
       .eq('is_visible', true)
       .order('published_at', { ascending: false }),
@@ -175,11 +175,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ])
 
   // ── Detail pages ───────────────────────────────────────────────────────────
+  // Image sitemap entries (Sprint C, 2026-10-31): the hero on each detail page,
+  // so Google Images can index it against the piece. Only absolute http(s)
+  // URLs qualify — a relative or empty hero is simply omitted.
+  const heroImages = (url: string | null | undefined): string[] | undefined =>
+    url && /^https?:\/\//.test(url) ? [url] : undefined
+
   const reviewUrls: MetadataRoute.Sitemap = reviewRows.map((r) => ({
     url: `${base}/reviews/${r.slug}`,
     lastModified: contentDate(r) ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.8,
+    images: heroImages(r.image_url),
   }))
 
   const articleUrls: MetadataRoute.Sitemap = guideRows.map((a) => ({
@@ -187,6 +194,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: contentDate(a) ?? undefined,
     changeFrequency: 'monthly',
     priority: 0.7,
+    images: heroImages(a.image_url),
   }))
 
   // ── Category + tag pages — dated by their newest member ────────────────────

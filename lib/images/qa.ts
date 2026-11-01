@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { aiGenerateObjectWithMeta, type CallMeta } from '@/lib/ai/client'
 import type { SafetyToggles } from './safety'
+import type { ImageLook } from './style'
 
 // Vision QA for a freshly generated editorial image, BEFORE it is stored. One
 // Haiku call (utility bucket, temperature 0) looks at the pixels and reports
@@ -59,6 +60,9 @@ const QA_SYSTEM =
   'textSeen, and score publishable as a photo editor would (composition, light, believability, artifacts) — do ' +
   'not let the rule checks sway the score.'
 
+const ILLUSTRATION_QA_LINE =
+  'This is an editorial illustration, not a photograph: judge composition, line and legibility as an illustrator\'s editor would; "rendered" means it looks like clip art, a cartoon or a 3D render rather than a drawn illustration.'
+
 export async function inspectImage(args: {
   bytes: Buffer
   mediaType: 'image/webp' | 'image/png' | 'image/jpeg'
@@ -67,13 +71,17 @@ export async function inspectImage(args: {
   toggles: SafetyToggles
   /** The quoted phrase the prompt asked to render, when it did. */
   expectedText?: string | null
+  /** The editorial look the image was asked for; default photo. */
+  look?: ImageLook
 }): Promise<QaResult> {
+  const look = args.look ?? 'photo'
   const expectedText = args.expectedText?.trim() || null
   const textLine = expectedText
     ? `Expected visible text (it must read exactly this, nothing more): "${expectedText}"\n\n`
     : args.toggles.noText
       ? 'No text is expected in this image.\n\n'
       : ''
+  const lookLine = look === 'illustration' ? `${ILLUSTRATION_QA_LINE}\n\n` : ''
   const { object, meta } = await aiGenerateObjectWithMeta<QaReport>({
     bucket: 'utility',
     tag: 'image-qa',
@@ -86,18 +94,18 @@ export async function inspectImage(args: {
       role: 'user',
       content: [
         { type: 'image', image: args.bytes, mediaType: args.mediaType },
-        { type: 'text', text: `Intended subject: ${args.subject.slice(0, 400)}\n\n${textLine}Inspect the image and fill every field.` },
+        { type: 'text', text: `Intended subject: ${args.subject.slice(0, 400)}\n\n${textLine}${lookLine}Inspect the image and fill every field.` },
       ],
     }],
   })
-  return { report: object, judgement: judgeQa(object, args.toggles, { expectedText }), meta }
+  return { report: object, judgement: judgeQa(object, args.toggles, { expectedText, look }), meta }
 }
 
 /** Pure: report + the lane's rules → verdict. Unit-tested. */
 export function judgeQa(
   report: QaReport,
   toggles: SafetyToggles,
-  opts?: { expectedText?: string | null },
+  opts?: { expectedText?: string | null; look?: ImageLook },
 ): QaJudgement {
   const fails: string[] = []
   const warns: string[] = []
@@ -115,7 +123,13 @@ export function judgeQa(
     else if (seen !== normalizeText(expected)) fails.push(`text reads "${report.textSeen}" instead of "${expected}"`)
   }
   if (report.artifacts) warns.push('generation artifacts (hands, warped objects)')
-  if (report.rendered && toggles.editorialOnly) warns.push('looks rendered or staged, not a candid photograph')
+  if (report.rendered && toggles.editorialOnly) {
+    warns.push(
+      opts?.look === 'illustration'
+        ? 'looks like clip art or a 3D render, not a drawn illustration'
+        : 'looks rendered or staged, not a candid photograph',
+    )
+  }
   if (!report.matchesSubject) warns.push('does not show the requested subject')
   if (report.publishable < 3) warns.push(`weak as a photograph (publishable ${report.publishable}/5)`)
 

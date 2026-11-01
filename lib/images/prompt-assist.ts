@@ -23,6 +23,7 @@ import {
   type FigureAspect,
 } from './doctrine'
 import type { PeoplePolicy } from './safety'
+import type { ImageLook } from './style'
 
 export const ASSIST_MODES = ['rewrite', 'variations', 'fresh', 'describe'] as const
 export type AssistMode = (typeof ASSIST_MODES)[number]
@@ -57,6 +58,8 @@ export const AssistInput = z.object({
   target:      z.enum(ASSIST_TARGETS),
   people:      z.enum(['none', 'anonymous', 'allowed']).default('anonymous'),
   allow_text:  z.boolean().default(false),
+  /** The editorial look the pictures will be rendered in. */
+  look:        z.enum(['photo', 'illustration']).default('photo'),
   aspect:      z.enum(SLOT_ASPECTS).optional(),
   context:     AssistContext.optional(),
   // The draft this image belongs to. The route reads it (RLS: the caller's own
@@ -162,8 +165,11 @@ const ASSIST_NOTES =
   "The author's instruction is direction, but the rules above win: if it asks for something they forbid, give the nearest version that is allowed."
 
 /** The doctrine's five-clause shape says "no faces, no text"; the toggles can lift that, and the prompt must say so. */
-function toggleNotes(people: PeoplePolicy, allowText: boolean): string[] {
+function toggleNotes(people: PeoplePolicy, allowText: boolean, look: ImageLook): string[] {
   const notes: string[] = []
+  if (look === 'illustration') {
+    notes.push('The pictures are illustrations: the SUBJECT, SETTING, MOMENT and FOCAL clauses describe a drawable idea; EXCLUDE lists nothing photographic.')
+  }
   if (people === 'allowed') {
     notes.push('Faces are allowed here: MOMENT may show a person with a face (never an identifiable child), and EXCLUDE does not list faces.')
   }
@@ -177,12 +183,14 @@ export function buildAssistSystem(opts: {
   target: AssistTarget
   people: PeoplePolicy
   allowText: boolean
+  look?: ImageLook
 }): string {
+  const look = opts.look ?? 'photo'
   return [
     ROLE,
-    doctrineBlock({ people: opts.people, allowText: opts.allowText }),
+    doctrineBlock({ people: opts.people, allowText: opts.allowText, look }),
     TARGET_CLAUSE[opts.target],
-    ...toggleNotes(opts.people, opts.allowText),
+    ...toggleNotes(opts.people, opts.allowText, look),
     ASSIST_NOTES,
   ].join('\n\n')
 }

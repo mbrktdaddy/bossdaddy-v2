@@ -59,6 +59,9 @@ function getLimiter(type: string): Ratelimit | null {
     // Draft-tier renders and Finalize is a second, so a guide with six figures
     // plus a hero spends ~14 requests in one sitting; 20 pinched. One key, both tiers.
     'image-gen':        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_image_gen' }),
+    // Text cards — code-rendered by Satori, no model call; a flood backstop only.
+    // 60/h matches image-gen so the two tabs feel the same.
+    'image-card':       new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, '1 h'), prefix: 'bd_image_card' }),
     // AI specs grading — uses the web_search tool (per-search cost) on top of
     // tokens, so the priciest Claude call. Author-triggered; this is a light
     // backstop, the manual button is the real throttle.
@@ -135,7 +138,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
+  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'image-card' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)

@@ -12,9 +12,17 @@ import {
   HOUSE_STYLE,
   HOUSE_STYLE_MARKER,
   applyCropNote,
+  ILLUSTRATION_STYLE,
+  ILLUSTRATION_STYLE_MARKER,
+  REFERENCE_NOTE,
   applyHouseStyle,
+  applyIllustrationStyle,
+  applyLook,
+  applyReferenceNote,
   cropNote,
+  referenceNote,
 } from '@/lib/images/style'
+import { ILLUSTRATION_RULE, doctrineBlock } from '@/lib/images/doctrine'
 import { judgeQa, avoidanceClause, quotedText, type QaReport } from '@/lib/images/qa'
 
 // The allowance model per lane (plan §6, brand guide §2 "Images"): what the
@@ -74,6 +82,32 @@ describe('buildSafetyRules', () => {
     expect(r).not.toContain('NO people')
     expect(r).not.toContain('anonymously')
     expect(r).not.toContain('editorial scene')
+  })
+})
+
+describe('illustration look', () => {
+  it('style text is applied once and applyLook picks by look', () => {
+    expect(applyIllustrationStyle('A porch at dusk.')).toBe(`A porch at dusk.
+
+${ILLUSTRATION_STYLE}`)
+    expect(applyIllustrationStyle(applyIllustrationStyle('A porch.'))).toBe(applyIllustrationStyle('A porch.'))
+    expect(applyLook('A porch.', 'illustration')).toContain(ILLUSTRATION_STYLE_MARKER)
+    expect(applyLook('A porch.', 'illustration')).not.toContain(HOUSE_STYLE_MARKER)
+    expect(applyLook('A porch.', 'photo')).toBe(applyHouseStyle('A porch.'))
+  })
+
+  it('the reference note and the editorial safety clause follow the look', () => {
+    expect(referenceNote('photo')).toBe(REFERENCE_NOTE)
+    expect(referenceNote('illustration')).toContain('finished illustration')
+    expect(applyReferenceNote('x', 'illustration')).toContain('cleaner line, flatter fills')
+    expect(buildSafetyRules(EDITORIAL, 'illustration')).toContain('An editorial illustration of a real-world scene')
+    expect(buildSafetyRules(EDITORIAL)).toBe(buildSafetyRules(EDITORIAL, 'photo'))
+    expect(buildSafetyRules(EDITORIAL)).toContain('A candid editorial scene')
+  })
+
+  it('doctrineBlock adds the illustration rule only for that look', () => {
+    expect(doctrineBlock({ people: 'anonymous', allowText: false, look: 'illustration' })).toContain(ILLUSTRATION_RULE)
+    expect(doctrineBlock({ people: 'anonymous', allowText: false })).not.toContain(ILLUSTRATION_RULE)
   })
 })
 
@@ -167,6 +201,17 @@ describe('judgeQa', () => {
     expect(judgeQa({ ...clean, rendered: true }, EDITORIAL).verdict).toBe('warn')
     expect(judgeQa({ ...clean, rendered: true }, SOCIAL_FLEXIBLE).verdict).toBe('pass')
     expect(judgeQa({ ...clean, matchesSubject: false }, EDITORIAL).verdict).toBe('warn')
+  })
+
+  it('an illustration look swaps the rendered warning wording; a photo look is unchanged', () => {
+    expect(judgeQa({ ...clean, rendered: true }, EDITORIAL, { look: 'illustration' })).toEqual({
+      verdict: 'warn',
+      reasons: ['looks like clip art or a 3D render, not a drawn illustration'],
+    })
+    expect(judgeQa({ ...clean, rendered: true }, EDITORIAL, { look: 'photo' }).reasons).toEqual([
+      'looks rendered or staged, not a candid photograph',
+    ])
+    expect(judgeQa({ ...clean, rendered: true }, SOCIAL_FLEXIBLE, { look: 'illustration' }).verdict).toBe('pass')
   })
 
   it('a fail carries its warnings too, worst first', () => {

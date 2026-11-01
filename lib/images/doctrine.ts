@@ -13,6 +13,7 @@
 // Client-safe: plain strings and pure functions only.
 
 import type { PeoplePolicy } from './safety'
+import type { ImageLook } from './style'
 
 /** What a slot needs. The first three are AI photographs; `owned` is a thing only a real capture can show. */
 export const IMAGE_NEEDS = ['scene', 'detail', 'hands', 'owned'] as const
@@ -99,6 +100,9 @@ export const OWNED_RULE =
   'A need that depends on an unrenderable is `owned`: leave the prompt empty and write `ask` as one concrete line telling the author exactly what to capture, in the second person, naming the thing ' +
   '("Screenshot of the OnStar sign-in screen with your account details hidden", "Your photo of the latch on the cooler lid"). Owned slots count toward the image count.'
 
+export const ILLUSTRATION_RULE =
+  'These pictures are rendered as editorial illustrations, not photographs: write each subject as a drawable idea — one object or place with a clear silhouette, few elements, a single focal point — and never photographic detail (textures, bokeh, lens, light quality).'
+
 /** The people rule as prompt text, by policy. */
 export function peopleRule(policy: PeoplePolicy): string {
   if (policy === 'none') return 'No people at all: no hands, no figures, no body parts.'
@@ -118,7 +122,7 @@ export function textRule(allowText: boolean): string {
  * The full rule block a prompt-writing model receives. One source for the
  * planner and the assist so they never disagree about what is allowed.
  */
-export function doctrineBlock(opts: { people: PeoplePolicy; allowText: boolean }): string {
+export function doctrineBlock(opts: { people: PeoplePolicy; allowText: boolean; look?: ImageLook }): string {
   return [
     'RULES FOR EVERY IMAGE:',
     `- Never ask for: ${UNRENDERABLES.join('; ')}.`,
@@ -132,6 +136,7 @@ export function doctrineBlock(opts: { people: PeoplePolicy; allowText: boolean }
     `- ${VARIETY_RULE}`,
     `- ${HERO_COMPOSITION_RULE}`,
     `- ${ESSAY_RULE}`,
+    ...(opts.look === 'illustration' ? [`- ${ILLUSTRATION_RULE}`] : []),
     '- altText is what a reader would see described, under 120 characters, no "Image of". caption is one editorial sentence under the image that adds something the alt does not, under 100 characters.',
   ].join('\n')
 }
