@@ -12,7 +12,13 @@
 //                                         (1024x1024, quality low, WebP out;
 //                                         about a cent each) to prove the Images
 //                                         API still accepts the request shape the
-//                                         app sends and returns a real WebP
+//                                         app sends and returns a real WebP — and
+//                                         one real EDIT on the Publication pin,
+//                                         the generated image as its reference,
+//                                         because finalize-from-pick goes through
+//                                         images.edit and a model can be served
+//                                         and still reject that shape (Sunburst
+//                                         400'd on input_fidelity, 2026-11-01)
 //
 // The pins are read out of lib/images/tiers.ts as text, so this script can never
 // disagree with the app about what is pinned. Plain fetch, no SDK, no file
@@ -37,6 +43,15 @@ export async function pinnedModels() {
   if (start < 0) throw new Error('IMAGE_TIERS not found in lib/images/tiers.ts')
   const found = [...src.slice(start).matchAll(/\bmodel:\s*'([^']+)'/g)].map((m) => m[1])
   return [...new Set(found)]
+}
+
+// The Publication pin alone — the only model the app sends through images.edit
+// (lib/images/openai.ts callEditModel), so the edit probe runs on it only.
+export async function publicationModel() {
+  const src = await readFile(TIERS_PATH, 'utf8')
+  const m = src.match(/\bpublication:\s*\{\s*model:\s*'([^']+)'/)
+  if (!m) throw new Error('publication tier not found in lib/images/tiers.ts')
+  return m[1]
 }
 
 function authHeaders(key) {
@@ -93,6 +108,41 @@ async function probeGenerate(key, id) {
   // fail in production even though the call succeeded.
   const isWebp = bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP'
   if (!isWebp) return { ok: false, detail: `${bytes.length} bytes came back, but they are not a WebP` }
+  return { ok: true, bytes, detail: `${bytes.length} bytes (webp), usage ${JSON.stringify(body.usage ?? null)}` }
+}
+
+// One real edit, shaped like finalizeFromDraft's call (lib/images/openai.ts
+// callEditModel): the reference image as a WebP file, prompt, size, quality,
+// WebP out at compression 90 — and NO input_fidelity, which the 2.5 models
+// reject. Any parameter added to the app's edit call belongs here too, or the
+// probe stops proving what it claims to.
+async function probeEdit(key, id, reference) {
+  const form = new FormData()
+  form.set('model', id)
+  form.set('image', new Blob([reference], { type: 'image/webp' }), 'draft.webp')
+  form.set('prompt', 'Reference: the attached image is the composition to keep. Render it as the finished photograph. Add nothing that is not already in it.')
+  form.set('size', '1024x1024')
+  form.set('quality', 'low')
+  form.set('output_format', 'webp')
+  form.set('output_compression', '90')
+  let res
+  try {
+    res = await fetch(`${API}/images/edits`, {
+      method: 'POST',
+      headers: authHeaders(key),
+      body: form,
+      signal: AbortSignal.timeout(GENERATE_TIMEOUT_MS),
+    })
+  } catch (err) {
+    return { ok: false, detail: `request failed - ${err?.message ?? err}` }
+  }
+  const body = await res.json().catch(() => null)
+  if (!res.ok) return { ok: false, detail: body?.error?.message ?? `HTTP ${res.status}` }
+  const b64 = body?.data?.[0]?.b64_json
+  if (!b64) return { ok: false, detail: 'the response carried no image data' }
+  const bytes = Buffer.from(b64, 'base64')
+  const isWebp = bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP'
+  if (!isWebp) return { ok: false, detail: `${bytes.length} bytes came back, but they are not a WebP` }
   return { ok: true, detail: `${bytes.length} bytes (webp), usage ${JSON.stringify(body.usage ?? null)}` }
 }
 
@@ -104,7 +154,8 @@ async function main() {
     console.error('FAIL: could not parse any models out of lib/images/tiers.ts')
     process.exit(1)
   }
-  console.log(`tiers.ts pins ${pins.length} image models: ${pins.join(', ')}\n`)
+  const publication = await publicationModel()
+  console.log(`tiers.ts pins ${pins.length} image models: ${pins.join(', ')} (edits go to ${publication})\n`)
 
   const key = process.env.OPENAI_API_KEY
   if (!key) {
@@ -132,6 +183,22 @@ async function main() {
         problems++
         console.log(`         generate FAIL ${id} - ${gen.detail}`)
       }
+      // The edit shape, on the Publication pin only, with the image we just
+      // generated as the reference. No generation means nothing to attach.
+      if (id === publication) {
+        if (!gen.ok) {
+          problems++
+          console.log(`         edit     SKIP ${id} - no reference image (generate failed)`)
+        } else {
+          const edit = await probeEdit(key, id, gen.bytes)
+          if (edit.ok) {
+            console.log(`         edit     OK   ${id} - ${edit.detail}`)
+          } else {
+            problems++
+            console.log(`         edit     FAIL ${id} - ${edit.detail}`)
+          }
+        }
+      }
     }
   }
 
@@ -143,7 +210,7 @@ async function main() {
     process.exitCode = 1
     return
   }
-  console.log(`\nIMAGE CHECK PASS - ${pins.length} pinned model(s) found${generate ? ' and generating' : ''}`)
+  console.log(`\nIMAGE CHECK PASS - ${pins.length} pinned model(s) found${generate ? ' and generating (edit shape OK on the Publication pin)' : ''}`)
 }
 
 // Only run when invoked directly, so pinnedModels() can be imported without

@@ -18,12 +18,14 @@
 // REQUEST-SHAPE GOTCHA: Sunburst rejects `input_fidelity` on images.edit (400
 // `invalid_input_fidelity_model`, 2026-11-01) even though the SDK's types still
 // allow it. finalizeFromDraft relies on the reference image + prompt instead.
-// A pin can be served and still 400 on our shape — bump, then run a real finalize.
+// A pin can be served and still 400 on our shape — that is what `--generate`
+// below exists to catch.
 //
 // `npm run images:check` (scripts/image-model-check.mjs) reads the pins out of
 // this file and verifies each one live against OpenAI; add `-- --generate` to
-// also prove the Images API still accepts our request shape (about a cent). Run
-// it after any bump here and whenever OpenAI posts a deprecation.
+// also prove the Images API still accepts both request shapes the app sends — a
+// generation per pin, plus an edit on the Publication pin (a few cents). Run it
+// after any bump here and whenever OpenAI posts a deprecation.
 //
 // Client-safe on purpose: plain data, no server imports. The panels read `label`
 // and `hint` from here, so a button can never name a model the server no longer

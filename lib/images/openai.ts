@@ -155,7 +155,7 @@ async function callEditModel(
       image: await toFile(draft, 'draft.webp', { type: 'image/webp' }),
       prompt,
       size,
-      quality: 'high',
+      quality: IMAGE_TIERS.publication.quality,
       output_format: 'webp',
       output_compression: WEBP_QUALITY,
     })
