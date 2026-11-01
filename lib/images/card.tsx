@@ -1,7 +1,14 @@
+import 'server-only'
 import { ImageResponse } from 'next/og'
 import type { ReactElement } from 'react'
 import { loadMerchFonts } from '@/lib/merch/fonts'
 import { BRAND } from '@/lib/brand'
+import { CARD_SIZES, type CardInput } from './card-spec'
+
+// Plain data (sizes, caps, the input type) lives in ./card-spec so client code
+// can import it; this module is server-only (Satori + font reads + sharp via
+// next/og) and would break the browser bundle if a client component touched it.
+export { CARD_SIZES, CARD_TEXT_MAX, CARD_LINE_MAX, type CardInput, type CardSize, type CardVariant } from './card-spec'
 
 // Text cards composed in CODE (Sprint C, 2026-10-31) — the "text in image"
 // answer for social. An image model renders text as the uncanny tell (brand
@@ -12,31 +19,6 @@ import { BRAND } from '@/lib/brand'
 // white type, no washes. Node runtime only (Satori + the font reads in
 // lib/merch/fonts.ts; the route is listed in next.config.ts
 // outputFileTracingIncludes so the TTFs ship with it).
-
-export type CardVariant = 'block' | 'photo'
-export type CardSize = 'square' | 'landscape' | 'portrait'
-
-export const CARD_SIZES: Readonly<Record<CardSize, { width: number; height: number; label: string; ratio: string }>> = {
-  square:    { width: 1080, height: 1080, label: 'Square',    ratio: '1:1' },
-  landscape: { width: 1200, height: 675,  label: 'Landscape', ratio: '16:9' },
-  portrait:  { width: 1080, height: 1350, label: 'Portrait',  ratio: '4:5' },
-}
-
-export const CARD_TEXT_MAX = 140
-export const CARD_LINE_MAX = 40
-
-export interface CardInput {
-  /** The statement. Up to CARD_TEXT_MAX characters; set in Montserrat Black. */
-  text: string
-  /** Small uppercase line above the statement, e.g. "Boss Daddy says" or a category. */
-  kicker?: string
-  /** Small line under the statement, e.g. "— Boss Daddy" or the piece's title. */
-  attribution?: string
-  variant: CardVariant
-  size: CardSize
-  /** `photo` only: the author's own photo as a data URI, already sized to the card. */
-  imageDataUri?: string | null
-}
 
 // Dark-zone palette (app/globals.css): chrome black, hot orange, the AA orange
 // for small type on black, white ink.

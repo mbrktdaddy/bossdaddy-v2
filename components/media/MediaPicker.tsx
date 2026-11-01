@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/Card'
 import { buttonVariants } from '@/components/ui/Button'
 import { CloseButton } from '@/components/ui/Modal'
 import { CheckIcon, PhotoIcon } from '@/components/icons'
-import { CARD_SIZES, CARD_TEXT_MAX, type CardSize, type CardVariant } from '@/lib/images/card'
+import { CARD_SIZES, CARD_TEXT_MAX, type CardSize, type CardVariant } from '@/lib/images/card-spec'
 
 interface MediaAsset {
   id: string
