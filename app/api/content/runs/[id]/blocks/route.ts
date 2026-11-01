@@ -17,6 +17,9 @@ export const maxDuration = 90
 // Stage 3 — the structured blocks, derived from the finished prose.
 const EFFORT = 'medium' as const
 const TEMPERATURE = 0.5
+// Reasoning tokens share this cap (see the outline route); a review with every
+// block plus three elements is the long case.
+const MAX_OUTPUT_TOKENS = 6000
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -45,7 +48,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       schema,
       system,
       messages: [{ role: 'user', content: prompt }],
-      maxOutputTokens: 3000,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       effort: EFFORT,
       temperature: TEMPERATURE,
       maxRetries: 2,
@@ -71,8 +74,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'blocks',
       status: c.kind === 'truncated' ? 'truncated' : 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind), effort: EFFORT, temperature: TEMPERATURE,
+      meta: failedCallMeta('content', startedAt, c.kind, undefined, c.usage), effort: EFFORT, temperature: TEMPERATURE,
       input: { choices: run.outline.blocks, prompt },
+      output: c.rawText ? { rawText: c.rawText } : undefined,
     })
     await updateRun(supabase, run, { error: c.userMessage }).catch(() => {})
     return NextResponse.json({ error: c.userMessage }, { status: c.status })

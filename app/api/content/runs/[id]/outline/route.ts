@@ -10,7 +10,8 @@ import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-export const maxDuration = 60
+// One attempt runs 30–40s at effort high; the SDK's two retries must fit.
+export const maxDuration = 120
 
 // Stage 1 — POST generates the outline (content-bucket model at effort high —
 // the outline is where the argument is decided, 2026-10-30); PUT saves the
@@ -19,6 +20,10 @@ export const maxDuration = 60
 
 const EFFORT = 'high' as const
 const TEMPERATURE = 0.7
+// Reasoning tokens share this cap (a successful guide outline measured 2056
+// output tokens, 808 of them reasoning, against the old 2500 — the next one
+// truncated). Billing is by tokens used, so the headroom costs nothing idle.
+const MAX_OUTPUT_TOKENS = 6000
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -44,7 +49,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       schema: OutlineOutput,
       system,
       messages: [{ role: 'user', content: prompt }],
-      maxOutputTokens: 2500,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       effort: EFFORT,
       temperature: TEMPERATURE,
       maxRetries: 2,
@@ -64,8 +69,10 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'outline',
       status: c.kind === 'truncated' ? 'truncated' : 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind),
+      meta: failedCallMeta('content', startedAt, c.kind, undefined, c.usage),
       effort: EFFORT, temperature: TEMPERATURE, input: { brief: run.brief, prompt },
+      // What the model actually returned, so a schema failure is diagnosable.
+      output: c.rawText ? { rawText: c.rawText } : undefined,
     })
     await updateRun(supabase, run, { error: c.userMessage }).catch(() => {})
     return NextResponse.json({ error: c.userMessage }, { status: c.status })

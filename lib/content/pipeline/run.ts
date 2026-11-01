@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Json } from '@/lib/supabase/database.types'
 import { PROMPT_VERSION } from '../prompts'
-import type { Blocks, Brief, Critic, ImagePlan, Outline, RunState, RunStatus, SectionResult } from './types'
+import type { Blocks, Brief, ContentType, Critic, ImagePlan, Outline, RunState, RunStatus, SectionResult } from './types'
 
 // Persistence for `content_runs` (mig 165). Routes use the SESSION client so
 // RLS enforces ownership; nothing here needs the service role.
@@ -34,7 +34,32 @@ export function rowToRun(row: Row): RunState {
   }
 }
 
+const UNFINISHED = '("done","failed")'
+
+/**
+ * Take every unfinished run of this type out of the resumable set. The rows
+ * (and their generations log) stay — the cost was real. Used by "discard and
+ * start over" and by `createRun`, so a double-tapped start or a discard can
+ * never leave a second run behind to resurface as "unfinished draft" later
+ * (that is how run 375e715c got stuck, 2026-10-31).
+ */
+export async function discardUnfinishedRuns(
+  supabase: SupabaseClient, userId: string, contentType: ContentType, reason: string,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from('content_runs')
+    .update({ status: 'failed', error: reason, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('content_type', contentType)
+    .not('status', 'in', UNFINISHED)
+    .select('id')
+  if (error) throw new Error(`discardUnfinishedRuns failed: ${error.message}`)
+  return data?.length ?? 0
+}
+
 export async function createRun(supabase: SupabaseClient, userId: string, brief: Brief): Promise<RunState> {
+  // One live run per author per type: a new start supersedes whatever was left.
+  await discardUnfinishedRuns(supabase, userId, brief.contentType, 'Superseded by a new run.')
   const { data, error } = await supabase
     .from('content_runs')
     .insert({
@@ -111,7 +136,7 @@ export async function findResumableRun(supabase: SupabaseClient, userId: string,
     .select('*')
     .eq('user_id', userId)
     .eq('content_type', contentType)
-    .not('status', 'in', '("done","failed")')
+    .not('status', 'in', UNFINISHED)
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle()

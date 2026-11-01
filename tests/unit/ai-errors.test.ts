@@ -35,6 +35,11 @@ describe('classifyClaudeError', () => {
 
   it('distinguishes truncation from unexpected format (generateObject)', () => {
     expect(classifyClaudeError(noObject('length')).kind).toBe('truncated')
+    // A schema/parse failure still burned tokens and left raw text behind —
+    // both ride on the classification so the generations row can carry them.
+    const withText = new NoObjectGeneratedError({ message: 'no object', response: responseMeta, usage, finishReason: 'stop', text: '{"titleOptions":["x"' })
+    expect(classifyClaudeError(withText)).toMatchObject({ kind: 'no_object', usage, rawText: '{"titleOptions":["x"' })
+    expect(classifyClaudeError(noObject('stop')).rawText).toBeUndefined()
     expect(classifyClaudeError(noObject('stop')).kind).toBe('no_object')
   })
 

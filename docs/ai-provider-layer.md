@@ -90,6 +90,8 @@ Temperature is set per call site, not per bucket, because it tracks the *task* r
 
 Anything left unset inherits the provider default (~1.0), which is why the deterministic lanes above are now explicit.
 
+**`maxOutputTokens` includes reasoning tokens on the 5 generation.** Opus 5 at effort high spent 500–1700 reasoning tokens per pipeline call (measured 2026-11-01 from `generations.reasoning_tokens`): the outline fit 2056 tokens into a 2500 cap once and truncated the next time, a 350-word section hit its 2200 cap with 1646 of them, and the critic spent its whole 2000 thinking and returned no object. The caps are now outline 6000 / blocks 6000 / critic 5000 / section `targetWords × 4 + 3000` (`sectionBudget`). Billing is by tokens used, not the cap, so size a cap for the worst case. Opus 5 also ignores `temperature` (the SDK warns once per call; harmless).
+
 ## AI SDK v7 upgrade — assessed 2026-07-27, deliberately deferred
 
 **The three packages are interlocked and must move as one PR.** `ai`,

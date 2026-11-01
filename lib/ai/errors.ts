@@ -1,4 +1,4 @@
-import { APICallError, NoObjectGeneratedError, NoOutputGeneratedError, RetryError } from 'ai'
+import { APICallError, NoObjectGeneratedError, NoOutputGeneratedError, RetryError, type LanguageModelUsage } from 'ai'
 
 // Consolidates the timeout/overload error-classification regex that was
 // copy-pasted across the Claude routes, and maps AI SDK error types
@@ -24,7 +24,21 @@ export interface ClassifiedAiError {
   userMessage: string
   /** Short internal detail for server logs ONLY. Never send to the client. */
   detail: string
+  /**
+   * Token usage of the failed call when the SDK reports it (NoObjectGeneratedError
+   * carries it). A truncated or schema-failed call is still billed — pass this
+   * to `failedCallMeta` so the `generations` row and the cost chip count it.
+   */
+  usage?: LanguageModelUsage
+  /**
+   * The first part of the model's raw text on a schema/parse failure, for the
+   * `generations` row's `output` — the only way to tell a truncated object from
+   * one that broke a `.max()` constraint. Logs only; never sent to the client.
+   */
+  rawText?: string
 }
+
+const RAW_TEXT_LIMIT = 2000
 
 // User-facing copy, kept in the Boss Daddy register and matching the wording the
 // Claude routes used before consolidation (502 preserved for timeout/overload so
@@ -83,9 +97,14 @@ export function classifyClaudeError(err: unknown): ClassifiedAiError {
   // the model was cut off mid-object (truncation); anything else is an
   // unparseable / unexpected response.
   if (NoObjectGeneratedError.isInstance(err)) {
-    return err.finishReason === 'length'
+    const base = err.finishReason === 'length'
       ? classified('truncated', 502, detail)
       : classified('no_object', 502, detail)
+    return {
+      ...base,
+      ...(err.usage ? { usage: err.usage } : {}),
+      ...(err.text ? { rawText: err.text.slice(0, RAW_TEXT_LIMIT) } : {}),
+    }
   }
 
   // generateText + `Output.object` (the research bucket) throws this when the run

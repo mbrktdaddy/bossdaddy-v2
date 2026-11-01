@@ -9,9 +9,12 @@ import type { Brief, OutlinePart, PartFormat, RunState } from './types'
 const KIND_LABEL = { intro: 'introduction', body: 'section', closing: 'closing' } as const
 
 export function sectionBudget(targetWords: number): number {
-  // ~1.5 tokens/word of prose plus thinking headroom (adaptive thinking shares
-  // the budget on the 5 generation); floor keeps tiny parts from truncating.
-  return Math.min(6000, Math.max(1500, Math.round(targetWords * 4) + 800))
+  // ~1.5 tokens/word of prose plus thinking headroom: adaptive thinking shares
+  // `maxOutputTokens` on the 5 generation, and at effort high Opus 5 spends
+  // 500–1700 reasoning tokens on one part (measured 2026-11-01 — a 350-word
+  // part hit the old 2200 cap with 1646 of them). Billing is by tokens used,
+  // not the cap, so the headroom is free until it's needed.
+  return Math.min(8000, Math.max(3500, Math.round(targetWords * 4) + 3000))
 }
 
 /** The prose written so far, in order, with headings — what the model must not repeat. */

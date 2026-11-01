@@ -54,6 +54,9 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
   const [error, setError] = useState<string | null>(null)
   const [stream, setStream] = useState<{ index: number; text: string } | null>(null)
   const [voice, setVoice] = useState<{ hasProfile: boolean; phraseCount: number } | null>(null)
+  // A discard/start is in flight: the buttons that fire one are disabled so a
+  // double tap can't create two runs (that is how a run got orphaned 2026-10-31).
+  const [pending, setPending] = useState(false)
   const booted = useRef(false)
 
   function fail(e: unknown) {
@@ -179,12 +182,22 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
     await continueFrom(fresh)
   }
 
+  // DELETE fails every unfinished run of this type, not just `r`. With a brief
+  // in hand a fresh run starts; in resume-only mode (the idea step's notice
+  // hands over no brief) the author goes back to write one.
   async function discardAndRestart(r: RunState | null) {
+    if (pending) return
+    setPending(true)
     setError(null)
-    if (r) await api(`/api/content/runs/${r.id}`, { method: 'DELETE' })
-    setResumable(null)
-    setRun(null)
-    await startNew()
+    try {
+      if (r) await api(`/api/content/runs/${r.id}`, { method: 'DELETE' })
+      setResumable(null)
+      setRun(null)
+      if (brief) await startNew()
+      else onCancel()
+    } finally {
+      setPending(false)
+    }
   }
 
   const parts = run?.outline?.parts ?? []
@@ -203,9 +216,9 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
             {resumable.costUsd > 0 ? ` · $${resumable.costUsd.toFixed(2)} spent so far` : ''}.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
-            <button type="button" onClick={() => continueFrom(resumable).catch(fail)} className={buttonVariants()}>Resume it</button>
-            <button type="button" onClick={() => discardAndRestart(resumable).catch(fail)} className={buttonVariants({ variant: 'outline' })} disabled={!brief}>
-              Discard and start over
+            <button type="button" onClick={() => continueFrom(resumable).catch(fail)} className={buttonVariants()} disabled={pending}>Resume it</button>
+            <button type="button" onClick={() => discardAndRestart(resumable).catch(fail)} className={buttonVariants({ variant: 'outline' })} disabled={pending}>
+              {brief ? 'Discard and start over' : 'Discard it'}
             </button>
             <button type="button" onClick={onCancel} className="text-sm text-prose-muted">Back</button>
           </div>
@@ -269,8 +282,10 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
       <div className="space-y-4">
         <p className="text-danger-ink text-sm bg-danger-bg border border-danger-line rounded-lg px-4 py-3">{error ?? 'Something went wrong.'}</p>
         <div className="flex items-center gap-3 flex-wrap">
-          <button type="button" onClick={() => retry().catch(fail)} className={buttonVariants()}>Try again</button>
-          <button type="button" onClick={() => discardAndRestart(run).catch(fail)} className={buttonVariants({ variant: 'outline' })} disabled={!brief}>Start over</button>
+          <button type="button" onClick={() => retry().catch(fail)} className={buttonVariants()} disabled={pending}>Try again</button>
+          <button type="button" onClick={() => discardAndRestart(run).catch(fail)} className={buttonVariants({ variant: 'outline' })} disabled={pending}>
+            {brief ? 'Start over' : 'Discard it'}
+          </button>
           <button type="button" onClick={onCancel} className="text-sm text-prose-muted">Back</button>
         </div>
       </div>

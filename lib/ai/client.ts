@@ -230,13 +230,18 @@ export function aiStreamText(
   })
 }
 
-/** The metadata shape for a call that threw, so failures log like successes. */
-export function failedCallMeta(bucket: AiBucket, startedAt: number, finishReason: string, model?: string): CallMeta {
+/**
+ * The metadata shape for a call that threw, so failures log like successes.
+ * Pass the classified error's `usage` when the SDK reported it: a truncated or
+ * schema-failed call still burned tokens, and the cost chip should say so.
+ */
+export function failedCallMeta(bucket: AiBucket, startedAt: number, finishReason: string, model?: string, usage?: LanguageModelUsage): CallMeta {
+  const resolved = resolveModel(bucket, { model }).model
   return {
-    model: resolveModel(bucket, { model }).model,
-    usage: undefined,
+    model: resolved,
+    usage,
     finishReason,
     latencyMs: Date.now() - startedAt,
-    costUsd: null,
+    costUsd: usage ? estimateCostUsd(resolved, usage) : null,
   }
 }

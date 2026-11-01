@@ -58,8 +58,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'images',
       status: c.kind === 'truncated' ? 'truncated' : 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind, MODELS.claudeHaiku), effort: EFFORT, temperature: TEMPERATURE,
+      meta: failedCallMeta('content', startedAt, c.kind, MODELS.claudeHaiku, c.usage), effort: EFFORT, temperature: TEMPERATURE,
       input: { prompt },
+      output: c.rawText ? { rawText: c.rawText } : undefined,
     })
     await updateRun(supabase, run, { error: c.userMessage }).catch(() => {})
     return NextResponse.json({ error: c.userMessage }, { status: c.status })

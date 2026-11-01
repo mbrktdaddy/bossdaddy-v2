@@ -73,10 +73,10 @@ describe('priorProse / nextUnwrittenIndex / runToDraftHtml', () => {
 
 describe('sectionBudget', () => {
   it('scales with the target and stays inside the floor/ceiling', () => {
-    expect(sectionBudget(60)).toBe(1500)
-    expect(sectionBudget(250)).toBe(1800)
-    expect(sectionBudget(600)).toBe(3200)
-    expect(sectionBudget(5000)).toBe(6000)
+    expect(sectionBudget(60)).toBe(3500)
+    expect(sectionBudget(250)).toBe(4000)
+    expect(sectionBudget(600)).toBe(5400)
+    expect(sectionBudget(5000)).toBe(8000)
   })
 })
 

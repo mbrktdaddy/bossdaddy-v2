@@ -20,6 +20,9 @@ export const maxDuration = 90
 // (tests/eval/content-eval.ts) judges with exactly this editor.
 const EFFORT = 'high' as const
 const TEMPERATURE = 0
+// Reasoning tokens share this cap: at the old 2000 the editor spent the whole
+// budget thinking and returned no object at all (2026-11-01).
+const MAX_OUTPUT_TOKENS = 5000
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -55,7 +58,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       // No voice system here on purpose: the critic is the editor, not the writer.
       system: CRITIC_SYSTEM,
       messages: [{ role: 'user', content: prompt }],
-      maxOutputTokens: 2000,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
       effort: EFFORT,
       temperature: TEMPERATURE,
       maxRetries: 2,
@@ -73,10 +76,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
   } catch (err) {
     const c = classifyClaudeError(err)
     console.error('critic error (continuing with rules only):', c.kind, '-', c.detail)
+    const failed = failedCallMeta('content', startedAt, c.kind, undefined, c.usage)
     await logGeneration(supabase, {
-      userId, contentType: run.contentType, runId: run.id, stage: 'critic', status: 'failed',
-      meta: failedCallMeta('content', startedAt, c.kind), effort: EFFORT, temperature: TEMPERATURE, input: { prompt },
+      userId, contentType: run.contentType, runId: run.id, stage: 'critic',
+      status: c.kind === 'truncated' ? 'truncated' : 'failed',
+      meta: failed, effort: EFFORT, temperature: TEMPERATURE, input: { prompt },
+      output: c.rawText ? { rawText: c.rawText } : undefined,
     })
+    // A failed editor pass still burned tokens — the run's chip should say so.
+    cost = failed.costUsd ?? 0
     summary = 'The editor pass was unavailable — only the rule checks ran.'
   }
 
