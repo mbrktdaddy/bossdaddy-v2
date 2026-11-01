@@ -34,10 +34,19 @@ export function rowToRun(row: Row): RunState {
   }
 }
 
-const UNFINISHED = '("done","failed")'
+/**
+ * PostgREST `or` filter for "still the author's to pick up": unfinished, OR
+ * finished but never saved (content_id null). Used by BOTH the resume query
+ * and the discard update — if they drift apart a run can be offered forever
+ * and never discarded (that was the 2026-10-31 stuck draft).
+ */
+const OPEN_RUN_FILTER = 'status.not.in.(done,failed),and(status.eq.done,content_id.is.null)'
+
+/** How long an unfinished (or unsaved) run stays offered for resume. */
+export const RESUMABLE_WINDOW_MS = 14 * 24 * 60 * 60 * 1000
 
 /**
- * Take every unfinished run of this type out of the resumable set. The rows
+ * Take every open run of this type — unfinished, or finished but never saved — out of the resumable set. The rows
  * (and their generations log) stay — the cost was real. Used by "discard and
  * start over" and by `createRun`, so a double-tapped start or a discard can
  * never leave a second run behind to resurface as "unfinished draft" later
@@ -51,7 +60,7 @@ export async function discardUnfinishedRuns(
     .update({ status: 'failed', error: reason, updated_at: new Date().toISOString() })
     .eq('user_id', userId)
     .eq('content_type', contentType)
-    .not('status', 'in', UNFINISHED)
+    .or(OPEN_RUN_FILTER)
     .select('id')
   if (error) throw new Error(`discardUnfinishedRuns failed: ${error.message}`)
   return data?.length ?? 0
@@ -129,14 +138,21 @@ export async function attachRun(supabase: SupabaseClient, runId: string, content
   if (b.error) console.error('attachRun (generations) failed:', b.error.message)
 }
 
-/** Latest unfinished run of this type for the user — what the wizard offers to resume. */
+/**
+ * Latest unfinished — or finished-but-unsaved — run of this type for the user
+ * within the resume window; what the wizard offers to resume.
+ */
 export async function findResumableRun(supabase: SupabaseClient, userId: string, contentType: 'review' | 'guide'): Promise<RunState | null> {
   const { data } = await supabase
     .from('content_runs')
     .select('*')
     .eq('user_id', userId)
     .eq('content_type', contentType)
-    .not('status', 'in', UNFINISHED)
+    // Unfinished, OR finished but never saved (the author closed the tab before
+    // "Continue to preview" — the draft is paid for and still usable).
+    .or(OPEN_RUN_FILTER)
+    // A fortnight is generous for a paid draft; older ones are stale briefs.
+    .gte('updated_at', new Date(Date.now() - RESUMABLE_WINDOW_MS).toISOString())
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle()

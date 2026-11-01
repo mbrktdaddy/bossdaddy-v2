@@ -47,6 +47,12 @@ export function relTime(iso: string): string {
   return `${Math.round(h / 24)} days ago`
 }
 
+/** The banner's one-line description of where a resumable run was left. */
+export function resumeLabel(run: RunState): string {
+  if (run.status === 'done' && !run.contentId) return 'finished but never saved'
+  return `left at the ${STAGE_LABEL[run.status]} stage`
+}
+
 export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Props) {
   const [run, setRun] = useState<RunState | null>(null)
   const [phase, setPhase] = useState<Phase>('boot')
@@ -212,7 +218,7 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
           <Eyebrow>Unfinished draft</Eyebrow>
           <p className="text-sm text-prose">
             <span className="font-semibold">{resumable.outline?.title ?? 'Untitled'}</span>
-            {' '}— left at the {STAGE_LABEL[resumable.status]} stage, {relTime(resumable.updatedAt)}
+            {' '}— {resumeLabel(resumable)}, {relTime(resumable.updatedAt)}
             {resumable.costUsd > 0 ? ` · $${resumable.costUsd.toFixed(2)} spent so far` : ''}.
           </p>
           <div className="flex items-center gap-3 flex-wrap">
@@ -332,7 +338,7 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
       )}
 
       <button type="button" onClick={onCancel} disabled={busy && phase === 'creating'} className="text-sm text-prose-muted">
-        Leave — it keeps going server-side and you can resume
+        Leave — finished stages are saved and you can resume
       </button>
     </div>
   )

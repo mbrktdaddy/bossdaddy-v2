@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Notice } from '@/components/ui/Notice'
 import { buttonVariants } from '@/components/ui/Button'
-import { STAGE_LABEL, relTime } from './PipelineRunner'
+import { relTime, resumeLabel } from './PipelineRunner'
 import type { RunState } from '@/lib/content/pipeline/types'
 
 // The wizards' idea step: if an unfinished run exists for this author and
@@ -36,7 +36,7 @@ export function ResumeDraftNotice({ contentType, onContinue }: Props) {
       title="You have an unfinished draft"
       action={<button type="button" onClick={onContinue} className={buttonVariants()}>Continue</button>}
     >
-      {run.outline?.title ?? 'Untitled'} — left at the {STAGE_LABEL[run.status]} stage, {relTime(run.updatedAt)}
+      {run.outline?.title ?? 'Untitled'} — {resumeLabel(run)}, {relTime(run.updatedAt)}
       {run.costUsd > 0 ? ` · $${run.costUsd.toFixed(2)} spent` : ''}.
     </Notice>
   )

@@ -235,13 +235,29 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
 
   // The finished run → the preview shape the save step already understands.
   function handleRunComplete(run: RunState) {
+    const rb = run.brief.contentType === 'review' ? run.brief : null
+    // Resumed from the idea step's notice: the wizard never built a brief, so the
+    // form may be empty — the run is the source of truth for the save below.
+    if (brief === null && rb) {
+      setProductName(rb.productName)
+      setProductSlug(rb.productSlug ?? '')
+      setCategory(rb.category)
+      setKeyFeatures(rb.keyFeatures.join('\n'))
+      setInputRating(rb.ratingHint)
+      setTestingDuration(rb.testingDuration ?? '')
+      setTestingSince(rb.testingSince ?? '')
+      setTestingNote(rb.testingNote ?? '')
+      setHowYouUsedIt(rb.howYouUsedIt ?? '')
+      setStandoutMoment(rb.standoutMoment ?? '')
+      setPricePaid(rb.pricePaid != null ? String(rb.pricePaid) : '')
+    }
     const b = run.blocks
     const sub = b?.subScores
     setPreviewDraft({
-      title: run.outline?.title ?? productName,
+      title: run.outline?.title ?? rb?.productName ?? productName,
       excerpt: run.outline?.excerpt ?? '',
       content: runToDraftHtml(run),
-      rating: inputRating!,  // the author's input drives the rating; sub-scores are confirmed in the workspace
+      rating: inputRating ?? rb?.ratingHint ?? 0,  // the author's input drives the rating; sub-scores are confirmed in the workspace
       pros: b?.pros ?? [], cons: b?.cons ?? [],
       // Never the product itself (AI never replicates a product — safety rules
       // would fight the prompt): a category scene the product belongs to.

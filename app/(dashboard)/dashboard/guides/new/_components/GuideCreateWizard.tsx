@@ -181,9 +181,21 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
 
   // The finished run → the preview shape the save step already understands.
   function handleRunComplete(run: RunState) {
+    const rb = run.brief.contentType === 'guide' ? run.brief : null
+    // Resumed from the idea step's notice: the wizard never built a brief, so the
+    // form may be empty — the run is the source of truth for the save below.
+    if (brief === null && rb) {
+      setTopic(rb.topic)
+      setCategory(rb.category)
+      setPieceType(rb.pieceType)
+      setKeyPoints(rb.keyPoints.join('\n'))
+      setContext(rb.context ?? '')
+      setSelectedSlugs(rb.productSlugs)
+      setInquiryOverride(rb.inquiryMode)
+    }
     const b = run.blocks
     setPreviewDraft({
-      title: run.outline?.title ?? topic,
+      title: run.outline?.title ?? rb?.topic ?? topic,
       excerpt: run.outline?.excerpt ?? '',
       content: runToDraftHtml(run),
       imagePrompt: run.images?.heroPrompt ?? `Photorealistic lifestyle photo for a dad-focused article about ${topic}, no people, objects and setting only`,

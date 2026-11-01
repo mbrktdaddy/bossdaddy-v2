@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { NextResponse, after, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { aiStreamText, failedCallMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
@@ -12,7 +12,9 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 // Stage 2 — one part, streamed as plain text. The response body is the prose;
 // the run row is updated in onFinish (awaited by the SDK before the stream
-// closes), so the client re-fetches the run after the stream ends.
+// closes), so the client re-fetches the run after the stream ends. The stream is
+// also drained server-side (see the bottom of POST) so a dropped client does not
+// lose the part.
 export const maxDuration = 120
 
 const EFFORT = 'high' as const
@@ -105,5 +107,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     },
   })
 
+  // A closed tab aborts the response stream, which would cancel the model call
+  // before onFinish persists the part. Draining the stream server-side keeps
+  // the call running to completion; after() keeps the function alive for it.
+  // Errors are already handled by onError above.
+  after(async () => {
+    await result.consumeStream({ onError: () => undefined })
+  })
   return result.toTextStreamResponse()
 }
