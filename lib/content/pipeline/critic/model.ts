@@ -20,16 +20,41 @@ export const CRITIC_CODES = [
   'other',
 ] as const
 
+// The prose caps the editor is ASKED for (in the descriptions) and the hard
+// caps the schema rejects at are different numbers on purpose. An over-long
+// summary used to throw the whole pass away (2026-10-31: five good findings
+// lost over the summary's 500); now anything up to the hard cap validates and
+// the route clips it to the display length with `clipFinding` / `clipSummary`.
+export const CRITIC_CAPS = { message: 300, quote: 200, summary: 500 } as const
+const HARD = { message: 900, quote: 600, summary: 1500 } as const
+
 export const CriticOutput = z.object({
   findings: z.array(z.object({
     severity: z.enum(['block', 'warn', 'note']),
     code:     z.enum(CRITIC_CODES),
-    message:  z.string().min(1).max(300).describe('One sentence an editor could act on'),
+    message:  z.string().min(1).max(HARD.message).describe(`One sentence an editor could act on, under ${CRITIC_CAPS.message} characters`),
     part:     z.number().int().min(1).nullable().describe('1-based part number from the outline, or null if whole-piece'),
-    quote:    z.string().max(200).nullable().describe('The offending phrase, verbatim and short'),
+    quote:    z.string().max(HARD.quote).nullable().describe(`The offending phrase, verbatim and short (under ${CRITIC_CAPS.quote} characters)`),
   })).max(20),
-  summary: z.string().max(500).describe('Two sentences: the piece\'s biggest strength and its biggest risk'),
+  summary: z.string().max(HARD.summary).describe(`Two sentences, under ${CRITIC_CAPS.summary} characters: the piece's biggest strength and its biggest risk`),
 })
+
+/** Clip a string to `max` on a word boundary with an ellipsis; short strings pass through. */
+function clipText(text: string, max: number): string {
+  const t = text.trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max - 1)
+  const space = cut.lastIndexOf(' ')
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`
+}
+
+export function clipFinding<T extends { message: string; quote: string | null }>(f: T): T {
+  return { ...f, message: clipText(f.message, CRITIC_CAPS.message), quote: f.quote != null ? clipText(f.quote, CRITIC_CAPS.quote) : f.quote }
+}
+
+export function clipSummary(summary: string): string {
+  return clipText(summary, CRITIC_CAPS.summary)
+}
 export type CriticModelOutput = z.infer<typeof CriticOutput>
 
 /** The structured blocks as plain text for the editor (null when none were derived yet). */

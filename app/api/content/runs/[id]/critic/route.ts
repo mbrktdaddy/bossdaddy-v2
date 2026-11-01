@@ -5,7 +5,7 @@ import { getVoiceProfile, voiceProfileFactLines } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
 import { runRules } from '@/lib/content/pipeline/critic/rules'
-import { CRITIC_SYSTEM, CriticOutput, blocksText, criticPrompt, type CriticModelOutput } from '@/lib/content/pipeline/critic/model'
+import { CRITIC_SYSTEM, CriticOutput, blocksText, clipFinding, clipSummary, criticPrompt, type CriticModelOutput } from '@/lib/content/pipeline/critic/model'
 import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import type { Critic, CriticFinding } from '@/lib/content/pipeline/types'
@@ -65,10 +65,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       promptVersion: PROMPT_VERSION,
     })
     cost = meta.costUsd ?? 0
-    for (const f of object.findings) {
+    for (const raw of object.findings) {
+      const f = clipFinding(raw)
       findings.push({ severity: f.severity, code: f.code, message: f.message, part: f.part != null ? f.part - 1 : null, quote: f.quote ?? null, source: 'model' })
     }
-    summary = object.summary
+    summary = clipSummary(object.summary)
     await logGeneration(supabase, {
       userId, contentType: run.contentType, runId: run.id, stage: 'critic', status: 'done',
       meta, effort: EFFORT, temperature: TEMPERATURE, input: { prompt }, output: object,

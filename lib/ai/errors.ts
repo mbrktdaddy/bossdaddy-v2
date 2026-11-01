@@ -38,7 +38,35 @@ export interface ClassifiedAiError {
   rawText?: string
 }
 
-const RAW_TEXT_LIMIT = 2000
+// Stored on the failed `generations` row only (never sent to the client). The
+// old 2000 clipped a critic answer mid-summary, which hid the field that broke
+// the schema (2026-10-31); 12k covers every structured answer the pipeline asks
+// for, so the whole object is recoverable from the row.
+const RAW_TEXT_LIMIT = 12_000
+
+/**
+ * The schema issues behind a NoObjectGeneratedError, as `path: message` lines.
+ * The SDK wraps the zod error two levels down (NoObjectGeneratedError → 
+ * TypeValidationError → ZodError) and TypeValidationError's own message
+ * embeds the whole value, so the issues are the only readable part. Duck-typed
+ * walk of `cause`, first three issues, so the console line and the failed row
+ * say WHICH field broke instead of "did not match schema".
+ */
+function schemaIssues(err: unknown): string {
+  let cur: unknown = err
+  for (let depth = 0; depth < 4 && cur && typeof cur === 'object'; depth++) {
+    const issues = (cur as { issues?: unknown }).issues
+    if (Array.isArray(issues) && issues.length) {
+      return issues.slice(0, 3).map((i) => {
+        const path = Array.isArray((i as { path?: unknown }).path) ? ((i as { path: unknown[] }).path).join('.') : ''
+        const message = String((i as { message?: unknown }).message ?? '')
+        return path ? `${path}: ${message}` : message
+      }).join('; ')
+    }
+    cur = (cur as { cause?: unknown }).cause
+  }
+  return ''
+}
 
 // User-facing copy, kept in the Boss Daddy register and matching the wording the
 // Claude routes used before consolidation (502 preserved for timeout/overload so
@@ -97,9 +125,11 @@ export function classifyClaudeError(err: unknown): ClassifiedAiError {
   // the model was cut off mid-object (truncation); anything else is an
   // unparseable / unexpected response.
   if (NoObjectGeneratedError.isInstance(err)) {
+    const issues = schemaIssues(err)
+    const withIssues = issues ? `${detail} [${issues}]`.slice(0, 400) : detail
     const base = err.finishReason === 'length'
       ? classified('truncated', 502, detail)
-      : classified('no_object', 502, detail)
+      : classified('no_object', 502, withIssues)
     return {
       ...base,
       ...(err.usage ? { usage: err.usage } : {}),
