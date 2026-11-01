@@ -107,6 +107,8 @@ npm run check
 npm test
 ```
 
+**Family gotcha:** `@tiptap/*` siblings pin each other with exact peers, so a plain `npm install` of the five direct packages ERESOLVEs against the old tree. Do it as `npm uninstall <the five>` then `npm install <the five>@<version>` in one step, then verify a single version across the lockfile (the 2026-11-01 run needed this).
+
 Then `npm run build` once if anything in the set touches rendering (`@tiptap/*`, `react-easy-crop`, `sharp`). Report the gate output verbatim on failure and stop — do not retry with a different version. On success, commit direct to master (no PR ceremony — memory `feedback_lightweight_process_no_pr_ceremony`):
 
 ```
