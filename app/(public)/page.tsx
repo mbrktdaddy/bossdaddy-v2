@@ -16,7 +16,7 @@ import AboutBand from '@/components/home/AboutBand'
 import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import HomeHero from '@/components/home/HomeHero'
 import BenchStrip from '@/components/BenchStrip'
-import { MerchStrip } from '@/components/MerchStrip'
+import { MerchCallout } from '@/components/MerchCallout'
 import OccasionTiles from '@/components/collections/OccasionTiles'
 import { getLiveSeasonalGifts, type SeasonalGift } from '@/lib/collections/seasonal-gifts'
 import { isGiftSeason } from '@/lib/gift-occasions'
@@ -451,10 +451,15 @@ export default async function HomePage() {
       {/* ── ABOUT — the closing dark band: portrait + the Creed + two links ── */}
       <AboutBand />
 
-      {/* ── SHOP STRIP — slim "Made by Boss Daddy" band → /shop ─────────────── */}
+      {/* ── SHOP — after the Creed, "rep the brand" (the same narrative as /about).
+          The LIGHT merch form (2026-11-13): the black strip here stacked a third
+          dark band on About + the footer; the quiet module keeps the dark finale
+          to those two. ───────────────────────────────────────────────────────── */}
       <section className="border-b border-soft">
-        <div className="max-w-6xl mx-auto px-6">
-          <MerchStrip />
+        <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+          <Suspense fallback={null}>
+            <MerchCallout className="" />
+          </Suspense>
         </div>
       </section>
     </>

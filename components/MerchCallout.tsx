@@ -1,10 +1,27 @@
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
 import { type Merch } from '@/lib/merch'
+import { BRAND } from '@/lib/brand'
 import { LabelBlock } from '@/components/ui/LabelBlock'
+import { buttonVariants } from '@/components/ui/Button'
 import { FeaturedMerchCard } from './FeaturedMerchCard'
 
-export async function MerchCallout() {
+/**
+ * MerchCallout — the ARTICLE form of the merch module (reviews, guides): light,
+ * under a hairline, after the bench head, so it stays quiet inside the close.
+ * The brand-page form is `MerchStrip` (black, on /gear and /about); the homepage
+ * uses THIS form after the About band — the Creed, then "rep the brand" — because
+ * a black strip there stacked a third dark band on About and the footer.
+ * Settled 2026-11-13 so the two
+ * agree on everything but the surface: the merch voice line as the headline,
+ * "Shop →" as a button, featured items first, the same tile anatomy (image,
+ * status badge, name, price). Self-suppresses at zero items — a teaser is a
+ * brand moment on a brand page and noise on an article.
+ */
+export async function MerchCallout({
+  /** The article margins by default; a page container (the homepage) passes its own. */
+  className = 'mt-12 pt-10 border-t border-soft',
+}: { className?: string } = {}) {
   // Cookie-free anon client — public merch only (audit H3).
   const supabase = createAnonClient()
   // Featured items lead, then the rest of the catalog by position. This used to
@@ -23,17 +40,14 @@ export async function MerchCallout() {
   if (items.length === 0) return null
 
   return (
-    <div className="mt-12 pt-10 border-t border-soft">
-      <div className="flex items-end justify-between mb-6">
-        <div>
+    <div className={className}>
+      <div className="flex items-end justify-between gap-3 mb-6">
+        <div className="min-w-0">
           <LabelBlock className="mb-2">Made by Boss Daddy</LabelBlock>
-          <h3 className="text-lg font-black text-prose">Rep the brand while you&apos;re at it.</h3>
+          <h3 className="text-lg font-black text-prose leading-tight">{BRAND.merchVoice}</h3>
         </div>
-        <Link
-          href="/shop"
-          className="hidden sm:inline-flex text-xs text-prose-faint hover:text-accent-text-soft transition-colors uppercase tracking-widest font-semibold whitespace-nowrap ml-4"
-        >
-          Shop All →
+        <Link href="/shop" className={buttonVariants({ variant: 'outline', size: 'sm', className: 'shrink-0' })}>
+          Shop →
         </Link>
       </div>
 
@@ -55,12 +69,6 @@ export async function MerchCallout() {
         {items.map((item) => (
           <FeaturedMerchCard key={item.id} item={item} compact />
         ))}
-      </div>
-
-      <div className="mt-5 sm:hidden text-center">
-        <Link href="/shop" className="text-sm text-accent-text-soft hover:text-accent font-semibold transition-colors">
-          Shop All →
-        </Link>
       </div>
     </div>
   )

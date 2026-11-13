@@ -1,19 +1,31 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { createAnonClient } from '@/lib/supabase/anon'
-import { getMerchDisplayImage, type Merch } from '@/lib/merch'
+import { formatPrice, getMerchDisplayImage, type Merch } from '@/lib/merch'
 import { BRAND } from '@/lib/brand'
 import { BagIcon } from '@/components/icons'
+import { Badge } from '@/components/ui/Badge'
 import { LabelBlock } from '@/components/ui/LabelBlock'
 import { buttonVariants } from '@/components/ui/Button'
 
 /**
  * MerchStrip — slim, proud "Made by Boss Daddy" strip, the store's discovery
  * surface. The store itself is /shop (split out of /gear 2026-09-29); this
- * strip rides on content pages (homepage, /gear, /about) so readers find the
- * merch without a fifth nav anchor. "Shop →" goes to /shop.
+ * strip rides on /gear and /about so readers find the merch without a fifth
+ * nav anchor (the homepage and the articles use the light `MerchCallout`).
+ * "Shop →" goes to /shop.
  * Two states: a few live/coming-soon items as a horizontal scroll strip, or a
- * tight branded teaser when nothing is loaded yet.
+ * tight branded teaser when nothing is loaded yet (a brand moment on a brand
+ * page; the article form, `MerchCallout`, disappears instead).
+ *
+ * Settled 2026-11-13 with the callout: the same headline (the merch voice
+ * line), "Shop →" as a button, featured items first, the same tile anatomy
+ * (image, status badge, name, price). Its own tile rather than the shared
+ * card because the card is a light-surface card and would sit as a dark box
+ * on this black panel. It left the homepage 2026-11-13: after the About band
+ * it stacked a third dark band on About + the footer, and anywhere higher it
+ * either broke the content-first order or touched the Tools panels — so the
+ * homepage keeps the slot (the Creed, then "rep the brand") in the light form.
  */
 /**
  * @param exploreHref where "Shop →", the empty state, and the no-link
@@ -25,9 +37,10 @@ export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: stri
 
   const { data } = await supabase
     .from('merch')
-    .select('id, name, slug, image_url, default_image_url, status, position, external_url, printful_sync_product_id')
+    .select('id, name, slug, image_url, default_image_url, price_cents, status, position, external_url, printful_sync_product_id')
     .in('status', ['coming_soon', 'available'])
     .is('archived_at', null)
+    .order('featured', { ascending: false })
     .order('position', { ascending: true })
     .limit(6)
 
@@ -71,12 +84,11 @@ export async function MerchStrip({ exploreHref = '/shop' }: { exploreHref?: stri
                     </div>
                   )}
                   {p.status !== 'available' && (
-                    <span className="absolute top-2 left-2 bg-accent text-white rounded-sm px-2 py-1 text-[10px] font-display font-black uppercase tracking-[0.14em]">
-                      Soon
-                    </span>
+                    <Badge tone="neutral" size="sm" className="absolute top-2 left-2">Coming soon</Badge>
                   )}
                 </div>
                 <p className="text-xs font-semibold text-prose mt-2 w-36 truncate group-hover:text-accent-text transition-colors">{p.name}</p>
+                <p className="text-xs font-bold tabular-nums text-prose mt-0.5">{p.price_cents != null ? formatPrice(p.price_cents) : '—'}</p>
               </>
             )
             return isExternal ? (
