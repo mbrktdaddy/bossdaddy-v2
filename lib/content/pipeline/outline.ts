@@ -17,6 +17,9 @@ export const MAX_PART_REFS = 10
 export const OutlineOutput = z.object({
   titleOptions: z.array(z.string().min(1).max(120)).min(2).max(4)
     .describe('2–4 title options; include the product name / topic keyword; aim under 70 chars'),
+  register: z.string().min(1).max(300).describe(
+    "One or two sentences for the writer, decided before the parts: whose world this piece lives in, on what terms it treats its subject, and where (if anywhere) fatherhood enters. E.g. 'A research explainer for a man who wants the real answer: the body reads the studies straight; the family stakes land in the closing.' or 'A truck-maintenance how-to: all garage, the kids never appear.' Never 'a dad's take on everything'.",
+  ),
   excerpt: z.string().min(1).max(200).describe('One punchy card sentence; aim under 160 chars'),
   parts: z.array(z.object({
     kind:        z.enum(['intro', 'body', 'closing']),
@@ -88,7 +91,7 @@ export function outlinePrompt(brief: Brief, related: RelatedPiece[]): string {
   const inquiry = brief.contentType === 'guide' && brief.inquiryMode
   const fixedImages = brief.imageSlots !== 'auto' ? brief.imageSlots : null
 
-  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece, not a gear piece — plan it in the inquiry register — a witness, not a student: humble in posture, decisive in substance. The outline must arrive at a position; every body part moves toward it.\n\n` : ''}Plan a dad-focused ${briefLabel(brief)}. Produce the OUTLINE only — no prose.
+  return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece, not a gear piece — plan it in the inquiry register — a witness, not a student: humble in posture, decisive in substance. The outline must arrive at a position; every body part moves toward it.\n\n` : ''}Plan a ${briefLabel(brief)} for Boss Daddy's reader — a man who is a father. The piece is about its TOPIC: decide "register" first (whose world it lives in, on what terms it treats the subject, where fatherhood enters — if it does), then plan the parts inside it. Produce the OUTLINE only — no prose.
 
 ${briefHeaderLines(brief)}
 ${data ? `\n${data}\n` : ''}
@@ -101,6 +104,7 @@ ${refLines.map((l) => `${l.id}. ${l.fact} — ${l.source}`).join('\n')}
 STRUCTURE:
 ${structureGuidance(brief)}
 - Headings are specific and useful, written the way a reader scans ("Battery life across a weekend", not "Performance").
+- "register" is the decision the writer follows in every part: the subject on its own terms, in its own world and vocabulary. A fishing guide is a fishing guide; a research explainer reads the research straight; fatherhood, the kids and the family table enter where the subject earns them (a safety call, a family-use part the facts support, the stakes in the closing) — never as a reflex in every part. Headings come from the subject, never from the family angle.
 - "intent" is one plain sentence a writer could act on.
 - "format" is a recommendation the author sees: give a part "steps" or "list" only when a reader would genuinely scan it that way (a sequence they perform; 3+ parallel options or criteria; a checklist). Narrative, argument, verdicts and intros are "prose".
 - "elements" are boxed body elements the author sees and keeps or drops. Recommend a callout only where a warning, safety point, tip or faith note would otherwise break a paragraph; ONE steps box for a piece that teaches a procedure (it recaps the steps the prose explains — after the introduction or after the last step part); ONE facts box when the piece will state 3+ hard numbers worth scanning (price paid, weight, capacity, time tested) — reviews with author facts usually earn it; ONE timeline when the piece narrates a dated sequence (a testing period, a first year, a season); ONE chart only when 3+ numbers in the SAME unit will be compared (never for a lone figure, never invented); ONE video slot only for a how-to where a 30-second demo beats words — the author supplies the clip, so name the subject precisely in "reason". Essays earn none. Most pieces earn 0–1.
@@ -211,6 +215,7 @@ export function buildOutline(model: OutlineModelOutput, brief: Brief, related: R
   return {
     title: titleOptions[0] ?? briefHeaderLines(brief).split('\n')[0],
     titleOptions,
+    ...(model.register?.trim() ? { register: model.register.trim() } : {}),
     excerpt: model.excerpt,
     parts: assignProductTokens(parts, brief),
     blocks: {
@@ -232,6 +237,8 @@ export function buildOutline(model: OutlineModelOutput, brief: Brief, related: R
 export const OutlineEdit = z.object({
   title:    z.string().min(1).max(120),
   excerpt:  z.string().min(1).max(200),
+  /** The outline's register line, author-edited; optional so runs stored before 2026-11-13 still save. */
+  register: z.string().max(300).optional(),
   parts:    z.array(z.object({
     kind:         z.enum(['intro', 'body', 'closing']),
     heading:      z.string().max(200),

@@ -110,6 +110,12 @@ export interface RelatedPiece {
 export interface Outline {
   title: string
   titleOptions: string[]
+  /**
+   * The outline's decision on whose world the piece lives in and where (if
+   * anywhere) fatherhood enters — every part is written against it and the
+   * critic flags a forced angle. Author-editable. Absent on runs before 2026-11-13.
+   */
+  register?: string
   excerpt: string
   parts: OutlinePart[]
   blocks: BlockChoices
@@ -166,6 +172,8 @@ export interface Critic {
 }
 
 export interface ImagePlan {
+  /** The piece's visual world as the planner decided it — where the subject is actually seen. Absent on runs planned before 2026-11-13. */
+  world?: string
   heroPrompt: string
   /** The hero's shot type, kept so a re-plan can vary the slots against it. Absent on runs planned before 2026-10-31. */
   heroShot?: ImageShot

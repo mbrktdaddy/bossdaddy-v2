@@ -52,7 +52,7 @@ export function sectionPrompt(run: RunState, index: number): string {
 
   const kindRules = part.kind === 'intro'
     ? (firsthand && part.notes.length
-        ? 'Open inside a real moment from the notes below (first-person dad). 2–3 sentences; no throat-clearing, no "in this article".'
+        ? 'Open inside a real moment from the notes below (first person). 2–3 sentences; no throat-clearing, no "in this article".'
         : 'Open on the decision or question the reader is facing. No invented scenario, no "last weekend my son…" — the notes carry nothing like that. 2–3 sentences.')
     : part.kind === 'closing'
       ? (brief.contentType === 'review'
@@ -81,6 +81,7 @@ THIS PART
 - Intent: ${part.intent}
 - Target length: about ${part.targetWords} words.
 - ${kindRules}
+- ${registerRule(outline.register)}
 - ${tokenLine}
 ${part.notes.length
     ? `- Author facts for this part — the ONLY firsthand material you may claim; use them concretely, don't restate them as a list:\n${part.notes.map((n) => `    • ${n}`).join('\n')}`
@@ -90,6 +91,18 @@ ${disciplineRules(brief, !!prior)}
 ${formatRules(part, brief)}
 
 Write only the prose of this part: no heading, no title, no preamble, no sign-off. Paragraphs separated by a blank line. No JSON, no # or ## headings, no code fences, no tables, no HTML.`
+}
+
+/**
+ * The register — decided once at the outline, shown to every part — plus the
+ * standing rule behind it (brand-guide §1.6 "The topic sets the register"):
+ * the subject on its own terms; fatherhood where the part's intent or facts
+ * bring it. Before 2026-11-13 the system prompt framed every piece at the
+ * family table, and the pictures followed the prose into the kitchen.
+ */
+function registerRule(register: string | undefined): string {
+  const set = register ? `Register (set at the outline): ${register} ` : ''
+  return `${set}Write this part on the subject's own terms, in its own world and vocabulary. Fatherhood, the kids and the family table enter where this part's intent or facts bring them — not as a reflex; "we dads know" is a tool, not the frame.`
 }
 
 /**

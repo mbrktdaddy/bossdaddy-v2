@@ -18,6 +18,7 @@ export const CRITIC_CODES = [
   'preachy',                 // sermonising, scripture saturation, judging another man's walk — conviction stated as the author's own is NOT preachy
   'generic',                 // a part that could be about any product / any topic
   'rating-mismatch',         // verdict or tone disagrees with the target rating
+  'forced-angle',            // the subject dragged back to fatherhood or the family table where neither the facts nor the part's intent call for it
   'other',
 ] as const
 
@@ -84,7 +85,7 @@ export function blocksText(run: { blocks: Blocks | null }): string | null {
 
 /** The critic's own system prompt — the editor, never the writer (no voice blocks on purpose). */
 export const CRITIC_SYSTEM =
-  'You are a meticulous, fair editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. You return findings only, never rewrites. You never flag religious, moral or metaphysical positions as misleading claims — stating them is the genre on discussion pieces.'
+  'You are a meticulous, fair editor for Boss Daddy (BossDaddyLife.com), a gear and life site for men who are fathers. You return findings only, never rewrites. You never flag religious, moral or metaphysical positions as misleading claims — stating them is the genre on discussion pieces.'
 
 /**
  * @param profileFacts The author's standing profile as "- label: value" lines
@@ -104,7 +105,7 @@ export function criticPrompt(run: RunState, blocksText: string | null, profileFa
   return `${inquiry ? `${INQUIRY_TRIGGER}\n\n` : ''}You are the EDITOR, not the writer. Read this ${briefLabel(brief)} against the author's notes and the house rules, and return findings only. Be specific and sparing — a finding must be something an editor would actually change. Severity: block = must fix before publishing; warn = should fix; note = worth a look.
 
 Title: ${run.outline!.title}
-${brief.contentType === 'review' ? `Author's target rating: ${brief.ratingHint}/10.` : ''}
+${run.outline!.register ? `Register (the outline's decision on whose world the piece lives in and where fatherhood enters): ${run.outline!.register}\n` : ''}${brief.contentType === 'review' ? `Author's target rating: ${brief.ratingHint}/10.` : ''}
 
 AUTHOR NOTES (${facts.length ? 'the only firsthand experience on record — any usage claim, duration, test result, family reaction, friend or anecdote NOT traceable to these is unsupported-firsthand or invented-anecdote' : 'NONE — any firsthand claim at all is unsupported'}):
 ${facts.length ? facts.map((f) => `- ${f}`).join('\n') : '(none)'}
@@ -139,6 +140,7 @@ WHAT TO CHECK (the banlist words, product-token counts and family names are chec
   - warn: the author performing doubt about his own thesis ("I'm not sure about any of this", "I could be wrong about all of it") instead of naming one open sub-question.
   - warn: a faith passage that presents the foundation (grace through faith) as one option among several the author is weighing.` : ''}
 - A part that could be about any product or topic ("generic").
+- The register: the piece treats its subject on its own terms (the Register line above, when there is one). A passage that routes back to the nursery, the minivan or the family table when neither the facts nor the part's intent call for it is "forced-angle" — a note, or a warn when it happens in most parts.
 ${brief.contentType === 'review' ? '- Does the verdict and the overall tone match the target rating?\n' : ''}
 Return the structured object. An empty findings list is a valid, good answer.`
 }

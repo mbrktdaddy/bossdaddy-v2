@@ -26,10 +26,11 @@ import type { ImageLook } from './style'
 export const QaReportSchema = z.object({
   altText: z.string().min(1).max(200)
     .describe('One sentence, 10–20 words, describing what is visible for a screen reader. No "Image of".'),
-  text: z.boolean().describe('Any rendered text, lettering, numbers, signage, labels or a watermark is visible'),
+  text: z.boolean().describe('Readable rendered text — lettering, numbers, signage, labels or a watermark the viewer can actually read. Blurred, distant or illegible marks no one could read do not count'),
   logos: z.boolean().describe('A brand logo, brand name, product packaging, or a recognisable real-world branded product is visible'),
   faces: z.boolean().describe('At least one human face is clearly visible (eyes/nose/mouth readable)'),
   identifiableChild: z.boolean().describe('A child appears with a recognisable face'),
+  likeness: z.boolean().describe('A recognisable real person or public figure is depicted — a likeness you could put a name to — photographed or drawn'),
   artifacts: z.boolean().describe('Obvious generation artifacts: extra or fused fingers, warped objects, impossible geometry, melted text-like shapes'),
   rendered: z.boolean().describe('Looks like an illustration, 3D render, HDR composite or stock photo rather than a candid documentary photograph'),
   matchesSubject: z.boolean().describe('The frame shows the requested subject'),
@@ -58,7 +59,8 @@ const QA_SYSTEM =
   'Judge only what is visible. Be literal and strict about text, logos and faces — a single readable word or one ' +
   'clear face counts. Describe the image accurately for the alt text. Transcribe any visible text verbatim into ' +
   'textSeen, and score publishable as a photo editor would (composition, light, believability, artifacts) — do ' +
-  'not let the rule checks sway the score.'
+  'not let the rule checks sway the score. Illegible, blurred or distant marks no viewer could read are not text. ' +
+  'A likeness means a specific real person you could name.'
 
 const ILLUSTRATION_QA_LINE =
   'This is an editorial illustration, not a photograph: judge composition, line and legibility as an illustrator\'s editor would; "rendered" means it looks like clip art, a cartoon or a 3D render rather than a drawn illustration.'
@@ -112,6 +114,7 @@ export function judgeQa(
 
   if (report.logos) fails.push('a brand, logo or recognisable product is visible')
   if (report.identifiableChild) fails.push('a child is identifiable')
+  if (report.likeness) fails.push('a real person or public figure is depicted')
   if (report.text && toggles.noText) fails.push('rendered text is visible')
   if (report.faces && toggles.people !== 'allowed') {
     fails.push(toggles.people === 'none' ? 'a person is visible' : 'a face is visible')

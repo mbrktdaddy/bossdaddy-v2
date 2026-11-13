@@ -18,8 +18,10 @@ import {
   FIGURE_ASPECTS,
   HERO_COMPOSITION_RULE,
   IMAGE_SHOTS,
+  atmosphereLine,
   doctrineBlock,
   isFigureAspect,
+  type Atmosphere,
   type FigureAspect,
 } from './doctrine'
 import type { PeoplePolicy } from './safety'
@@ -139,7 +141,7 @@ export function settleAspect(
 // ── The system prompt ────────────────────────────────────────────────────────
 
 const ROLE =
-  'You are the photo editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. ' +
+  "You are the photo editor for Boss Daddy (BossDaddyLife.com), a gear and life site for men who are fathers. The pictures are of the topic, in the topic's own world. " +
   'The author is writing a review or a guide and asks you for the prompt an AI image model will turn into one photograph for it. ' +
   'You write that prompt, name its shot type, and write its alt text and caption. You do not write articles and you do not chat.'
 
@@ -201,7 +203,7 @@ export const MODE_LINE: Readonly<Record<AssistMode, string>> = {
   rewrite:
     "Rewrite the current prompt. Keep its subject. Apply the author's instruction; if there is none, tighten it into the five-clause shape and fix anything that breaks the rules. Return exactly 1 prompt.",
   variations:
-    "Give 3 variations of the current prompt's idea. They must be genuinely different concepts, not rewordings: different shot types or different moments, all serving the same piece. " +
+    "Give 3 variations of the current prompt's idea. They must be genuinely different concepts, not rewordings: different settings from the topic's world (at most one at home), different shot types, different hours or weather, all serving the same piece. " +
     "With no current prompt, find three ideas in the piece. Apply the author's instruction to all three. Return exactly 3 prompts.",
   fresh:
     'Ignore any earlier prompt and propose the single best picture for this piece. If the author gave an instruction, treat it as direction. Return exactly 1 prompt.',
@@ -218,6 +220,7 @@ function fence(label: string, body: string): string {
 export function buildAssistUser(
   input: Pick<AssistRequest, 'mode' | 'target' | 'prompt' | 'instruction' | 'aspect'>,
   ctx: ResolvedContext = {},
+  opts: { atmosphere?: Atmosphere } = {},
 ): string {
   const parts: string[] = [MODE_LINE[input.mode]]
 
@@ -241,6 +244,11 @@ export function buildAssistUser(
 
   const instruction = input.instruction?.trim()
   if (instruction) parts.push(`The author's instruction: ${instruction}`)
+
+  // A fresh idea or three variations get the run's season, hour and weather,
+  // so a retry does not land in the same autumn dusk; a rewrite keeps the
+  // author's own setting.
+  if (opts.atmosphere && (input.mode === 'fresh' || input.mode === 'variations')) parts.push(atmosphereLine(opts.atmosphere))
 
   return parts.join('\n\n')
 }

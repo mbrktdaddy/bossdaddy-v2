@@ -5,14 +5,22 @@
 // place lighting, lens and palette are written. Change it here, never in a
 // prompt. The social / media-library lane does not get it — a quote card or a
 // meme is not a documentary photograph.
+//
+// One photographer means one camera discipline — documentary, 35mm, honest
+// depth of field, matte, candid — not one palette and not one room. The light
+// follows the hour and weather the subject prompt sets and the colour is the
+// place's own. The 2026-10 suffix pinned "warm, earthy, lived-in clutter" on
+// every frame and was a third of why every picture read as the same kitchen
+// at dusk (retuned 2026-11-13; doctrine in brand-guide §2 "Images").
 
 export const HOUSE_STYLE_MARKER = 'Photographic style:'
 
 export const HOUSE_STYLE =
   `${HOUSE_STYLE_MARKER} documentary editorial photography for a print magazine. ` +
-  'Natural available light, soft and directional, true-to-life warm colour with a muted earthy palette and one warm accent. ' +
+  "Natural available light as the scene's hour and weather give it — hard noon sun, flat overcast, cold first light, streetlight, work light, firelight — never a studio look. " +
+  "True-to-life colour, restrained and matte: the place's own palette, nothing graded warm or cool, nothing oversaturated. " +
   'A 35mm lens at a slightly wide working distance, shallow but honest depth of field, the subject sharp. ' +
-  'A lived-in real-world setting with everyday clutter left in, candid framing, matte finish. ' +
+  'A real place as found — nothing tidied, nothing staged — candid framing, matte finish. ' +
   'Not a studio product shot, not HDR, not neon, not an illustration or a 3D render, no stock-photo posing.'
 
 /** Append the house style once; a prompt that already carries it is returned as-is. */
@@ -36,7 +44,7 @@ export const ILLUSTRATION_STYLE_MARKER = 'Illustration style:'
 
 export const ILLUSTRATION_STYLE =
   `${ILLUSTRATION_STYLE_MARKER} editorial spot illustration for the op-ed page of a print magazine. ` +
-  'A flat, hand-drawn feel with confident ink linework and loose textured fills; a limited palette of warm off-white paper, near-black ink and one burnt-orange accent; generous negative space; the subject simplified to its telling shape. ' +
+  'A flat, hand-drawn feel with confident ink linework and loose textured fills; a limited palette of warm off-white paper, near-black ink and one burnt-orange accent; generous negative space; the subject simplified to its telling shape; figures, when drawn, reduced to a few lines, never a caricature of anyone real. ' +
   'Not a cartoon, not clip art, not a 3D render, not a photograph, not a watercolour wash.'
 
 /** Append the illustration style once; a prompt that already carries it is returned as-is. */

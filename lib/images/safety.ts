@@ -12,6 +12,15 @@
 //     the uncanny-valley tell that reads as a fake testimonial next to a
 //     first-person "I tested this" voice. `anonymous` keeps the warmth (hands,
 //     a figure from behind, a face out of frame) without the face.
+//   • Anonymous is not ABSENT: a public place is full of people at a distance,
+//     from behind, in motion. The 2026-10 reading emptied every scene ("as if
+//     someone just stepped away") — that was the sameness, not the safety.
+//   • A likeness of a real person or a public figure is never allowed, in any
+//     lane, drawn or photographed (publicity rights, and the Watch Duty
+//     temptation to draw the politician in the news).
+//   • In the illustration look faces are allowed by default
+//     (`defaultPeopleForLook`): a drawn face is neither uncanny nor a fake
+//     testimonial; a likeness is still out.
 //   • Text in an AI image is the other tell and the site composes text in code
 //     (the OG route), so editorial lanes block it; the social lane may allow it.
 //
@@ -65,6 +74,16 @@ export function isPeoplePolicy(v: unknown): v is PeoplePolicy {
 }
 
 /**
+ * The people default a panel and the planner start on for a look: anonymous
+ * for the photograph (an AI face is the uncanny tell beside a first-person
+ * voice), faces allowed for the illustration (a drawn figure is honest about
+ * being made; a likeness is still out). The author changes it per piece.
+ */
+export function defaultPeopleForLook(look: ImageLook): PeoplePolicy {
+  return look === 'illustration' ? 'allowed' : 'anonymous'
+}
+
+/**
  * Merge caller-supplied toggles over a preset baseline. `noBrands` is pinned on
  * regardless of what the caller passes — relaxing it is not an option we expose.
  * Only explicitly-set keys apply: an `undefined` override must NOT clobber the
@@ -106,18 +125,19 @@ export function buildSafetyRules(toggles: SafetyToggles, look: ImageLook = 'phot
     )
   }
   if (toggles.noText) {
-    clauses.push('NO text, lettering, numbers, signage, labels or watermarks anywhere in the frame')
+    clauses.push('NO text that can be read — no lettering, numbers, signage, labels or watermarks anywhere in the frame; any sign, label or spine the scene would have is blurred, turned away or too small to read')
   }
   if (toggles.people === 'none') {
     clauses.push('NO people, no hands, no body parts')
   } else if (toggles.people === 'anonymous') {
     clauses.push(
-      'People may appear ONLY anonymously — hands, a figure from behind, out of focus, or with the face out of frame; ' +
+      'People may appear ONLY anonymously — hands, a figure from behind, out of focus, at a distance in a crowd, in motion, or with the face out of frame; ' +
         'NEVER a visible face, never a recognisable person',
     )
   }
   if (toggles.people !== 'none') {
     clauses.push('Any child in the frame must be unidentifiable (face turned away, out of frame, or out of focus)')
+    clauses.push('NEVER a recognisable real person, a public figure or any likeness of someone who exists')
   }
   if (toggles.editorialOnly) {
     clauses.push(
