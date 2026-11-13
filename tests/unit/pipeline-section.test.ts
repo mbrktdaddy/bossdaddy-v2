@@ -111,3 +111,42 @@ describe('formatRules (lane 1, docs/rich-elements-plan.md §2)', () => {
     expect(sectionPrompt(r, 1)).toContain('This is an essay: paragraphs only')
   })
 })
+
+describe('sectionPrompt — reference facts per part', () => {
+  const brief: RunState['brief'] = {
+    contentType: 'review', productName: 'Battery Daddy', category: 'garage', keyFeatures: [], specs: [], competitors: [], imageSlots: 'auto', ratingHint: 7,
+    references: [{ url: 'https://www.dewalt.com/x' }],
+    referenceNotes: [{ url: 'https://www.dewalt.com/x', title: 'DCD791 Drill', status: 'ok', facts: ['DeWalt lists it at 3.4 lb', 'Two-speed gearbox'] }],
+  }
+  const withRefs = (): RunState => {
+    const base = run()
+    return run({
+      brief,
+      outline: {
+        ...base.outline!,
+        parts: [
+          base.outline!.parts[0],
+          { ...base.outline!.parts[1], refs: ['DeWalt lists it at 3.4 lb (source: DCD791 Drill)'] },
+          base.outline!.parts[2],
+        ],
+      },
+    })
+  }
+
+  it('a part with refs gets only its share, with the attribution rule, never the whole block', () => {
+    const p = sectionPrompt(withRefs(), 1)
+    expect(p).toContain('Reference facts for this part')
+    expect(p).toContain('• DeWalt lists it at 3.4 lb (source: DCD791 Drill)')
+    expect(p).toContain('name the source in words, never a URL')
+    expect(p).not.toContain('Two-speed gearbox')
+    expect(p).not.toContain('REFERENCE NOTES')
+  })
+  it('a part with no refs on a piece that has references is told to cite nothing', () => {
+    expect(sectionPrompt(withRefs(), 2)).toContain('Cite no source in this part')
+  })
+  it('a piece with no references carries neither line', () => {
+    const p = sectionPrompt(run(), 1)
+    expect(p).not.toContain('Reference facts for this part')
+    expect(p).not.toContain('Cite no source')
+  })
+})

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { OutlineEdit, assignProductTokens, buildOutline, defaultBlockChoices, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { OutlineEdit, assignProductTokens, buildOutline, defaultBlockChoices, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
 import type { Brief, OutlinePart } from '@/lib/content/pipeline/types'
 
 const review: Brief = {
@@ -118,5 +118,55 @@ describe('buildOutline — part format (lane 1)', () => {
     expect(parsed.success).toBe(true)
     expect(parsed.success && parsed.data.parts[1].format).toBe('steps')
     expect(parsed.success && parsed.data.parts[0].format).toBeUndefined()
+  })
+})
+
+describe('reference facts → per-part refs', () => {
+  const withRefs: Brief = {
+    ...review,
+    references: [{ url: 'https://www.dewalt.com/x' }, { url: 'https://www.cpsc.gov/r' }],
+    referenceNotes: [
+      { url: 'https://www.dewalt.com/x', title: 'DCD791 Drill', status: 'ok', facts: ['DeWalt lists it at 3.4 lb', 'Two-speed gearbox'] },
+      { url: 'https://www.cpsc.gov/r', title: null, status: 'ok', facts: ['Recalled in 2024 for a battery fault'] },
+      { url: 'https://dead.example/x', title: null, status: 'failed', facts: [], error: 'gone' },
+    ],
+  }
+  const model: OutlineModelOutput = {
+    titleOptions: ['A', 'B'], excerpt: 'e',
+    parts: [
+      { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60, format: 'prose' },
+      { kind: 'body', heading: 'Weight', intent: 'w', notes: [], refIds: [1, 1, 9], targetWords: 200, format: 'prose' },
+      { kind: 'body', heading: 'Safety', intent: 's', notes: [], refIds: [3], targetWords: 200, format: 'prose' },
+      { kind: 'closing', heading: 'The Verdict', intent: 'land', notes: [], targetWords: 120, format: 'prose' },
+    ],
+    blocks: { tldr: true, keyTakeaways: true, faqs: false, bestFor: true, notFor: true, prosCons: true },
+    elements: [], imageCount: 2,
+  }
+
+  it('the outline prompt lists the facts numbered across sources instead of the fenced block', () => {
+    const p = outlinePrompt(withRefs, [])
+    expect(p).toContain('REFERENCE FACTS')
+    expect(p).toContain('1. DeWalt lists it at 3.4 lb — DCD791 Drill')
+    expect(p).toContain('2. Two-speed gearbox — DCD791 Drill')
+    expect(p).toContain('3. Recalled in 2024 for a battery fault — cpsc.gov')
+    expect(p).not.toContain('REFERENCE NOTES')
+    expect(outlinePrompt(review, [])).not.toContain('REFERENCE FACTS')
+  })
+
+  it('buildOutline maps ids to "fact (source: name)" lines and drops unknown or repeated ids', () => {
+    const o = buildOutline(model, withRefs, [])
+    expect(o.parts[0].refs).toEqual([])
+    expect(o.parts[1].refs).toEqual(['DeWalt lists it at 3.4 lb (source: DCD791 Drill)'])
+    expect(o.parts[2].refs).toEqual(['Recalled in 2024 for a battery fault (source: cpsc.gov)'])
+    expect(o.parts[3].refs).toEqual([])
+  })
+
+  it('an author edit keeps refs; an outline stored without them still parses', () => {
+    const o = buildOutline(model, withRefs, [])
+    const edit = OutlineEdit.parse({ title: 't', excerpt: 'e', parts: o.parts, blocks: o.blocks, imageCount: 1 })
+    expect(edit.parts[1].refs).toEqual(['DeWalt lists it at 3.4 lb (source: DCD791 Drill)'])
+    const bare = o.parts.map((p) => ({ kind: p.kind, heading: p.heading, intent: p.intent, notes: p.notes, targetWords: p.targetWords, productToken: p.productToken }))
+    const old = OutlineEdit.parse({ title: 't', excerpt: 'e', parts: bare, blocks: o.blocks, imageCount: 1 })
+    expect(old.parts[1].refs).toBeUndefined()
   })
 })

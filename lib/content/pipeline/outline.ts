@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { INQUIRY_TRIGGER } from '../prompts'
-import { briefDataBlocks, briefFacts, briefHeaderLines, briefLabel, briefProductSlugs, hasFirsthand } from './briefs'
+import { briefDataBlocks, briefFacts, briefHeaderLines, briefLabel, briefProductSlugs, briefReferenceLines, hasFirsthand, referenceLineText } from './briefs'
 import { PLAN_TYPES } from '../elements'
 import type { ElementPlan } from '../elements'
 import type { BlockChoices, Brief, Outline, OutlinePart, RelatedPiece } from './types'
@@ -9,6 +9,9 @@ import type { BlockChoices, Brief, Outline, OutlinePart, RelatedPiece } from './
 // where blocks and length are chosen per piece (no forced eight blocks, no
 // fixed 3–5 × 150–250), where the author's facts are distributed across parts,
 // and where cross-links / near-duplicates surface.
+
+/** Reference facts one part may cite — the whole block was up to 120 lines at ten links. */
+export const MAX_PART_REFS = 10
 
 export const OutlineOutput = z.object({
   titleOptions: z.array(z.string().min(1).max(120)).min(2).max(4)
@@ -20,6 +23,8 @@ export const OutlineOutput = z.object({
     intent:      z.string().min(1).max(400).describe('One line: what this part must do for the reader'),
     notes:       z.array(z.string().max(300)).max(8)
       .describe("Which of the AUTHOR FACTS this part draws on — copy them verbatim from the list; a part may have none"),
+    refIds:      z.array(z.number().int().min(1)).optional()
+      .describe('Numbers from the REFERENCE FACTS list this part should cite — each fact belongs to the ONE part where a reader needs it; a part may have none; omit when there is no list'),
     targetWords: z.number().int().min(40).max(600),
     format:      z.enum(['prose', 'steps', 'list'])
       .describe('"steps" when the reader performs things in order (one numbered list is the spine of the part); "list" when 3+ parallel options, criteria or items scan better as bullets; "prose" otherwise. Most parts are prose; an intro and a closing always are; an essay never has steps or list'),
@@ -75,6 +80,9 @@ function structureGuidance(brief: Brief): string {
 
 export function outlinePrompt(brief: Brief, related: RelatedPiece[]): string {
   const facts = briefFacts(brief)
+  const refLines = briefReferenceLines(brief)
+  // The numbered list below replaces the fenced reference block for this stage.
+  const data = briefDataBlocks(brief, { references: false })
   const slugs = briefProductSlugs(brief)
   const inquiry = brief.contentType === 'guide' && brief.inquiryMode
   const fixedImages = brief.imageSlots !== 'auto' ? brief.imageSlots : null
@@ -82,10 +90,13 @@ export function outlinePrompt(brief: Brief, related: RelatedPiece[]): string {
   return `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis is a discussion piece, not a gear piece — plan it in the inquiry register — a witness, not a student: humble in posture, decisive in substance. The outline must arrive at a position; every body part moves toward it.\n\n` : ''}Plan a dad-focused ${briefLabel(brief)}. Produce the OUTLINE only — no prose.
 
 ${briefHeaderLines(brief)}
-${briefDataBlocks(brief) ? `\n${briefDataBlocks(brief)}\n` : ''}
+${data ? `\n${data}\n` : ''}
 AUTHOR FACTS (${facts.length ? 'the only firsthand material this piece may claim — assign each fact to the part where it belongs, verbatim' : 'NONE — the author gave no firsthand notes, so plan parts that need none: no testing scenarios, no family moments, no "last weekend"'}):
 ${facts.length ? facts.map((f) => `- ${f}`).join('\n') : '(none)'}
-
+${refLines.length ? `
+REFERENCE FACTS (attributed knowledge from sources the author supplied — NOT firsthand, never a "note". Assign each by its number, in "refIds", to the ONE part where a reader needs it; a fact that fits nowhere goes to no part):
+${refLines.map((l) => `${l.id}. ${l.fact} — ${l.source}`).join('\n')}
+` : ''}
 STRUCTURE:
 ${structureGuidance(brief)}
 - Headings are specific and useful, written the way a reader scans ("Battery life across a weekend", not "Performance").
@@ -159,18 +170,29 @@ export function normalizeElementPlans(plans: ElementPlan[] | undefined, parts: O
 /** Normalise the model's outline into the editable Outline the run stores. */
 export function buildOutline(model: OutlineModelOutput, brief: Brief, related: RelatedPiece[]): Outline {
   const parts: OutlinePart[] = []
+  // Reference ids → the lines they name; unknown or repeated ids are dropped, never guessed.
+  const lines = briefReferenceLines(brief)
+  const refsFor = (ids: number[] | undefined): string[] => {
+    const out: string[] = []
+    const seen = new Set<number>()
+    for (const id of ids ?? []) {
+      const l = lines[id - 1]
+      if (l && !seen.has(id)) { seen.add(id); out.push(referenceLineText(l)) }
+    }
+    return out.slice(0, MAX_PART_REFS)
+  }
   const intro = model.parts.find((p) => p.kind === 'intro')
   const closing = [...model.parts].reverse().find((p) => p.kind === 'closing')
   const bodies = model.parts.filter((p) => p.kind === 'body')
 
   parts.push({
     kind: 'intro', heading: '', intent: intro?.intent ?? 'Open the piece.',
-    notes: intro?.notes ?? [], targetWords: intro?.targetWords ?? 60, productToken: null,
+    notes: intro?.notes ?? [], refs: refsFor(intro?.refIds), targetWords: intro?.targetWords ?? 60, productToken: null,
   })
   const essay = brief.contentType === 'guide' && brief.pieceType === 'essay'
   for (const b of bodies) {
     parts.push({
-      kind: 'body', heading: b.heading.trim() || 'Untitled', intent: b.intent, notes: b.notes, targetWords: b.targetWords, productToken: null,
+      kind: 'body', heading: b.heading.trim() || 'Untitled', intent: b.intent, notes: b.notes, refs: refsFor(b.refIds), targetWords: b.targetWords, productToken: null,
       // Essays never get a list spine, whatever the model said (critic: list-in-essay).
       format: essay ? 'prose' : (b.format ?? 'prose'),
     })
@@ -178,7 +200,7 @@ export function buildOutline(model: OutlineModelOutput, brief: Brief, related: R
   const closingHeading = brief.contentType === 'review' ? 'The Verdict' : 'Wrapping Up'
   parts.push({
     kind: 'closing', heading: closing?.heading.trim() || closingHeading, intent: closing?.intent ?? 'Land the piece.',
-    notes: closing?.notes ?? [], targetWords: closing?.targetWords ?? 120, productToken: null,
+    notes: closing?.notes ?? [], refs: refsFor(closing?.refIds), targetWords: closing?.targetWords ?? 120, productToken: null,
   })
 
   const duplicate = model.titleOptions.find((t) => /^DUPLICATE\?/i.test(t))
@@ -214,6 +236,8 @@ export const OutlineEdit = z.object({
     heading:      z.string().max(200),
     intent:       z.string().min(1).max(400),
     notes:        z.array(z.string().max(300)).max(12),
+    // Optional: runs stored before 2026-11-13 have no refs. Same strip-on-omit trap as format.
+    refs:         z.array(z.string().max(400)).max(MAX_PART_REFS).optional(),
     targetWords:  z.number().int().min(40).max(600),
     productToken: z.string().regex(/^[a-z0-9-]+$/).max(80).nullable(),
     // Optional: runs stored before 2026-10-25 have no format. z.object strips

@@ -34,8 +34,9 @@ function getLimiter(type: string): Ratelimit | null {
     'draft-blocks':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_draft_blocks' }),
     'critic':          new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_critic' }),
     'draft-images':    new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_draft_images' }),
-    // Reference links read before a run starts — one call per link, ≤10 per tap.
-    'references':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60,  '1 h'),  prefix: 'bd_references' }),
+    // Reference links read before a run starts — one Claude call per LINK, so the
+    // route charges the window per link (`cost`), not per tap: 80 page reads an hour.
+    'references':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(80,  '1 h'),  prefix: 'bd_references' }),
     // One section at a time — cheaper than `refine`, used more often.
     'refine-section':  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60,  '1 h'),  prefix: 'bd_refine_section' }),
     newsletter:        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
@@ -140,7 +141,9 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'references' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'image-card' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft'
+  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'references' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'image-card' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft',
+  /** `cost`: how many units this call consumes (default 1) — a batch that fans out into N paid calls charges N. */
+  opts: { cost?: number } = {},
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
   const failClosed = FAIL_CLOSED_TYPES.has(type)
   const limiter = getLimiter(type)
@@ -157,7 +160,8 @@ export async function checkRateLimit(
   }
 
   try {
-    const result = await limiter.limit(identifier)
+    const cost = Math.max(1, Math.floor(opts.cost ?? 1))
+    const result = await limiter.limit(identifier, cost > 1 ? { rate: cost } : undefined)
     return {
       success:   result.success,
       remaining: result.remaining,

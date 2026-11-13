@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { sanitizeSpecs } from '../specs'
 import { dataBlock, specLines } from '../prompts'
 import { splitFacts } from './facts'
-import { MAX_REFERENCES, ReferenceInput, ReferenceNote, pruneReferenceNotes, referenceBlock } from '../references'
+import { MAX_REFERENCES, ReferenceInput, ReferenceNote, pruneReferenceNotes, referenceBlock, referenceSourceName } from '../references'
 import type { Brief, GuideBrief, ReviewBrief } from './types'
 
 // The wizard's inputs, validated once at run creation. The shapes mirror the
@@ -131,9 +131,15 @@ export function hasFirsthand(brief: Brief): boolean {
   return briefFacts(brief).length > 0
 }
 
-/** The untrusted-data blocks (specs, competitors, reference notes) fenced for a prompt; '' if none. */
-export function briefDataBlocks(brief: Brief): string {
-  const refs = referenceBlock(brief.referenceNotes)
+/**
+ * The untrusted-data blocks (specs, competitors, reference notes) fenced for a
+ * prompt; '' if none. `references: false` leaves the reference block out — the
+ * outline gets the NUMBERED list instead (it assigns facts to parts by id) and a
+ * section gets only its part's share (`OutlinePart.refs`); the critic and the
+ * refines judge the whole piece, so they take the whole block.
+ */
+export function briefDataBlocks(brief: Brief, opts: { references?: boolean } = {}): string {
+  const refs = opts.references === false ? '' : referenceBlock(brief.referenceNotes)
   if (brief.contentType !== 'review') return refs
   const out: string[] = []
   const specs = specLines(brief.specs)
@@ -179,4 +185,28 @@ export function briefHeaderLines(brief: Brief): string {
 export function briefProductSlugs(brief: Brief): string[] {
   if (brief.contentType === 'review') return brief.productSlug ? [brief.productSlug] : []
   return brief.inquiryMode ? [] : brief.productSlugs
+}
+
+/** One fetched reference fact, numbered so the outline can assign it to a part by id. */
+export interface ReferenceLine { id: number; source: string; fact: string }
+
+/** Every usable reference fact on the brief, numbered 1..n across sources, in source order. */
+export function briefReferenceLines(brief: Brief): ReferenceLine[] {
+  const out: ReferenceLine[] = []
+  for (const n of brief.referenceNotes ?? []) {
+    if (n.status !== 'ok') continue
+    const source = referenceSourceName(n)
+    for (const fact of n.facts) out.push({ id: out.length + 1, source, fact })
+  }
+  return out
+}
+
+/** The form a part's assigned reference carries into the section prompt and the editor. */
+export function referenceLineText(l: ReferenceLine): string {
+  return `${l.fact} (source: ${l.source})`
+}
+
+/** Does the brief carry any reference fact at all? Drives the "cite no source here" rule. */
+export function hasReferences(brief: Brief): boolean {
+  return (brief.referenceNotes ?? []).some((n) => n.status === 'ok' && n.facts.length > 0)
 }

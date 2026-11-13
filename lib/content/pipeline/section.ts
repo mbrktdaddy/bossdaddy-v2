@@ -1,6 +1,6 @@
 import { INQUIRY_TRIGGER } from '../prompts'
 import { assembleDraftHtml } from '../html'
-import { briefDataBlocks, briefHeaderLines, briefLabel, hasFirsthand } from './briefs'
+import { briefDataBlocks, briefHeaderLines, briefLabel, hasFirsthand, hasReferences } from './briefs'
 import type { Brief, OutlinePart, PartFormat, RunState } from './types'
 
 // Stage 2 — one part at a time, streamed. Each call sees the approved outline,
@@ -40,6 +40,9 @@ export function sectionPrompt(run: RunState, index: number): string {
   const total = outline.parts.length
   const prior = priorProse(run, index)
   const firsthand = hasFirsthand(brief)
+  // Specs + competitors only: this part's reference share arrives via `part.refs` below,
+  // not the whole reference block (which ran to 120 lines at ten links).
+  const data = briefDataBlocks(brief, { references: false })
 
   const headingLine = part.kind === 'intro' ? '(no heading — this opens the piece)' : `"${part.heading}"`
   const tokenLine = part.productToken
@@ -64,7 +67,7 @@ export function sectionPrompt(run: RunState, index: number): string {
 
 Title: ${outline.title}
 ${briefHeaderLines(brief)}
-${briefDataBlocks(brief) ? `\n${briefDataBlocks(brief)}\n` : ''}
+${data ? `\n${data}\n` : ''}
 FULL OUTLINE (headings in order — write only yours):
 ${outline.parts.map((p, i) => `${i + 1}. ${p.kind === 'intro' ? '[intro]' : p.kind === 'closing' ? `[closing] ${p.heading}` : p.heading}${i === index ? '   ← THIS PART' : ''}`).join('\n')}
 ${prior ? `
@@ -81,18 +84,24 @@ THIS PART
 ${part.notes.length
     ? `- Author facts for this part — the ONLY firsthand material you may claim; use them concretely, don't restate them as a list:\n${part.notes.map((n) => `    • ${n}`).join('\n')}`
     : `- Author facts for this part: none. Write from general knowledge and the product/topic facts above. Do NOT claim any usage, test result, duration or family reaction.`}
-${referenceRule(brief)}
+${referenceLines(part, brief)}
 ${formatRules(part, brief)}
 
 Write only the prose of this part: no heading, no title, no preamble, no sign-off. Paragraphs separated by a blank line. No JSON, no # or ## headings, no code fences, no tables, no HTML.`
 }
 
-/** One rule line when the brief carries fetched reference notes; '' otherwise. */
-function referenceRule(brief: Brief): string {
-  const has = brief.referenceNotes?.some((n) => n.status === 'ok' && n.facts.length)
-  return has
-    ? '- Reference notes above are attributed knowledge, not experience: say who says it ("the maker lists…", "per the recall notice"), name the source in words, never a URL, and never claim you tested what only a source states.'
-    : ''
+/**
+ * This part's share of the reference facts (assigned at the outline), with the
+ * attribution rule; a "cite nothing here" line when the piece has references
+ * but this part got none; '' when the brief carries no references at all.
+ */
+function referenceLines(part: OutlinePart, brief: Brief): string {
+  const refs = part.refs ?? []
+  if (refs.length) {
+    return `- Reference facts for this part — attributed knowledge, NOT experience: state each as what its source says ("the maker lists…", "per the recall notice"), name the source in words, never a URL, and never claim you tested what only the source states:\n${refs.map((r) => `    • ${r}`).join('\n')}`
+  }
+  if (hasReferences(brief)) return '- Reference facts for this part: none. Cite no source in this part — the sourced facts belong to other parts.'
+  return ''
 }
 
 /**

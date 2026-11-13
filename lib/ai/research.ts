@@ -205,6 +205,20 @@ export async function aiResearch<T>(opts: {
  * may read ONLY the given URLs (`allowedDomains` = their hosts, `maxUses` =
  * their count). Backs /api/content/references.
  */
+// Which web_fetch tool `aiFetch` uses unless a call says otherwise (`dynamicFiltering`).
+//   true  = web_fetch_20260209: the page is loaded into a code-execution sandbox and
+//           the model filters it there — fewer context tokens for a huge document.
+//   false = web_fetch_20250910: the page text goes straight into context, capped by
+//           maxContentTokens.
+// Measured 2026-11-13 with `npm run ai:fetch-smoke [--plain]` (Sonnet 5, 20k content cap):
+//   cpsc.gov/Recalls (heavy listing)      filtering 41.6k tokens · plain 32.1k
+//   wikipedia Cordless_drill (article)    filtering 17.8k tokens · plain  9.0k
+// Plain was cheaper both times (23–50%), ran no code-execution steps, and its worst
+// case is bounded by maxContentTokens; filtering's cost also varied run to run
+// (52.7k on the same CPSC page the day before). So plain is the default; a caller
+// reading a huge PDF can ask for filtering per call.
+const FETCH_DYNAMIC_FILTERING = false
+
 export async function aiFetch<T>(opts: {
   tag: string
   system: string
@@ -217,16 +231,23 @@ export async function aiFetch<T>(opts: {
   maxContentTokens?: number
   /** Anthropic reasoning effort. maxOutputTokens INCLUDES reasoning, so pair a low effort with a roomy cap. */
   effort?: 'low' | 'medium' | 'high'
+  /** Override the module default (see FETCH_DYNAMIC_FILTERING) for one call. */
+  dynamicFiltering?: boolean
   temperature?: number
   timeout?: number
 }): Promise<{ object: T; meta: CallMeta }> {
   const model = MODELS.claudeSonnet
-  const hosts = [...new Set(opts.urls.map((u) => new URL(u).hostname))]
+  // example.com and www.example.com redirect to each other all the time; the domain lock
+  // must not turn that into a blocked fetch, so allow both spellings of every host.
+  const hosts = [...new Set(opts.urls.flatMap((u) => {
+    const h = new URL(u).hostname
+    return h.startsWith('www.') ? [h, h.slice(4)] : [h, `www.${h}`]
+  }))]
   const startedAt = Date.now()
   const result = await generateText({
     model: gateway(model),
     tools: {
-      web_fetch: anthropic.tools.webFetch_20260209({
+      web_fetch: (opts.dynamicFiltering ?? FETCH_DYNAMIC_FILTERING ? anthropic.tools.webFetch_20260209 : anthropic.tools.webFetch_20250910)({
         maxUses: opts.urls.length,
         allowedDomains: hosts,
         maxContentTokens: opts.maxContentTokens ?? 20_000,

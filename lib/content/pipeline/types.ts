@@ -76,6 +76,13 @@ export interface OutlinePart {
   intent: string
   /** The author's facts this part may draw on — the ONLY firsthand material. */
   notes: string[]
+  /**
+   * The reference facts (attributed knowledge from the author's links) this part
+   * cites, as "fact (source: name)" lines. Assigned by the outline stage from the
+   * numbered REFERENCE FACTS list, edited by the author; a section is told to cite
+   * no source when its list is empty. Absent on runs stored before 2026-11-13.
+   */
+  refs?: string[]
   targetWords: number
   /** A slug to embed exactly once in this part, or null. Assigned in code, not by the model. */
   productToken: string | null

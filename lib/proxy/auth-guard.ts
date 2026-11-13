@@ -60,7 +60,10 @@ export async function checkAuthGuard(args: {
   if ((pathname.startsWith('/dashboard') || pathname.startsWith('/account')) && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('next', pathname)
+    // Path AND query: the share-target page (/dashboard/share?url=…) carries its payload in
+    // the query string, and a bounce that kept only the path would land the author on an
+    // empty share page after signing in. /login accepts any same-origin path, query included.
+    url.searchParams.set('next', pathname + request.nextUrl.search)
     return NextResponse.redirect(url)
   }
 
