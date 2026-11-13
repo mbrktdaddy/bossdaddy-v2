@@ -1,17 +1,40 @@
-// The instrument deck — the signed-in toolbox's one black panel.
+// The instrument deck — the toolbox's one panel.
 //
 // Hard Goods Tools anatomy: a dark zone, the 4px orange rule, an orange kicker, a white
-// title and a hot-orange button. It replaces the PageHeader for members, so it carries
-// the page's h1, the day's readouts and rows (TodayCard in deck mode) and the launcher
-// as a dock of keys (ToolTiles in dock mode). The rest of the page is bench boxes on the
-// white canvas, so the black budget is this one panel.
+// title and a hot-orange button. It replaces the PageHeader on /tools, so it carries
+// the page's h1. For a MEMBER its body is the day's readouts and rows (TodayCard in
+// deck mode). For a VISITOR it is the DEMO STATE (brand-guide §11, 2026-11-13): the
+// same instrument with no readings — the pitch where the greeting goes, dashes where
+// the numbers would be, Create account / Sign in where the day's button is. Both get
+// the launcher as a dock of keys (ToolTiles in dock mode); the tools that need an
+// account say so on their own pages. The rest of the page is utility boxes, so this is
+// the page's one panel.
 
+import Link from 'next/link'
 import TodayCard from '@/components/goals/TodayCard'
 import ToolTiles from '@/components/dad-tools/ToolTiles'
+import { buttonVariants } from '@/components/ui/Button'
+
+export interface DeckDemo {
+  /** The pitch, under the title. */
+  body: string
+  /** The one-line promise under the empty readouts. */
+  note: string
+  signInHref: string
+  registerHref: string
+}
 
 export default function ToolboxDeck({
-  userId, greeting, title, className = '',
-}: { userId: string; greeting: string; title: string; className?: string }) {
+  greeting, title, userId, demo, className = '',
+}: {
+  greeting: string
+  title: string
+  /** The member; omit for the demo state. */
+  userId?: string
+  /** The demo state; omit for a member. */
+  demo?: DeckDemo
+  className?: string
+}) {
   return (
     <section
       data-theme="dark"
@@ -25,9 +48,44 @@ export default function ToolboxDeck({
         <h1 className="mt-2 font-black text-[28px] sm:text-[36px] leading-[0.95] tracking-[-0.02em] text-prose">
           {title}
         </h1>
-        <TodayCard userId={userId} variant="deck" />
+        {demo ? <DemoBody {...demo} /> : userId ? <TodayCard userId={userId} variant="deck" /> : null}
       </div>
       <ToolTiles variant="dock" />
     </section>
+  )
+}
+
+/** The instrument with no readings: honest about being empty, never fake numbers. */
+function DemoBody({ body, note, signInHref, registerHref }: DeckDemo) {
+  return (
+    <>
+      <p className="mt-3 text-sm sm:text-base text-prose-muted max-w-[52ch]">{body}</p>
+      <div className="mt-5 border-t border-soft pt-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="grid grid-cols-2 gap-6" aria-hidden>
+            <EmptyReadout label="Waiting on you" />
+            <EmptyReadout label="Later on" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href={registerHref} className={buttonVariants({ variant: 'primary', size: 'sm' })}>
+              Create account
+            </Link>
+            <Link href={signInHref} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+              Sign in
+            </Link>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-prose-faint max-w-[52ch]">{note}</p>
+      </div>
+    </>
+  )
+}
+
+function EmptyReadout({ label }: { label: string }) {
+  return (
+    <div>
+      <span className="block font-black text-[40px] leading-none tabular-nums text-prose-faint">—</span>
+      <span className="mt-1.5 block text-[10px] uppercase tracking-widest text-prose-faint">{label}</span>
+    </div>
   )
 }

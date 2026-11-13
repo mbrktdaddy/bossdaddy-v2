@@ -25,9 +25,7 @@ import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
 import ToolboxDeck from '@/components/dad-tools/ToolboxDeck'
 import { UtilityBox } from '@/components/ui/UtilityBox'
-import PageHeader from '@/components/PageHeader'
 import { ToolCard } from '@/components/dad-tools/ToolCard'
-import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
 export function generateMetadata(): Metadata {
@@ -184,27 +182,18 @@ export default async function ToolsHubPage() {
 
   // Declared once, rendered in one of two places depending on who's reading — see the
   // two call sites below. Two <InstallPWA> literals would be two things to keep in sync.
+  // Last on the page for everyone (2026-11-13): the promo once the tools are dealt with.
   const installCta = (
     <InstallPWA
-      className="mb-10 sm:mb-14"
+      className="mt-10 sm:mt-14"
       body="Install Boss Daddy — your dad tools, one tap from the home screen."
     />
   )
 
   return (
     <>
-      {/* Full PageHeader — this is a listing (continuity plan Phase 7). The old hero's
-          second line was an h2 (a heading with nothing under it); it's the deck's
-          opening sentence now. */}
-      {isSignedIn ? null : (
-        <PageHeader
-          eyebrow={isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
-          title={isSignedIn ? LABELS.tools.hub.loggedInBody : LABELS.tools.hub.heroTitle}
-          deck={isSignedIn
-            ? LABELS.tools.hub.loggedInDek
-            : `${LABELS.tools.hub.heroTitleSecond} ${LABELS.tools.hub.heroBody}`}
-        />
-      )}
+      {/* No PageHeader on /tools since 2026-11-13: the deck carries the h1 for
+          members AND visitors (the demo state, brand-guide §11). */}
 
     <div className="max-w-6xl mx-auto px-6 py-10 sm:py-14">
 
@@ -235,11 +224,22 @@ export default async function ToolsHubPage() {
           title={LABELS.tools.hub.loggedInBody}
           className="mb-10 sm:mb-14"
         />
-      ) : null}
+      ) : (
+        <ToolboxDeck
+          greeting={LABELS.tools.hub.eyebrow}
+          title={LABELS.tools.hub.heroTitle}
+          demo={{
+            body: `${LABELS.tools.hub.heroTitleSecond} ${LABELS.tools.hub.heroBody}`,
+            note: "Sign in and this reads your day: what's due, the week, and what's later.",
+            signInHref: '/login?next=%2Ftools',
+            registerHref: '/register?next=%2Ftools',
+          }}
+          className="mb-10 sm:mb-14"
+        />
+      )}
 
       {/* Signed-out only up here. For a member this is a promo sitting between him and
           his own work, so it moves below the personalized stack (further down). */}
-      {isSignedIn ? null : installCta}
 
       {/* ── PERSONALIZED STATE — only when logged in with kids ──────────── */}
       {/* Compact-row pattern matches /account/settings + /dashboard/profile.
@@ -352,7 +352,6 @@ export default async function ToolsHubPage() {
       ) : null}
 
       {/* The promo, once his own things are dealt with. */}
-      {isSignedIn ? installCta : null}
 
       {/* ── THE SHELF, IN TWO STATES ─────────────────────────────────────────
           A signed-in dad gets tiles; a visitor keeps the cards.
@@ -371,13 +370,26 @@ export default async function ToolsHubPage() {
           already has them as the launcher row at the top of the page. */}
       {isSignedIn ? null : (
         <section className="mb-10 sm:mb-14">
-          <SectionHeader label="The tools" />
-          {/* Four spokes: two across, then four — never three-and-an-orphan. */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {MAIN_SPOKES.map((spoke) => (
-              <ToolCard key={spoke.href} href={spoke.href} kicker={spoke.kicker} title={spoke.title} blurb={spoke.blurb} cta="Open" />
-            ))}
-          </div>
+          {/* The demo state's tools: one box of rows, like the calculators — the
+              deck's dock is the launcher; this is the pitch per tool (2026-11-13).
+              The four pitch panels under a section header were the old landing
+              page in dark clothes. */}
+          <UtilityBox label="The tools" count={MAIN_SPOKES.length}>
+            <ul className="divide-y divide-soft">
+              {MAIN_SPOKES.map((spoke) => (
+                <li key={spoke.href}>
+                  <Link href={spoke.href} className="group flex items-center gap-3 px-4 py-3 min-h-[64px] hover:bg-surface-raised transition-colors">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-eyebrow">{spoke.kicker}</span>
+                      <span className="mt-0.5 block text-sm font-bold text-prose group-hover:text-accent-text transition-colors">{spoke.title}</span>
+                      <span className="mt-0.5 block text-xs text-prose-faint line-clamp-2">{spoke.blurb}</span>
+                    </span>
+                    <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </UtilityBox>
         </section>
       )}
 
@@ -414,6 +426,8 @@ export default async function ToolsHubPage() {
           </ul>
         </UtilityBox>
       </section>
+
+      {installCta}
     </div>
     </>
   )
