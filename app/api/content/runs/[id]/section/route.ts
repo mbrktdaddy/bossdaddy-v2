@@ -7,6 +7,7 @@ import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
 import { sectionBudget, sectionPrompt } from '@/lib/content/pipeline/section'
 import { getRun, updateRun } from '@/lib/content/pipeline/run'
+import { enforceSourceLinks, sourceLinkUrls } from '@/lib/content/links'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
@@ -72,7 +73,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     promptVersion: PROMPT_VERSION,
     onFinish: async ({ text, meta }) => {
       const truncated = meta.finishReason === 'length'
-      const clean = text.trim()
+      // A link to any address outside the brief's references is cut back to its text.
+      const clean = enforceSourceLinks(text.trim(), sourceLinkUrls(run.brief))
       const generationId = await logGeneration(supabase, {
         userId, contentType: run.contentType, runId: run.id, stage: 'section',
         status: truncated ? 'truncated' : 'done',

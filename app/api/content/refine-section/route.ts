@@ -8,6 +8,7 @@ import { INQUIRY_TRIGGER, PROMPT_VERSION } from '@/lib/content/prompts'
 import { countTokens, sectionLabel, sectionToStructuredText, splitSections } from '@/lib/content/sections'
 import { requireAuthor } from '@/lib/content/pipeline/route-helpers'
 import { loadBriefForContent, refineGrounding } from '@/lib/content/pipeline/grounding'
+import { enforceSourceLinks, sourceLinkUrls } from '@/lib/content/links'
 import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -59,7 +60,8 @@ export async function POST(request: NextRequest) {
   const next = sections[sectionIndex + 1]
   const clip = (s: string) => (s.length > NEIGHBOUR_CHARS ? s.slice(0, NEIGHBOUR_CHARS) + ' …' : s)
   // The author's notes + fetched references behind this piece, when its run is on record.
-  const grounding = refineGrounding(await loadBriefForContent(supabase, contentType, contentId))
+  const groundBrief = await loadBriefForContent(supabase, contentType, contentId)
+  const grounding = refineGrounding(groundBrief)
 
   const prompt = `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis piece runs in the inquiry register (see your system prompt): a witness, not a student — keep the visible reasoning, answer the opposing view where it's raised, and keep the position stated as a conviction; never soften it into a shrug.\n\n` : ''}STAGED DRAFTING — you are rewriting ONE section of an existing Boss Daddy ${contentType === 'review' ? 'product review' : 'guide'} to an editor's instruction. Everything outside this section stays as it is; you return only this section's prose.
 
@@ -91,6 +93,7 @@ RULES:
 - ${tokenEntries.length
       ? `Product links: this section contains ${tokenEntries.map(([s, n]) => `${n} × [[BUY:${s}]]`).join(', ')}. Keep exactly those tokens, written exactly like that, placed where they still make sense. Add none, drop none.`
       : 'Product links: this section has no [[BUY:]] tokens — add none.'}
+- Links: keep any [name](url) source link already in the section, written exactly as it is; add no new links.
 - Keep the first-person dad voice, the house rules, and roughly the same length unless told to lengthen or shorten.
 - Return the section's prose ONLY: no heading, no title, no preamble, no commentary, no JSON, no # or ## headings, no code fences, no tables. Paragraphs separated by a blank line. The text may carry light Markdown — "- " bullets, "1." numbered items, "### " sub-heads, "> " pull-quotes, **bold** — keep what is there in the same marks (a numbered list stays numbered); add a list only if the instruction asks for one.`
 
@@ -116,6 +119,7 @@ RULES:
     if (section.heading && out.toLowerCase().startsWith(section.heading.toLowerCase())) {
       out = out.slice(section.heading.length).replace(/^[\s:—-]+/, '')
     }
+    out = enforceSourceLinks(out, sourceLinkUrls(groundBrief))
     const warnings: string[] = []
     const after = countTokens(out)
     for (const [slug, n] of tokenEntries) {

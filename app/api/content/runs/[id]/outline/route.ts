@@ -5,6 +5,8 @@ import { buildBossDaddySystemMessages } from '@/lib/voiceProfile'
 import { logGeneration } from '@/lib/content/generations'
 import { PROMPT_VERSION } from '@/lib/content/prompts'
 import { OutlineEdit, OutlineOutput, assignProductTokens, buildOutline, normalizeElementPlans, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { mergeResearchReferences } from '@/lib/content/pipeline/research'
+import { MAX_REFERENCES } from '@/lib/content/references'
 import { findRelated } from '@/lib/content/pipeline/related'
 import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
@@ -114,8 +116,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     imageCount: parsed.data.imageCount,
     elements: normalizeElementPlans(parsed.data.elements, parsed.data.parts.map((p) => ({ ...p, productToken: null })), run.brief),
   }
+  // Research the author kept joins the brief: a source like any other reference.
+  let brief = run.brief
+  if (parsed.data.addReferenceNotes?.length) {
+    const merged = mergeResearchReferences(run.brief, parsed.data.addReferenceNotes)
+    if (!merged) return NextResponse.json({ error: `The reference list is full (${MAX_REFERENCES}) — remove one in the brief before adding research.` }, { status: 400 })
+    brief = merged
+  }
   const next = await updateRun(supabase, run, {
     outline,
+    brief,
     sections: outline.parts.map(() => null),
     blocks: null, critic: null, images: null,
     status: 'drafting',
