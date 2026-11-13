@@ -12,7 +12,7 @@ User-facing content types are referred to consistently as:
 | **Reviews** | Product reviews | `reviews` table, `Review*` types |
 | **Guides** | All long-form editorial — how-tos, skills, advice, articles | `articles` table, `Article*` types (kept for now) |
 | **Wishlist** | Pipeline of products being considered/tested | `wishlist_items` table |
-| **Shop** | Boss Daddy branded merch | `shop_products` table |
+| **Shop** | Boss Daddy branded merch (Printful) | `merch` table, `/shop` route |
 | **Gear** | Curated gear list (the items I personally use) | `/gear` route |
 
 **Important rules:**
@@ -414,7 +414,7 @@ For bordered chips prefer the token recipe (`bg-{danger,success,warn,info}-bg` +
 ### Blocks — where black and orange fills are allowed (Hard Goods, 2026-10-14)
 The loudness mechanism is **solid blocks on the white page**. A black panel is a `data-theme="dark"` zone — every token inside it inverts by itself; never fake one with `bg-zinc-950` and hand-set colours. An orange block is `bg-accent` with **chrome-black ink** (`text-chrome`: 4.6:1 on `#CC5500`; the prose black is 4.1:1 and white is 4.3:1, both miss AA at body size), so an orange block is never a dark zone and never carries white body text.
 
-**Allowed:** the masthead's 4px orange rule · the desktop brand band (orange) · section label blocks (black) · the Tools panels (black) · the newsletter block (orange) · the bench header strip (black) and its status chips (orange = testing, black = queued) · the square score chip (orange) · the "Top pick" tag (black, orange type) · the About band (black, orange top rule) · the Footer (black, orange top rule) · buttons · **the close of a detail page (2026-11-13, Phase 3):** the Ask the Boss panel (black, the Tools-tile anatomy), the newsletter block in its column-width `inset` form (orange), the Creed strip (black, the About band without the portrait) — see §8 "The close".
+**Allowed:** the masthead's 4px orange rule · the desktop brand band (orange) · section label blocks (black) · the Tools panels (black) · the newsletter block (orange) · the bench header strip (black) and its status chips (orange = testing, black = queued) · the square score chip (orange) · the "Top pick" tag (black, orange type) · the About band (black, orange top rule) · the Footer (black, orange top rule) · buttons · **the close of a detail page (2026-11-13, Phase 3):** the Ask the Boss panel (black, the Tools-tile anatomy), the newsletter block in its column-width `inset` form (orange), the Creed strip (black, the About band without the portrait) — see §8 "The close" · the merch strip (black; the store's discovery band on `/gear` and `/about` — the homepage and the articles use the light callout, §8 "`/gear` and `/shop`").
 
 **Never:** inside an editorial card, a listing row, or an article body; as a section background on an editorial surface; as a tint or wash. One orange block on a screen at a time is the ceiling.
 
@@ -707,12 +707,10 @@ must not be tinted.
 - Section openers: `EditorialHeader` on editorial listings; `SectionHeader` (orange vertical rule) on `/gear` only.
 - Cards are the borderless editorial card (`ReviewCard` / `LibraryGuideCard` / `LeadCard`) — reuse them; don't re-skin a bordered copy per page.
 
-### `/gear` — unified Gear + Merch page
-- "Shop" is **not** a separate top-level concept. The unified `/gear` page hosts both:
-  1. **Boss Daddy Approved Gear** — the curated top-rated picks from reviews (rating ≥ 8.0). The substance.
-  2. **Made by Boss Daddy** — featured panel for branded merch, sits between the category filter and the gear grid. Renders a tight coming-soon callout when no merch is live; renders a 3-up product grid when products are available.
-- Hero copy: *"Boss Daddy Approved Gear"* H1 + *"Field-tested by a real dad. And, soon, made by one."* tagline.
-- `/shop` 301-redirects to `/gear` for SEO + bookmark continuity.
+### `/gear` and `/shop` — gear and merch (the store split out 2026-09-29)
+- `/gear` is **Boss Daddy Approved Gear** — the curated top-rated picks from reviews (rating ≥ 8.0) and On the Radar; utility-styled (`SectionHeader`). Hero copy: *"Boss Daddy Approved Gear"* H1 + *"Field-tested by a real dad. And, soon, made by one."*
+- `/shop` is the store (the `merch` table, Printful): `PageHeader` with the eyebrow "Made by Boss Daddy" + `MerchGrid`. There is no redirect between the two.
+- **Merch surfaces — one module, two forms (settled 2026-11-13).** The black **merch strip** (`MerchStrip`: dark zone, 4px orange rule, orange label block, the merch voice line, "Shop →" primary button, 144px tiles with the status badge, name and price) is the store's discovery band on the brand and utility pages — `/gear` (after the grid) and `/about` (after the story, before the orange block). The light **merch callout** (`MerchCallout`: ink label block, the same voice line, "Shop →" outline button, three shared merch cards) is the form on reviews and guides, after the bench head, where the close must stay quiet — and on the homepage, after the About band: the Creed, then "rep the brand", the same narrative as `/about`, kept quiet so the dark finale stays About + footer. Both order featured first, then position. Empty state: the strip renders its "first drop" teaser (a brand moment on a brand page); the callout disappears (noise on an article). Before this the two forms disagreed on headline, call to action, ordering and tile, and the homepage ran the black strip after the About band — black on black on black at the finale. Moving it higher was considered and rejected: ahead of the Guides it put two commerce modules before any guide, and below them it touched the Tools panels; the slot was right, the form was wrong.
 
 ### Detail pages (`/reviews/[slug]`, `/guides/[slug]`, comparisons, picks, stacks, bench)
 
