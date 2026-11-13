@@ -19,6 +19,7 @@ import { KID_COLUMNS, familyPhotoSrc } from '@/lib/dad-tools/family-photo'
 import { weeksUntil, milestoneDate, momentDayKey, daysSinceDayKey } from '@/lib/dad-tools/calc'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
+import { toolSamples, type ToolSample } from '@/lib/dad-tools/samples'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
 import WorkingOnSection from '@/components/goals/WorkingOnSection'
@@ -182,6 +183,10 @@ export default async function ToolsHubPage() {
 
   // Declared once, rendered in one of two places depending on who's reading — see the
   // two call sites below. Two <InstallPWA> literals would be two things to keep in sync.
+  // The demo state's worked examples (lib/dad-tools/samples.ts) — visitors only; a
+  // member's rows carry the pitch, not an example of someone else's numbers.
+  const samples = isSignedIn ? null : toolSamples()
+
   // Last on the page for everyone (2026-11-13): the promo once the tools are dealt with.
   const installCta = (
     <InstallPWA
@@ -382,8 +387,9 @@ export default async function ToolsHubPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-eyebrow">{spoke.kicker}</span>
                       <span className="mt-0.5 block text-sm font-bold text-prose group-hover:text-accent-text transition-colors">{spoke.title}</span>
-                      <span className="mt-0.5 block text-xs text-prose-faint line-clamp-2">{spoke.blurb}</span>
+                      <ExampleOrBlurb blurb={spoke.blurb} sample={samples?.[spoke.href]} />
                     </span>
+                    <Readout sample={samples?.[spoke.href]} />
                     <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
                   </Link>
                 </li>
@@ -416,8 +422,9 @@ export default async function ToolsHubPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-eyebrow">{spoke.kicker}</span>
                       <span className="mt-0.5 block text-sm font-bold text-prose group-hover:text-accent-text transition-colors truncate">{spoke.title}</span>
-                      {spoke.blurb && <span className="mt-0.5 block text-xs text-prose-faint line-clamp-1">{spoke.blurb}</span>}
+                      {spoke.blurb && <ExampleOrBlurb blurb={spoke.blurb} sample={samples?.[spoke.href]} />}
                     </span>
+                    <Readout sample={samples?.[spoke.href]} />
                     <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
                   </Link>
                 </li>
@@ -430,5 +437,32 @@ export default async function ToolsHubPage() {
       {installCta}
     </div>
     </>
+  )
+}
+
+/**
+ * The demo state's worked example in place of the pitch (lib/dad-tools/samples.ts),
+ * labelled so it never reads as the visitor's own data; the pitch when there is
+ * no sample (a member's rows).
+ */
+function ExampleOrBlurb({ blurb, sample }: { blurb?: string; sample?: ToolSample | null }) {
+  if (sample) {
+    return (
+      <span className="mt-0.5 block text-xs text-prose-faint line-clamp-2">
+        <span className="font-display font-extrabold text-[10px] uppercase tracking-[0.14em] text-eyebrow">Example</span>{' '}
+        {sample.input}
+      </span>
+    )
+  }
+  return blurb ? <span className="mt-0.5 block text-xs text-prose-faint line-clamp-2">{blurb}</span> : null
+}
+
+/** The example's result as the row's readout — bold tabular figures, like a savings row's dollar figure. */
+function Readout({ sample }: { sample?: ToolSample | null }) {
+  if (!sample) return null
+  return (
+    <span className="shrink-0 max-w-[9rem] text-right text-sm font-black tabular-nums leading-tight text-prose">
+      {sample.output}
+    </span>
   )
 }
