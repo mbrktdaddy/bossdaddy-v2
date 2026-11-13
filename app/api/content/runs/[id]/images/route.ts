@@ -43,7 +43,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       model: MODELS.claudeSonnet,
       tag: 'draft-images',
       schema: ImagesOutput,
-      system: 'You are the photo editor for Boss Daddy (BossDaddyLife.com), a dad-focused gear and life site. You plan editorial photographs from finished prose and decide which pictures the author must capture himself. Scenes, never product replicas; people only anonymously; no text, no logos.',
+      system: "You are the photo editor for Boss Daddy (BossDaddyLife.com), a gear and life site for men who are fathers. You plan editorial pictures from finished prose: the pictures are of the topic, set in the topic's own world, and you decide which the author must capture himself. Scenes, never product replicas; never a real person's likeness; no readable text, no logos; people as the rules in the message allow.",
       messages: [{ role: 'user', content: prompt }],
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       effort: EFFORT,

@@ -115,7 +115,7 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
   async function saveOutline(outline: Outline, addReferenceNotes: ReferenceNote[] = []) {
     if (!run) return
     setPhase('creating')
-    const body = { title: outline.title, excerpt: outline.excerpt, parts: outline.parts, blocks: outline.blocks, imageCount: outline.imageCount, elements: outline.elements ?? [], ...(addReferenceNotes.length ? { addReferenceNotes } : {}) }
+    const body = { title: outline.title, excerpt: outline.excerpt, register: outline.register, parts: outline.parts, blocks: outline.blocks, imageCount: outline.imageCount, elements: outline.elements ?? [], ...(addReferenceNotes.length ? { addReferenceNotes } : {}) }
     const { run: next } = await api<{ run: RunState }>(`/api/content/runs/${run.id}/outline`, { method: 'PUT', body: JSON.stringify(body) })
     await draftAll(next)
   }

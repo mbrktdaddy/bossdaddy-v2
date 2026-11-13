@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/Switch'
 import { PromptAssist } from '@/components/workspace/PromptAssist'
 import { ContactSheetPicker, type SheetDraft } from '@/components/workspace/ContactSheetPicker'
 import { XIcon } from '@/components/icons'
-import type { PeoplePolicy } from '@/lib/images/safety'
+import { defaultPeopleForLook, type PeoplePolicy } from '@/lib/images/safety'
 import type { ImageLook } from '@/lib/images/style'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
 
@@ -84,7 +84,7 @@ export function HeroImagePanel({
   // the model); the draft tier is for roughing out a composition before the real one.
   const [premium, setPremium] = useState(true)
   // Lane knob (lib/images/safety.ts EDITORIAL): no text always; people anonymous.
-  const [people, setPeople] = useState<PeoplePolicy>('anonymous')
+  const [people, setPeople] = useState<PeoplePolicy>(() => defaultPeopleForLook(defaultLook))
   // OpenAI's own content filter: 'low' loosens it for benign dad-life scenes that
   // 'auto' sometimes refuses (a kid on shoulders, a campfire). Our rules are unchanged.
   const [moderation, setModeration] = useState<'auto' | 'low'>('auto')

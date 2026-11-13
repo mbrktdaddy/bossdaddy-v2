@@ -108,6 +108,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     ...run.outline,
     title: parsed.data.title.trim(),
     excerpt: parsed.data.excerpt.trim(),
+    register: parsed.data.register?.trim() || run.outline.register,
     parts: assignProductTokens(
       parsed.data.parts.map((p) => ({ ...p, heading: p.kind === 'intro' ? '' : p.heading.trim() })),
       run.brief,

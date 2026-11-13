@@ -5,6 +5,7 @@ import { aiGenerateObjectWithMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
 import { MODELS } from '@/lib/ai/models'
 import { isRenderableImageUrl } from '@/lib/images/remote-hosts'
+import { pickAtmosphere } from '@/lib/images/doctrine'
 import {
   AssistInput,
   AssistOutput,
@@ -138,7 +139,9 @@ export async function POST(request: NextRequest) {
   const ctx = resolveAssistContext(input, piece)
 
   const system = buildAssistSystem({ target: input.target, people: input.people, allowText: input.allow_text, look: input.look })
-  const userText = buildAssistUser(input, ctx)
+  const userText = buildAssistUser(input, ctx, {
+    atmosphere: input.mode === 'fresh' || input.mode === 'variations' ? pickAtmosphere() : undefined,
+  })
   const messages: ModelMessage[] | undefined = photo
     ? [{
         role: 'user',

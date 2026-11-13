@@ -34,7 +34,7 @@ import { Switch } from '@/components/ui/Switch'
 import { TrashIcon } from '@/components/icons'
 import { PromptAssist } from '@/components/workspace/PromptAssist'
 import { ContactSheetPicker } from '@/components/workspace/ContactSheetPicker'
-import type { PeoplePolicy } from '@/lib/images/safety'
+import { defaultPeopleForLook, type PeoplePolicy } from '@/lib/images/safety'
 import { FIGURE_ASPECTS, isFigureAspect, type FigureAspect } from '@/lib/images/doctrine'
 import { IMAGE_TIERS } from '@/lib/images/tiers'
 import type { ImageLook } from '@/lib/images/style'
@@ -160,7 +160,7 @@ export function InlineMediaPanel({ content, onChangeContent, category, productId
   // the Draft tier to rough out a composition, then regenerate for the page.
   const [premium, setPremium]                 = useState(true)
   // Lane knobs (lib/images/safety.ts EDITORIAL): people anonymous, no text.
-  const [people, setPeople]                   = useState<PeoplePolicy>('anonymous')
+  const [people, setPeople]                   = useState<PeoplePolicy>(() => defaultPeopleForLook(defaultLook))
   const [allowText, setAllowText]             = useState(false)
   // 'low' loosens only the image model's own filter (benign dad-life scenes).
   const [moderation, setModeration]           = useState<'auto' | 'low'>('auto')

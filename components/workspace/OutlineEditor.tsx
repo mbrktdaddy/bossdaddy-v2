@@ -129,6 +129,7 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
         )}
         <Field label="Title" hideLabel value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} maxLength={120} />
         <Field as="textarea" label="Excerpt" hint="One card sentence, under 160 characters" rows={2} value={draft.excerpt} onChange={(e) => setDraft((d) => ({ ...d, excerpt: e.target.value }))} maxLength={200} />
+        <Field as="textarea" label="Register" hint="Whose world the piece lives in and where fatherhood enters — every part is written against this line" rows={2} value={draft.register ?? ''} onChange={(e) => setDraft((d) => ({ ...d, register: e.target.value }))} maxLength={300} />
       </div>
 
       <div className="space-y-3">
