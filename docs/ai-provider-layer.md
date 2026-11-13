@@ -190,3 +190,14 @@ Design decisions:
 ### URL reads (`aiFetch`, 2026-11-11)
 
 `aiFetch()` is the bucket's second entry point: read the listed URLs with Anthropic's native `web_fetch` (`anthropic.tools.webFetch_20260209`) and return one schema-validated object. It is **always Claude** (`MODELS.claudeSonnet`) and ignores `AI_MODEL_RESEARCH` on purpose — xAI ships no fetch tool, so the provider-dispatch that `aiResearch()` does has nothing to dispatch to. No web search is attached: `allowedDomains` is the given hosts and `maxUses` their count, so the model can read only what the author pointed at. `maxContentTokens` caps the page text pulled into context (20k default). Backs `/api/content/references` (plan §4a). Fetched text is untrusted: the route distils it to short facts and scrubs them with `sanitizeSpecValue` before anything reaches a content prompt.
+
+**Which fetch tool (measured 2026-11-13).** Two versions exist: `web_fetch_20260209` loads the page into a code-execution sandbox and the model filters it there ("dynamic filtering"); `web_fetch_20250910` puts the page text straight into context, capped by `maxContentTokens`. Both pass through the Gateway with `Output.object` (`npm run ai:fetch-smoke [--plain] [url]`, Sonnet 5, 20k cap):
+
+| Page | filtering (20260209) | plain (20250910) |
+|---|---|---|
+| cpsc.gov/Recalls (heavy listing) | 41.6k tokens, 2 steps | 32.1k tokens, 1 step |
+| wikipedia Cordless_drill (article) | 17.8k tokens, 3 steps | 9.0k tokens, 1 step |
+
+Plain is cheaper both times (23–50%), runs no code-execution steps (no sandbox time, faster), and its worst case is bounded by the content cap; filtering's cost also moved run to run (52.7k on the same CPSC page the day before). **Default = plain** (`FETCH_DYNAMIC_FILTERING` in `lib/ai/research.ts`); the per-call knob `dynamicFiltering: true` is there for a huge PDF. The next lever if real runs still cost too much is `maxContentTokens` — measure a `generations` `stage='references'` row before touching it.
+
+**Pasted text (2026-11-13).** A reference can also be TEXT the author pasted (a page behind a bot wall — congress.gov's bill text was the case; a PDF; a sign-in page): `distillPasted` in the route runs the same distillation prompt through `aiGenerateObjectWithMeta` on the research bucket pinned to Sonnet (tag `references-text`, temp 0, effort low), fenced with `dataBlock`, no fetch. `npm run ai:paste-smoke [url]` samples a public page as pasted text and checks the returned facts' hard numbers against it (measured on the H.R. 5344 text: 20 grounded facts, ~4k tokens).
