@@ -20,6 +20,11 @@
 // IT LINKS THROUGH, IT DOESN'T LOG. v1 deliberately: logging inline would save a
 // navigation, but it would also put medication logging on a settings-adjacent page.
 // Revisit as its own decision, not as a side effect of this one.
+//
+// DECK MODE is the body of the /tools instrument deck (2026-11-13). It renders no Link
+// shell and no card border: the shell, the greeting and the black panel belong to
+// ToolboxDeck, and this supplies the readouts (open now / later on), the week, the rows
+// and the one primary button inside it.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import Link from 'next/link'
@@ -31,6 +36,7 @@ import {
   type TodayPreviewItem,
 } from '@/lib/goals/today'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { buttonVariants } from '@/components/ui/Button'
 
 type Props = {
   /** Passed in rather than resolved here — every caller has already done the auth
@@ -57,8 +63,11 @@ type Props = {
    * occurrences; those badges read goal_stats, which is only as fresh as the last
    * sweep tick). One number per page. The week strip stays even here, because it's
    * the one thing a list of goals cannot show.
+   *
+   * 'deck' is the body of the /tools instrument deck: no shell, no border, big
+   * tabular readouts and a primary button. Row selection is the same as 'full'.
    */
-  variant?: 'full' | 'compact'
+  variant?: 'full' | 'compact' | 'deck'
 }
 
 /** Total rows shown across both groups. Four keeps the card a card. */
@@ -80,6 +89,19 @@ export default async function TodayCard({
   // to /goals/new rather than /today, because sending someone to an empty screen is the
   // one thing worse than not inviting them.
   if (!summary) {
+    if (variant === 'deck') {
+      return (
+        <div className="mt-5 border-t border-soft pt-5">
+          <p className="text-sm text-prose-muted max-w-[46ch]">{LABELS.goals.emptyBody}</p>
+          <Link
+            href="/goals/new"
+            className={`${buttonVariants({ variant: 'primary', size: 'sm' })} mt-4`}
+          >
+            {LABELS.goals.newCta}
+          </Link>
+        </div>
+      )
+    }
     return emptyPrompt ? <EmptyToday className={className} /> : null
   }
 
@@ -98,6 +120,50 @@ export default async function TodayCard({
   )
   const shown = dueItems.length + laterItems.length
   const more = compact ? 0 : work.dueNow.length + work.later.length - shown
+
+  if (variant === 'deck') {
+    return (
+      <div className="mt-5 border-t border-soft pt-5">
+        <div className="flex items-end justify-between gap-4">
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <span className="block font-black text-[40px] leading-none tabular-nums text-prose">
+                {work.dueNow.length}
+              </span>
+              <span className="mt-1.5 block text-[10px] uppercase tracking-widest text-prose-faint">
+                {due ? 'Waiting on you' : 'Open now'}
+              </span>
+            </div>
+            <div>
+              <span className="block font-black text-[40px] leading-none tabular-nums text-prose">
+                {work.later.length}
+              </span>
+              <span className="mt-1.5 block text-[10px] uppercase tracking-widest text-prose-faint">
+                Later on
+              </span>
+            </div>
+          </div>
+          <Link href="/today" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
+            {summary.cta}
+          </Link>
+        </div>
+
+        {week.cells.length === 7 ? (
+          <div className="mt-4">
+            <WeekStrip cells={week.cells} todayLocal={week.todayLocal} />
+          </div>
+        ) : null}
+
+        {shown > 0 ? (
+          <div className="mt-4 space-y-3 border-t border-soft pt-4">
+            {dueItems.length > 0 ? <Rows label="Open now" items={dueItems} /> : null}
+            {laterItems.length > 0 ? <Rows label="Later on" items={laterItems} /> : null}
+            {more > 0 ? <p className="text-xs text-prose-faint">+{more} more</p> : null}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <Link

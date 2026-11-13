@@ -100,7 +100,40 @@ const TILES: Tile[] = [
   { href: '/goals',                label: LABELS.goals.short,               Icon: TargetIcon },
 ]
 
-export default function ToolTiles({ className = '' }: { className?: string }) {
+/**
+ * `variant="dock"` is the launcher as a strip of keys inside the /tools instrument deck
+ * (ToolboxDeck, 2026-11-13). The deck is already the dark zone, so there is no
+ * `data-theme`, no rounding and no orange cap per cell: four keys divided by hairlines
+ * under a top rule, tokens inverting from the deck. The default `tiles` variant is the
+ * standalone launcher and is unchanged.
+ */
+export default function ToolTiles({
+  className = '', variant = 'tiles',
+}: { className?: string; variant?: 'tiles' | 'dock' }) {
+  if (variant === 'dock') {
+    return (
+      <nav aria-label="Your tools" className={`border-t border-soft ${className}`}>
+        <ul className="grid grid-cols-4 divide-x divide-soft">
+          {TILES.map(({ href, label, Icon }) => (
+            <li key={href}>
+              <Link
+                href={href}
+                className="group flex min-h-[76px] flex-col items-center justify-center gap-1.5 px-1.5 py-3 text-center hover:bg-surface-raised transition-colors"
+              >
+                <span className="text-accent-text">
+                  <Icon />
+                </span>
+                <span className="font-display text-[11px] font-extrabold leading-tight text-prose transition-colors group-hover:text-accent-text">
+                  {label}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+
   return (
     <nav className={className} aria-label="Your tools">
       {/* FOUR ACROSS AT EVERY WIDTH. At 393px that's ~82px a tile after padding and
