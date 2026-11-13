@@ -24,7 +24,7 @@ import { planWindow } from '@/lib/goals/progress'
 import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import { ChevronRightIcon } from '@/components/icons'
-import { Badge } from '@/components/ui/Badge'
+import { UtilityBox, StatusChip } from '@/components/ui/UtilityBox'
 
 const ROW_CAP = 8
 
@@ -58,33 +58,20 @@ export default async function WorkingOnSection({ userId }: { userId?: string } =
   const hidden = total - goalRows.length - savingsRows.length
 
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-prose-faint font-medium uppercase tracking-widest">
-          {LABELS.goals.workingOnHeading}
-        </p>
-        {total > 0 && (
-          <Link
-            href="/goals/new"
-            className="text-xs font-semibold text-accent hover:text-accent-hover transition-colors"
-          >
-            + {LABELS.goals.newCta}
-          </Link>
-        )}
-      </div>
-
+    <UtilityBox
+      label={LABELS.goals.workingOnHeading}
+      count={total > 0 ? total : null}
+      link={total > 0 ? { label: `+ ${LABELS.goals.newCta}`, href: '/goals/new' } : undefined}
+    >
       {total === 0 ? (
-        <Link
-          href="/goals/new"
-          className="block bg-surface-sunken border border-soft hover:border-accent-border/50 rounded-xl p-4 transition-colors group"
-        >
-          <p className="text-sm font-semibold text-prose group-hover:text-accent-text-soft transition-colors">
+        <Link href="/goals/new" className="block p-4 group">
+          <p className="font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-prose group-hover:text-accent-text transition-colors">
             {LABELS.goals.emptyHeading}
           </p>
           <p className="text-xs text-prose-faint mt-1">{LABELS.goals.emptyBody}</p>
         </Link>
       ) : (
-        <div className="space-y-1.5">
+        <ul className="divide-y divide-soft">
           {goalRows.map((goal) => {
             const stat = stats.get(goal.id)
             const win = planWindow(goal.started_on, goal.target_date, stat?.today_local_date ?? goal.started_on)
@@ -132,12 +119,14 @@ export default async function WorkingOnSection({ userId }: { userId?: string } =
               ⚠️ If this section is ever placed on a surface WITHOUT the launcher, the
               exit disappears again. That's the trap the first version fell into. */}
           {hidden > 0 && (
-            <Link
-              href="/goals"
-              className="block text-center text-xs font-semibold text-accent hover:text-accent-hover py-2 transition-colors"
-            >
-              See all {total} →
-            </Link>
+            <li>
+              <Link
+                href="/goals"
+                className="flex items-center justify-center px-4 min-h-[44px] font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-prose transition-colors"
+              >
+                See all {total}
+              </Link>
+            </li>
           )}
 
           {/* "Start a savings goal →" removed. This is a STATUS LIST, and that link was
@@ -145,9 +134,9 @@ export default async function WorkingOnSection({ userId }: { userId?: string } =
               one thing on the page that wasn't about what he's already carrying. The
               Savings tile is in the launcher at the top, and /tools/savings has its own
               create CTA, so nothing is unreachable. */}
-        </div>
+        </ul>
       )}
-    </section>
+    </UtilityBox>
   )
 }
 
@@ -161,25 +150,23 @@ function Row({
   value?: string
 }) {
   return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 px-3 py-2.5 bg-surface-sunken border border-soft hover:border-accent-border/60 rounded-lg transition-colors group min-h-[44px]"
-    >
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-prose group-hover:text-accent-text-soft transition-colors truncate">
-          {title}
-        </p>
-        <p className="text-[11px] text-prose-faint truncate">{sub}</p>
-      </div>
-      {badge && (
-        <Badge tone="accent" size="sm">
-          {badge}
-        </Badge>
-      )}
-      {value && (
-        <p className="shrink-0 text-sm font-black text-prose tabular-nums">{value}</p>
-      )}
-      <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
-    </Link>
+    <li>
+      <Link
+        href={href}
+        className="group flex items-center gap-3 px-4 py-3 min-h-[56px] hover:bg-surface-raised transition-colors"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-prose group-hover:text-accent-text transition-colors truncate">
+            {title}
+          </p>
+          <p className="text-[11px] text-prose-faint truncate">{sub}</p>
+        </div>
+        {badge && <StatusChip tone="accent">{badge}</StatusChip>}
+        {value && (
+          <p className="shrink-0 text-sm font-black text-prose tabular-nums">{value}</p>
+        )}
+        <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
+      </Link>
+    </li>
   )
 }

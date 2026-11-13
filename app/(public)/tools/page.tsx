@@ -21,14 +21,12 @@ import { getGoals } from '@/lib/dad-tools/savings-actions'
 import { fmtUsdWhole } from '@/lib/dad-tools/savings'
 import type { Kid } from '@/lib/dad-tools/kid-actions'
 import type { Metadata } from 'next'
-import TodayCard from '@/components/goals/TodayCard'
 import WorkingOnSection from '@/components/goals/WorkingOnSection'
 import YourCornerSection from '@/components/account/YourCornerSection'
-import ToolTiles from '@/components/dad-tools/ToolTiles'
-import { Card } from '@/components/ui/Card'
+import ToolboxDeck from '@/components/dad-tools/ToolboxDeck'
+import { UtilityBox } from '@/components/ui/UtilityBox'
 import PageHeader from '@/components/PageHeader'
 import { ToolCard } from '@/components/dad-tools/ToolCard'
-import { buttonVariants } from '@/components/ui/Button'
 import SectionHeader from '@/components/SectionHeader'
 import { ChevronRightIcon } from '@/components/icons'
 
@@ -198,13 +196,15 @@ export default async function ToolsHubPage() {
       {/* Full PageHeader — this is a listing (continuity plan Phase 7). The old hero's
           second line was an h2 (a heading with nothing under it); it's the deck's
           opening sentence now. */}
-      <PageHeader
-        eyebrow={isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
-        title={isSignedIn ? LABELS.tools.hub.loggedInBody : LABELS.tools.hub.heroTitle}
-        deck={isSignedIn
-          ? LABELS.tools.hub.loggedInDek
-          : `${LABELS.tools.hub.heroTitleSecond} ${LABELS.tools.hub.heroBody}`}
-      />
+      {isSignedIn ? null : (
+        <PageHeader
+          eyebrow={isSignedIn ? LABELS.tools.hub.loggedInGreeting : LABELS.tools.hub.eyebrow}
+          title={isSignedIn ? LABELS.tools.hub.loggedInBody : LABELS.tools.hub.heroTitle}
+          deck={isSignedIn
+            ? LABELS.tools.hub.loggedInDek
+            : `${LABELS.tools.hub.heroTitleSecond} ${LABELS.tools.hub.heroBody}`}
+        />
+      )}
 
     <div className="max-w-6xl mx-auto px-6 py-10 sm:py-14">
 
@@ -218,15 +218,24 @@ export default async function ToolsHubPage() {
           Card-first even when the day is CLEAR, and deliberately so — the quiet state
           ("You're clear") is reassurance, which is the thing a man opening this page at
           6am is actually after. That also avoids reordering the page by state, which
-          would mean preloading the query up here just to learn the tone. */}
-      {user ? <TodayCard userId={user.id} className="mb-10 sm:mb-14" /> : null}
+          would mean preloading the query up here just to learn the tone.
+
+          The day and the launcher now share the deck (2026-11-13): one black panel
+          holds the greeting, the readouts, the rows and the dock of keys. */}
 
       {/* ── THE LAUNCHER, HIGH AND THIN ──────────────────────────────────────
           Second now, still above the fold. This is the row a returning dad aims his
           thumb at without reading, and at ~76px it costs less height than one of the old
           cards. Signed-out visitors get the full pitch further down instead; they have
           no muscle memory to serve. */}
-      {isSignedIn ? <ToolTiles className="mb-10 sm:mb-14" /> : null}
+      {isSignedIn && user ? (
+        <ToolboxDeck
+          userId={user.id}
+          greeting={LABELS.tools.hub.loggedInGreeting}
+          title={LABELS.tools.hub.loggedInBody}
+          className="mb-10 sm:mb-14"
+        />
+      ) : null}
 
       {/* Signed-out only up here. For a member this is a promo sitting between him and
           his own work, so it moves below the personalized stack (further down). */}
@@ -239,7 +248,12 @@ export default async function ToolsHubPage() {
           hub where % elapsed, last moment, savings, and Dad Math live. */}
       {isLoggedInWithKids && (
         <section className="mb-10 sm:mb-14">
-          <div className="space-y-1.5">
+          <UtilityBox
+            label="Family"
+            count={kids.length}
+            link={{ label: LABELS.tools.hub.manageKidsCta, href: manageKidsHref }}
+          >
+          <ul className="divide-y divide-soft">
             {kids.map((kid) => {
               const isChild = kid.member_type === 'child'
               const name = kid.name?.trim() || LABELS.tools.kids.noNameFallback
@@ -268,12 +282,11 @@ export default async function ToolsHubPage() {
               const metrics = [leadLabel, momentLabel, savedLabel].filter(Boolean).join(' · ')
 
               return (
+                <li key={kid.id}>
                 <Link
-                  key={kid.id}
                   href={`/tools/family/${kid.id}`}
-                  className="block group"
+                  className="group flex items-center gap-3 px-4 py-3 min-h-[56px] hover:bg-surface-raised transition-colors"
                 >
-                  <Card tone="chrome" className="flex items-center gap-3 px-3 py-3 min-h-[44px]">
                   {familyPhotoSrc(kid) ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -298,20 +311,12 @@ export default async function ToolsHubPage() {
                     </p>
                   </div>
                   <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text-soft shrink-0 transition-colors" strokeWidth={2} />
-                  </Card>
                 </Link>
+                </li>
               )
             })}
-          </div>
-
-          <div className="mt-5 flex items-center justify-between gap-3 flex-wrap">
-            <Link
-              href={manageKidsHref}
-              className={buttonVariants({ variant: 'outline', size: 'sm' })}
-            >
-              {LABELS.tools.hub.manageKidsCta}
-            </Link>
-          </div>
+          </ul>
+          </UtilityBox>
         </section>
       )}
 
@@ -323,6 +328,7 @@ export default async function ToolsHubPage() {
           title="Add a family member to unlock personalized numbers."
           blurb="Tools work without an account — but adding your family lets you save moments, get yearly check-ins, and watch the number compound."
           cta={LABELS.tools.hub.addFirstKidCta}
+          tone="box"
           className="mb-10 sm:mb-14"
         />
       )}

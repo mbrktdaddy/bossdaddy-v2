@@ -20,8 +20,7 @@ import Link from 'next/link'
 import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { TIER_COPY, type ShareTier } from '@/lib/goals/participants'
 import { LABELS } from '@/lib/labels'
-import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
+import { UtilityBox, StatusChip } from '@/components/ui/UtilityBox'
 
 type Row = {
   goal_id: string
@@ -40,26 +39,28 @@ type Row = {
  *
  * Counted against the definer view, which returns nothing unless you're actually
  * a participant, so this costs no rows.
+ *
+ * `asListItem` renders it as the last `<li>` of the populated list; otherwise it is
+ * a `border-t` block under the empty-state copy.
  */
-async function BackingLink() {
+async function BackingLink({ asListItem = false }: { asListItem?: boolean }) {
   const supabase = await createClient()
   const { count } = await supabase
     .from('goal_share_summary')
     .select('goal_id', { count: 'exact', head: true })
   if (!count) return null
 
-  return (
+  const link = (
     <Link
       href="/goals#corner"
-      className="mt-3 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-soft bg-surface-sunken px-4 py-3 text-xs transition-colors hover:border-strong"
+      className="flex items-center justify-center px-4 min-h-[44px] font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-prose transition-colors"
     >
-      <span className="text-prose">
-        {LABELS.goals.sharedHeading}
-        <span className="text-prose-faint"> · {count} shared with you</span>
-      </span>
-      <span className="shrink-0 text-prose-muted" aria-hidden="true">→</span>
+      {LABELS.goals.sharedHeading}
+      <span className="ml-1.5 font-sans font-normal normal-case tracking-normal text-prose-faint"> · {count} shared with you</span>
     </Link>
   )
+
+  return asListItem ? <li>{link}</li> : <div className="border-t border-soft">{link}</div>
 }
 
 export default async function YourCornerSection() {
@@ -104,44 +105,43 @@ export default async function YourCornerSection() {
   // someone would be advice he can't take.
   if (rows.length === 0) {
     return (
-      <Card className="p-6 mb-6">
-        <Eyebrow className="mb-1">
-          {LABELS.contacts.cornerLabel}
-        </Eyebrow>
-        {goals.size === 0 ? (
-          <>
-            <p className="text-sm text-prose-faint leading-snug">
-              Nobody yet. Start something you want to stick to, then you can ask
-              someone to keep you honest about it.
-            </p>
-            <Link
-              href="/goals/new"
-              className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
-            >
-              {LABELS.goals.newCta} →
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-prose-faint leading-snug">
-              Nobody yet. Pick a goal and invite someone — they can see how it&apos;s
-              going without ever being told about a day you missed, and either of
-              you can end it whenever.
-            </p>
-            {/* Names the next step, not the end state — /goals is a list, and
-                "Share a goal" implied it would take you somewhere you could
-                immediately do that. Every row there now carries its own share
-                control, so picking one IS the action. */}
-            <Link
-              href="/goals"
-              className="mt-3 inline-flex min-h-11 items-center text-xs font-semibold text-accent-text hover:text-prose"
-            >
-              Pick a goal to share →
-            </Link>
-          </>
-        )}
+      <UtilityBox label={LABELS.contacts.cornerLabel} count={null}>
+        <div className="p-4">
+          {goals.size === 0 ? (
+            <>
+              <p className="text-sm text-prose-faint leading-snug">
+                Nobody yet. Start something you want to stick to, then you can ask
+                someone to keep you honest about it.
+              </p>
+              <Link
+                href="/goals/new"
+                className="mt-3 inline-flex min-h-11 items-center font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-prose transition-colors"
+              >
+                {LABELS.goals.newCta}
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-prose-faint leading-snug">
+                Nobody yet. Pick a goal and invite someone — they can see how it&apos;s
+                going without ever being told about a day you missed, and either of
+                you can end it whenever.
+              </p>
+              {/* Names the next step, not the end state — /goals is a list, and
+                  "Share a goal" implied it would take you somewhere you could
+                  immediately do that. Every row there now carries its own share
+                  control, so picking one IS the action. */}
+              <Link
+                href="/goals"
+                className="mt-3 inline-flex min-h-11 items-center font-display font-extrabold text-[11px] uppercase tracking-[0.1em] text-accent-text hover:text-prose transition-colors"
+              >
+                Pick a goal to share
+              </Link>
+            </>
+          )}
+        </div>
         <BackingLink />
-      </Card>
+      </UtilityBox>
     )
   }
 
@@ -159,19 +159,16 @@ export default async function YourCornerSection() {
   const people = [...byPerson.values()].sort((a, b) => a.label.localeCompare(b.label))
 
   return (
-    <Card className="p-6 mb-6">
-      <Eyebrow className="mb-1">
-        {LABELS.contacts.cornerLabel}
-      </Eyebrow>
-      <p className="text-xs text-prose-faint mb-4 leading-snug">
+    <UtilityBox label={LABELS.contacts.cornerLabel} count={people.length > 0 ? people.length : null}>
+      <p className="px-4 pt-3 pb-2 text-xs text-prose-faint leading-snug">
         Who&apos;s keeping you honest, and on what. They never get notified about a
         day you missed — and you can cut any of it off from the goal itself.
       </p>
 
-      <div className="space-y-3">
+      <ul className="divide-y divide-soft">
         {people.map((person) => (
-          <Card key={person.label} tone="sunken" className="p-4">
-            <p className="text-sm font-semibold text-prose truncate">{person.label}</p>
+          <li key={person.label} className="px-4 py-3">
+            <p className="text-sm font-bold text-prose truncate">{person.label}</p>
             <div className="mt-2 space-y-1">
               {person.entries.map((e) => (
                 <Link
@@ -180,14 +177,14 @@ export default async function YourCornerSection() {
                   className="flex items-center justify-between gap-3 min-h-11 text-xs text-prose-muted hover:text-prose transition-colors"
                 >
                   <span className="truncate">{e.title}</span>
-                  <span className="shrink-0 text-prose-faint">{TIER_COPY[e.tier].label}</span>
+                  <StatusChip tone="chrome">{TIER_COPY[e.tier].label}</StatusChip>
                 </Link>
               ))}
             </div>
-          </Card>
+          </li>
         ))}
-      </div>
-      <BackingLink />
-    </Card>
+        <BackingLink asListItem />
+      </ul>
+    </UtilityBox>
   )
 }
