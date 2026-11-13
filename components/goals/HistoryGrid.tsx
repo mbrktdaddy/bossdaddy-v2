@@ -63,7 +63,7 @@ const MONTH_NAMES = [
 const CELL_CLASS: Record<CellState, string> = {
   kept:    'bg-accent text-white',
   extra:   'border-2 border-accent text-prose',
-  skipped: 'bg-zinc-500 text-white',
+  skipped: 'bg-surface-hover text-prose',
   missed:  'border border-strong text-prose-muted',
   open:    'text-prose-faint',
   none:    'text-prose-faint',

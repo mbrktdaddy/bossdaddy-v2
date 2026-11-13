@@ -817,7 +817,7 @@ export default function Thread({
                   {/* The BossChat recipe: mine = solid chrome + white ink, theirs =
                       surface + hairline; the tail corner is the only asymmetry. */}
                   <div className={`max-w-[75%] rounded-xl text-sm break-words overflow-hidden ${
-                    fromMe ? 'bg-chrome text-white rounded-br-sm' : 'bg-surface text-prose border border-soft rounded-bl-sm'
+                    fromMe ? 'bg-chrome app:bg-surface-raised text-white rounded-br-sm' : 'bg-surface text-prose border border-soft rounded-bl-sm'
                   } ${hasImage ? 'p-1' : 'px-4 py-2.5'}`}>
                     {/* Quoted parent. Tapping it jumps to the original when it's in
                         the loaded window. A null parent means the message was
@@ -943,7 +943,7 @@ export default function Thread({
               looks the way it will look when this finishes, immediately. */}
           {uploads.map((u) => (
             <div key={u.key} className="flex items-end justify-end gap-1.5">
-              <div className={`relative max-w-[75%] rounded-xl rounded-br-sm overflow-hidden p-1 ${u.error ? 'bg-surface-raised border border-strong' : 'bg-chrome'}`}>
+              <div className={`relative max-w-[75%] rounded-xl rounded-br-sm overflow-hidden p-1 ${u.error ? 'bg-surface-raised border border-strong' : 'bg-chrome app:bg-surface-raised'}`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={u.previewUrl}
@@ -1333,7 +1333,7 @@ function ProgressRing({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(1, value))
   return (
     <span
-      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-900/55"
+      className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-chrome/55"
       role="progressbar"
       aria-valuenow={Math.round(pct * 100)}
       aria-valuemin={0}

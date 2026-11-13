@@ -16,7 +16,7 @@ export default function ProgressBlock({ goal, stats }: Props) {
 
   return (
     // The ONE black panel on the detail screen (Hard Goods) — tokens invert inside the zone.
-    <section aria-label="Progress" data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
+    <section aria-label="Progress" data-theme="dark" className="bg-chrome app:bg-surface-raised text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
 
       {/* Top — saved + target */}
       <div>

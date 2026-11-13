@@ -245,7 +245,7 @@ function BossChatSession({
               <div
                 className={
                   m.role === 'user'
-                    ? 'bg-chrome text-white rounded-xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap'
+                    ? 'bg-chrome app:bg-surface-raised text-white rounded-xl rounded-br-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap'
                     : `rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap ${
                         m.failed ? 'bg-danger-bg text-danger-ink border border-danger-line' : 'bg-surface text-prose border border-soft'
                       }`

@@ -63,7 +63,7 @@ export function ResultCard({
 }) {
   // The ONE black panel per screen (Hard Goods): tokens invert inside the zone.
   return (
-    <section aria-label={label} data-theme="dark" className="bg-chrome text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
+    <section aria-label={label} data-theme="dark" className="bg-chrome app:bg-surface-raised text-prose border-t-4 border-accent rounded-xl p-6 sm:p-8 space-y-5">
       <div aria-live="polite" className="space-y-5">
         <div>
           <p className="text-[10px] uppercase tracking-widest font-semibold text-accent-text">{label}</p>

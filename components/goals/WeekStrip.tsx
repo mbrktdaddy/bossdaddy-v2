@@ -21,7 +21,7 @@ import { WEEKDAY_INITIALS, type CellState, type HistoryCell } from '@/lib/goals/
 const CELL_CLASS: Record<CellState, string> = {
   kept:    'bg-accent',
   extra:   'border-2 border-accent',
-  skipped: 'bg-zinc-500',
+  skipped: 'bg-surface-hover',
   missed:  'border border-strong',
   open:    'border border-dashed border-strong',
   none:    'bg-surface-raised',

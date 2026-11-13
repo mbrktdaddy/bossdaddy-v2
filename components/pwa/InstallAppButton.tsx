@@ -57,9 +57,9 @@ export default function InstallAppButton({ variant = 'card', className = '' }: P
           {LABELS.app.short}
         </button>
         {showIosHint && (
-          <p className="px-3 pb-2 text-xs text-zinc-400 leading-snug">
-            Tap <span className="font-semibold text-zinc-200">Share</span> in Safari, then{' '}
-            <span className="font-semibold text-zinc-200">Add to Home Screen</span>.
+          <p className="px-3 pb-2 text-xs text-prose-faint leading-snug">
+            Tap <span className="font-semibold text-prose-muted">Share</span> in Safari, then{' '}
+            <span className="font-semibold text-prose-muted">Add to Home Screen</span>.
           </p>
         )}
       </div>

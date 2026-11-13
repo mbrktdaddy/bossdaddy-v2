@@ -296,7 +296,7 @@ export default async function ToolsHubPage() {
                     />
                   ) : (
                     <div
-                      className="h-10 w-10 rounded-full bg-chrome text-white flex items-center justify-center text-base font-black shrink-0"
+                      className="h-10 w-10 rounded-full bg-chrome app:bg-prose text-white app:text-background flex items-center justify-center text-base font-black shrink-0"
                       aria-hidden="true"
                     >
                       {initial}
@@ -389,23 +389,30 @@ export default async function ToolsHubPage() {
           instead of surprising. The "More coming" placeholder retired when the money
           path filled the section (2026-09-24). */}
       <section>
-        <SectionHeader label="Calculators" />
-        {/* Five compact boxes on a 6-column track: 3 + 2 wide ones on desktop (no
-            empty slot), 2 + 2 + a full-width one on tablet. */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-          {REFERENCE_TOOLS.map((spoke, i) => (
-            <ToolCard
-              key={spoke.href}
-              href={spoke.href}
-              kicker={spoke.kicker}
-              title={spoke.title}
-              blurb={spoke.blurb}
-              size="compact"
-              tone="box"
-              className={`${i === REFERENCE_TOOLS.length - 1 ? 'sm:col-span-2' : ''} ${i < 3 ? 'lg:col-span-2' : 'lg:col-span-3'}`}
-            />
-          ))}
-        </div>
+        {/* One box with rows (2026-11-13) — five stacked boxes read as a list of cards, not an instrument.
+            Phone = hairline rows; sm+ = two columns with hairlines, none on the last row. */}
+        <UtilityBox label="Calculators" count={REFERENCE_TOOLS.length}>
+          <ul className="divide-y divide-soft sm:grid sm:grid-cols-2 sm:divide-y-0">
+            {REFERENCE_TOOLS.map((spoke, i) => {
+              const lastRowStart = REFERENCE_TOOLS.length % 2 === 0 ? REFERENCE_TOOLS.length - 2 : REFERENCE_TOOLS.length - 1
+              return (
+                <li
+                  key={spoke.href}
+                  className={`${i % 2 === 0 ? 'sm:border-r sm:border-soft' : ''} ${i < lastRowStart ? 'sm:border-b sm:border-soft' : ''}`}
+                >
+                  <Link href={spoke.href} className="group flex items-center gap-3 px-4 py-3 min-h-[64px] hover:bg-surface-raised transition-colors">
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-eyebrow">{spoke.kicker}</span>
+                      <span className="mt-0.5 block text-sm font-bold text-prose group-hover:text-accent-text transition-colors truncate">{spoke.title}</span>
+                      {spoke.blurb && <span className="mt-0.5 block text-xs text-prose-faint line-clamp-1">{spoke.blurb}</span>}
+                    </span>
+                    <ChevronRightIcon className="w-4 h-4 text-prose-faint group-hover:text-accent-text shrink-0 transition-colors" strokeWidth={2} />
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </UtilityBox>
       </section>
     </div>
     </>

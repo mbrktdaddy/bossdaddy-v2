@@ -151,7 +151,7 @@ export default function InviteManager({ goalId, goalName, pendingInvites, seatsR
               placeholder="Search by username or name…"
             />
             {memberHits.length > 0 && (
-              <div className="mt-2 border-2 border-chrome rounded-lg overflow-hidden divide-y divide-soft">
+              <div className="mt-2 border-2 border-chrome app:border-strong rounded-lg overflow-hidden divide-y divide-soft">
                 {memberHits.map((m) => (
                   <div key={m.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-surface-sunken">
                     <span className="min-w-0 text-sm text-prose truncate">
