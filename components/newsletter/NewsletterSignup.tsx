@@ -35,6 +35,12 @@ type Variant = 'block' | 'card' | 'inline'
 
 interface NewsletterSignupProps {
   variant?: Variant
+  /**
+   * Block variant only (2026-11-13, the detail-page close): column-width —
+   * rounded, no full-bleed container, one column, a smaller headline. The
+   * homepage block stays full-bleed.
+   */
+  inset?: boolean
   intent?: 'digest' | 'notify'
   /** notify only — `gift:fathers-day`. Lowercase, [a-z0-9:_-]. */
   topic?: string
@@ -56,7 +62,7 @@ const INITIAL: NewsletterFormState = { status: 'idle' }
 
 export function NewsletterSignup({
   variant = 'card', intent = 'digest', topic, interests, eyebrow, heading, headingAs: Heading = 'h2',
-  body, buttonLabel, successMessage, id, className = '',
+  body, buttonLabel, successMessage, id, className = '', inset = false,
 }: NewsletterSignupProps) {
   const [state, formAction, pending] = useActionState(subscribeFromForm, INITIAL)
   const onBlock = variant === 'block'
@@ -90,11 +96,11 @@ export function NewsletterSignup({
 
   if (onBlock) {
     return (
-      <section id={id} className={`bg-accent text-chrome border-b border-soft scroll-mt-24 ${className}`}>
-        <div className="max-w-6xl mx-auto px-6 py-11 md:py-16 grid gap-5 lg:grid-cols-2 lg:items-center lg:gap-10">
+      <section id={id} className={`${inset ? 'bg-accent text-chrome rounded-xl' : 'bg-accent text-chrome border-b border-soft'} scroll-mt-24 ${className}`}>
+        <div className={inset ? 'px-6 py-8 md:px-8 md:py-10 grid gap-5' : 'max-w-6xl mx-auto px-6 py-11 md:py-16 grid gap-5 lg:grid-cols-2 lg:items-center lg:gap-10'}>
           <div>
             <p className="font-display font-extrabold text-[11px] uppercase tracking-[0.2em]">{eyebrow ?? L.name}</p>
-            <Heading className="font-black uppercase text-[40px] md:text-[56px] leading-[0.95] tracking-[-0.03em] mt-2">
+            <Heading className={`font-black uppercase ${inset ? 'text-[28px] md:text-[36px]' : 'text-[40px] md:text-[56px]'} leading-[0.95] tracking-[-0.03em] mt-2`}>
               {heading ?? L.headline}
             </Heading>
             <p className="font-semibold text-[15px] leading-relaxed mt-3 max-w-[46ch]">{body ?? L.pitch}</p>

@@ -1,8 +1,10 @@
 import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 
-// The newsletter card at the end of reviews, guides and About — a thin preset
-// over <NewsletterSignup variant="card">, kept so those three pages didn't
-// churn. Only the eyebrow (and optionally the heading) varies by context; the
+// The newsletter capture at the end of reviews, guides and About — a thin
+// preset over <NewsletterSignup variant="block" inset>, the homepage's ORANGE
+// block in its column-width form (2026-11-13, Phase 3: the detail pages had
+// the same component as a white 2px box, and no orange moment at all). Kept
+// so those three pages didn't churn. Only the eyebrow (and optionally the heading) varies by context; the
 // promise and the cadence line come from LABELS.newsletter and never vary.
 //
 // CAPTURE_CARD re-exported for the remaining hand-built captures (merch
@@ -25,7 +27,8 @@ export function NewsletterCard({
 }) {
   return (
     <NewsletterSignup
-      variant="card"
+      variant="block"
+      inset
       eyebrow={eyebrow}
       heading={heading}
       headingAs={headingAs}
