@@ -12,6 +12,10 @@ import { DraftProvenanceNote } from '@/components/workspace/DraftProvenanceNote'
 import { PipelineRunner } from '@/components/workspace/PipelineRunner'
 import { ResumeDraftNotice } from '@/components/workspace/ResumeDraftNotice'
 import { CriticFindings } from '@/components/workspace/CriticFindings'
+import { NotesField } from '@/components/workspace/NotesField'
+import { ReferencesPanel } from '@/components/workspace/ReferencesPanel'
+import { extractLinks } from '@/lib/content/pipeline/facts'
+import { pruneReferenceNotes, type ReferenceInput, type ReferenceNote } from '@/lib/content/references'
 import { runToDraftHtml } from '@/lib/content/pipeline/section'
 import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
@@ -36,7 +40,8 @@ type ReviewDraft = Partial<{
   description: string; productName: string; productSlug: string; keyFeatures: string; category: string
   comparisonSlugs: string[]; imageSlots: number | 'auto'; inputRating: number | null
   testingDuration: string; testingSince: string; testingNote: string
-  howYouUsedIt: string; standoutMoment: string; pricePaid: string
+  howYouUsedIt: string; standoutMoment: string; pricePaid: string; notes: string
+  references: ReferenceInput[]; referenceNotes: ReferenceNote[]
 }>
 
 function readDraft(): ReviewDraft {
@@ -79,15 +84,18 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
   const [howYouUsedIt, setHowYouUsedIt]     = useState(draft.howYouUsedIt || '')
   const [standoutMoment, setStandoutMoment] = useState(draft.standoutMoment || '')
   const [pricePaid, setPricePaid]           = useState(draft.pricePaid || '')
+  const [notes, setNotes]                   = useState(draft.notes || '')
+  const [references, setReferences]         = useState<ReferenceInput[]>(draft.references ?? [])
+  const [referenceNotes, setReferenceNotes] = useState<ReferenceNote[]>(draft.referenceNotes ?? [])
 
   // Persist form state to localStorage on change. Skipped for the pre-hydration
   // (server-keyed) form so its empty state never overwrites the saved draft.
   useEffect(() => {
     if (!restore) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid, notes, references, referenceNotes }))
     } catch { /* ignore */ }
-  }, [restore, description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid])
+  }, [restore, description, productName, productSlug, keyFeatures, category, comparisonSlugs, imageSlots, inputRating, testingDuration, testingSince, testingNote, howYouUsedIt, standoutMoment, pricePaid, notes, references, referenceNotes])
 
   // The staged pipeline's input; the run itself lives server-side.
   const [brief, setBrief] = useState<Record<string, unknown> | null>(null)
@@ -228,6 +236,9 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
       ...(testingDuration === 'custom' && testingNote.trim() ? { testingNote: testingNote.trim() } : {}),
       ...(howYouUsedIt.trim() ? { howYouUsedIt: howYouUsedIt.trim() } : {}),
       ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
+      ...(notes.trim() ? { notes: notes.trim() } : {}),
+      references,
+      referenceNotes: pruneReferenceNotes(references, referenceNotes),
       ...(parsedPricePaid !== null && !isNaN(parsedPricePaid) ? { pricePaid: parsedPricePaid } : {}),
     })
     setStep('pipeline')
@@ -250,6 +261,9 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
       setHowYouUsedIt(rb.howYouUsedIt ?? '')
       setStandoutMoment(rb.standoutMoment ?? '')
       setPricePaid(rb.pricePaid != null ? String(rb.pricePaid) : '')
+      setNotes(rb.notes ?? '')
+      setReferences(rb.references ?? [])
+      setReferenceNotes(rb.referenceNotes ?? [])
     }
     const b = run.blocks
     const sub = b?.subScores
@@ -776,6 +790,23 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
             className="w-full px-4 py-2.5 bg-surface-sunken border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-none"
           />
         </div>
+
+        <NotesField
+          label={<>Testing notes <span className="font-normal text-prose-faint">(optional, but recommended)</span></>}
+          value={notes}
+          onChange={setNotes}
+          placeholder={"Everything you actually did with it — the jobs, the numbers, what broke, what surprised you, who else used it. Paragraphs, bullets or a pasted log all work; links are pulled out into the reference list below. The draft can only claim what's written here."}
+          hint="Each line becomes a fact the outline assigns to a section; nothing firsthand gets invented."
+        />
+
+        <ReferencesPanel
+          contentType="review"
+          subject={productName}
+          references={references}
+          notes={referenceNotes}
+          detected={extractLinks(notes)}
+          onChange={(refs, n) => { setReferences(refs); setReferenceNotes(n) }}
+        />
       </div>
 
         <div>

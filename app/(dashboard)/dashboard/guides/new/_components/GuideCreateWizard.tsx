@@ -10,6 +10,10 @@ import { DraftProvenanceNote } from '@/components/workspace/DraftProvenanceNote'
 import { PipelineRunner } from '@/components/workspace/PipelineRunner'
 import { ResumeDraftNotice } from '@/components/workspace/ResumeDraftNotice'
 import { CriticFindings } from '@/components/workspace/CriticFindings'
+import { NotesField } from '@/components/workspace/NotesField'
+import { ReferencesPanel } from '@/components/workspace/ReferencesPanel'
+import { extractLinks } from '@/lib/content/pipeline/facts'
+import { pruneReferenceNotes, type ReferenceInput, type ReferenceNote } from '@/lib/content/references'
 import { runToDraftHtml } from '@/lib/content/pipeline/section'
 import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
@@ -35,6 +39,7 @@ interface ProductOption {
 
 type GuideDraft = Partial<{
   description: string; topic: string; keyPoints: string; context: string; category: string
+  references: ReferenceInput[]; referenceNotes: ReferenceNote[]
   pieceType: PieceType; imageSlots: number | 'auto'; inquiryOverride: boolean | null
 }>
 
@@ -65,6 +70,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
   const [topic, setTopic]             = useState(draft.topic || '')
   const [keyPoints, setKeyPoints]     = useState(draft.keyPoints || '')
   const [context, setContext]         = useState(draft.context || '')
+  const [references, setReferences]       = useState<ReferenceInput[]>(draft.references ?? [])
+  const [referenceNotes, setReferenceNotes] = useState<ReferenceNote[]>(draft.referenceNotes ?? [])
   const [category, setCategory]       = useState(draft.category || '')
   const [pieceType, setPieceType]     = useState<PieceType>(draft.pieceType || 'guide')
   const [imageSlots, setImageSlots]   = useState<number | 'auto'>(draft.imageSlots !== undefined ? draft.imageSlots : 'auto')
@@ -79,9 +86,9 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
   useEffect(() => {
     if (!restore) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride }))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride, references, referenceNotes }))
     } catch { /* ignore */ }
-  }, [restore, description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride])
+  }, [restore, description, topic, keyPoints, context, category, pieceType, imageSlots, inquiryOverride, references, referenceNotes])
 
   // Inquiry register: a witness, not a student — the voice for philosophical/moral
   // topics. Defaults on for Table Duty / Watch Duty, off elsewhere — and the
@@ -171,6 +178,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       pieceType,
       keyPoints: keyPoints.split('\n').map((p) => p.trim()).filter(Boolean),
       ...(context.trim() ? { context: context.trim() } : {}),
+      references,
+      referenceNotes: pruneReferenceNotes(references, referenceNotes),
       imageSlots,
       inquiryMode,
       // Inquiry pieces carry no affiliate links — the register forbids them.
@@ -190,6 +199,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       setPieceType(rb.pieceType)
       setKeyPoints(rb.keyPoints.join('\n'))
       setContext(rb.context ?? '')
+      setReferences(rb.references ?? [])
+      setReferenceNotes(rb.referenceNotes ?? [])
       setSelectedSlugs(rb.productSlugs)
       setInquiryOverride(rb.inquiryMode)
     }
@@ -438,22 +449,22 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm text-prose-muted mb-1.5">
-            Context &amp; source material <span className="text-prose-faint">(optional, but recommended)</span>
-          </label>
-          <textarea
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
-            rows={6}
-            maxLength={6000}
-            placeholder={"Paste your full brief here — personal story, real numbers, brand names, sources, the arc you want to tell. Claude grounds the piece in these specifics instead of inventing them."}
-            className="w-full px-4 py-2.5 bg-surface border border-strong rounded-lg text-prose placeholder:text-prose-faint focus:outline-none focus:ring-2 focus:ring-accent-hover resize-y"
-          />
-          <p className="mt-1 text-xs text-prose-faint">
-            The more real detail you give, the more accurate and personal the draft. {context.length}/6000
-          </p>
-        </div>
+        <NotesField
+          label={<>Context &amp; source material <span className="font-normal text-prose-faint">(optional, but recommended)</span></>}
+          value={context}
+          onChange={setContext}
+          placeholder={"Paste your full brief here — personal story, real numbers, brand names, sources, the arc you want to tell. Paragraphs, bullets or a pasted log all work; links are pulled out into the reference list below. Claude grounds the piece in these specifics instead of inventing them."}
+          hint="The more real detail you give, the more accurate and personal the draft."
+        />
+
+        <ReferencesPanel
+          contentType="guide"
+          subject={topic}
+          references={references}
+          notes={referenceNotes}
+          detected={extractLinks(context)}
+          onChange={(refs, n) => { setReferences(refs); setReferenceNotes(n) }}
+        />
 
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">Piece type</label>
