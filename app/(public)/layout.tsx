@@ -7,6 +7,7 @@ import InstallPrompt from '@/components/InstallPrompt'
 import AskBossFab from '@/components/AskBossFab'
 import PublicMain from '@/components/PublicMain'
 import HideOnImmersive from '@/components/HideOnImmersive'
+import HideOnApp from '@/components/HideOnApp'
 import { isGiftSeason } from '@/lib/gift-occasions'
 import { hasLiveSeasonalGifts } from '@/lib/collections/seasonal-gifts'
 
@@ -40,7 +41,9 @@ export default async function PublicLayout({ children }: { children: React.React
       {/* Topics row (every width since Hard Goods) — scrolls away with the page
           while the masthead sticks. Since 2026-10-14 this row IS the topics
           nav; the masthead carries the places (Explore · Gear · Shop | Tools). */}
-      <HideOnImmersive><CategoryBar /></HideOnImmersive>
+      {/* Not on the Toolbox routes (brand-guide §11): the app opens with the
+          program, not the Magazine's topic nav. */}
+      <HideOnApp><CategoryBar /></HideOnApp>
       <PublicMain>{children}</PublicMain>
       <HideOnImmersive><Footer giftSeason={giftSeason} /></HideOnImmersive>
       <MobileBottomNav />
