@@ -731,6 +731,8 @@ interface Props {
   targetWords?: number
   enableCollectionEmbed?: boolean
   enableCrossLink?: boolean
+  /** The saved piece this editor belongs to — lets selection rewrites see its notes + references. */
+  groundingFor?: { contentType: 'review' | 'guide'; contentId: string }
 }
 
 interface SelectionState {
@@ -739,7 +741,7 @@ interface SelectionState {
   text: string
 }
 
-export function TiptapEditor({ value, onChange, placeholder, targetWords, enableCollectionEmbed = false, enableCrossLink = false }: Props) {
+export function TiptapEditor({ value, onChange, placeholder, targetWords, enableCollectionEmbed = false, enableCrossLink = false, groundingFor }: Props) {
   const lastEmitted     = useRef(value)
   const [linkOpen, setLinkOpen]     = useState(false)
   const [linkCurrent, setLinkCurrent] = useState('')
@@ -865,7 +867,7 @@ export function TiptapEditor({ value, onChange, placeholder, targetWords, enable
       const res = await fetch('/api/claude/refine-selection', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: selection.text, instruction: aiInstruction }),
+        body: JSON.stringify({ text: selection.text, instruction: aiInstruction, ...(groundingFor ?? {}) }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Refinement failed')

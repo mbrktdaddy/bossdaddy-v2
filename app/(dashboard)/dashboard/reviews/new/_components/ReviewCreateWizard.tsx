@@ -13,9 +13,9 @@ import { PipelineRunner } from '@/components/workspace/PipelineRunner'
 import { ResumeDraftNotice } from '@/components/workspace/ResumeDraftNotice'
 import { CriticFindings } from '@/components/workspace/CriticFindings'
 import { NotesField } from '@/components/workspace/NotesField'
-import { ReferencesPanel } from '@/components/workspace/ReferencesPanel'
+import { ReferencesPanel, readReferences } from '@/components/workspace/ReferencesPanel'
 import { extractLinks } from '@/lib/content/pipeline/facts'
-import { pruneReferenceNotes, type ReferenceInput, type ReferenceNote } from '@/lib/content/references'
+import { mergeReferenceNotes, pruneReferenceNotes, unfetchedReferences, type ReferenceInput, type ReferenceNote } from '@/lib/content/references'
 import { runToDraftHtml } from '@/lib/content/pipeline/section'
 import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
@@ -65,6 +65,7 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
   const [draft] = useState<ReviewDraft>(() => (restore ? readDraft() : {}))
   const [step, setStep] = useState<Step>('idea')
   const [error, setError] = useState<string | null>(null)
+  const [readingLinks, setReadingLinks] = useState(false)
 
   const [description, setDescription]   = useState(draft.description || '')
   const [productName, setProductName]   = useState(draft.productName || '')
@@ -198,11 +199,30 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
     setSuggestions([])
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (!productName.trim()) { setError('Enter a product name first'); return }
     if (!category) { setError('Select a category before generating'); return }
     if (inputRating === null) { setError('Rate the product before generating — this drives the draft tone'); return }
     setError(null)
+
+    // A listed link that was never read would go unused — read it now, so Generate is
+    // the one tap that matters. A link that cannot be read stops here, in the list,
+    // where it can be fixed or removed; the run never starts with a silent gap.
+    let notesNow = referenceNotes
+    const pending = unfetchedReferences(references, referenceNotes)
+    if (pending.length) {
+      setReadingLinks(true)
+      const r = await readReferences({ contentType: 'review', subject: productName.trim(), references: pending })
+      setReadingLinks(false)
+      if (!r.ok) { setError(r.error); return }
+      notesNow = mergeReferenceNotes(references, referenceNotes, r.notes)
+      setReferenceNotes(notesNow)
+      const failed = r.notes.filter((n) => n.status === 'failed').length
+      if (failed) {
+        setError(failed === 1 ? 'A reference link could not be read — fix or remove it in the list, then generate.' : `${failed} reference links could not be read — fix or remove them in the list, then generate.`)
+        return
+      }
+    }
 
     const parsedPricePaid = pricePaid.trim() ? parseInt(pricePaid.trim(), 10) : null
 
@@ -238,7 +258,7 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
       ...(standoutMoment.trim() ? { standoutMoment: standoutMoment.trim() } : {}),
       ...(notes.trim() ? { notes: notes.trim() } : {}),
       references,
-      referenceNotes: pruneReferenceNotes(references, referenceNotes),
+      referenceNotes: pruneReferenceNotes(references, notesNow),
       ...(parsedPricePaid !== null && !isNaN(parsedPricePaid) ? { pricePaid: parsedPricePaid } : {}),
     })
     setStep('pipeline')
@@ -845,10 +865,10 @@ function ReviewWizardForm({ restore }: { restore: boolean }) {
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={!productName.trim()}
+          disabled={!productName.trim() || readingLinks}
           className={buttonVariants()}
         >
-          ✨ Generate with AI → Edit
+          {readingLinks ? 'Reading your links…' : '✨ Generate with AI → Edit'}
         </button>
         <button
           type="button"

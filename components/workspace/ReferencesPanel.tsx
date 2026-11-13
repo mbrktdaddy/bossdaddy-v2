@@ -6,15 +6,17 @@ import { fieldClass } from '@/components/ui/Field'
 import { buttonVariants } from '@/components/ui/Button'
 import { XIcon } from '@/components/icons'
 import {
-  MAX_REFERENCES, MAX_REF_NOTE_LEN, hostOf, isRetailerUrl, pruneReferenceNotes,
-  type ReferenceInput, type ReferenceNote,
+  MAX_REFERENCES, MAX_REF_LABEL_LEN, MAX_REF_NOTE_LEN, MAX_REF_TEXT_LEN, MIN_REF_TEXT_LEN,
+  hostOf, isRetailerUrl, mergeReferenceNotes, normalizeLinkInput, pruneReferenceNotes, referenceKey,
+  unfetchedReferences, type ReferenceInput, type ReferenceNote,
 } from '@/lib/content/references'
 
-// Reference links for a draft (docs/content-pipeline-plan.md §4a). The author
-// lists as many links as they like (up to MAX_REFERENCES), each with an optional
-// "what I want from it" line, taps Fetch, and reviews the distilled facts per
-// link before the run starts. Links pasted into the notes are offered with one
-// tap. Retailer links are flagged, not fetched — the product panel owns those.
+// References for a draft (docs/content-pipeline-plan.md §4a). The author lists as
+// many as they like (up to MAX_REFERENCES) — a link, or pasted text for a page
+// that can't be fetched — each with an optional "what I want from it" line. They
+// are read at Generate (or on the Read tap), and the distilled facts are reviewed
+// per reference. Links pasted into the notes are offered with one tap. Retailer
+// links are flagged, not fetched — the product panel owns those.
 
 interface Props {
   contentType: 'review' | 'guide'
@@ -27,11 +29,26 @@ interface Props {
   detected?: string[]
 }
 
-function validUrl(raw: string): string | null {
+// "dewalt.com/x" is a link too: the scheme is added, then it must be a plain web address.
+const validUrl = normalizeLinkInput
+
+/**
+ * Read references through /api/content/references. Shared with the wizards, which
+ * read any still-unread reference at Generate so a listed one can never silently
+ * go unused.
+ */
+export async function readReferences(input: { contentType: 'review' | 'guide'; subject: string; references: ReferenceInput[] }):
+  Promise<{ ok: true; notes: ReferenceNote[] } | { ok: false; error: string }> {
   try {
-    const u = new URL(raw.trim())
-    return u.protocol === 'http:' || u.protocol === 'https:' ? u.toString() : null
-  } catch { return null }
+    const res = await fetch('/api/content/references', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input),
+    })
+    const data = await res.json().catch(() => null)
+    if (!res.ok) return { ok: false, error: data?.error ?? 'Could not read the references.' }
+    return { ok: true, notes: (data?.notes ?? []) as ReferenceNote[] }
+  } catch {
+    return { ok: false, error: 'Could not read the references.' }
+  }
 }
 
 function shortPath(url: string): string {
@@ -42,112 +59,150 @@ function shortPath(url: string): string {
   } catch { return '' }
 }
 
+type AddMode = 'link' | 'text'
+
 export function ReferencesPanel({ contentType, subject, references, notes, onChange, detected = [] }: Props) {
+  const [mode, setMode] = useState<AddMode>('link')
   const [url, setUrl] = useState('')
+  const [text, setText] = useState('')
+  const [label, setLabel] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const listed = new Set(references.map((r) => r.url))
+  const listed = new Set(references.map(referenceKey))
   const offers = detected.map((d) => validUrl(d)).filter((d): d is string => !!d && !listed.has(d))
-  const noteFor = (u: string) => notes.find((n) => n.url === u)
-  const unfetched = references.filter((r) => noteFor(r.url)?.status !== 'ok')
+  const noteFor = (key: string) => notes.find((n) => n.url === key)
+  const unfetched = unfetchedReferences(references, notes)
   const full = references.length >= MAX_REFERENCES
 
-  function add(raw: string, why = '') {
+  function push(ref: ReferenceInput) {
+    if (full) { setError(`Up to ${MAX_REFERENCES} references per piece.`); return false }
+    if (listed.has(referenceKey(ref))) { setError('Already on the list.'); return false }
+    setError(null)
+    onChange([...references, ref], notes)
+    return true
+  }
+
+  function addLink(raw: string, why = '') {
     const u = validUrl(raw)
     if (!u) { setError('That is not a web address.'); return }
-    if (listed.has(u)) { setError('Already on the list.'); return }
-    if (full) { setError(`Up to ${MAX_REFERENCES} links per piece.`); return }
-    setError(null)
-    onChange([...references, { url: u, ...(why.trim() ? { note: why.trim() } : {}) }], notes)
-    setUrl(''); setNote('')
+    if (push({ url: u, ...(why.trim() ? { note: why.trim() } : {}) })) { setUrl(''); setNote('') }
   }
 
-  function remove(u: string) {
-    const refs = references.filter((r) => r.url !== u)
-    onChange(refs, pruneReferenceNotes(refs, notes))
-  }
-
-  function setWhy(u: string, why: string) {
-    onChange(references.map((r) => (r.url === u ? { ...r, ...(why ? { note: why } : { note: undefined }) } : r)), notes)
-  }
-
-  function dropFact(u: string, i: number) {
-    onChange(references, notes.map((n) => (n.url === u ? { ...n, facts: n.facts.filter((_, j) => j !== i) } : n)))
-  }
-
-  async function fetchAll() {
-    if (!unfetched.length || busy) return
-    if (!subject.trim()) { setError('Name the product or topic first so the reader knows what to pull.'); return }
-    setBusy(true); setError(null)
-    try {
-      const res = await fetch('/api/content/references', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contentType, subject: subject.trim(), references: unfetched }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok) { setError(data?.error ?? 'Could not fetch the links.'); return }
-      const fresh = (data?.notes ?? []) as ReferenceNote[]
-      const byUrl = new Map(fresh.map((n) => [n.url, n]))
-      const merged = [...notes.filter((n) => !byUrl.has(n.url)), ...fresh]
-      onChange(references, pruneReferenceNotes(references, merged))
-    } catch {
-      setError('Could not fetch the links.')
-    } finally {
-      setBusy(false)
+  function addText(raw: string, what = '', why = '') {
+    const t = raw.trim()
+    if (t.length < MIN_REF_TEXT_LEN) { setError(`Paste at least ${MIN_REF_TEXT_LEN} characters of the document.`); return }
+    if (push({ text: t, ...(what.trim() ? { label: what.trim() } : {}), ...(why.trim() ? { note: why.trim() } : {}) })) {
+      setText(''); setLabel(''); setNote('')
     }
   }
 
+  function addCurrent() {
+    if (mode === 'link') addLink(url, note)
+    else addText(text, label, note)
+  }
+
+  // Leaving the add row with a reference typed but never added used to lose it
+  // silently — exactly what happened on the first real guide (2026-11-12). The row's
+  // container catches focus leaving it (focusout bubbles); moving between the row's
+  // own fields, its Add button or its mode toggle is not leaving the row.
+  function leaveAddRow(e: React.FocusEvent<HTMLDivElement>) {
+    if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) return
+    if (mode === 'link' ? url.trim() : text.trim().length >= MIN_REF_TEXT_LEN) addCurrent()
+  }
+
+  function remove(key: string) {
+    const refs = references.filter((r) => referenceKey(r) !== key)
+    onChange(refs, pruneReferenceNotes(refs, notes))
+  }
+
+  function setWhy(key: string, why: string) {
+    onChange(references.map((r) => (referenceKey(r) === key ? { ...r, ...(why ? { note: why } : { note: undefined }) } : r)), notes)
+  }
+
+  function dropFact(key: string, i: number) {
+    onChange(references, notes.map((n) => (n.url === key ? { ...n, facts: n.facts.filter((_, j) => j !== i) } : n)))
+  }
+
+  async function readSome(targets: ReferenceInput[]) {
+    if (!targets.length || busy) return
+    if (!subject.trim()) { setError('Name the product or topic first so the reader knows what to pull.'); return }
+    setBusy(true); setError(null)
+    const r = await readReferences({ contentType, subject: subject.trim(), references: targets })
+    setBusy(false)
+    if (!r.ok) { setError(r.error); return }
+    onChange(references, mergeReferenceNotes(references, notes, r.notes))
+  }
+
+  const readAll = () => readSome(unfetched)
+
   const okCount = notes.filter((n) => n.status === 'ok' && n.facts.length).length
   const factCount = notes.reduce((s, n) => s + (n.status === 'ok' ? n.facts.length : 0), 0)
+  const canAdd = mode === 'link' ? !!url.trim() : text.trim().length >= MIN_REF_TEXT_LEN
 
   return (
     <div>
       <div className="flex items-end justify-between gap-3 mb-1.5">
         <span className="text-sm font-semibold text-prose">
-          Reference links <span className="font-normal text-prose-faint">(optional)</span>
+          References <span className="font-normal text-prose-faint">(optional)</span>
         </span>
         {references.length > 0 && (
           <button
             type="button"
-            onClick={fetchAll}
+            onClick={readAll}
             disabled={busy || !unfetched.length}
             className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
-            {busy ? 'Reading…' : unfetched.length ? `Fetch ${unfetched.length} ${unfetched.length === 1 ? 'link' : 'links'}` : 'All fetched'}
+            {busy ? 'Reading…' : unfetched.length ? `Read ${unfetched.length}` : okCount ? 'All read' : 'Nothing to read'}
           </button>
         )}
       </div>
 
       <div className="border border-soft rounded-md divide-y divide-soft">
         {references.map((r) => {
-          const n = noteFor(r.url)
-          const retailer = isRetailerUrl(r.url)
+          const key = referenceKey(r)
+          const n = noteFor(key)
+          const link = r.url
+          const retailer = !!link && isRetailerUrl(link)
+          const name = link ? (hostOf(link) ?? link) : (r.label?.trim() || 'Pasted text')
           return (
-            <div key={r.url} className="p-3">
+            <div key={key} className="p-3">
               <div className="flex items-start gap-2">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm text-prose truncate">
-                    <span className="font-semibold">{hostOf(r.url) ?? r.url}</span>
-                    <span className="text-prose-faint">{shortPath(r.url)}</span>
+                    <span className="font-semibold">{name}</span>
+                    <span className="text-prose-faint">
+                      {link ? shortPath(link) : ` · ${(r.text?.length ?? 0).toLocaleString()} characters`}
+                    </span>
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     {retailer
                       ? <Badge tone="warn" size="sm">Retailer</Badge>
                       : !n
-                        ? <Badge tone="muted" size="sm">Not fetched</Badge>
+                        ? <Badge tone="muted" size="sm">Not read</Badge>
                         : n.status === 'ok'
-                          ? <Badge tone="success" size="sm">{n.facts.length} {n.facts.length === 1 ? 'fact' : 'facts'}</Badge>
+                          ? <Badge tone={n.facts.length ? 'success' : 'warn'} size="sm">{n.facts.length} {n.facts.length === 1 ? 'fact' : 'facts'}</Badge>
                           : <Badge tone="danger" size="sm">{n.status === 'skipped' ? 'Skipped' : 'Failed'}</Badge>}
-                    {n?.title && n.status === 'ok' && <span className="text-xs text-prose-muted truncate">{n.title}</span>}
+                    {link && n?.title && n.status === 'ok' && <span className="text-xs text-prose-muted truncate">{n.title}</span>}
+                    {n && !retailer && n.status !== 'skipped' && (
+                      <button
+                        type="button"
+                        onClick={() => readSome([r])}
+                        disabled={busy}
+                        aria-label={`Read ${name} again`}
+                        className="inline-flex items-center min-h-[44px] px-2 -my-2.5 text-xs font-semibold text-prose underline underline-offset-2 disabled:opacity-60"
+                      >
+                        Re-read
+                      </button>
+                    )}
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => remove(r.url)}
-                  aria-label={`Remove ${hostOf(r.url) ?? 'link'}`}
-                  className="shrink-0 p-2 -m-1 text-prose-muted hover:text-prose"
+                  onClick={() => remove(key)}
+                  aria-label={`Remove ${name}`}
+                  className="shrink-0 inline-flex items-center justify-center min-w-[44px] min-h-[44px] -m-2.5 text-prose-muted hover:text-prose"
                 >
                   <XIcon className="w-4 h-4" />
                 </button>
@@ -155,10 +210,10 @@ export function ReferencesPanel({ contentType, subject, references, notes, onCha
               <input
                 type="text"
                 value={r.note ?? ''}
-                onChange={(e) => setWhy(r.url, e.target.value)}
+                onChange={(e) => setWhy(key, e.target.value)}
                 maxLength={MAX_REF_NOTE_LEN}
-                placeholder="What do you want from this page? e.g. the weight and battery spec"
-                aria-label={`What to pull from ${hostOf(r.url) ?? 'this link'}`}
+                placeholder={link ? 'What do you want from this page? e.g. the weight and battery spec' : 'What do you want from this text? e.g. the dates and the vote counts'}
+                aria-label={`What to pull from ${name}`}
                 className={fieldClass({ className: 'mt-2' })}
               />
               {retailer && (
@@ -174,9 +229,9 @@ export function ReferencesPanel({ contentType, subject, references, notes, onCha
                       <span className="flex-1 leading-snug">{f}</span>
                       <button
                         type="button"
-                        onClick={() => dropFact(r.url, i)}
+                        onClick={() => dropFact(key, i)}
                         aria-label="Drop this fact"
-                        className="shrink-0 p-1.5 -m-1 text-prose-faint hover:text-prose"
+                        className="shrink-0 inline-flex items-center justify-center min-w-[44px] min-h-[44px] -my-3 -mr-2.5 text-prose-faint hover:text-prose"
                       >
                         <XIcon className="w-3.5 h-3.5" />
                       </button>
@@ -188,39 +243,104 @@ export function ReferencesPanel({ contentType, subject, references, notes, onCha
           )
         })}
 
-        <div className="p-3">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              type="url"
-              inputMode="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(url, note) } }}
-              placeholder="https://…"
-              aria-label="Reference link"
-              disabled={full}
-              className={fieldClass({ className: 'sm:flex-1' })}
-            />
-            <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); add(url, note) } }}
-              maxLength={MAX_REF_NOTE_LEN}
-              placeholder="What to pull (optional)"
-              aria-label="What to pull from the link"
-              disabled={full}
-              className={fieldClass({ className: 'sm:flex-1' })}
-            />
-            <button type="button" onClick={() => add(url, note)} disabled={full || !url.trim()} className={buttonVariants({ variant: 'outline', size: 'md' })}>
-              Add
+        <div className="p-3 space-y-2" onBlur={leaveAddRow}>
+          <div className="flex items-center gap-1.5" role="group" aria-label="Add a reference as">
+            <button
+              type="button"
+              onClick={() => setMode('link')}
+              aria-pressed={mode === 'link'}
+              className={buttonVariants({ variant: mode === 'link' ? 'primary' : 'outline', size: 'sm' })}
+            >
+              Link
             </button>
+            <button
+              type="button"
+              onClick={() => setMode('text')}
+              aria-pressed={mode === 'text'}
+              className={buttonVariants({ variant: mode === 'text' ? 'primary' : 'outline', size: 'sm' })}
+            >
+              Paste text
+            </button>
+            {mode === 'text' && <span className="text-xs text-prose-faint">for a page that can&apos;t be fetched</span>}
           </div>
+
+          {mode === 'link' ? (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                inputMode="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCurrent() } }}
+                placeholder="https://…"
+                aria-label="Reference link"
+                disabled={full}
+                className={fieldClass({ className: 'sm:flex-1' })}
+              />
+              <input
+                type="text"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCurrent() } }}
+                maxLength={MAX_REF_NOTE_LEN}
+                placeholder="What to pull (optional)"
+                aria-label="What to pull from the link"
+                disabled={full}
+                className={fieldClass({ className: 'sm:flex-1' })}
+              />
+              <button type="button" onClick={addCurrent} disabled={full || !canAdd} className={buttonVariants({ variant: 'outline', size: 'md' })}>
+                Add
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                maxLength={MAX_REF_LABEL_LEN}
+                placeholder="What is this? e.g. H.R. 5344 bill text"
+                aria-label="What the pasted text is"
+                disabled={full}
+                className={fieldClass()}
+              />
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                maxLength={MAX_REF_TEXT_LEN}
+                placeholder="Paste the document, or the part of it that matters."
+                aria-label="Pasted reference text"
+                disabled={full}
+                className={fieldClass({ className: 'min-h-[9rem] max-h-[50dvh] overflow-y-auto resize-none [field-sizing:content]' })}
+              />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCurrent() } }}
+                    maxLength={MAX_REF_NOTE_LEN}
+                  placeholder="What to pull (optional)"
+                  aria-label="What to pull from the text"
+                  disabled={full}
+                  className={fieldClass({ className: 'sm:flex-1' })}
+                />
+                <button type="button" onClick={addCurrent} disabled={full || !canAdd} className={buttonVariants({ variant: 'outline', size: 'md' })}>
+                  Add
+                </button>
+              </div>
+              <p className="text-xs text-prose-faint tabular-nums">
+                {text.length.toLocaleString()} / {MAX_REF_TEXT_LEN.toLocaleString()}
+                {text.trim().length > 0 && text.trim().length < MIN_REF_TEXT_LEN ? ` · at least ${MIN_REF_TEXT_LEN} characters` : ''}
+              </p>
+            </div>
+          )}
+
           {offers.length > 0 && (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xs text-prose-muted">In your notes:</span>
               {offers.map((o) => (
-                <button key={o} type="button" onClick={() => add(o)} disabled={full} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                <button key={o} type="button" onClick={() => addLink(o)} disabled={full} className={buttonVariants({ variant: 'outline', size: 'sm' })}>
                   + {hostOf(o) ?? o}
                 </button>
               ))}
@@ -233,8 +353,8 @@ export function ReferencesPanel({ contentType, subject, references, notes, onCha
         {error
           ? <span className="text-danger-ink font-medium">{error}</span>
           : references.length
-            ? `${okCount} of ${references.length} read · ${factCount} reference ${factCount === 1 ? 'fact' : 'facts'} will ride with the brief as attributed knowledge, never as your own experience.`
-            : `Pages the draft may cite: a spec sheet, a recall notice, a study. Up to ${MAX_REFERENCES}. Fetched facts are attributed to the source, never claimed as yours.`}
+            ? `${okCount} of ${references.length} read · ${factCount} reference ${factCount === 1 ? 'fact' : 'facts'} will ride with the brief as attributed knowledge, never as your own experience. Anything still unread is read when you generate.`
+            : `Sources the draft may cite: a spec sheet, a recall notice, a study — as a link, or pasted text when the page can't be fetched. Up to ${MAX_REFERENCES}. Facts are attributed to the source, never claimed as yours.`}
       </p>
     </div>
   )

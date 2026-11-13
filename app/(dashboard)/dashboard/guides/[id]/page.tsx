@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { GuideWorkspace } from './_components/GuideWorkspace'
 import { ChevronLeftIcon } from '@/components/icons'
 import { costForContent } from '@/lib/content/generations'
+import { createClient } from '@/lib/supabase/server'
+import { groundingSummary, loadBriefForContent } from '@/lib/content/pipeline/grounding'
 
 export default async function GuideWorkspacePage({
   params,
@@ -36,10 +38,13 @@ export default async function GuideWorkspacePage({
 
   // Everything spent generating this piece (generations rows linked on save).
   const generationCostUsd = await costForContent(admin, id)
+  // The notes + sources it was drafted from. Session client on purpose: a run is private to its author (RLS).
+  const grounding = groundingSummary(await loadBriefForContent(await createClient(), 'guide', id))
 
   return (
     <GuideWorkspace
       generationCostUsd={generationCostUsd}
+      grounding={grounding}
       guide={{
         ...guide,
         moderation_flags: (guide.moderation_flags ?? []) as string[],

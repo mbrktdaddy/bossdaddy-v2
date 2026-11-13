@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ReviewWorkspace } from './_components/ReviewWorkspace'
 import { ChevronLeftIcon } from '@/components/icons'
 import { costForContent } from '@/lib/content/generations'
+import { createClient } from '@/lib/supabase/server'
+import { groundingSummary, loadBriefForContent } from '@/lib/content/pipeline/grounding'
 
 export default async function ReviewWorkspacePage({
   params,
@@ -78,10 +80,13 @@ export default async function ReviewWorkspacePage({
 
   // Everything spent generating this piece (generations rows linked on save).
   const generationCostUsd = await costForContent(admin, id)
+  // The notes + sources it was drafted from. Session client on purpose: a run is private to its author (RLS).
+  const grounding = groundingSummary(await loadBriefForContent(await createClient(), 'review', id))
 
   return (
     <ReviewWorkspace
       generationCostUsd={generationCostUsd}
+      grounding={grounding}
       review={{
         ...review,
         moderation_flags: (review.moderation_flags ?? []) as string[],

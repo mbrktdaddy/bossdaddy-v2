@@ -259,6 +259,13 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
   // ── Finished: the editor's read, then hand back ───────────────────────────
   if (phase === 'review' && run) {
     const blocks = Object.values(run.outline?.blocks ?? {}).filter(Boolean).length
+    // Was the reference lane used? The author asked exactly this after the first real guide.
+    const okSources = (run.brief.referenceNotes ?? []).filter((n) => n.status === 'ok' && n.facts.length > 0)
+    const refFacts = okSources.reduce((a, n) => a + n.facts.length, 0)
+    const listed = run.brief.references?.length ?? 0
+    const sourcesLine = okSources.length
+      ? `${refFacts} reference ${refFacts === 1 ? 'fact' : 'facts'} from ${okSources.length} ${okSources.length === 1 ? 'source' : 'sources'}`
+      : listed ? `${listed} ${listed === 1 ? 'link' : 'links'} listed, none read` : 'no reference links'
     return (
       <div className="space-y-5">
         <div className="border border-strong rounded-xl p-5 space-y-3">
@@ -267,7 +274,7 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
             <span className="text-xs text-prose-faint">${run.costUsd.toFixed(2)}</span>
           </div>
           <p className="text-sm text-prose-muted">
-            {parts.length} parts · {run.sections.reduce((a, s) => a + (s?.text.split(/\s+/).filter(Boolean).length ?? 0), 0)} words · {blocks} blocks · {run.images?.inline.length ?? 0} image placements
+            {parts.length} parts · {run.sections.reduce((a, s) => a + (s?.text.split(/\s+/).filter(Boolean).length ?? 0), 0)} words · {blocks} blocks · {run.images?.inline.length ?? 0} image placements · {sourcesLine}
           </p>
         </div>
         <div className="border border-soft rounded-xl p-5">

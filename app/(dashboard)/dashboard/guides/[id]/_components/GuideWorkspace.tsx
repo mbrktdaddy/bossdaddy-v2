@@ -15,6 +15,8 @@ import { ModerationInfo } from '@/components/workspace/ModerationInfo'
 import { SEOPanel } from '@/components/workspace/SEOPanel'
 import { SchedulePanel } from '@/components/workspace/SchedulePanel'
 import { FollowupIntentPanel } from '@/components/workspace/FollowupIntentPanel'
+import { GroundingPanel } from '@/components/workspace/GroundingPanel'
+import type { GroundingSummary } from '@/lib/content/pipeline/grounding'
 import { VersionHistoryPanel } from '@/components/workspace/VersionHistoryPanel'
 import { InternalLinkPanel } from '@/components/workspace/InternalLinkPanel'
 import { SocialPostsPanel } from '@/components/workspace/SocialPostsPanel'
@@ -70,9 +72,11 @@ interface Props {
   guide: GuideData
   /** Sum of the generations behind this piece, for the header (null = none logged). */
   generationCostUsd?: number | null
+  /** The notes + sources the draft was written from (null = no run on record). */
+  grounding?: GroundingSummary | null
 }
 
-export function GuideWorkspace({ guide: article, generationCostUsd = null }: Props) {
+export function GuideWorkspace({ guide: article, generationCostUsd = null, grounding = null }: Props) {
   const [title, setTitle]           = useState(article.title)
   const [category, setCategory]     = useState(article.category)
   // The image look the panels start on (brand guide §2): Table Duty / Watch
@@ -322,6 +326,8 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
         }}
       />
 
+      <GroundingPanel grounding={grounding} />
+
       <div>
         <label className="block text-sm text-prose-muted mb-1.5">Content</label>
         <TiptapEditor
@@ -330,6 +336,7 @@ export function GuideWorkspace({ guide: article, generationCostUsd = null }: Pro
           targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
           enableCollectionEmbed
           enableCrossLink
+          groundingFor={{ contentType: 'guide', contentId: article.id }}
         />
         <p className="mt-1.5 text-xs text-prose-faint">
           Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for product mentions — resolves to a link on save.

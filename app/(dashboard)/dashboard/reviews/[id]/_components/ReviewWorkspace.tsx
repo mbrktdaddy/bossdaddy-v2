@@ -36,6 +36,8 @@ import { ReviewDraftPreview } from '@/components/workspace/ReviewDraftPreview'
 import { RefinePreviewModal } from '@/components/workspace/RefinePreviewModal'
 import { ScheduleFollowupModal } from '@/components/workspace/ScheduleFollowupModal'
 import { FollowupIntentPanel } from '@/components/workspace/FollowupIntentPanel'
+import { GroundingPanel } from '@/components/workspace/GroundingPanel'
+import type { GroundingSummary } from '@/lib/content/pipeline/grounding'
 import { Card } from '@/components/ui/Card'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { buttonVariants } from '@/components/ui/Button'
@@ -121,9 +123,11 @@ interface WorkspaceProps {
   parentAgeDays?: number | null
   /** Sum of the generations behind this piece, for the header (null = none logged). */
   generationCostUsd?: number | null
+  /** The notes + sources the draft was written from (null = no run on record). */
+  grounding?: GroundingSummary | null
 }
 
-export function ReviewWorkspace({ review, parent = null, followupCount = 0, parentAgeDays = null, generationCostUsd = null }: WorkspaceProps) {
+export function ReviewWorkspace({ review, parent = null, followupCount = 0, parentAgeDays = null, generationCostUsd = null, grounding = null }: WorkspaceProps) {
   const [title, setTitle]             = useState(review.title)
   const [productName, setProductName] = useState(review.product_name)
   const [category, setCategory]       = useState(review.category)
@@ -794,6 +798,8 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
           <ListEditor label="The Not-So-Good (Cons)" items={cons} onChange={setCons} placeholder="e.g. Runs hot under load" accent="text-danger-ink" />
         </div>
 
+        <GroundingPanel grounding={grounding} />
+
         <div>
           <label className="block text-sm text-prose-muted mb-1.5">Content</label>
           <TiptapEditor
@@ -802,6 +808,7 @@ export function ReviewWorkspace({ review, parent = null, followupCount = 0, pare
             targetWords={CATEGORIES.find(c => c.slug === category)?.targetWords}
             enableCollectionEmbed
             enableCrossLink
+            groundingFor={{ contentType: 'review', contentId: review.id }}
           />
           <p className="mt-1.5 text-xs text-prose-faint">
             Primary CTA is set via Product &amp; Monetization below. Use <code className="text-accent-text-soft">[[BUY:product-slug]]</code> inline for mid-article mentions — resolves to a link on save.

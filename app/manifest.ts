@@ -67,6 +67,17 @@ export default function manifest(): MetadataRoute.Manifest {
         description: 'What you\'re working on.',
       },
     ],
+    // Android share sheet → "Boss Daddy" lands on /dashboard/share, which files the shared
+    // link onto a draft's reference list. Only an INSTALLED app is offered as a share target.
+    // Chrome refreshes an installed WebAPK from this manifest on its own schedule (it checks
+    // at launch, at most about once a day) or at once on reinstall — so the entry can take a
+    // day to appear after a deploy. Members are bounced off /dashboard by the proxy, so for
+    // them the entry is harmless.
+    share_target: {
+      action: '/dashboard/share',
+      method: 'GET',
+      params: { title: 'title', text: 'text', url: 'url' },
+    },
     icons: [
       {
         src:     '/icon-192.png',

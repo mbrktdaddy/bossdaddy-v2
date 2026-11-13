@@ -33,6 +33,8 @@ const BLOCK_LABELS: Record<keyof BlockChoices, { label: string; reviewOnly: bool
 
 export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate, onCancel }: Props) {
   const [draft, setDraft] = useState<Outline>(outline)
+  // The sources field shows on every part once any part cites one, so a fact can be moved between parts.
+  const hasRefs = draft.parts.some((p) => (p.refs?.length ?? 0) > 0)
 
   function patchPart(i: number, patch: Partial<OutlinePart>) {
     setDraft((d) => ({ ...d, parts: d.parts.map((p, j) => (j === i ? { ...p, ...patch } : p)) }))
@@ -43,7 +45,7 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
   function addBodyPart(afterIndex: number) {
     setDraft((d) => {
       const parts = [...d.parts]
-      parts.splice(afterIndex + 1, 0, { kind: 'body', heading: 'New section', intent: '', notes: [], targetWords: 200, productToken: null })
+      parts.splice(afterIndex + 1, 0, { kind: 'body', heading: 'New section', intent: '', notes: [], refs: [], targetWords: 200, productToken: null })
       return { ...d, parts }
     })
   }
@@ -113,6 +115,14 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
               )}
               <Field as="textarea" label="What this part must do" rows={2} value={p.intent} onChange={(e) => patchPart(i, { intent: e.target.value })} maxLength={400} />
               <NotesField notes={p.notes} onChange={(notes) => patchPart(i, { notes })} />
+              {hasRefs && (
+                <NotesField
+                  notes={p.refs ?? []}
+                  onChange={(refs) => patchPart(i, { refs })}
+                  label="Sources this part cites"
+                  hint="One per line, as fact (source: name). Attributed knowledge the writer names in words — never claimed as yours."
+                />
+              )}
               <TargetWordsField value={p.targetWords} onChange={(targetWords) => patchPart(i, { targetWords })} />
               {p.kind === 'body' && (
                 <FormatField value={p.format ?? 'prose'} onChange={(format) => patchPart(i, { format })} />
@@ -231,14 +241,18 @@ function canonicalNotes(notes: string[]): string {
  * and comparing parsed text against the RAW list would never match, so the
  * render-time setText would fire forever ("Too many re-renders").
  */
-function NotesField({ notes, onChange }: { notes: string[]; onChange: (notes: string[]) => void }) {
+function NotesField({
+  notes, onChange,
+  label = 'Your facts for this part',
+  hint = 'One per line. These are the only firsthand details it may claim.',
+}: { notes: string[]; onChange: (notes: string[]) => void; label?: string; hint?: string }) {
   const [text, setText] = useState(() => notes.join('\n'))
   if (parseNotes(text).join('\n') !== canonicalNotes(notes)) setText(notes.join('\n'))
   return (
     <Field
       as="textarea"
-      label="Your facts for this part"
-      hint="One per line. These are the only firsthand details it may claim."
+      label={label}
+      hint={hint}
       rows={Math.max(2, Math.min(5, text.split('\n').length + 1))}
       value={text}
       onChange={(e) => { setText(e.target.value); onChange(parseNotes(e.target.value)) }}
