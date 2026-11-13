@@ -32,7 +32,11 @@ export default function AboutBand() {
   return (
     <section data-theme="dark" className="bg-chrome border-t-4 border-accent border-b border-soft">
       <div className="max-w-6xl mx-auto px-6 py-10 md:py-16">
-        <div className={PORTRAIT ? 'grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-14 items-center' : 'max-w-3xl'}>
+        {/* Without the portrait the type carries the band, as the orange brand
+            band's lockup does: left-ranged, a ~60-character measure, the Creed
+            one size up on desktop. Never centred — the page is left-ranged
+            everywhere but inside the Tools tiles (2026-11-13). */}
+        <div className={PORTRAIT ? 'grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-14 items-center' : 'max-w-4xl'}>
           {PORTRAIT && (
             <div className="relative aspect-[4/5] md:aspect-[3/4] rounded-2xl overflow-hidden bg-surface-raised">
               <Image
@@ -46,7 +50,7 @@ export default function AboutBand() {
           )}
           <div>
             <LabelBlock tone="accent" className="mb-5">About the Boss</LabelBlock>
-            <blockquote className="font-editorial-display font-semibold text-prose text-2xl md:text-3xl leading-[1.3] tracking-tight">
+            <blockquote className={`font-editorial-display font-semibold text-prose leading-[1.3] tracking-tight ${PORTRAIT ? 'text-2xl md:text-3xl' : 'text-2xl md:text-4xl'}`}>
               {BRAND.creed}
               <span className="block text-accent mt-3">That&rsquo;s {BRAND.positioning}.</span>
             </blockquote>
