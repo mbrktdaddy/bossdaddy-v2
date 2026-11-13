@@ -38,6 +38,7 @@ import MyKidsSection from '@/components/dad-tools/MyKidsSection'
 import ContactsCard from '@/components/account/ContactsCard'
 import MessagesCard from '@/components/account/MessagesCard'
 import { Card } from '@/components/ui/Card'
+import { UtilityBox } from '@/components/ui/UtilityBox'
 import { Badge } from '@/components/ui/Badge'
 import PageHeader from '@/components/PageHeader'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -141,18 +142,21 @@ export default async function AccountHomePage() {
 
         {/* The four places an account leads — Settings used to be a text link at
             the bottom of the page, which is where nobody looked for it. */}
-        <Card tone="surface" as="section" className="mb-6 divide-y divide-soft overflow-hidden" aria-label="Account destinations">
-          {DESTINATIONS.map((d) => (
-            <Link
-              key={d.href}
-              href={d.href}
-              className="group flex min-h-14 items-center justify-between gap-3 px-6 py-3 transition-colors hover:bg-surface-hover"
-            >
-              <span className="text-sm font-semibold text-prose group-hover:text-accent">{d.label}</span>
-              <ChevronRightIcon className="w-4 h-4 shrink-0 text-prose-muted group-hover:text-accent" strokeWidth={2} />
-            </Link>
-          ))}
-        </Card>
+        <UtilityBox label={LABELS.account.short} ariaLabel="Account destinations" className="mb-6">
+          <ul className="divide-y divide-soft">
+            {DESTINATIONS.map((d) => (
+              <li key={d.href}>
+                <Link
+                  href={d.href}
+                  className="group flex min-h-[56px] items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-surface-raised"
+                >
+                  <span className="text-sm font-bold text-prose group-hover:text-accent-text transition-colors">{d.label}</span>
+                  <ChevronRightIcon className="w-4 h-4 shrink-0 text-prose-faint group-hover:text-accent-text transition-colors" strokeWidth={2} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </UtilityBox>
 
         {/* ── MANAGEMENT LIVES HERE; STATE AND WORK LIVE ON /tools ─────────────
             One rule, and it decides every section on both pages: this page is where

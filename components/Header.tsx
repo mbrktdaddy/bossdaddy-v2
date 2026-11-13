@@ -146,6 +146,9 @@ function BrowseIcon({ icon }: { icon: ReactNode }) {
 // account is one place on both; the pending-requests badge rides on Contacts.
 function accountLinks(hasDashboard: boolean): { href: string; label: string; badge?: boolean }[] {
   return [
+    // The Toolbox is the signed-in home (nav-ia-plan Phase D); the "you" menu is
+    // where a member looks for it on desktop. Same one word as the bottom-nav tab.
+    { href: '/tools', label: LABELS.tools.short },
     { href: '/account/settings', label: LABELS.settings.short },
     { href: '/account/connections', label: LABELS.contacts.short, badge: true },
     { href: '/account/messages', label: LABELS.messages.short },
