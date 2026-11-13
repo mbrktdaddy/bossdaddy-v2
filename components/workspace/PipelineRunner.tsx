@@ -8,6 +8,8 @@ import { CriticFindings } from './CriticFindings'
 import { DraftProvenanceNote } from './DraftProvenanceNote'
 import { partLabel } from '@/lib/content/pipeline/section'
 import type { Outline, RunState } from '@/lib/content/pipeline/types'
+import type { ReferenceNote } from '@/lib/content/references'
+import type { ResearchResult } from '@/lib/content/pipeline/research'
 
 // Drives the staged pipeline (docs/content-pipeline-plan.md §4) from the
 // wizard: create run → outline (author edits) → each part streamed → blocks →
@@ -110,12 +112,18 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
     }
   }
 
-  async function saveOutline(outline: Outline) {
+  async function saveOutline(outline: Outline, addReferenceNotes: ReferenceNote[] = []) {
     if (!run) return
     setPhase('creating')
-    const body = { title: outline.title, excerpt: outline.excerpt, parts: outline.parts, blocks: outline.blocks, imageCount: outline.imageCount, elements: outline.elements ?? [] }
+    const body = { title: outline.title, excerpt: outline.excerpt, parts: outline.parts, blocks: outline.blocks, imageCount: outline.imageCount, elements: outline.elements ?? [], ...(addReferenceNotes.length ? { addReferenceNotes } : {}) }
     const { run: next } = await api<{ run: RunState }>(`/api/content/runs/${run.id}/outline`, { method: 'PUT', body: JSON.stringify(body) })
     await draftAll(next)
+  }
+
+  // One live web search for a planned part (the research bucket); the author keeps what belongs.
+  async function researchPart(partIndex: number): Promise<ResearchResult> {
+    if (!run) throw new Error('No run to research for.')
+    return api<ResearchResult>(`/api/content/runs/${run.id}/research`, { method: 'POST', body: JSON.stringify({ partIndex }) })
   }
 
   async function draftAll(r: RunState) {
@@ -248,7 +256,8 @@ export function PipelineRunner({ contentType, brief, onComplete, onCancel }: Pro
           outline={run.outline}
           contentType={contentType}
           busy={false}
-          onSave={(o) => saveOutline(o).catch(fail)}
+          onSave={(o, notes) => saveOutline(o, notes).catch(fail)}
+          onResearch={researchPart}
           onRegenerate={run.status === 'outline' ? () => generateOutline(run).catch(fail) : undefined}
           onCancel={onCancel}
         />

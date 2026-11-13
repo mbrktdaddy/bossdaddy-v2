@@ -12,6 +12,8 @@ import { ResumeDraftNotice } from '@/components/workspace/ResumeDraftNotice'
 import { CriticFindings } from '@/components/workspace/CriticFindings'
 import { NotesField } from '@/components/workspace/NotesField'
 import { ReferencesPanel, readReferences } from '@/components/workspace/ReferencesPanel'
+import { BriefReviewPanel, distillBrief } from '@/components/workspace/BriefReviewPanel'
+import type { Distilled } from '@/lib/content/pipeline/distill'
 import { extractLinks } from '@/lib/content/pipeline/facts'
 import { mergeReferenceNotes, pruneReferenceNotes, unfetchedReferences, type ReferenceInput, type ReferenceNote } from '@/lib/content/references'
 import { runToDraftHtml } from '@/lib/content/pipeline/section'
@@ -19,7 +21,7 @@ import type { Critic, RunState } from '@/lib/content/pipeline/types'
 
 const STORAGE_KEY = 'bd:guide-wizard-draft'
 
-type Step = 'idea' | 'pipeline' | 'generating' | 'preview' | 'saving'
+type Step = 'idea' | 'brief' | 'pipeline' | 'generating' | 'preview' | 'saving'
 type PieceType = 'essay' | 'howto' | 'guide'
 
 const PIECE_TYPES: { v: PieceType; label: string; hint: string }[] = [
@@ -65,6 +67,8 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
   const [step, setStep] = useState<Step>('idea')
   const [error, setError] = useState<string | null>(null)
   const [readingLinks, setReadingLinks] = useState(false)
+  const [preparing, setPreparing] = useState(false)
+  const [distilled, setDistilled] = useState<Distilled | null>(null)
 
   // Step 1 state
   const [description, setDescription] = useState(draft.description || '')
@@ -191,7 +195,7 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
 
     // The brief is everything the staged pipeline (docs/content-pipeline-plan.md
     // §4) needs. The run lives server-side, so a dead tab loses nothing.
-    setBrief({
+    const built = {
       contentType: 'guide',
       topic: topic.trim(),
       category,
@@ -204,8 +208,18 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       inquiryMode,
       // Inquiry pieces carry no affiliate links — the register forbids them.
       productSlugs: !inquiryMode ? selectedSlugs : [],
-    })
-    setStep('pipeline')
+    }
+    setBrief(built)
+    await prepareBrief(built)
+  }
+
+  // The brief step: the raw dump becomes clean facts plus the gaps a writer would
+  // otherwise fill by invention. A failed or empty distill never blocks drafting.
+  async function prepareBrief(built: Record<string, unknown>) {
+    setPreparing(true)
+    const d = await distillBrief(built)
+    setPreparing(false)
+    if (d && !d.skipped) { setDistilled(d); setStep('brief') } else { setStep('pipeline') }
   }
 
   // The finished run → the preview shape the save step already understands.
@@ -309,6 +323,17 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
       setError(err instanceof Error ? err.message : 'Create failed')
       setStep('idea')
     }
+  }
+
+  if (step === 'brief' && distilled && brief) {
+    return (
+      <BriefReviewPanel
+        distilled={distilled}
+        onContinue={(facts) => { setBrief({ ...brief, facts }); setStep('pipeline') }}
+        onSkip={() => setStep('pipeline')}
+        onBack={() => setStep('idea')}
+      />
+    )
   }
 
   if (step === 'pipeline') {
@@ -661,10 +686,10 @@ function GuideWizardForm({ restore }: { restore: boolean }) {
         <button
           type="button"
           onClick={handleGenerate}
-          disabled={!topic.trim() || readingLinks}
+          disabled={!topic.trim() || readingLinks || preparing}
           className={buttonVariants()}
         >
-          {readingLinks ? 'Reading your links…' : '✨ Generate with AI → Edit'}
+          {readingLinks ? 'Reading your links…' : preparing ? 'Preparing your brief…' : '✨ Generate with AI → Edit'}
         </button>
         <button
           type="button"

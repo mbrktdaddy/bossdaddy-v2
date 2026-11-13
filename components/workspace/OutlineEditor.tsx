@@ -6,6 +6,8 @@ import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Field } from '@/components/ui/Field'
 import type { BlockChoices, Outline, OutlinePart, PartFormat } from '@/lib/content/pipeline/types'
 import { ELEMENT_LABEL } from '@/lib/content/elements'
+import { hostOf, type ReferenceNote } from '@/lib/content/references'
+import type { ResearchFinding, ResearchResult } from '@/lib/content/pipeline/research'
 
 // The author's one real decision point in the staged pipeline: what the piece
 // is, part by part, which facts go where, how long, which blocks. Everything
@@ -15,7 +17,10 @@ interface Props {
   outline: Outline
   contentType: 'review' | 'guide'
   busy: boolean
-  onSave: (outline: Outline) => void
+  /** `addReferenceNotes`: sources kept from "Research this part", to join the brief with this save. */
+  onSave: (outline: Outline, addReferenceNotes: ReferenceNote[]) => void
+  /** One live web search for a part's missing facts; absent = no button. */
+  onResearch?: (partIndex: number) => Promise<ResearchResult>
   /** Only offered before the first "Start writing" (the server regenerates from the brief). */
   onRegenerate?: () => void
   onCancel: () => void
@@ -31,10 +36,48 @@ const BLOCK_LABELS: Record<keyof BlockChoices, { label: string; reviewOnly: bool
   subScores:    { label: 'Sub-scores (suggested, you confirm)', reviewOnly: true },
 }
 
-export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate, onCancel }: Props) {
+export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate, onCancel, onResearch }: Props) {
   const [draft, setDraft] = useState<Outline>(outline)
   // The sources field shows on every part once any part cites one, so a fact can be moved between parts.
   const hasRefs = draft.parts.some((p) => (p.refs?.length ?? 0) > 0)
+
+  // "Research this part": one search per tap, the author keeps what belongs; kept
+  // facts become the part's ref lines, their sources ride to the brief on save.
+  type ResearchState = { busy: boolean; error: string | null; findings: ResearchFinding[] | null; notes: ReferenceNote[]; picked: number[] }
+  const idle: ResearchState = { busy: false, error: null, findings: null, notes: [], picked: [] }
+  const [research, setResearch] = useState<Record<number, ResearchState>>({})
+  const [pendingNotes, setPendingNotes] = useState<ReferenceNote[]>([])
+  async function runResearch(i: number) {
+    if (!onResearch) return
+    setResearch((r) => ({ ...r, [i]: { ...idle, busy: true } }))
+    try {
+      const res = await onResearch(i)
+      setResearch((r) => ({ ...r, [i]: { ...idle, findings: res.findings, notes: res.notes, picked: res.findings.map((_, j) => j) } }))
+    } catch (e) {
+      setResearch((r) => ({ ...r, [i]: { ...idle, error: e instanceof Error ? e.message : 'Research failed.' } }))
+    }
+  }
+  function togglePick(i: number, j: number) {
+    setResearch((r) => { const st = r[i]; if (!st) return r; const picked = st.picked.includes(j) ? st.picked.filter((x) => x !== j) : [...st.picked, j]; return { ...r, [i]: { ...st, picked } } })
+  }
+  function addPicked(i: number) {
+    const st = research[i]
+    if (!st?.findings) return
+    const chosen = st.picked.map((j) => st.findings![j]).filter(Boolean)
+    const lines = chosen.map((f) => f.line)
+    setDraft((d) => ({ ...d, parts: d.parts.map((p, k) => (k === i ? { ...p, refs: [...(p.refs ?? []), ...lines.filter((l) => !(p.refs ?? []).includes(l))] } : p)) }))
+    // Only the sources behind the kept facts join the brief, with only those facts.
+    const kept = st.notes
+      .map((n) => ({ ...n, facts: n.facts.filter((f) => chosen.some((c) => c.fact === f && c.source.url === n.url)) }))
+      .filter((n) => n.facts.length)
+    setPendingNotes((prev) => {
+      const byUrl = new Map(prev.map((n) => [n.url, n]))
+      for (const n of kept) { const p = byUrl.get(n.url); byUrl.set(n.url, p ? { ...p, facts: [...new Set([...p.facts, ...n.facts])] } : n) }
+      return [...byUrl.values()]
+    })
+    setResearch((r) => ({ ...r, [i]: idle }))
+  }
+  const dismissResearch = (i: number) => setResearch((r) => ({ ...r, [i]: idle }))
 
   function patchPart(i: number, patch: Partial<OutlinePart>) {
     setDraft((d) => ({ ...d, parts: d.parts.map((p, j) => (j === i ? { ...p, ...patch } : p)) }))
@@ -123,6 +166,46 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
                   hint="One per line, as fact (source: name). Attributed knowledge the writer names in words — never claimed as yours."
                 />
               )}
+              {p.kind === 'body' && onResearch && (
+                <div className="space-y-2">
+                  {!research[i]?.findings && (
+                    <button
+                      type="button"
+                      disabled={busy || !!research[i]?.busy}
+                      onClick={() => runResearch(i)}
+                      className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                    >
+                      {research[i]?.busy ? 'Searching the web…' : 'Research this part'}
+                    </button>
+                  )}
+                  {research[i]?.error && <p className="text-xs text-danger-ink leading-snug">{research[i].error}</p>}
+                  {research[i]?.findings && (
+                    <div className="border border-soft rounded-lg p-3 space-y-2">
+                      <p className="text-xs text-eyebrow uppercase tracking-widest">Found on the web — keep what belongs here</p>
+                      {research[i].findings!.length === 0 && <p className="text-sm text-prose-muted">Nothing solid turned up.</p>}
+                      <ul className="space-y-1">
+                        {research[i].findings!.map((f, j) => (
+                          <li key={`${f.source.url}:${j}`}>
+                            <label className="flex items-start gap-3 min-h-[44px] py-1 cursor-pointer">
+                              <input type="checkbox" className="mt-1" checked={research[i].picked.includes(j)} onChange={() => togglePick(i, j)} />
+                              <span className="text-sm text-prose leading-snug">{f.fact} <span className="text-prose-faint">— {f.source.title || hostOf(f.source.url) || f.source.url}</span></span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {research[i].findings!.length > 0 && (
+                          <button type="button" disabled={!research[i].picked.length} onClick={() => addPicked(i)} className={buttonVariants({ size: 'sm' })}>
+                            Add {research[i].picked.length} to this part
+                          </button>
+                        )}
+                        <button type="button" onClick={() => dismissResearch(i)} className="text-xs text-prose-muted min-h-[44px] px-2">Dismiss</button>
+                      </div>
+                      <p className="text-xs text-prose-faint">Kept facts are cited as their source says, never as yours; the source joins your references.</p>
+                    </div>
+                  )}
+                </div>
+              )}
               <TargetWordsField value={p.targetWords} onChange={(targetWords) => patchPart(i, { targetWords })} />
               {p.kind === 'body' && (
                 <FormatField value={p.format ?? 'prose'} onChange={(format) => patchPart(i, { format })} />
@@ -201,7 +284,7 @@ export function OutlineEditor({ outline, contentType, busy, onSave, onRegenerate
       )}
 
       <div className="flex items-center gap-3 flex-wrap pt-2">
-        <button type="button" disabled={busy || !valid} onClick={() => onSave(draft)} className={buttonVariants()}>
+        <button type="button" disabled={busy || !valid} onClick={() => onSave(draft, pendingNotes)} className={buttonVariants()}>
           {busy ? 'Working…' : 'Start writing'}
         </button>
         {onRegenerate && (
