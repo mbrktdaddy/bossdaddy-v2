@@ -1,6 +1,7 @@
 // URL-read smoke test — run with:
 //   npm run ai:fetch-smoke
-//   (node --env-file=.env.local scripts/ai-fetch-smoke.mjs; pass a URL as the first arg to read a page of your choice)
+//   (node --env-file=.env.local scripts/ai-fetch-smoke.mjs [--plain] [url]; pass a URL to read a page of your
+//   choice; --plain uses web_fetch_20250910, the version WITHOUT code-execution dynamic filtering)
 //
 // Verifies the ONE unverified assumption behind /api/content/references: that
 // Anthropic's provider-executed `web_fetch` tool is forwarded by the Vercel AI
@@ -17,7 +18,13 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { z } from 'zod'
 
 const MODEL = 'anthropic/claude-sonnet-5'
-const URL_TO_READ = process.argv[2] ?? 'https://www.cpsc.gov/Recalls'
+const ARGS = process.argv.slice(2)
+// --plain: web_fetch_20250910 drops the page text straight into context (capped by
+// maxContentTokens). The default 20260209 tool runs code execution to filter the page
+// first — fewer context tokens for a huge document, more for an ordinary page.
+const PLAIN = ARGS.includes('--plain')
+const URL_TO_READ = ARGS.find((a) => !a.startsWith('--')) ?? 'https://www.cpsc.gov/Recalls'
+const TOOL_NAME = PLAIN ? 'web_fetch_20250910 (plain)' : 'web_fetch_20260209 (dynamic filtering)'
 
 const schema = z.object({
   reachable: z.boolean(),
@@ -26,14 +33,14 @@ const schema = z.object({
 })
 
 async function main() {
-  console.log(`\n=== url-read smoke: ${MODEL} + web_fetch + Output.object ===\nreading ${URL_TO_READ}\n`)
+  console.log(`\n=== url-read smoke: ${MODEL} + ${TOOL_NAME} + Output.object ===\nreading ${URL_TO_READ}\n`)
 
   let result
   try {
     result = await generateText({
       model: gateway(MODEL),
       tools: {
-        web_fetch: anthropic.tools.webFetch_20260209({
+        web_fetch: (PLAIN ? anthropic.tools.webFetch_20250910 : anthropic.tools.webFetch_20260209)({
           maxUses: 1,
           allowedDomains: [new URL(URL_TO_READ).hostname],
           maxContentTokens: 20_000,
@@ -76,7 +83,8 @@ async function main() {
   }
   console.log(`\noutput object:`)
   console.log(JSON.stringify(object, null, 2))
-  console.log(`\nfinishReason: ${result.finishReason} | tokens: ${result.totalUsage?.totalTokens ?? result.usage?.totalTokens}`)
+  const u = result.totalUsage ?? result.usage ?? {}
+  console.log(`\nfinishReason: ${result.finishReason} | tokens: ${u.totalTokens} (input ${u.inputTokens}, output ${u.outputTokens}) | ${TOOL_NAME}`)
 
   const facts = object?.facts ?? []
   const fetched = fetchCalls >= 1

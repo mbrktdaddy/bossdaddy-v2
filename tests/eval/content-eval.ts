@@ -1,12 +1,12 @@
 import { afterAll, describe, it, expect } from 'vitest'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { aiGenerateObjectWithMeta, aiGenerateTextWithMeta } from '@/lib/ai/client'
-import { MODELS } from '@/lib/ai/models'
 import { buildBossDaddySystemMessages, getVoiceProfile, voiceProfileFactLines } from '@/lib/voiceProfile'
 import { fetchTagVocabulary } from '@/lib/claude/tag-vocab'
 import { PROMPT_VERSION, validateSuggestedTags } from '@/lib/content/prompts'
 import { BriefInput, normalizeBrief } from '@/lib/content/pipeline/briefs'
 import { OutlineOutput, buildOutline, outlinePrompt, validateOutlineShape, type OutlineModelOutput } from '@/lib/content/pipeline/outline'
+import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
 import { findRelated } from '@/lib/content/pipeline/related'
 import { sectionBudget, sectionPrompt } from '@/lib/content/pipeline/section'
 import { blocksOutput, blocksPrompt } from '@/lib/content/pipeline/blocks'
@@ -50,7 +50,6 @@ const PER_PIECE_TIMEOUT_MS = 10 * 60 * 1000
 
 const EMOJI = /\p{Extended_Pictographic}/u
 const MD_HEADING = /^\s{0,3}#{1,6}\s/m
-const MD_BOLD = /\*\*[^*]+\*\*/
 
 // ── The golden briefs (3 reviews, 3 guides incl. one inquiry) ────────────────
 // Real-shaped notes: the critic's FTC check only works against facts on record.
@@ -146,35 +145,40 @@ interface PieceResult {
   truncatedParts: number[]
 }
 
-/** Same stages, same knobs as app/api/content/runs/[id]/{outline,section,blocks,critic}. */
+/**
+ * Same stages as app/api/content/runs/[id]/{outline,section,blocks,critic}, on the
+ * SAME knobs (STAGE_KNOBS — shared with the routes, so the two cannot drift).
+ */
 async function generate(brief: Brief, ctx: { supabase: SupabaseClient; userId: string }): Promise<PieceResult> {
   const { supabase, userId } = ctx
   const run = baseRun(brief, userId)
   const system = await buildBossDaddySystemMessages(supabase, userId)
   let costUsd = 0
 
-  // Stage 1 — outline (Haiku, effort low, 0.7)
+  // Stage 1 — the outline, on the production knobs (the content model; cap / effort / temperature from STAGE_KNOBS)
   const related = await findRelated(supabase, brief).catch(() => [])
   const outline = await aiGenerateObjectWithMeta<OutlineModelOutput>({
-    bucket: 'content', model: MODELS.claudeHaiku, tag: 'eval-outline', schema: OutlineOutput, system,
+    bucket: 'content', tag: 'eval-outline', schema: OutlineOutput, system,
     messages: [{ role: 'user', content: outlinePrompt(brief, related) }],
-    maxOutputTokens: 2500, effort: 'low', temperature: 0.7, maxRetries: 2, promptVersion: PROMPT_VERSION,
+    ...STAGE_KNOBS.outline, maxRetries: 2, promptVersion: PROMPT_VERSION,
   })
   costUsd += outline.meta.costUsd ?? 0
   const shapeErr = validateOutlineShape(outline.object.parts)
-  expect(shapeErr, `outline shape: ${shapeErr}`).toBeNull()
+  // Say what the model returned, so a shape failure is diagnosable from the log alone.
+  const shape = outline.object.parts.map((p) => `${p.kind}${p.heading ? `: ${p.heading}` : ''}`).join(' · ')
+  expect(shapeErr, `outline shape: ${shapeErr} — model parts: ${shape}`).toBeNull()
   run.outline = buildOutline(outline.object, brief, related)
   run.sections = run.outline.parts.map(() => null)
   run.status = 'drafting'
 
-  // Stage 2 — sections in order (Sonnet, effort high, 0.8), one-shot instead of streamed
+  // Stage 2 — sections in order on the production knobs, one-shot instead of streamed
   const truncatedParts: number[] = []
   for (let i = 0; i < run.outline.parts.length; i++) {
     const part = run.outline.parts[i]
     const { text, meta } = await aiGenerateTextWithMeta({
       bucket: 'content', tag: 'eval-section', system,
       messages: [{ role: 'user', content: sectionPrompt(run, i) }],
-      maxOutputTokens: sectionBudget(part.targetWords), effort: 'high', temperature: 0.8, maxRetries: 2, promptVersion: PROMPT_VERSION,
+      maxOutputTokens: sectionBudget(part.targetWords), ...STAGE_KNOBS.section, maxRetries: 2, promptVersion: PROMPT_VERSION,
     })
     costUsd += meta.costUsd ?? 0
     if (meta.finishReason === 'length') truncatedParts.push(i)
@@ -182,18 +186,18 @@ async function generate(brief: Brief, ctx: { supabase: SupabaseClient; userId: s
   }
   run.status = 'blocks'
 
-  // Stage 3 — blocks from the finished prose (effort low, 0.5)
+  // Stage 3 — blocks from the finished prose, on the production knobs
   const vocab = await fetchTagVocabulary(supabase)
   const blocks = await aiGenerateObjectWithMeta<Blocks>({
     bucket: 'content', tag: 'eval-blocks', schema: blocksOutput(run.outline.blocks, brief.contentType), system,
     messages: [{ role: 'user', content: blocksPrompt(run, vocab) }],
-    maxOutputTokens: 3000, effort: 'low', temperature: 0.5, maxRetries: 2, promptVersion: PROMPT_VERSION,
+    ...STAGE_KNOBS.blocks, maxRetries: 2, promptVersion: PROMPT_VERSION,
   })
   costUsd += blocks.meta.costUsd ?? 0
   run.blocks = { ...blocks.object, suggestedTags: await validateSuggestedTags(supabase, blocks.object.suggestedTags) }
   run.status = 'critic'
 
-  // Stage 4 — the editor: rules, then the model at temperature 0
+  // Stage 4 — the editor: rules, then the model on the production knobs (temperature 0)
   const profile = await getVoiceProfile(supabase, userId)
   const familyNames = (profile?.family_members ?? []).map((m) => m.name?.trim() ?? '').filter((n) => n.length >= 2)
   const texts = run.outline.parts.map((_, i) => run.sections[i]?.text ?? '')
@@ -201,7 +205,7 @@ async function generate(brief: Brief, ctx: { supabase: SupabaseClient; userId: s
   const critic = await aiGenerateObjectWithMeta<CriticModelOutput>({
     bucket: 'content', tag: 'eval-critic', schema: CriticOutput, system: CRITIC_SYSTEM,
     messages: [{ role: 'user', content: criticPrompt(run, blocksText(run), voiceProfileFactLines(profile)) }],
-    maxOutputTokens: 2000, effort: 'low', temperature: 0, maxRetries: 2, promptVersion: PROMPT_VERSION,
+    ...STAGE_KNOBS.critic, maxRetries: 2, promptVersion: PROMPT_VERSION,
   })
   costUsd += critic.meta.costUsd ?? 0
   for (const f of critic.object.findings) {
@@ -239,7 +243,6 @@ function judge(label: string, r: PieceResult) {
       .toBeGreaterThanOrEqual(Math.floor(parts[i].targetWords * MIN_LENGTH_RATIO))
     expect(EMOJI.test(texts[i]), `${label}: emoji in part ${i + 1}`).toBe(false)
     expect(MD_HEADING.test(texts[i]), `${label}: markdown heading inside part ${i + 1} (headings come from the outline)`).toBe(false)
-    if (MD_BOLD.test(texts[i])) console.warn(`${label}: markdown bold in part ${i + 1} — it will render literally`)
   }
 
   // The editor's verdict — the rubric the author sees.
