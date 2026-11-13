@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { INQUIRY_TRIGGER } from '../../prompts'
 import { briefFacts, briefLabel } from '../briefs'
+import { referenceBlock } from '../../references'
 import { runProse } from '../section'
 import type { Blocks, RunState } from '../types'
 
@@ -97,6 +98,7 @@ export function criticPrompt(run: RunState, blocksText: string | null, profileFa
   const brief = run.brief
   const inquiry = brief.contentType === 'guide' && brief.inquiryMode
   const facts = briefFacts(brief)
+  const refs = referenceBlock(brief.referenceNotes)
   const parts = run.outline!.parts
 
   return `${inquiry ? `${INQUIRY_TRIGGER}\n\n` : ''}You are the EDITOR, not the writer. Read this ${briefLabel(brief)} against the author's notes and the house rules, and return findings only. Be specific and sparing — a finding must be something an editor would actually change. Severity: block = must fix before publishing; warn = should fix; note = worth a look.
@@ -110,7 +112,10 @@ ${profileFacts.length ? `
 ALSO ON RECORD — the author's standing profile (family by relationship, background, region). Mentioning one of these is NOT invented. What IS still unsupported: any specific event, quote, reaction or detail about them that the notes above don't give.
 ${profileFacts.join('\n')}
 ` : ''}
-PARTS (1-based, for the "part" field):
+${refs ? `${refs}
+A fact attributed to one of these sources is supported. The same fact claimed as the author's own test, measurement or experience is unsupported-firsthand.
+
+` : ''}PARTS (1-based, for the "part" field):
 ${parts.map((p, i) => `${i + 1}. ${p.kind === 'intro' ? '[intro]' : p.heading}`).join('\n')}
 
 THE PIECE:

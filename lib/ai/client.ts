@@ -119,7 +119,7 @@ function telemetry(opts: CallBase): TelemetrySettings {
   }
 }
 
-function meta(model: string, usage: LanguageModelUsage | undefined, finishReason: string, startedAt: number): CallMeta {
+export function meta(model: string, usage: LanguageModelUsage | undefined, finishReason: string, startedAt: number): CallMeta {
   return {
     model,
     usage,

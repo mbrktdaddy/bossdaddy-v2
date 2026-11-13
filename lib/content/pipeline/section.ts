@@ -81,10 +81,18 @@ THIS PART
 ${part.notes.length
     ? `- Author facts for this part — the ONLY firsthand material you may claim; use them concretely, don't restate them as a list:\n${part.notes.map((n) => `    • ${n}`).join('\n')}`
     : `- Author facts for this part: none. Write from general knowledge and the product/topic facts above. Do NOT claim any usage, test result, duration or family reaction.`}
-
+${referenceRule(brief)}
 ${formatRules(part, brief)}
 
 Write only the prose of this part: no heading, no title, no preamble, no sign-off. Paragraphs separated by a blank line. No JSON, no # or ## headings, no code fences, no tables, no HTML.`
+}
+
+/** One rule line when the brief carries fetched reference notes; '' otherwise. */
+function referenceRule(brief: Brief): string {
+  const has = brief.referenceNotes?.some((n) => n.status === 'ok' && n.facts.length)
+  return has
+    ? '- Reference notes above are attributed knowledge, not experience: say who says it ("the maker lists…", "per the recall notice"), name the source in words, never a URL, and never claim you tested what only a source states.'
+    : ''
 }
 
 /**

@@ -33,7 +33,8 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { xai } from '@ai-sdk/xai'
 import { resolveModel } from '../flags'
 import { classifyClaudeError } from './errors'
-import { cachedSystem } from './client'
+import { cachedSystem, meta, type CallMeta } from './client'
+import { MODELS } from './models'
 
 export interface ResearchSearchConfig {
   /** Anthropic: web_search max_uses. xAI: no equivalent — it self-caps, bounded by maxSteps. */
@@ -194,4 +195,60 @@ export async function aiResearch<T>(opts: {
     }
     throw err
   }
+}
+
+/**
+ * One URL-read call: Claude fetches the listed pages with Anthropic's native
+ * web_fetch tool and returns one schema-validated object. ALWAYS Claude — xAI
+ * ships no fetch tool, so this ignores AI_MODEL_RESEARCH on purpose (pinned to
+ * `MODELS.claudeSonnet`, like the moderation gate). No web search: the model
+ * may read ONLY the given URLs (`allowedDomains` = their hosts, `maxUses` =
+ * their count). Backs /api/content/references.
+ */
+export async function aiFetch<T>(opts: {
+  tag: string
+  system: string
+  prompt: string
+  schema: FlexibleSchema<T>
+  urls: string[]
+  maxSteps: number
+  maxOutputTokens: number
+  /** Cap on fetched page content pulled into context, in tokens (default 20k). */
+  maxContentTokens?: number
+  /** Anthropic reasoning effort. maxOutputTokens INCLUDES reasoning, so pair a low effort with a roomy cap. */
+  effort?: 'low' | 'medium' | 'high'
+  temperature?: number
+  timeout?: number
+}): Promise<{ object: T; meta: CallMeta }> {
+  const model = MODELS.claudeSonnet
+  const hosts = [...new Set(opts.urls.map((u) => new URL(u).hostname))]
+  const startedAt = Date.now()
+  const result = await generateText({
+    model: gateway(model),
+    tools: {
+      web_fetch: anthropic.tools.webFetch_20260209({
+        maxUses: opts.urls.length,
+        allowedDomains: hosts,
+        maxContentTokens: opts.maxContentTokens ?? 20_000,
+        citations: { enabled: false },
+      }) as unknown as Tool,
+    },
+    output: Output.object({ schema: opts.schema }),
+    stopWhen: stepCountIs(opts.maxSteps),
+    system: [cachedSystem(opts.system)],
+    prompt: opts.prompt,
+    maxOutputTokens: opts.maxOutputTokens,
+    ...(opts.temperature != null ? { temperature: opts.temperature } : {}),
+    ...(opts.timeout != null ? { timeout: opts.timeout } : {}),
+    providerOptions: {
+      gateway: { tags: [`surface:${opts.tag}`] },
+      ...(opts.effort ? { anthropic: { effort: opts.effort } } : {}),
+    },
+  })
+  if (result.finishReason !== 'stop') {
+    throw new NoOutputGeneratedError({
+      message: `No output: finishReason=${result.finishReason} after ${result.steps.length} step(s), ${result.usage.outputTokens ?? '?'} output tokens in the last step`,
+    })
+  }
+  return { object: result.output as T, meta: meta(model, result.totalUsage, result.finishReason, startedAt) }
 }

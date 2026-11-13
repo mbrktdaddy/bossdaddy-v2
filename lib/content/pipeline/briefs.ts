@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { sanitizeSpecs } from '../specs'
 import { dataBlock, specLines } from '../prompts'
+import { splitFacts } from './facts'
+import { MAX_REFERENCES, ReferenceInput, ReferenceNote, pruneReferenceNotes, referenceBlock } from '../references'
 import type { Brief, GuideBrief, ReviewBrief } from './types'
 
 // The wizard's inputs, validated once at run creation. The shapes mirror the
@@ -32,6 +34,10 @@ export const ReviewBriefInput = z.object({
   howYouUsedIt:    z.string().max(600).optional(),
   standoutMoment:  z.string().max(600).optional(),
   pricePaid:       z.number().int().min(0).optional(),
+  /** Long-form firsthand notes (testing log, numbers, moments) — split into fact lines like a guide's context. */
+  notes:           z.string().max(6000).optional(),
+  references:      z.array(ReferenceInput).max(MAX_REFERENCES).default([]),
+  referenceNotes:  z.array(ReferenceNote).max(MAX_REFERENCES).default([]),
 })
 
 export const GuideBriefInput = z.object({
@@ -45,6 +51,8 @@ export const GuideBriefInput = z.object({
   productSlugs:   z.array(z.string().regex(/^[a-z0-9-]+$/).max(80)).max(15).default([]),
   imageSlots:     ImageSlots,
   inquiryMode:    z.boolean(),
+  references:     z.array(ReferenceInput).max(MAX_REFERENCES).default([]),
+  referenceNotes: z.array(ReferenceNote).max(MAX_REFERENCES).default([]),
 })
 
 export const BriefInput = z.discriminatedUnion('contentType', [ReviewBriefInput, GuideBriefInput])
@@ -54,13 +62,20 @@ export function normalizeBrief(b: z.infer<typeof BriefInput>): Brief {
   if (b.contentType === 'review') {
     return {
       ...b,
+      notes: b.notes?.trim() || undefined,
+      referenceNotes: pruneReferenceNotes(b.references, b.referenceNotes),
       specs: sanitizeSpecs(b.specs),
       competitors: b.competitors
         .map((c) => ({ name: c.name.trim(), brand: c.brand?.trim() || undefined, specs: sanitizeSpecs(c.specs) }))
         .filter((c) => c.name),
     }
   }
-  return { ...b, context: b.context?.trim() || undefined, productSlugs: b.inquiryMode ? [] : b.productSlugs }
+  return {
+    ...b,
+    context: b.context?.trim() || undefined,
+    productSlugs: b.inquiryMode ? [] : b.productSlugs,
+    referenceNotes: pruneReferenceNotes(b.references, b.referenceNotes),
+  }
 }
 
 const DURATION_LABEL: Record<string, string> = {
@@ -101,20 +116,14 @@ function reviewFacts(b: ReviewBrief): string[] {
     b.howYouUsedIt ? `How I used it: ${b.howYouUsedIt}` : null,
     b.standoutMoment ? `Standout moment: ${b.standoutMoment}` : null,
     b.pricePaid != null ? `Price paid: $${(b.pricePaid / 100).toFixed(2)}` : null,
+    ...splitFacts(b.notes),
   ].filter((x): x is string => !!x)
 }
 
 function guideFacts(b: GuideBrief): string[] {
-  const facts: string[] = []
-  if (b.context) {
-    // The brief is free text; split it into sentences so the outline can hand
-    // specific lines to specific parts rather than the whole blob to every part.
-    for (const s of b.context.split(/(?<=[.!?])\s+(?=[A-Z0-9"'])/)) {
-      const t = s.trim()
-      if (t) facts.push(t)
-    }
-  }
-  return facts
+  // The brief is free text; split it into lines so the outline can hand
+  // specific facts to specific parts rather than the whole blob to every part.
+  return splitFacts(b.context)
 }
 
 /** Does the brief carry ANY firsthand material? Drives the no-invented-scenario rule. */
@@ -122,9 +131,10 @@ export function hasFirsthand(brief: Brief): boolean {
   return briefFacts(brief).length > 0
 }
 
-/** The untrusted-data blocks (specs, competitors) fenced for a prompt; '' if none. */
+/** The untrusted-data blocks (specs, competitors, reference notes) fenced for a prompt; '' if none. */
 export function briefDataBlocks(brief: Brief): string {
-  if (brief.contentType !== 'review') return ''
+  const refs = referenceBlock(brief.referenceNotes)
+  if (brief.contentType !== 'review') return refs
   const out: string[] = []
   const specs = specLines(brief.specs)
   if (specs) {
@@ -140,6 +150,7 @@ export function briefDataBlocks(brief: Brief): string {
       }).join('\n'),
     ))
   }
+  if (refs) out.push(refs)
   return out.join('\n\n')
 }
 

@@ -1,3 +1,4 @@
+import type { ReferenceInput, ReferenceNote } from '../references'
 import type { SpecLike } from '../specs'
 import type { DraftInlineImage } from '../html'
 import type { ContentElement, ElementPlan } from '../elements'
@@ -31,6 +32,11 @@ export interface ReviewBrief {
   howYouUsedIt?: string
   standoutMoment?: string
   pricePaid?: number
+  /** Long-form firsthand notes; split into fact lines like a guide's context. */
+  notes?: string
+  references?: ReferenceInput[]
+  /** Fetched + author-reviewed facts per link; attributed knowledge, never firsthand. */
+  referenceNotes?: ReferenceNote[]
 }
 
 export interface GuideBrief {
@@ -45,6 +51,8 @@ export interface GuideBrief {
   imageSlots: number | 'auto'
   /** Resolved (explicit toggle or pillar default) — the run never re-derives it. */
   inquiryMode: boolean
+  references?: ReferenceInput[]
+  referenceNotes?: ReferenceNote[]
 }
 
 export type Brief = ReviewBrief | GuideBrief
