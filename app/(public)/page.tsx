@@ -448,7 +448,8 @@ export default async function HomePage() {
           section and all (it owns its own band) ───────────────────────────── */}
       <BenchStrip heading="On the bench" ctaText="See the bench" asSection />
 
-      {/* ── ABOUT — the closing dark band: portrait + the Creed + two links ── */}
+      {/* ── ABOUT — the closing dark band: the Creed + two links (the portrait is
+          pulled until a better image exists — `PORTRAIT` in AboutBand) ──────── */}
       <AboutBand />
 
       {/* ── SHOP — after the Creed, "rep the brand" (the same narrative as /about).

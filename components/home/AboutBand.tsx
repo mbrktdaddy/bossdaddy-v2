@@ -19,20 +19,31 @@ import { buttonVariants } from '@/components/ui/Button'
  * the source is empty wall), so anchoring to the bottom keeps him in frame at
  * every aspect this block takes.
  */
+/**
+ * The portrait. Pulled 2026-11-13 (his call) — the workshop crop was the
+ * retired poster hero's phone image, not a portrait shot for this band — until
+ * a better one exists. Set a path to restore the two-column band; null = the
+ * Creed alone, full width. (`as` rather than an annotation so TypeScript does
+ * not narrow the const to `null` and flag the branch.)
+ */
+const PORTRAIT = null as string | null
+
 export default function AboutBand() {
   return (
     <section data-theme="dark" className="bg-chrome border-t-4 border-accent border-b border-soft">
       <div className="max-w-6xl mx-auto px-6 py-10 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-14 items-center">
-          <div className="relative aspect-[4/5] md:aspect-[3/4] rounded-2xl overflow-hidden bg-surface-raised">
-            <Image
-              src="/images/hero-workshop-mobile.webp"
-              alt="The Boss at the workbench"
-              fill
-              sizes="(max-width: 768px) 100vw, 420px"
-              className="object-cover object-bottom"
-            />
-          </div>
+        <div className={PORTRAIT ? 'grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-14 items-center' : 'max-w-3xl'}>
+          {PORTRAIT && (
+            <div className="relative aspect-[4/5] md:aspect-[3/4] rounded-2xl overflow-hidden bg-surface-raised">
+              <Image
+                src={PORTRAIT}
+                alt="The Boss at the workbench"
+                fill
+                sizes="(max-width: 768px) 100vw, 420px"
+                className="object-cover object-bottom"
+              />
+            </div>
+          )}
           <div>
             <LabelBlock tone="accent" className="mb-5">About the Boss</LabelBlock>
             <blockquote className="font-editorial-display font-semibold text-prose text-2xl md:text-3xl leading-[1.3] tracking-tight">
