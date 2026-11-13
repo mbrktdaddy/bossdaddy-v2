@@ -86,9 +86,29 @@ ${part.notes.length
     ? `- Author facts for this part — the ONLY firsthand material you may claim; use them concretely, don't restate them as a list:\n${part.notes.map((n) => `    • ${n}`).join('\n')}`
     : `- Author facts for this part: none. Write from general knowledge and the product/topic facts above. Do NOT claim any usage, test result, duration or family reaction.`}
 ${referenceLines(part, brief)}
+${disciplineRules(brief, !!prior)}
 ${formatRules(part, brief)}
 
 Write only the prose of this part: no heading, no title, no preamble, no sign-off. Paragraphs separated by a blank line. No JSON, no # or ## headings, no code fences, no tables, no HTML.`
+}
+
+/**
+ * The two rules the 2026-11-13 eval showed the writer breaking most (plan §4a):
+ * specifics invented past the notes — the dominant finding class in every run
+ * since the 10-23 baseline — and parts written one at a time disagreeing with
+ * each other ("a two-evening job" in the intro, a four-day schedule in the close).
+ * The first rule names the forms the inventions took; the second makes the
+ * earlier part the authority when this part's intent pulls the other way.
+ */
+function disciplineRules(brief: Brief, hasPrior: boolean): string {
+  const firsthand = hasFirsthand(brief)
+  const scene = firsthand
+    ? 'You may set a scene the notes give; you may not furnish it with details they do not — no "cleats still on", no "flat on my back", no reconstructed conversation, no reaction nobody recorded.'
+    : 'With no author facts there is no scene to set — no "last weekend", no reaction, no "I noticed".'
+  const continuity = hasPrior
+    ? '- Continuity: this part agrees with everything WRITTEN SO FAR — every number, count, name, sequence of steps, time span, product term and claim about what happened stays exactly as an earlier part stated it (an earlier "two-evening job" is not laid out over four days here; a roster of nine stays nine; the same patch is not a mesh in one part and a metal plate in another). Where this part\'s intent conflicts with what an earlier part already said, keep the earlier part\'s facts and serve the intent with them. Check the written parts for the figures and sequence you are about to use before you write.'
+    : '- Continuity: what this part states — numbers, counts, names, sequence, time spans — is what every later part must agree with, so state only what the facts above support; a figure you are not sure of is left unsaid, not estimated.'
+  return `- Specifics: every number, price, duration, count, measurement, date, model name, scene, line of dialogue, physical detail, mishap and reaction comes from the author facts, the product facts or the reference facts above — nothing else. ${scene} Where a specific would strengthen the sentence and the facts above do not have it, write the general truth instead; never fill the gap. A sweeping claim of experience ("I\'ve met grown men who…", "every dad I know") is an argument, not a memory — make it one. A statistic or study not in the facts above: name it with its source only if you are certain of both; otherwise make the point without the number. Never invent a figure or a source.\n${continuity}`
 }
 
 /**

@@ -150,3 +150,24 @@ describe('sectionPrompt — reference facts per part', () => {
     expect(p).not.toContain('Cite no source')
   })
 })
+
+describe('sectionPrompt — the two eval remedies (2026-11-13)', () => {
+  it('every part carries the specifics rule; a part with prior prose carries the continuity rule', () => {
+    const later = sectionPrompt(run(), 1)
+    expect(later).toContain('- Specifics: every number, price, duration')
+    expect(later).toContain('never fill the gap')
+    expect(later).toContain('Never invent a figure or a source')
+    expect(later).toContain('- Continuity: this part agrees with everything WRITTEN SO FAR')
+    expect(later).toContain('You may set a scene the notes give')
+  })
+  it('the first part is told later parts must agree with it instead', () => {
+    const first = sectionPrompt(run({ sections: [null, null, null] }), 0)
+    expect(first).toContain('- Continuity: what this part states')
+    expect(first).not.toContain('agrees with everything WRITTEN SO FAR')
+  })
+  it('a brief with no firsthand material gets the no-scene wording', () => {
+    const r = run()
+    const bare = run({ brief: { ...r.brief, howYouUsedIt: undefined } as RunState['brief'], outline: { ...r.outline!, parts: r.outline!.parts.map((p) => ({ ...p, notes: [] })) } })
+    expect(sectionPrompt(bare, 1)).toContain('there is no scene to set')
+  })
+})
