@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Eyebrow } from '@/components/ui/Eyebrow'
+import { PlusIcon } from '@/components/icons'
 
 interface TocItem {
   id: string
@@ -14,6 +15,13 @@ interface Props {
   target?: string
   /** Minimum number of headings to bother showing the TOC. Defaults to 3. */
   minHeadings?: number
+  /**
+   * Phone/tablet mode (2026-11-13): a closed disclosure row — "In this guide ·
+   * N sections" with the FAQ accordion's plus control — instead of the open
+   * box. The open list cost a full phone screen before the body, on top of the
+   * summary card. Desktop keeps the open box in the sidebar.
+   */
+  collapsible?: boolean
 }
 
 function slugify(text: string): string {
@@ -25,7 +33,7 @@ function slugify(text: string): string {
     .slice(0, 60)
 }
 
-export default function TableOfContents({ target = '.bd-content', minHeadings = 3 }: Props) {
+export default function TableOfContents({ target = '.bd-content', minHeadings = 3, collapsible = false }: Props) {
   const [items, setItems] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -94,28 +102,53 @@ export default function TableOfContents({ target = '.bd-content', minHeadings = 
 
   if (items.length < minHeadings) return null
 
+  const list = items.map((item) => {
+    const isActive = activeId === item.id
+    return (
+      <li key={item.id}>
+        <a
+          href={`#${item.id}`}
+          className={`block py-1 leading-snug transition-colors ${
+            item.level === 3 ? 'pl-4 text-xs' : ''
+          } ${
+            isActive ? 'text-accent-text-soft font-semibold' : 'text-prose-muted hover:text-prose'
+          }`}
+        >
+          {item.text}
+        </a>
+      </li>
+    )
+  })
+
+  if (collapsible) {
+    // The same disclosure row as the FAQ accordion (native <details>, the
+    // chrome plus that turns into a cross), so the page has one mechanism.
+    const sections = items.filter((i) => i.level === 2).length || items.length
+    return (
+      <nav aria-label="Table of contents">
+        <details className="group border-y border-soft">
+          <summary className="flex items-center justify-between gap-4 cursor-pointer list-none py-3 min-h-[48px] [&::-webkit-details-marker]:hidden">
+            <span className="flex items-baseline gap-2">
+              <Eyebrow as="span">In this guide</Eyebrow>
+              <span className="text-xs text-prose-faint">{sections} {sections === 1 ? 'section' : 'sections'}</span>
+            </span>
+            <span
+              aria-hidden
+              className="shrink-0 grid place-items-center w-7 h-7 rounded-md bg-chrome text-white transition-transform duration-200 group-open:rotate-45"
+            >
+              <PlusIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
+            </span>
+          </summary>
+          <ul className="pb-4 space-y-1.5 text-sm">{list}</ul>
+        </details>
+      </nav>
+    )
+  }
+
   return (
     <nav aria-label="Table of contents" className="bg-surface border border-soft rounded-xl p-5">
       <Eyebrow className="mb-3">In this guide</Eyebrow>
-      <ul className="space-y-1.5 text-sm">
-        {items.map((item) => {
-          const isActive = activeId === item.id
-          return (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className={`block py-1 leading-snug transition-colors ${
-                  item.level === 3 ? 'pl-4 text-xs' : ''
-                } ${
-                  isActive ? 'text-accent-text-soft font-semibold' : 'text-prose-muted hover:text-prose'
-                }`}
-              >
-                {item.text}
-              </a>
-            </li>
-          )
-        })}
-      </ul>
+      <ul className="space-y-1.5 text-sm">{list}</ul>
     </nav>
   )
 }

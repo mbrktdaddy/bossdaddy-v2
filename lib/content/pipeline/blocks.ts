@@ -22,11 +22,15 @@ export function blocksOutput(choices: BlockChoices, contentType: 'review' | 'gui
   const drafted = elements.filter((e) => e.type !== 'video')
   if (drafted.length) shape.elements = z.array(ElementDraftOutput).max(drafted.length)
     .describe(`The ${drafted.length} planned element(s) in the prompt, in order, each drafted from the prose; omit one only if the prose gives it nothing to say`)
+  // The lengths are asked for in the descriptions, not enforced with .max():
+  // a cap that trips throws the whole blocks object away. On a phone the TL;DR
+  // and the takeaways share one card above the body (2026-11-13), so they are
+  // the length of a glance, not a second introduction.
   if (choices.tldr) shape.tldr = z.string().min(1).max(600).describe(contentType === 'review'
-    ? '1–2 sentence verdict for skimmers; lead with the gut answer'
-    : '2–3 plain-English sentences; lead with the main takeaway (inquiry: name the question and the answer you land on)')
+    ? '1–2 sentence verdict for skimmers, 40 words at most; lead with the gut answer'
+    : '2 plain-English sentences, 45 words at most; lead with the main takeaway (inquiry: name the question and the answer you land on). It opens the summary card on a phone — a glance, not a second introduction')
   if (choices.keyTakeaways) shape.keyTakeaways = z.array(z.string().min(1).max(400)).min(2).max(6)
-    .describe('3–5 specific, decision-relevant insights pulled from the prose — not a rehash of the intro or the pros')
+    .describe('3–5 specific, decision-relevant insights pulled from the prose, each ONE line of 18 words at most — not a rehash of the intro, the TL;DR or the pros')
   if (choices.faqs) shape.faqs = z.array(FaqOutput).min(2).max(6)
     .describe('3–5 pairs; questions the way a real dad would search (inquiry: the strongest objections, each given a real answer)')
   if (choices.bestFor) shape.bestFor = z.array(z.string().min(1).max(300)).min(2).max(5).describe('3–4 specific buyer profiles')

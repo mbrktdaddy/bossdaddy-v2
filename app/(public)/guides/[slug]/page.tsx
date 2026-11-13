@@ -31,10 +31,9 @@ import TrackView from '@/components/TrackView'
 import RecentlyViewedStrip from '@/components/RecentlyViewedStrip'
 import AskTheBoss from '@/components/AskTheBoss'
 import BenchStrip from '@/components/BenchStrip'
-import TakeawaysCard from '@/components/reviews/TakeawaysCard'
+import QuickTakeCard from '@/components/content/QuickTakeCard'
 import FAQAccordion from '@/components/collections/FAQAccordion'
 import { Card } from '@/components/ui/Card'
-import { Eyebrow } from '@/components/ui/Eyebrow'
 import EditorialHeader from '@/components/EditorialHeader'
 import { LabelBlock } from '@/components/ui/LabelBlock'
 import { buttonVariants } from '@/components/ui/Button'
@@ -279,21 +278,12 @@ export default async function GuidePage({ params }: Props) {
           </div>
         )}
 
-        {/* Quick Take — the tldr summary, same accent-tint treatment as
-            before. Sits ABOVE the .bd-content wrapper, so its h2 doesn't leak
-            into the TOC. */}
-        {guide.tldr && (
-          <div className="mb-10 bg-accent-tint border border-accent-border/40 rounded-xl p-5 sm:p-6">
-            <span aria-hidden className="block h-px w-6 bg-accent-brand/60 mb-3" />
-            <Eyebrow as="h2" className="mb-3">Quick Take</Eyebrow>
-            <p className="text-prose leading-relaxed text-sm sm:text-base">{guide.tldr}</p>
-          </div>
-        )}
-
-        {/* Key Takeaways — same standalone TakeawaysCard as reviews (neutral
-            bg-surface-sunken card, not the Quick Take's accent tint), so the
-            two content types render this block identically. */}
-        <TakeawaysCard items={guideKeyTakeaways} />
+        {/* Quick Take + Key Takeaways — ONE card (2026-11-13): the lede and the
+            bullets together instead of two stacked boxes; on a phone the pair
+            plus the open TOC put the body two and a half screens down. Sits
+            ABOVE the .bd-content wrapper, so its headings don't leak into the
+            TOC. */}
+        <QuickTakeCard lede={guide.tldr} items={guideKeyTakeaways} />
 
         {/* ── Two-column layout ─────────────────────────────────────────── */}
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10 lg:items-start">
@@ -301,9 +291,10 @@ export default async function GuidePage({ params }: Props) {
           {/* Main column */}
           <div className={`min-w-0 ${ARTICLE_SURFACE_CLASS}`}>
 
-            {/* TOC — mobile/tablet only; desktop version lives in sidebar */}
+            {/* TOC — mobile/tablet only, as a closed disclosure row (2026-11-13);
+                the open box lives in the desktop sidebar */}
             <div className="mb-10 lg:hidden">
-              <TableOfContents />
+              <TableOfContents collapsible />
             </div>
 
             {/* Guide body — ProductCtaCards injected inline at [[BUY:slug]] positions */}
