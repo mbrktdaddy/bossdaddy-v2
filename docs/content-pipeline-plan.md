@@ -94,6 +94,21 @@ Acceptance: `npm run check && npm test && npm run build` green; a generated draf
 
 Acceptance: a review generated end-to-end on the phone; critic findings visible before save; `generations` holds one row per stage with cost; truncation impossible by construction (section budgets).
 
+### 4a. Notes + reference lane — BUILT 2026-11-11 (uncommitted; PROMPT_VERSION `2026-11-11.1`)
+
+**Why.** The eval baseline's biggest warn class was "specifics beyond the notes": the model fills gaps in a thin brief. The fix is more input, but input comes in two kinds and the pipeline must never confuse them:
+
+| Lane | What it is | How the prompts treat it |
+|---|---|---|
+| **Notes** (`notes` on reviews, `context` on guides; 6,000 chars) | The author's firsthand material — what he did, measured, saw | `splitFacts()` (`lib/content/pipeline/facts.ts`) → fact lines; the outline assigns each to a part; the critic treats anything firsthand outside them as invented |
+| **References** (`references[]` + `referenceNotes[]`, ≤10 links) | Pages the piece may cite — a spec sheet, a recall notice, a study | Fetched + distilled BEFORE the run by `/api/content/references`; ride on the brief as a fenced `dataBlock` (`referenceBlock()` in `lib/content/references.ts`); written as attributed knowledge ("the maker lists…"), never first person; the critic counts a reference-backed claim as supported but the same fact claimed as the author's own test as unsupported |
+
+**Mechanics.** `NotesField` (both wizards): grows with the text to 60dvh then scrolls, "Expand" opens it full-height in the Modal, the count line shows chars + fact lines (red above 60, roughly the outline's per-part capacity). `splitFacts` breaks on line breaks AND sentence ends, strips list markers first, and **holds URLs out** (a URL as a verbatim fact makes the writer describe a page it never saw); `extractLinks()` offers those URLs to the reference list with one tap. `ReferencesPanel`: add link + optional "what I want from it" note, Fetch reads every un-fetched link in parallel (one Claude `web_fetch` call per link via `aiFetch()` in `lib/ai/research.ts`, always Claude — xAI has no fetch tool; `allowedDomains` = the link's host, `maxContentTokens` 20k, temp 0, 60s), each result = title + ≤12 scrubbed facts (`sanitizeSpecValue`, injection lines dropped) the author can drop line by line. Retailer hosts (Amazon, Home Depot…) are flagged, not fetched — the product panel owns specs. Each fetch is a `references` row in `generations` (no run_id yet; cost-attributed `surface:references`). Rate key `references` (60/h). `normalizeBrief` prunes notes whose link was removed. Raw page text never reaches the Opus stages.
+
+**Not built (his call):** a brief-distillation step that turns the whole dump into facts / references / gaps he answers before the outline; per-part assignment of reference lines (today the whole block goes to every stage like specs); a "Research this part" web-search action for parts with no facts; links rendered in the public body (the writer names the source in words; he adds the anchor in the editor).
+
+**Walkthrough (phone):** (1) review wizard → paste a paragraph with a dewalt.com link into Testing notes → the count line shows facts, the link appears under "In your notes" → tap + → Fetch 1 link → facts list → drop one → generate → the section that uses them says "DeWalt lists…" not "I measured"; check the `generations` row (`stage='references'`) and the critic has no warn on the attributed fact. (2) Same with an amazon.com link → "Retailer" badge, not fetched. (3) Guide wizard → Expand on Context, type, Done → text kept.
+
 ## 5. Phase 2 — Patch-based editing
 
 - `POST /api/content/refine-section`: instruction + section index + that section + neighbours as read-only context → replacement section (small Zod schema, ≤ 2000 tokens, temp 0.5). The workspace applies it as a diff; `snapshotRevision(..., label: 'pre-ai-refine')` before apply.
