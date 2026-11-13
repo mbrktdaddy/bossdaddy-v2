@@ -10,6 +10,7 @@ import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import type { Critic, CriticFinding } from '@/lib/content/pipeline/types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
 
 export const maxDuration = 90
 
@@ -18,11 +19,9 @@ export const maxDuration = 90
 // the critic informs the author, it never blocks the pipeline by itself.
 // `blocksText` / `CRITIC_SYSTEM` live in the model module so the content eval
 // (tests/eval/content-eval.ts) judges with exactly this editor.
-const EFFORT = 'high' as const
-const TEMPERATURE = 0
-// Reasoning tokens share this cap: at the old 2000 the editor spent the whole
-// budget thinking and returned no object at all (2026-11-01).
-const MAX_OUTPUT_TOKENS = 5000
+// Knobs live in knobs.ts so the golden eval runs exactly this configuration; the
+// cap includes reasoning (at the old 2000 the editor spent it all thinking, 2026-11-01).
+const { maxOutputTokens: MAX_OUTPUT_TOKENS, effort: EFFORT, temperature: TEMPERATURE } = STAGE_KNOBS.critic
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

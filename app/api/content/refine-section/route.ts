@@ -7,6 +7,7 @@ import { logGeneration } from '@/lib/content/generations'
 import { INQUIRY_TRIGGER, PROMPT_VERSION } from '@/lib/content/prompts'
 import { countTokens, sectionLabel, sectionToStructuredText, splitSections } from '@/lib/content/sections'
 import { requireAuthor } from '@/lib/content/pipeline/route-helpers'
+import { loadBriefForContent, refineGrounding } from '@/lib/content/pipeline/grounding'
 import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -57,13 +58,17 @@ export async function POST(request: NextRequest) {
   const prev = sections[sectionIndex - 1]
   const next = sections[sectionIndex + 1]
   const clip = (s: string) => (s.length > NEIGHBOUR_CHARS ? s.slice(0, NEIGHBOUR_CHARS) + ' …' : s)
+  // The author's notes + fetched references behind this piece, when its run is on record.
+  const grounding = refineGrounding(await loadBriefForContent(supabase, contentType, contentId))
 
   const prompt = `${inquiry ? `${INQUIRY_TRIGGER}\n\nThis piece runs in the inquiry register (see your system prompt): a witness, not a student — keep the visible reasoning, answer the opposing view where it's raised, and keep the position stated as a conviction; never soften it into a shrug.\n\n` : ''}STAGED DRAFTING — you are rewriting ONE section of an existing Boss Daddy ${contentType === 'review' ? 'product review' : 'guide'} to an editor's instruction. Everything outside this section stays as it is; you return only this section's prose.
 
 Title: ${title}${productName ? `\nProduct: ${productName}` : ''}
 Category: ${category}
 Section: ${sectionLabel(section)} (${sectionIndex + 1} of ${sections.length})
-${prev ? `
+${grounding ? `
+${grounding}
+` : ''}${prev ? `
 PREVIOUS SECTION (read-only context — do not rewrite or repeat it):
 """
 ${clip(sectionToStructuredText(prev))}
@@ -82,7 +87,7 @@ ${clip(sectionToStructuredText(next))}
 INSTRUCTION: ${instruction}
 
 RULES:
-- Apply only what the instruction asks; keep every fact, number and firsthand detail that is already there unless the instruction says otherwise, and never add a usage claim, test result or family moment that isn't in the current text.
+- Apply only what the instruction asks; keep every fact, number and firsthand detail that is already there unless the instruction says otherwise, and never add a usage claim, test result or family moment that isn't in the current text${grounding ? ' or the author notes above' : ''}.
 - ${tokenEntries.length
       ? `Product links: this section contains ${tokenEntries.map(([s, n]) => `${n} × [[BUY:${s}]]`).join(', ')}. Keep exactly those tokens, written exactly like that, placed where they still make sense. Add none, drop none.`
       : 'Product links: this section has no [[BUY:]] tokens — add none.'}

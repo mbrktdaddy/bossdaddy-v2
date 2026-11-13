@@ -3,6 +3,7 @@ import { createClient, getUserSafe } from '@/lib/supabase/server'
 import { aiGenerateTextWithMeta } from '@/lib/ai/client'
 import { classifyClaudeError } from '@/lib/ai/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { loadBriefForContent, refineGrounding } from '@/lib/content/pipeline/grounding'
 import { z } from 'zod'
 
 export const maxDuration = 30
@@ -10,6 +11,9 @@ export const maxDuration = 30
 const Input = z.object({
   text:        z.string().min(1).max(4000),
   instruction: z.string().min(3).max(500),
+  // Which saved piece the selection is from, so the rewrite can see its notes + references.
+  contentType: z.enum(['review', 'guide']).optional(),
+  contentId:   z.string().uuid().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -31,7 +35,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
   }
 
-  const { text, instruction } = parsed.data
+  const { text, instruction, contentType, contentId } = parsed.data
+  const grounding = contentType ? refineGrounding(await loadBriefForContent(supabase, contentType, contentId)) : ''
 
   // The budget used to be a flat 600 tokens for up to 4000 characters of input,
   // and a cut-off rewrite replaced the selection silently. Size it to the
@@ -45,7 +50,7 @@ export async function POST(request: NextRequest) {
       bucket: 'utility',
       tag: 'refine-selection',
       system: 'You are an editor. The user provides an excerpt and an instruction. Return ONLY the revised text — no preamble, no explanation, no quotes. Preserve any HTML tags that were in the original.',
-      prompt: `Instruction: ${instruction}\n\nExcerpt:\n${text}`,
+      prompt: `${grounding ? `${grounding}\n\n` : ''}Instruction: ${instruction}\n\nExcerpt:\n${text}`,
       maxOutputTokens: budget,
       // Low but not zero: it is rewriting the operator's prose to a specific
       // instruction, so faithfulness beats invention — but flat-0 editing reads

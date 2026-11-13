@@ -9,6 +9,7 @@ import { sectionBudget, sectionPrompt } from '@/lib/content/pipeline/section'
 import { getRun, updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
 
 // Stage 2 — one part, streamed as plain text. The response body is the prose;
 // the run row is updated in onFinish (awaited by the SDK before the stream
@@ -17,8 +18,8 @@ import { checkRateLimit } from '@/lib/rate-limit'
 // lose the part.
 export const maxDuration = 120
 
-const EFFORT = 'high' as const
-const TEMPERATURE = 0.8
+// Knobs live in knobs.ts so the golden eval runs exactly this configuration.
+const { effort: EFFORT, temperature: TEMPERATURE } = STAGE_KNOBS.section
 
 const Input = z.object({
   index: z.number().int().min(0).max(20),

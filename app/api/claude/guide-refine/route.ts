@@ -11,6 +11,7 @@ import { extractProductSlugs } from '@/lib/inline-content'
 import { isInquiryCategory } from '@/lib/categories'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
+import { loadBriefForContent, refineGrounding } from '@/lib/content/pipeline/grounding'
 
 // A comprehensive guide re-emitted in full runs to ~9k tokens on the 5
 // generation (the draft budget is 12k with thinking); 3800 truncated it.
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
 
   const structured = htmlToStructuredText(content)
 
+  // The author's notes + fetched references behind this guide, when its run is on record.
+  const grounding = refineGrounding(await loadBriefForContent(supabase, 'guide', contentId))
+
   const contentBlocksContext = [
     tldr ? `Current TL;DR: ${tldr}` : null,
     keyTakeaways?.length ? `Current Key Takeaways:\n${keyTakeaways.map((t, i) => `${i + 1}. ${t}`).join('\n')}` : null,
@@ -78,7 +82,7 @@ This piece runs in the inquiry register (see your system prompt): humble in post
 
 Title: ${title}
 Category: ${category}${slugLine}
-
+${grounding ? `\n${grounding}\n` : ''}
 Current article text ("## " marks a section heading):
 ${structured}
 ${contentBlocksContext ? `\n${contentBlocksContext}\n` : ''}

@@ -10,6 +10,7 @@ import { logGeneration } from '@/lib/content/generations'
 import { extractProductSlugs } from '@/lib/inline-content'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
+import { loadBriefForContent, refineGrounding } from '@/lib/content/pipeline/grounding'
 
 export const maxDuration = 120
 
@@ -79,12 +80,15 @@ export async function POST(request: NextRequest) {
   // collapse, so "preserve everything else" has a structure to preserve.
   const structured = htmlToStructuredText(content)
 
+  // The author's notes + fetched references behind this review, when its run is on record.
+  const grounding = refineGrounding(await loadBriefForContent(supabase, 'review', contentId))
+
   const prompt = `You are editing an existing Boss Daddy product review. Apply ONLY the requested changes — preserve everything else, including section headings and order, unless the instruction says otherwise.
 
 Title: ${title}
 Product: ${product_name}
 Category: ${category}${slugLine}
-
+${grounding ? `\n${grounding}\n` : ''}
 Current review text ("## " marks a section heading):
 ${structured}
 ${blocksContext ? `\n${blocksContext}\n` : ''}

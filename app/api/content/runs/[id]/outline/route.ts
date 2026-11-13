@@ -9,6 +9,7 @@ import { findRelated } from '@/lib/content/pipeline/related'
 import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
 
 // One attempt runs 30–40s at effort high; the SDK's two retries must fit.
 export const maxDuration = 120
@@ -18,12 +19,9 @@ export const maxDuration = 120
 // author's edited outline and opens drafting. The author ALWAYS passes through
 // PUT: the outline is the contract the sections are written against.
 
-const EFFORT = 'high' as const
-const TEMPERATURE = 0.7
-// Reasoning tokens share this cap (a successful guide outline measured 2056
-// output tokens, 808 of them reasoning, against the old 2500 — the next one
-// truncated). Billing is by tokens used, so the headroom costs nothing idle.
-const MAX_OUTPUT_TOKENS = 6000
+// Knobs live in knobs.ts so the golden eval runs exactly this configuration; the
+// cap includes reasoning tokens (the 2026-11-01 note there).
+const { maxOutputTokens: MAX_OUTPUT_TOKENS, effort: EFFORT, temperature: TEMPERATURE } = STAGE_KNOBS.outline
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

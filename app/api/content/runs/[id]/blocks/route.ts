@@ -11,15 +11,13 @@ import { updateRun } from '@/lib/content/pipeline/run'
 import { loadOwnedRun, rateLimited, requireStage } from '@/lib/content/pipeline/route-helpers'
 import type { Blocks } from '@/lib/content/pipeline/types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { STAGE_KNOBS } from '@/lib/content/pipeline/knobs'
 
 export const maxDuration = 90
 
-// Stage 3 — the structured blocks, derived from the finished prose.
-const EFFORT = 'medium' as const
-const TEMPERATURE = 0.5
-// Reasoning tokens share this cap (see the outline route); a review with every
-// block plus three elements is the long case.
-const MAX_OUTPUT_TOKENS = 6000
+// Stage 3 — the structured blocks, derived from the finished prose. Knobs live in
+// knobs.ts so the golden eval runs exactly this configuration.
+const { maxOutputTokens: MAX_OUTPUT_TOKENS, effort: EFFORT, temperature: TEMPERATURE } = STAGE_KNOBS.blocks
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
