@@ -715,6 +715,8 @@ must not be tinted.
 - `/shop` 301-redirects to `/gear` for SEO + bookmark continuity.
 
 ### Detail pages (`/reviews/[slug]`, `/guides/[slug]`, comparisons, picks, stacks, bench)
+
+**Guide preamble (2026-11-13).** Between the hero and the first paragraph a guide shows ONE summary card — the Quick Take lede with the Key Takeaways as a sub-heading inside it (`QuickTakeCard`) — and, on phones and tablets, the table of contents as a closed disclosure row ("In this guide · N sections", the FAQ accordion's plus control) instead of an open box; the open list stays in the desktop sidebar. Why: on a 360px phone the title, hero, Quick Take card, Key Takeaways card and open contents box put the body about two and a half screens down, and the paragraph and the bullets said the same thing twice. The blocks stage now asks for a 45-word lede and one-line takeaways. No sticky "jump to" bar: the bottom nav already owns that edge of the phone. Reviews keep the verdict card above the takeaways — it carries the score and the buy button.
 - Article header with the score ring (`ScoreBlock variant="ring"` / `ScoreArc` — the sanctioned hero moment) + meta; category and bench links are square chips.
 - Hero image at `rounded-xl` (4px). Title Montserrat `font-black`, body sans on bare canvas; the article prose stays clean — no blocks inside it.
 - **Utility modules are chrome boxes** (`Card tone="chrome"`): the verdict, the product CTA, the testing log, specs (table frame + `bg-chrome` header row), the comment form, "Products mentioned". The sidebar verdict may be the page's one black panel. Status/state chips (`Badge`): would-rebuy, "From the bench", "Best for", roles, winners. No shadows, no tints.
