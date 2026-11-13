@@ -33,7 +33,7 @@ export default function EditorialHeader({ eyebrow, title, right }: Props) {
   return (
     // flex-wrap: the button never shrinks (nowrap), so a long label drops under the
     // title instead of squeezing it into an overlap on a phone.
-    <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 mb-6 pb-3 border-b-[3px] border-chrome">
+    <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3 mb-6 pb-3 border-b-[3px] border-chrome app:border-prose">
       <div className="min-w-0">
         <LabelBlock>{eyebrow}</LabelBlock>
         <h2 className="font-black text-prose uppercase text-[26px] md:text-[34px] leading-[1.05] tracking-[-0.01em] mt-2.5">

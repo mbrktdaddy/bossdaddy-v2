@@ -105,7 +105,11 @@ export default function Footer({ giftSeason = false }: { giftSeason?: boolean })
   const browse = giftSeason ? [...BROWSE, GIFTS_LINK] : BROWSE
 
   return (
-    <footer data-theme="dark" className="bg-chrome border-t-4 border-accent text-prose-muted">
+    <footer data-theme="dark" className="bg-chrome border-t-4 border-accent text-prose-muted pb-14 md:pb-0">
+      {/* `pb-14 md:pb-0` is the mobile bottom-nav clearance (moved here from
+          PublicMain 2026-11-13): the fixed nav covers the footer's last 56px on
+          a phone, so the footer carries the room in its own dark — never a
+          light band above it. */}
       <div className="max-w-6xl mx-auto px-6 py-14">
 
         {/* Top: 3-column grid */}

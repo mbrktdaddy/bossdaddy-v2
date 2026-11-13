@@ -13,7 +13,7 @@ interface LabelBlockProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const TONE = {
-  ink:    'bg-chrome text-white',
+  ink:    'bg-chrome text-white app:bg-prose app:text-background',
   accent: 'bg-accent text-white',
 } as const
 

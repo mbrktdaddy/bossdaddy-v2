@@ -35,7 +35,7 @@ export function ToolCard({ href, kicker, title, blurb, cta = 'Try it', size = 'f
       href={href}
       data-theme={panel ? 'dark' : undefined}
       className={`group flex flex-col rounded-xl ${full ? 'p-5 sm:p-6' : 'p-4 sm:p-5'} ${
-        panel ? 'bg-chrome text-prose border-t-4 border-accent' : 'bg-surface border-2 border-chrome'
+        panel ? 'bg-chrome text-prose border-t-4 border-accent app:bg-surface-raised' : 'bg-surface border-2 border-chrome app:border-strong'
       } ${className}`}
     >
       <p className={`font-display font-extrabold text-[11px] uppercase tracking-[0.16em] ${panel ? 'text-accent-text' : 'text-eyebrow'}`}>

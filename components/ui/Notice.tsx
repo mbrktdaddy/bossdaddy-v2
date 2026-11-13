@@ -48,7 +48,7 @@ export function Notice({
       role={role}
       aria-label={label}
       style={style}
-      className={`flex items-center gap-3 bg-chrome text-prose border-t-4 border-accent rounded-xl ${VARIANT[variant]} ${className}`}
+      className={`flex items-center gap-3 bg-chrome app:bg-surface-raised text-prose border-t-4 border-accent rounded-xl ${VARIANT[variant]} ${className}`}
     >
       <div className="min-w-0 flex-1">
         {title && <p className="text-sm font-bold text-prose leading-snug">{title}</p>}

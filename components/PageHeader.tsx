@@ -45,7 +45,7 @@ interface Props {
 export default function PageHeader({ back, eyebrow, title, deck, actions, size = 'default', className = '' }: Props) {
   if (size === 'compact') {
     return (
-      <header className={`pb-5 border-b-[3px] border-chrome ${className}`}>
+      <header className={`pb-5 border-b-[3px] border-chrome app:border-prose ${className}`}>
         {back && <BackLink href={back.href} label={back.label} className="mb-3" />}
         <div className="flex items-end justify-between gap-4">
           <div className="min-w-0">
@@ -62,7 +62,7 @@ export default function PageHeader({ back, eyebrow, title, deck, actions, size =
   }
   return (
     <header>
-      <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 md:pt-14 md:pb-8 border-b-[3px] border-chrome">
+      <div className="max-w-6xl mx-auto px-6 pt-10 pb-6 md:pt-14 md:pb-8 border-b-[3px] border-chrome app:border-prose">
         {back && <BackLink href={back.href} label={back.label} className="mb-3" />}
         <div className="flex items-end justify-between gap-6">
           <div className="min-w-0">

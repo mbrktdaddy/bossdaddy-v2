@@ -41,9 +41,9 @@ export function UtilityBox({
   return (
     <section
       aria-label={ariaLabel ?? label}
-      className={`border-2 border-chrome rounded-xl overflow-hidden bg-surface ${className}`}
+      className={`border-2 border-chrome app:border-strong rounded-xl overflow-hidden bg-surface ${className}`}
     >
-      <div data-theme="dark" className="bg-chrome text-prose flex items-center gap-2.5 px-4 min-h-[44px]">
+      <div data-theme="dark" className="bg-chrome app:bg-surface-raised text-prose flex items-center gap-2.5 px-4 min-h-[44px]">
         {live && (
           <span aria-hidden className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse shadow-[0_0_0_4px_rgba(229,90,26,0.25)]" />
         )}
@@ -77,7 +77,7 @@ export function StatusChip({
 }) {
   return (
     <span
-      className={`shrink-0 font-display font-black text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-sm text-white whitespace-nowrap ${tone === 'accent' ? 'bg-accent' : 'bg-chrome'} ${className}`}
+      className={`shrink-0 font-display font-black text-[10px] uppercase tracking-[0.14em] px-2.5 py-1.5 rounded-sm text-white whitespace-nowrap ${tone === 'accent' ? 'bg-accent' : 'bg-chrome app:bg-prose app:text-background'} ${className}`}
     >
       {children}
     </span>

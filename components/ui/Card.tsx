@@ -12,7 +12,7 @@
 //   faint   — half-strength surface for quiet asides
 
 const TONE = {
-  chrome:  'bg-surface border-2 border-chrome',
+  chrome:  'bg-surface border-2 border-chrome app:border-strong',
   surface: 'bg-surface border border-soft',
   raised:  'bg-surface-raised border border-soft',
   sunken:  'bg-surface-sunken border border-soft',

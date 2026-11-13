@@ -91,6 +91,19 @@
   --bd-accent-tint: #f4f4f5;      /* zinc-100 — neutral elevated surface */
 }
 
+/* ── The app zone variant (2026-11-13, brand-guide §11 "The Toolbox scheme").
+   `app:` utilities apply inside [data-zone="app"] — the Toolbox routes
+   (/tools, /goals, /today, /account; components/app/AppZone.tsx). Keyed on
+   its own attribute, NOT on [data-theme="dark"], on purpose: a black panel on
+   the light page is a dark zone too, and the scheme must not leak into it. */
+@custom-variant app (&:where([data-zone="app"] *));
+
+/* A page that holds the app zone paints its <main> dark too, so a short app
+   page has no light remainder between the zone and the footer. */
+main:has([data-zone="app"]) {
+  background-color: #09090b;
+}
+
 /* ── Dark zone — applied via [data-theme="dark"] on a layout root div.
    Used for "work" surfaces (dashboard, account, tools) while editorial
    pages stay light. The @theme inline semantic tokens var() to these

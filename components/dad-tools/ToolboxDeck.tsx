@@ -16,7 +16,7 @@ export default function ToolboxDeck({
     <section
       data-theme="dark"
       aria-label={title}
-      className={`bg-chrome text-prose border-t-4 border-accent rounded-xl overflow-hidden ${className}`}
+      className={`bg-chrome app:bg-surface text-prose border-t-4 border-accent rounded-xl overflow-hidden ${className}`}
     >
       <div className="px-5 pt-5 pb-5 sm:px-6 sm:pt-6 sm:pb-6">
         <p className="font-display font-extrabold text-[11px] uppercase tracking-[0.16em] text-accent-text">
