@@ -36,6 +36,8 @@ import FAQAccordion from '@/components/collections/FAQAccordion'
 import { Card } from '@/components/ui/Card'
 import EditorialHeader from '@/components/EditorialHeader'
 import { LabelBlock } from '@/components/ui/LabelBlock'
+import SectionHeader from '@/components/SectionHeader'
+import CreedStrip from '@/components/CreedStrip'
 import { buttonVariants } from '@/components/ui/Button'
 import { extractSteps } from '@/lib/content/elements'
 
@@ -242,6 +244,9 @@ export default async function GuidePage({ params }: Props) {
 
         {/* Header */}
         <div className="mb-10">
+          {/* The open's brand moment (Phase 3, 2026-11-13): the category as the
+              black label block, the same lockup the listing headers use. */}
+          {category && <LabelBlock className="mb-4">{category.label}</LabelBlock>}
           <h1 className="font-black text-4xl md:text-5xl leading-[1.05] mb-6 tracking-tight">{guide.title}</h1>
           <div className="flex flex-wrap items-center gap-4 text-sm text-prose-muted pb-6">
             <span>by <Link href={`/author/${author}`} className="text-prose-muted hover:text-accent-text-soft transition-colors">@{author}</Link></span>
@@ -435,9 +440,14 @@ export default async function GuidePage({ params }: Props) {
               </div>
             )}
 
-            {/* ── Community ── */}
-            <section className="mt-12 pt-8 border-t border-soft" aria-labelledby="comments-heading">
-              <h2 id="comments-heading" className="text-xl font-black mb-5">Comments</h2>
+            {/* ── Sign-off — the close's second black moment (Phase 3,
+                2026-11-13); Community follows so it never stacks on another
+                dark band ── */}
+            <CreedStrip className="mt-12" />
+
+            {/* ── Community — the utility lane's header, as on reviews ── */}
+            <section className="mt-12 pt-8 border-t border-soft" aria-label="Comments">
+              <SectionHeader label="Community" heading="Comments" />
               <CommentForm contentType="guide" contentId={guide.id} />
               <div className="mt-8">
                 <CommentList contentType="guide" contentId={guide.id} />

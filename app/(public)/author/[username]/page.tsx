@@ -5,6 +5,7 @@ import { getCategoryBySlug } from '@/lib/categories'
 import ContentRow from '@/components/ContentRow'
 import { LabelBlock } from '@/components/ui/LabelBlock'
 import BenchStrip from '@/components/BenchStrip'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import PipelineCounter from '@/components/PipelineCounter'
 import MessageUserButton from '@/components/messages/MessageUserButton'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -209,6 +210,9 @@ export default async function AuthorPage({ params }: Props) {
  <div className="mt-12 pt-8 border-t border-soft">
    <PipelineCounter />
  </div>
+
+ {/* The orange block — the page's one orange moment (Phase 3, 2026-11-13) */}
+ <NewsletterSignup variant="block" inset headingAs="h2" eyebrow="Follow the Boss" className="mt-12" />
 
  <div className="mt-16">
    <BenchStrip ctaText="See what's on the bench" />

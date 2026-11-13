@@ -44,6 +44,7 @@ import { withWeeks, type TestingNote } from '@/lib/products/testing-notes'
 import { LABELS } from '@/lib/labels'
 import BenchStrip from '@/components/BenchStrip'
 import AskTheBoss from '@/components/AskTheBoss'
+import CreedStrip from '@/components/CreedStrip'
 import CategoryIcon from '@/components/CategoryIcon'
 import { ReviewTimelineStrip } from '@/components/reviews/ReviewTimelineStrip'
 import { VerdictChangeBadge } from '@/components/reviews/VerdictChangeBadge'
@@ -701,6 +702,11 @@ export default async function ReviewPage({ params }: Props) {
         )}
 
         <CollectionsForReview reviewId={review.id} />
+
+        {/* ── Sign-off — the close's second black moment (Phase 3,
+            2026-11-13); Community follows so it never stacks on another
+            dark band ── */}
+        <CreedStrip className="mt-12" />
 
         {/* ── Community ── Related content sits above comments: while volume is
             low, an empty thread high on the page reads as a ghost town. */}

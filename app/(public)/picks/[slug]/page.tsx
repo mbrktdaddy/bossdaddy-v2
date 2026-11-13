@@ -15,6 +15,8 @@ import { faqPageLd } from '@/lib/seo/faq-ld'
 import { ogImageUrl, ogImageMeta, toAbsoluteUrl, aspectVariants, OG_SITE, TWITTER_HANDLE, clampSocialDescription } from '@/lib/og'
 import RelatedRail, { type RelatedItem } from '@/components/collections/RelatedRail'
 import BenchStrip from '@/components/BenchStrip'
+import CreedStrip from '@/components/CreedStrip'
+import { NewsletterSignup } from '@/components/newsletter/NewsletterSignup'
 import CollectionBreadcrumb from '@/components/collections/CollectionBreadcrumb'
 import FtcDisclosure from '@/components/FtcDisclosure'
 import { LABELS } from '@/lib/labels'
@@ -515,6 +517,11 @@ export default async function PickDetailPage({ params }: Props) {
 
             <RelatedRail items={related} id="related" eyebrow="Also From The Vault" heading="Keep going" />
 
+            {/* ── Sign-off — the close's black moment (Phase 3, 2026-11-13); the
+                browse link and the newsletter follow so it never stacks on the
+                bench head ── */}
+            <CreedStrip className="mt-16" />
+
             {/* Same-flavor browse link — a quiet footer affordance for readers
                 who finished one list and want more of the same kind. The
                 RelatedRail above handles cross-flavor discovery; this is
@@ -524,6 +531,9 @@ export default async function PickDetailPage({ params }: Props) {
                 Browse all best-of lists →
               </Link>
             </div>
+
+            {/* The orange block — the one orange moment on the page (Phase 3, 2026-11-13) */}
+            <NewsletterSignup variant="block" inset headingAs="h2" eyebrow="Liked this list?" className="mt-16" />
 
             {/* On the Bench */}
             <div className="mt-16">
