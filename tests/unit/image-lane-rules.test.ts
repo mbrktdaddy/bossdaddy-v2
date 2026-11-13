@@ -171,7 +171,7 @@ describe('crop note', () => {
 
 const clean: QaReport = {
   altText: 'A wooden bench with a folded blanket by a window.',
-  text: false, logos: false, faces: false, identifiableChild: false,
+  text: false, logos: false, faces: false, identifiableChild: false, likeness: false,
   artifacts: false, rendered: false, matchesSubject: true, textSeen: '', publishable: 4, notes: '',
 }
 

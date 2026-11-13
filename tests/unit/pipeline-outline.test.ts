@@ -37,7 +37,7 @@ describe('assignProductTokens', () => {
 
 describe('buildOutline', () => {
   const model: OutlineModelOutput = {
-    titleOptions: ['DUPLICATE? Battery Daddy review', 'Battery Daddy: 180 cells, one box'],
+    titleOptions: ['DUPLICATE? Battery Daddy review', 'Battery Daddy: 180 cells, one box'], register: 'A garage review.',
     excerpt: 'Fine.',
     parts: [
       { kind: 'body', heading: 'Build', intent: 'b', notes: ['Used it four months'], targetWords: 200, format: 'steps' },
@@ -91,7 +91,7 @@ describe('validateOutlineShape', () => {
 
 describe('buildOutline — part format (lane 1)', () => {
   const model: OutlineModelOutput = {
-    titleOptions: ['A', 'B'], excerpt: 'e', imageCount: 0, elements: [],
+    titleOptions: ['A', 'B'], register: 'r', excerpt: 'e', imageCount: 0, elements: [],
     blocks: { tldr: false, keyTakeaways: false, faqs: false, bestFor: false, notFor: false, prosCons: false },
     parts: [
       { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60, format: 'prose' },
@@ -132,7 +132,7 @@ describe('reference facts → per-part refs', () => {
     ],
   }
   const model: OutlineModelOutput = {
-    titleOptions: ['A', 'B'], excerpt: 'e',
+    titleOptions: ['A', 'B'], register: 'r', excerpt: 'e',
     parts: [
       { kind: 'intro', heading: '', intent: 'open', notes: [], targetWords: 60, format: 'prose' },
       { kind: 'body', heading: 'Weight', intent: 'w', notes: [], refIds: [1, 1, 9], targetWords: 200, format: 'prose' },

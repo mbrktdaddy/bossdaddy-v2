@@ -121,7 +121,7 @@ describe('validateImagePlan', () => {
 
 describe('InlineImageOutput vs the planner schema', () => {
   const legacy = { afterHeading: 'Build', prompt: 'p', altText: 'a', caption: 'c' }
-  const full = { afterHeading: 'Build', need: 'scene', shot: 'wide', aspect: '3:2', prompt: 'p', ask: '', altText: 'a', caption: 'c' }
+  const full = { afterHeading: 'Build', setting: 'street', need: 'scene', shot: 'wide', aspect: '3:2', prompt: 'p', ask: '', altText: 'a', caption: 'c' }
 
   it('the shared schema still parses a legacy placement and defaults the empty strings', () => {
     const parsed = InlineImageOutput.safeParse(legacy)
@@ -130,15 +130,18 @@ describe('InlineImageOutput vs the planner schema', () => {
   })
 
   it('the planner schema requires every photo-editor field and the hero shot', () => {
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h', heroShot: 'wide', inline: [full] }).success).toBe(true)
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h', heroShot: 'wide', inline: [legacy] }).success).toBe(false)
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h', inline: [full] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h', heroShot: 'wide', inline: [full] }).success).toBe(true)
+    // 2026-11-13: the world is decided first and every picture names its setting.
+    expect(ImagesOutput.safeParse({ heroPrompt: 'h', heroShot: 'wide', inline: [full] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h', heroShot: 'wide', inline: [{ ...full, setting: undefined }] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h', heroShot: 'wide', inline: [legacy] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h', inline: [full] }).success).toBe(false)
   })
 
   it('caps the hero prompt and each prompt at 700 characters', () => {
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h'.repeat(700), heroShot: 'wide', inline: [] }).success).toBe(true)
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h'.repeat(701), heroShot: 'wide', inline: [] }).success).toBe(false)
-    expect(ImagesOutput.safeParse({ heroPrompt: 'h', heroShot: 'wide', inline: [{ ...full, prompt: 'p'.repeat(701) }] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h'.repeat(700), heroShot: 'wide', inline: [] }).success).toBe(true)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h'.repeat(701), heroShot: 'wide', inline: [] }).success).toBe(false)
+    expect(ImagesOutput.safeParse({ world: 'w', heroSetting: 'street', heroPrompt: 'h', heroShot: 'wide', inline: [{ ...full, prompt: 'p'.repeat(701) }] }).success).toBe(false)
   })
 
   it('lists the photo-editor fields as required in the JSON schema the model is given', () => {
