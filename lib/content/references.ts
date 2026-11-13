@@ -85,6 +85,13 @@ export type ReferenceNote = z.infer<typeof ReferenceNote>
 // amzn.to and a.co are Amazon's short domains (Associates rules: never read the page).
 const RETAILER_DOMAINS = ['amzn.to', 'a.co', 'homedepot.com', 'lowes.com', 'walmart.com', 'target.com', 'bestbuy.com', 'ebay.com']
 const AMAZON_HOST = /(^|\.)amazon\.[a-z.]+$/
+/** For search exclusion (research): the retailer domains as a plain list. */
+// Wider than the fetch skip-list on purpose: a search should not cite a store page at all
+// (the first smoke cited zoro.com). The author still reviews every finding.
+export const RETAILER_BLOCKLIST = [
+  'amazon.com', 'amazon.ca', 'amazon.co.uk', ...RETAILER_DOMAINS,
+  'zoro.com', 'grainger.com', 'acmetools.com', 'toolnut.com', 'northerntool.com', 'harborfreight.com', 'menards.com', 'acehardware.com', 'cpooutlets.com', 'ohiopowertool.com',
+]
 
 function hostMatches(host: string, domain: string): boolean {
   return host === domain || host.endsWith(`.${domain}`)

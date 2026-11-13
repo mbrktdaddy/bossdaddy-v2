@@ -38,6 +38,8 @@ export const ReviewBriefInput = z.object({
   notes:           z.string().max(6000).optional(),
   references:      z.array(ReferenceInput).max(MAX_REFERENCES).default([]),
   referenceNotes:  z.array(ReferenceNote).max(MAX_REFERENCES).default([]),
+  /** Curated firsthand facts from the brief step; when present they replace the split of the raw notes. */
+  facts:           z.array(z.string().max(300)).max(80).optional(),
 })
 
 export const GuideBriefInput = z.object({
@@ -53,9 +55,17 @@ export const GuideBriefInput = z.object({
   inquiryMode:    z.boolean(),
   references:     z.array(ReferenceInput).max(MAX_REFERENCES).default([]),
   referenceNotes: z.array(ReferenceNote).max(MAX_REFERENCES).default([]),
+  /** Curated firsthand facts from the brief step; when present they replace the split of the raw context. */
+  facts:          z.array(z.string().max(300)).max(80).optional(),
 })
 
 export const BriefInput = z.discriminatedUnion('contentType', [ReviewBriefInput, GuideBriefInput])
+
+/** The brief step's list, trimmed; undefined when empty so the raw split applies. */
+function cleanFacts(facts: string[] | undefined): string[] | undefined {
+  const out = (facts ?? []).map((f) => f.trim()).filter(Boolean)
+  return out.length ? out : undefined
+}
 
 /** Normalise a validated brief: sanitized specs, no product links on inquiry pieces. */
 export function normalizeBrief(b: z.infer<typeof BriefInput>): Brief {
@@ -63,6 +73,7 @@ export function normalizeBrief(b: z.infer<typeof BriefInput>): Brief {
     return {
       ...b,
       notes: b.notes?.trim() || undefined,
+      facts: cleanFacts(b.facts),
       referenceNotes: pruneReferenceNotes(b.references, b.referenceNotes),
       specs: sanitizeSpecs(b.specs),
       competitors: b.competitors
@@ -73,6 +84,7 @@ export function normalizeBrief(b: z.infer<typeof BriefInput>): Brief {
   return {
     ...b,
     context: b.context?.trim() || undefined,
+    facts: cleanFacts(b.facts),
     productSlugs: b.inquiryMode ? [] : b.productSlugs,
     referenceNotes: pruneReferenceNotes(b.references, b.referenceNotes),
   }
@@ -103,6 +115,8 @@ export function briefSubject(brief: Brief): string {
  * written from its share, and the critic flags firsthand claims outside them.
  */
 export function briefFacts(brief: Brief): string[] {
+  // The brief step's curated list, when the author went through it, IS the facts.
+  if (brief.facts?.length) return brief.facts
   if (brief.contentType === 'review') return reviewFacts(brief)
   return guideFacts(brief)
 }

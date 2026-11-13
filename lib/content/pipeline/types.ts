@@ -37,6 +37,8 @@ export interface ReviewBrief {
   references?: ReferenceInput[]
   /** Fetched + author-reviewed facts per link; attributed knowledge, never firsthand. */
   referenceNotes?: ReferenceNote[]
+  /** Curated firsthand facts from the brief step; when present they replace the raw split. */
+  facts?: string[]
 }
 
 export interface GuideBrief {
@@ -53,6 +55,8 @@ export interface GuideBrief {
   inquiryMode: boolean
   references?: ReferenceInput[]
   referenceNotes?: ReferenceNote[]
+  /** Curated firsthand facts from the brief step; when present they replace the raw split. */
+  facts?: string[]
 }
 
 export type Brief = ReviewBrief | GuideBrief

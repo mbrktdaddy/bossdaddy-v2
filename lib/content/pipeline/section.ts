@@ -1,4 +1,5 @@
 import { INQUIRY_TRIGGER } from '../prompts'
+import { sourceLinkLines } from '../links'
 import { assembleDraftHtml } from '../html'
 import { briefDataBlocks, briefHeaderLines, briefLabel, hasFirsthand, hasReferences } from './briefs'
 import type { Brief, OutlinePart, PartFormat, RunState } from './types'
@@ -98,7 +99,9 @@ Write only the prose of this part: no heading, no title, no preamble, no sign-of
 function referenceLines(part: OutlinePart, brief: Brief): string {
   const refs = part.refs ?? []
   if (refs.length) {
-    return `- Reference facts for this part — attributed knowledge, NOT experience: state each as what its source says ("the maker lists…", "per the recall notice"), name the source in words, never a URL, and never claim you tested what only the source states:\n${refs.map((r) => `    • ${r}`).join('\n')}`
+    // Only the addresses of sources this part cites are offered, so a link can't wander.
+    const links = sourceLinkLines(brief, refs)
+    return `- Reference facts for this part — attributed knowledge, NOT experience: state each as what its source says ("the maker lists…", "per the recall notice"), name the source in words, and never claim you tested what only the source states:\n${refs.map((r) => `    • ${r}`).join('\n')}${links ? `\n- Source links: the FIRST time this part names one of these sources, write the name as a link in exactly this form — [Name](url) — using only these addresses, each at most once. A source not listed here is named in words only. Never any other URL:\n${links.split('\n').map((l) => `    ${l}`).join('\n')}` : ''}`
   }
   if (hasReferences(brief)) return '- Reference facts for this part: none. Cite no source in this part — the sourced facts belong to other parts.'
   return ''

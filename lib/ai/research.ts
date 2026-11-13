@@ -111,6 +111,8 @@ export interface AiResearchResult<T> {
   model: string
   /** Grounding URLs the search tool surfaced (best-effort; surfaces also keep the model-emitted sources in `object`). */
   sources: { title: string | null; url: string }[]
+  /** Usage + list-price cost of the call that produced the result, for the generations log. */
+  meta: CallMeta
 }
 
 /**
@@ -150,6 +152,7 @@ export async function aiResearch<T>(opts: {
   const search = opts.search ?? {}
 
   const run = async (m: string): Promise<AiResearchResult<T>> => {
+    const startedAt = Date.now()
     const result = await generateText({
       model: gateway(m),
       tools: { web_search: webSearchToolFor(m, search) },
@@ -175,6 +178,7 @@ export async function aiResearch<T>(opts: {
     return {
       object: output as T,
       model: m,
+      meta: meta(m, result.totalUsage, result.finishReason, startedAt),
       sources: (sources ?? [])
         .filter((s): s is Extract<typeof s, { sourceType: 'url' }> => s.sourceType === 'url')
         .map((s) => ({ title: s.title ?? null, url: s.url }))

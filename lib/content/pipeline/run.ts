@@ -99,6 +99,8 @@ export interface RunPatch {
   images?: ImagePlan | null
   error?: string | null
   contentId?: string | null
+  /** Research kept at the plan step adds references; otherwise the brief stays the wizard's input. */
+  brief?: Brief
 }
 
 /** Patch the run; `addCost` accumulates (stages are sequential, so read-then-write is safe). */
@@ -112,6 +114,7 @@ export async function updateRun(supabase: SupabaseClient, run: RunState, patch: 
   if (patch.images !== undefined) update.images = patch.images as unknown as Json
   if (patch.error !== undefined) update.error = patch.error
   if (patch.contentId !== undefined) update.content_id = patch.contentId
+  if (patch.brief !== undefined) update.brief = patch.brief as unknown as Json
   if (addCost != null) update.cost_usd = Math.round((run.costUsd + addCost) * 1e5) / 1e5
 
   const { data, error } = await supabase

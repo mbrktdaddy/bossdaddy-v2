@@ -11,7 +11,7 @@ import { PROMPT_VERSION } from './prompts'
 
 // 'images' = the image PLAN (a text call); 'image' = one generated picture
 // (the image model + its vision QA), so the chip includes the pixels.
-export type GenerationStage = 'draft' | 'outline' | 'section' | 'blocks' | 'critic' | 'images' | 'image' | 'refine' | 'references'
+export type GenerationStage = 'draft' | 'outline' | 'section' | 'blocks' | 'critic' | 'images' | 'image' | 'refine' | 'references' | 'brief' | 'research'
 export type GenerationStatus = 'done' | 'failed' | 'truncated'
 
 export interface LogGenerationInput {

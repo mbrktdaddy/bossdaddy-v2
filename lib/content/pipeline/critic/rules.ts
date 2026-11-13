@@ -1,5 +1,6 @@
 import type { Brief, CriticFinding, OutlinePart } from '../types'
 import { briefProductSlugs } from '../briefs'
+import { sourceLinkUrls, withoutSourceLinks } from '../../links'
 
 // Stage 4a — the deterministic half of the critic. Everything here is a string
 // check the brand rules already state (BOSS_DADDY_SYSTEM); a model is only
@@ -135,8 +136,9 @@ export function runRules({ brief, parts, texts, familyNames }: RulesInput): Crit
       out.push({ severity: 'block', code: 'product-token', source: 'rules', part: i, message: `Token for a product that isn't linked to this piece: ${unknown.join(', ')}.` })
     }
   }
-  if (/https?:\/\/|amazon\.com|geni\.us/i.test(all)) {
-    out.push({ severity: 'block', code: 'raw-url', source: 'rules', message: 'A raw product URL appears in the prose — only [[BUY:]] tokens may link.' })
+  // The brief's source links — [Name](url) to a read reference (lib/content/links.ts) — are the one allowed link form.
+  if (/https?:\/\/|amazon\.com|geni\.us/i.test(withoutSourceLinks(all, sourceLinkUrls(brief)))) {
+    out.push({ severity: 'block', code: 'raw-url', source: 'rules', message: "A raw URL appears in the prose — only [[BUY:]] tokens and the brief's source links may link." })
   }
 
   // Structure: the light-Markdown subset (docs/rich-elements-plan.md §2).

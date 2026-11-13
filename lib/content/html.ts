@@ -93,6 +93,9 @@ const QUOTE_RE = /^>\s?(.*)$/
 /** `**bold**`, `*italic*` / `_italic_` — the only inline marks the subset allows. */
 export function inlineMarksToHtml(text: string): string {
   return text
+    // [Source name](https://…) — the writer's source link (lib/content/links.ts). The
+    // section route has already cut any link whose address is not a brief reference.
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)"]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[\s(])\*(?!\s)([^*\n]+?)\*(?=[\s.,;:!?)]|$)/g, '$1<em>$2</em>')
     .replace(/(^|[\s(])_(?!\s)([^_\n]+?)_(?=[\s.,;:!?)]|$)/g, '$1<em>$2</em>')
@@ -212,6 +215,9 @@ export function htmlToStructuredText(html: string): string {
   return html
     .replace(/<figure\b[\s\S]*?<\/figure>/gi, '')
     .replace(/<div\b[^>]*class="bd-[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '')
+    // A source link round-trips as [text](url) so a refine can keep it; product
+    // anchors (data-product-slug) are carried by their tokens and stay text here.
+    .replace(/<a\b(?![^>]*\bdata-product-slug=)[^>]*\bhref="(https?:\/\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, t: string) => `[${t.replace(/<[^>]+>/g, '').trim()}](${href})`)
     .replace(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi, (_m, t) => `\n\n## ${t.replace(/<[^>]+>/g, '').trim()}\n\n`)
     .replace(/<h3\b[^>]*>([\s\S]*?)<\/h3>/gi, (_m, t) => `\n\n### ${t.replace(/<[^>]+>/g, '').trim()}\n\n`)
     // Numbered lists round-trip as "1." lines so a refine keeps them numbered.

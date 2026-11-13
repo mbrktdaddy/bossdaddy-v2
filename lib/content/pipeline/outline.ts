@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { INQUIRY_TRIGGER } from '../prompts'
 import { briefDataBlocks, briefFacts, briefHeaderLines, briefLabel, briefProductSlugs, briefReferenceLines, hasFirsthand, referenceLineText } from './briefs'
+import { MAX_REFERENCES, ReferenceNote } from '../references'
 import { PLAN_TYPES } from '../elements'
 import type { ElementPlan } from '../elements'
 import type { BlockChoices, Brief, Outline, OutlinePart, RelatedPiece } from './types'
@@ -254,6 +255,8 @@ export const OutlineEdit = z.object({
     bestFor: z.boolean(), notFor: z.boolean(), prosCons: z.boolean(), subScores: z.boolean(),
   }),
   imageCount: z.number().int().min(0).max(6),
+  /** Sources kept from "Research this part" — they join the brief with this save. */
+  addReferenceNotes: z.array(ReferenceNote).max(MAX_REFERENCES).optional(),
 })
 
 export function validateOutlineShape(parts: { kind: string }[]): string | null {

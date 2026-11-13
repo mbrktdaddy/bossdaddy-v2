@@ -137,7 +137,7 @@ describe('sectionPrompt — reference facts per part', () => {
     const p = sectionPrompt(withRefs(), 1)
     expect(p).toContain('Reference facts for this part')
     expect(p).toContain('• DeWalt lists it at 3.4 lb (source: DCD791 Drill)')
-    expect(p).toContain('name the source in words, never a URL')
+    expect(p).toContain('name the source in words')
     expect(p).not.toContain('Two-speed gearbox')
     expect(p).not.toContain('REFERENCE NOTES')
   })

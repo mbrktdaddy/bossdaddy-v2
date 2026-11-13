@@ -37,6 +37,9 @@ function getLimiter(type: string): Ratelimit | null {
     // Reference links read before a run starts — one Claude call per LINK, so the
     // route charges the window per link (`cost`), not per tap: 80 page reads an hour.
     'references':      new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(80,  '1 h'),  prefix: 'bd_references' }),
+    // The brief step (one Sonnet call per Generate) and the plan step's live web search.
+    'distill':         new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(30,  '1 h'),  prefix: 'bd_distill' }),
+    'research-part':   new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20,  '1 h'),  prefix: 'bd_research_part' }),
     // One section at a time — cheaper than `refine`, used more often.
     'refine-section':  new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60,  '1 h'),  prefix: 'bd_refine_section' }),
     newsletter:        new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(3,   '1 h'),  prefix: 'bd_newsletter' }),
@@ -141,7 +144,7 @@ function getLimiter(type: string): Ratelimit | null {
 
 export async function checkRateLimit(
   identifier: string,
-  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'references' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'image-card' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft',
+  type: 'draft' | 'draft-outline' | 'draft-section' | 'draft-blocks' | 'critic' | 'draft-images' | 'references' | 'distill' | 'research-part' | 'refine-section' | 'submit' | 'refine' | 'newsletter' | 'view' | 'click' | 'collection-intro' | 'collection-fill' | 'claude-aux' | 'track' | 'image-gen' | 'image-card' | 'specs-grade' | 'voice' | 'boss' | 'boss-daily' | 'boss-plus' | 'boss-notify' | 'radar' | 'merch-sayings' | 'merch-publish' | 'message' | 'checkout' | 'printful-webhook' | 'goal-invite' | 'connection-request' | 'member-search' | 'link-preview' = 'draft',
   /** `cost`: how many units this call consumes (default 1) — a batch that fans out into N paid calls charges N. */
   opts: { cost?: number } = {},
 ): Promise<{ success: boolean; remaining: number; reset: number }> {
