@@ -50,7 +50,7 @@ export default function ToolboxDeck({
         </h1>
         {demo ? <DemoBody {...demo} /> : userId ? <TodayCard userId={userId} variant="deck" /> : null}
       </div>
-      <ToolTiles variant="dock" />
+      <ToolTiles />
     </section>
   )
 }

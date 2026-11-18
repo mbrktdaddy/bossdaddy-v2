@@ -101,58 +101,26 @@ const TILES: Tile[] = [
 ]
 
 /**
- * `variant="dock"` is the launcher as a strip of keys inside the /tools instrument deck
- * (ToolboxDeck, 2026-11-13). The deck is already the dark zone, so there is no
- * `data-theme`, no rounding and no orange cap per cell: four keys divided by hairlines
- * under a top rule, tokens inverting from the deck. The default `tiles` variant is the
- * standalone launcher and is unchanged.
+ * The launcher as a strip of keys inside the /tools instrument deck (ToolboxDeck,
+ * 2026-11-13). The deck is already the dark zone, so there is no `data-theme`, no
+ * rounding and no orange cap per cell: four keys divided by hairlines under a top
+ * rule, tokens inverting from the deck. The standalone black-tile form left with
+ * the app-zone guard (2026-11-18): nothing rendered it once the deck existed, and
+ * it was the guard's first hit.
  */
-export default function ToolTiles({
-  className = '', variant = 'tiles',
-}: { className?: string; variant?: 'tiles' | 'dock' }) {
-  if (variant === 'dock') {
-    return (
-      <nav aria-label="Your tools" className={`border-t border-soft ${className}`}>
-        <ul className="grid grid-cols-4 divide-x divide-soft">
-          {TILES.map(({ href, label, Icon }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                className="group flex min-h-[76px] flex-col items-center justify-center gap-1.5 px-1.5 py-3 text-center hover:bg-surface-raised transition-colors"
-              >
-                <span className="text-accent-text">
-                  <Icon />
-                </span>
-                <span className="font-display text-[11px] font-extrabold leading-tight text-prose transition-colors group-hover:text-accent-text">
-                  {label}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    )
-  }
-
+export default function ToolTiles({ className = '' }: { className?: string }) {
   return (
-    <nav className={className} aria-label="Your tools">
-      {/* FOUR ACROSS AT EVERY WIDTH. At 393px that's ~82px a tile after padding and
-          gaps — enough for a 24px icon and a label on one line, including the longest
-          ("Milestones"). A launcher that reflows between three and four columns stops
-          being muscle memory, which is the entire value of a launcher. */}
-      <ul className="grid grid-cols-4 gap-2 sm:gap-3">
+    <nav aria-label="Your tools" className={`border-t border-soft ${className}`}>
+      {/* FOUR ACROSS AT EVERY WIDTH. At 393px that's ~82px a key — enough for a
+          24px icon and a label on one line, including the longest ("Milestones").
+          A launcher that reflows between three and four columns stops being
+          muscle memory, which is the entire value of a launcher. */}
+      <ul className="grid grid-cols-4 divide-x divide-soft">
         {TILES.map(({ href, label, Icon }) => (
           <li key={href}>
-            {/* The ToolCard compact panel, shrunk to a launcher cell (continuity plan
-                P12 / Phase 7): a black `data-theme="dark"` zone, the 4px orange top
-                rule, the label in Montserrat. Orange icon on black, white label. */}
             <Link
               href={href}
-              data-theme="dark"
-              className={[
-                'group flex min-h-[76px] flex-col items-center justify-center gap-1.5',
-                'rounded-xl bg-chrome text-prose border-t-4 border-accent px-1.5 py-3 text-center',
-              ].join(' ')}
+              className="group flex min-h-[76px] flex-col items-center justify-center gap-1.5 px-1.5 py-3 text-center hover:bg-surface-raised transition-colors"
             >
               <span className="text-accent-text">
                 <Icon />
