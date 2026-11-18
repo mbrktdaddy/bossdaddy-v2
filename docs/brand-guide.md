@@ -900,4 +900,6 @@ Numbers          tabular-nums
 
 **Scope and boundary.** In: `/tools/**` (hub, the Boss, Weekends Until, Savings, Family, the calculators, email-unsubscribe), `/goals/**`, `/today`, `/account/**` (settings, connections, messages, notifications, blocked). Out: everything else, including `/bench` (editorial utility page), `/gear`, `/shop`. A new app route gets a `layout.tsx` that mounts `AppZone`. The `(dashboard)` layout is its own dark zone (admin), unchanged.
 
+**Guard.** `scripts/check-app-zone.mjs` runs in prebuild, strict, no baseline: inside the four app routes and the app-only component folders, a `bg-chrome` fill (opacity scrims excepted), a `border-chrome` edge, or a raw zinc/neutral/gray/white/black class with no `app:` form on the same line fails the build. The doctrine above is only as real as this script — the Hard Goods lesson was that a guard written but not armed guards nothing.
+
 **Relation to §10.1.** This does not reopen the editorial canvas; it adds a second canvas for a second product, by the zone mechanism the lock list already sanctions for the dashboard. Logged in §10 as its own decision.
